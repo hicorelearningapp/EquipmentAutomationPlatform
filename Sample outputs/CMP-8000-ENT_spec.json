@@ -1,0 +1,372 @@
+{
+    "tool_id": "CMP-8000-ENT",
+    "tool_type": "CMP",
+    "model": null,
+    "protocol": "HSMS (SEMI E37)",
+    "connection": null,
+    "variables": [
+        {
+            "vid": "V8001",
+            "name": "Platen1Speed",
+            "type": "float",
+            "unit": "RPM",
+            "category": "SV",
+            "access": "read",
+            "description": "Rotational speed of primary platen",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8002",
+            "name": "Platen2Speed",
+            "type": "float",
+            "unit": "RPM",
+            "category": "SV",
+            "access": "read",
+            "description": "Rotational speed of secondary platen",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8003",
+            "name": "Head1Pressure",
+            "type": "float",
+            "unit": "PSI",
+            "category": "SV",
+            "access": "read",
+            "description": "Downforce pressure on head 1",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8004",
+            "name": "Head2Pressure",
+            "type": "float",
+            "unit": "PSI",
+            "category": "SV",
+            "access": "read",
+            "description": "Downforce pressure on head 2",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8005",
+            "name": "Slurry1Flow",
+            "type": "float",
+            "unit": "mL/m",
+            "category": "SV",
+            "access": "read",
+            "description": "Flow rate of type-A slurry",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8006",
+            "name": "Slurry2Flow",
+            "type": "float",
+            "unit": "mL/m",
+            "category": "SV",
+            "access": "read",
+            "description": "Flow rate of type-B slurry",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8007",
+            "name": "Pad1Temp",
+            "type": "float",
+            "unit": "C",
+            "category": "SV",
+            "access": "read",
+            "description": "Surface temperature of pad 1",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8008",
+            "name": "Pad2Temp",
+            "type": "float",
+            "unit": "C",
+            "category": "SV",
+            "access": "read",
+            "description": "Surface temperature of pad 2",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8009",
+            "name": "WaterFlow",
+            "type": "float",
+            "unit": "L/m",
+            "category": "SV",
+            "access": "read",
+            "description": "DI water flow for rinsing",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8010",
+            "name": "ExhaustPressure",
+            "type": "float",
+            "unit": "Pa",
+            "category": "SV",
+            "access": "read",
+            "description": "Chamber exhaust pressure",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8011",
+            "name": "Pad1Life",
+            "type": "float",
+            "unit": "%",
+            "category": "SV",
+            "access": "read",
+            "description": "Remaining lifetime of pad 1",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8012",
+            "name": "Pad2Life",
+            "type": "float",
+            "unit": "%",
+            "category": "SV",
+            "access": "read",
+            "description": "Remaining lifetime of pad 2",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8013",
+            "name": "Arm1Position",
+            "type": "float",
+            "unit": "mm",
+            "category": "SV",
+            "access": "read",
+            "description": "Radial position of arm 1",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8014",
+            "name": "Arm2Position",
+            "type": "float",
+            "unit": "mm",
+            "category": "SV",
+            "access": "read",
+            "description": "Radial position of arm 2",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8015",
+            "name": "SlurrypH",
+            "type": "float",
+            "unit": "pH",
+            "category": "SV",
+            "access": "read",
+            "description": "Measured pH value of active slurry",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8016",
+            "name": "FilterPressure",
+            "type": "float",
+            "unit": "PSI",
+            "category": "SV",
+            "access": "read",
+            "description": "Pressure drop across slurry filter",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8017",
+            "name": "WaferTemp",
+            "type": "float",
+            "unit": "C",
+            "category": "SV",
+            "access": "read",
+            "description": "Non-contact wafer surface temperature",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8018",
+            "name": "CleaningStatus",
+            "type": "string",
+            "unit": null,
+            "category": "SV",
+            "access": "read",
+            "description": "Status of post-CMP cleaning module",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8019",
+            "name": "ThroughputHr",
+            "type": "integer",
+            "unit": "WPH",
+            "category": "SV",
+            "access": "read",
+            "description": "Calculated wafers per hour",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V8020",
+            "name": "TotalWafers",
+            "type": "integer",
+            "unit": null,
+            "category": "SV",
+            "access": "read",
+            "description": "Total wafers processed since reset",
+            "confidence": 1.0
+        }
+    ],
+    "events": [
+        {
+            "ceid": "E8001",
+            "name": "WaferLoaded",
+            "description": "Wafer has entered the loading station",
+            "linked_vids": [
+                "V8020"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E8002",
+            "name": "PolishStage1Start",
+            "description": "Initiation of primary polishing step",
+            "linked_vids": [
+                "V8001",
+                "V8003",
+                "V8005"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E8003",
+            "name": "PolishStage1End",
+            "description": "Completion of primary polishing step",
+            "linked_vids": [
+                "V8001",
+                "V8007"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E8004",
+            "name": "TransferToPlaten2",
+            "description": "Internal transfer between platens",
+            "linked_vids": [
+                "V8013",
+                "V8014"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E8005",
+            "name": "PolishStage2Start",
+            "description": "Initiation of secondary polishing step",
+            "linked_vids": [
+                "V8002",
+                "V8004",
+                "V8006"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E8006",
+            "name": "RinseStarted",
+            "description": "Deionized water rinse initiated",
+            "linked_vids": [
+                "V8009"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E8007",
+            "name": "WaferUnloaded",
+            "description": "Wafer has exited to the output cassette",
+            "linked_vids": [
+                "V8020",
+                "V8018"
+            ],
+            "report": true,
+            "confidence": 1.0
+        }
+    ],
+    "alarms": [
+        {
+            "alarm_id": "A8001",
+            "name": "LowSlurry",
+            "severity": "warning",
+            "linked_vid": null,
+            "description": "Slurry tank level below 10%",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A8002",
+            "name": "PadWearOut",
+            "severity": "warning",
+            "linked_vid": null,
+            "description": "Polishing pad life reached threshold",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A8003",
+            "name": "PlatenMotorOverheat",
+            "severity": "critical",
+            "linked_vid": null,
+            "description": "Motor temperature exceeded safe limit",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A8004",
+            "name": "VacuumLoss",
+            "severity": "critical",
+            "linked_vid": null,
+            "description": "Loss of wafer hold-down vacuum on head",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A8005",
+            "name": "FilterClogged",
+            "severity": "info",
+            "linked_vid": null,
+            "description": "Slurry filter maintenance required",
+            "confidence": 1.0
+        }
+    ],
+    "remote_commands": [
+        {
+            "rcmd": "START_POLISH",
+            "description": "Starts the process",
+            "parameters": [
+                {
+                    "name": "RECIPE_ID",
+                    "type": "string"
+                },
+                {
+                    "name": "PLATEN_ID",
+                    "type": "string"
+                }
+            ],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "ABORT_STEP",
+            "description": "Stops current polishing step and retracts heads",
+            "parameters": [],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "ADJUST_SPEED",
+            "description": "Changes platen speed on the fly",
+            "parameters": [
+                {
+                    "name": "SPEED_RPM",
+                    "type": "string"
+                }
+            ],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "MAINT_WASH",
+            "description": "Initiates high-pressure cleaning cycle for pads",
+            "parameters": [],
+            "confidence": 1.0
+        }
+    ],
+    "states": [],
+    "state_transitions": []
+}

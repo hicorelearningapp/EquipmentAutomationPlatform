@@ -1,0 +1,323 @@
+{
+    "tool_id": "LITHO-A300",
+    "tool_type": "Lithography",
+    "model": "LITHO-A300",
+    "protocol": "SECS/GEM",
+    "connection": {
+        "host": null,
+        "port": 5002,
+        "mode": null
+    },
+    "variables": [
+        {
+            "vid": "V1201",
+            "name": "StagePosition_X",
+            "type": "float",
+            "unit": "mm",
+            "category": "SV",
+            "access": "read",
+            "description": "X-axis stage position",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V1202",
+            "name": "StagePosition_Y",
+            "type": "float",
+            "unit": "mm",
+            "category": "SV",
+            "access": "read",
+            "description": "Y-axis stage position",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V1203",
+            "name": "FocusOffset",
+            "type": "float",
+            "unit": "\u00b5m",
+            "category": "SV",
+            "access": "read",
+            "description": "Focus adjustment offset",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V1204",
+            "name": "ExposureIntensity",
+            "type": "float",
+            "unit": "mW/cm\u00b2",
+            "category": "SV",
+            "access": "read",
+            "description": "Exposure light intensity",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V1205",
+            "name": "AlignmentStatus",
+            "type": "string",
+            "unit": null,
+            "category": "SV",
+            "access": "read",
+            "description": "Alignment status of wafer",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V1206",
+            "name": "SystemStatus",
+            "type": "string",
+            "unit": null,
+            "category": "SV",
+            "access": "read",
+            "description": "Overall system status",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V2201",
+            "name": "RecipeID",
+            "type": "string",
+            "unit": null,
+            "category": "DV",
+            "access": "read",
+            "description": "Active lithography recipe",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V2202",
+            "name": "WaferID",
+            "type": "string",
+            "unit": null,
+            "category": "DV",
+            "access": "read",
+            "description": "Current wafer identifier",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V2203",
+            "name": "ExposureTime",
+            "type": "float",
+            "unit": "ms",
+            "category": "DV",
+            "access": "read",
+            "description": "Duration of exposure",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V2204",
+            "name": "OverlayError",
+            "type": "float",
+            "unit": "nm",
+            "category": "DV",
+            "access": "read",
+            "description": "Alignment error between layers",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V2205",
+            "name": "DoseValue",
+            "type": "float",
+            "unit": "mJ/cm\u00b2",
+            "category": "DV",
+            "access": "read",
+            "description": "Energy dose applied",
+            "confidence": 1.0
+        }
+    ],
+    "events": [
+        {
+            "ceid": "E301",
+            "name": "WaferLoaded",
+            "description": "Wafer loaded onto stage",
+            "linked_vids": [
+                "V2202"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E302",
+            "name": "AlignmentComplete",
+            "description": "Wafer alignment completed",
+            "linked_vids": [
+                "V1201",
+                "V1202",
+                "V1205"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E303",
+            "name": "ExposureStart",
+            "description": "Exposure process started",
+            "linked_vids": [
+                "V1204",
+                "V2203"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E304",
+            "name": "ExposureEnd",
+            "description": "Exposure process completed",
+            "linked_vids": [
+                "V2203",
+                "V2205"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E305",
+            "name": "WaferUnloaded",
+            "description": "Wafer removed from stage",
+            "linked_vids": [
+                "V2202"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E306",
+            "name": "AlarmTriggered",
+            "description": "Alarm condition detected",
+            "linked_vids": [
+                "V1204",
+                "V1205"
+            ],
+            "report": true,
+            "confidence": 1.0
+        }
+    ],
+    "alarms": [
+        {
+            "alarm_id": "A401",
+            "name": "AlignmentFailure",
+            "severity": "critical",
+            "linked_vid": null,
+            "description": "Wafer alignment unsuccessful",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A402",
+            "name": "LowExposure",
+            "severity": "warning",
+            "linked_vid": null,
+            "description": "Exposure intensity below threshold",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A403",
+            "name": "FocusError",
+            "severity": "critical",
+            "linked_vid": null,
+            "description": "Focus offset exceeds limit",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A404",
+            "name": "StageMovementError",
+            "severity": "critical",
+            "linked_vid": null,
+            "description": "Stage positioning failure",
+            "confidence": 1.0
+        }
+    ],
+    "remote_commands": [
+        {
+            "rcmd": "START",
+            "description": "Start lithography process",
+            "parameters": [
+                {
+                    "name": "RecipeID",
+                    "type": "string"
+                }
+            ],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "STOP",
+            "description": "Stop process",
+            "parameters": [],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "ALIGN",
+            "description": "Perform wafer alignment",
+            "parameters": [],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "EXPOSE",
+            "description": "Execute exposure",
+            "parameters": [
+                {
+                    "name": "ExposureTime",
+                    "type": "float"
+                }
+            ],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "RESET",
+            "description": "Reset system after fault",
+            "parameters": [],
+            "confidence": 1.0
+        }
+    ],
+    "states": [
+        {
+            "state_id": "S1",
+            "name": "Idle",
+            "description": "System ready"
+        },
+        {
+            "state_id": "S2",
+            "name": "Aligning",
+            "description": "Wafer alignment in progress"
+        },
+        {
+            "state_id": "S3",
+            "name": "Exposing",
+            "description": "Exposure process active"
+        },
+        {
+            "state_id": "S4",
+            "name": "Completed",
+            "description": "Process completed"
+        },
+        {
+            "state_id": "S5",
+            "name": "Error",
+            "description": "Fault condition"
+        }
+    ],
+    "state_transitions": [
+        {
+            "from_state": "S1",
+            "to_state": "S2",
+            "trigger_event": null,
+            "trigger_command": "ALIGN",
+            "manual": false
+        },
+        {
+            "from_state": "S2",
+            "to_state": "S3",
+            "trigger_event": "E302",
+            "trigger_command": null,
+            "manual": false
+        },
+        {
+            "from_state": "S3",
+            "to_state": "S4",
+            "trigger_event": "E304",
+            "trigger_command": null,
+            "manual": false
+        },
+        {
+            "from_state": "S5",
+            "to_state": "S1",
+            "trigger_event": null,
+            "trigger_command": "RESET",
+            "manual": false
+        }
+    ]
+}

@@ -1,0 +1,258 @@
+{
+    "tool_id": "CVD-X100",
+    "tool_type": "CVD",
+    "model": "CVD-X100",
+    "protocol": "SECS/GEM",
+    "connection": {
+        "host": null,
+        "port": 5000,
+        "mode": null
+    },
+    "variables": [
+        {
+            "vid": "V1001",
+            "name": "ChamberTemperature",
+            "type": "float",
+            "unit": "\u00b0C",
+            "category": "SV",
+            "access": "read",
+            "description": "Current chamber temperature",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V1002",
+            "name": "ChamberPressure",
+            "type": "float",
+            "unit": "Torr",
+            "category": "SV",
+            "access": "read",
+            "description": "Current chamber pressure",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V1003",
+            "name": "GasFlowRate",
+            "type": "float",
+            "unit": "sccm",
+            "category": "SV",
+            "access": "read",
+            "description": "Gas flow rate",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V1004",
+            "name": "RFPower",
+            "type": "float",
+            "unit": "W",
+            "category": "SV",
+            "access": "read",
+            "description": "RF power applied",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V1005",
+            "name": "ProcessStatus",
+            "type": "string",
+            "unit": null,
+            "category": "SV",
+            "access": "read",
+            "description": "Current process state",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V2001",
+            "name": "RecipeID",
+            "type": "string",
+            "unit": null,
+            "category": "DV",
+            "access": "read",
+            "description": "Active process recipe",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V2002",
+            "name": "WaferCount",
+            "type": "integer",
+            "unit": null,
+            "category": "DV",
+            "access": "read",
+            "description": "Number of wafers processed",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V2003",
+            "name": "DepositionTime",
+            "type": "float",
+            "unit": "sec",
+            "category": "DV",
+            "access": "read",
+            "description": "Total deposition duration",
+            "confidence": 1.0
+        }
+    ],
+    "events": [
+        {
+            "ceid": "E101",
+            "name": "ProcessStart",
+            "description": "Triggered when process begins",
+            "linked_vids": [
+                "V1001",
+                "V1002",
+                "V2001"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E102",
+            "name": "ProcessEnd",
+            "description": "Triggered when process completes",
+            "linked_vids": [
+                "V2002",
+                "V2003"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E103",
+            "name": "WaferLoaded",
+            "description": "Wafer loaded into chamber",
+            "linked_vids": [
+                "V2001"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E104",
+            "name": "WaferUnloaded",
+            "description": "Wafer removed from chamber",
+            "linked_vids": [
+                "V2002"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E105",
+            "name": "AlarmTriggered",
+            "description": "Alarm condition detected",
+            "linked_vids": [
+                "V1001",
+                "V1002"
+            ],
+            "report": true,
+            "confidence": 1.0
+        }
+    ],
+    "alarms": [
+        {
+            "alarm_id": "A201",
+            "name": "HighTemperature",
+            "severity": "critical",
+            "linked_vid": null,
+            "description": "Temperature exceeds safe limit",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A202",
+            "name": "LowPressure",
+            "severity": "warning",
+            "linked_vid": null,
+            "description": "Pressure below threshold",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A203",
+            "name": "GasFlowError",
+            "severity": "critical",
+            "linked_vid": null,
+            "description": "Gas flow instability detected",
+            "confidence": 1.0
+        }
+    ],
+    "remote_commands": [
+        {
+            "rcmd": "START",
+            "description": "Start process",
+            "parameters": [
+                {
+                    "name": "RecipeID",
+                    "type": "string"
+                }
+            ],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "STOP",
+            "description": "Stop process",
+            "parameters": [],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "PAUSE",
+            "description": "Pause process",
+            "parameters": [],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "RESUME",
+            "description": "Resume process",
+            "parameters": [],
+            "confidence": 1.0
+        }
+    ],
+    "states": [
+        {
+            "state_id": "S1",
+            "name": "Idle",
+            "description": "System ready, no process"
+        },
+        {
+            "state_id": "S2",
+            "name": "Processing",
+            "description": "Active deposition process"
+        },
+        {
+            "state_id": "S3",
+            "name": "Completed",
+            "description": "Process completed"
+        },
+        {
+            "state_id": "S4",
+            "name": "Error",
+            "description": "Fault or alarm condition"
+        }
+    ],
+    "state_transitions": [
+        {
+            "from_state": "S1",
+            "to_state": "S2",
+            "trigger_event": null,
+            "trigger_command": "START",
+            "manual": false
+        },
+        {
+            "from_state": "S2",
+            "to_state": "S3",
+            "trigger_event": "E102",
+            "trigger_command": null,
+            "manual": false
+        },
+        {
+            "from_state": "S2",
+            "to_state": "S4",
+            "trigger_event": "E105",
+            "trigger_command": null,
+            "manual": false
+        },
+        {
+            "from_state": "S4",
+            "to_state": "S1",
+            "trigger_event": null,
+            "trigger_command": null,
+            "manual": true
+        }
+    ]
+}
