@@ -1,21 +1,9 @@
-"""
-SECS/GEM spec validation — Template Method pattern.
-
-SpecValidator.validate() defines the fixed sequence of checks.
-Each check is a private instance method, making it easy to add,
-remove, or override individual rules without touching the public API.
-"""
 from collections import Counter
 
 from app.schemas.secsgem import EquipmentSpec, ValidationIssue, ValidationReport
 
 
 class SpecValidator:
-    """Validates an extracted EquipmentSpec for logical SECS/GEM correctness."""
-
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
 
     def validate(self, spec: EquipmentSpec) -> ValidationReport:
         """Run all checks and return a consolidated ValidationReport."""
@@ -29,10 +17,6 @@ class SpecValidator:
         self._check_critical_sections(spec, issues)
 
         return ValidationReport(issues=issues)
-
-    # ------------------------------------------------------------------
-    # Private checks — Template Method steps
-    # ------------------------------------------------------------------
 
     @staticmethod
     def _dup_ids(values: list[str]) -> list[str]:

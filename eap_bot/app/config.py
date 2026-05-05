@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = Field("http://localhost:11434")
 
     DATABASE_URL: str = Field("sqlite:///./app.db")
-    UPLOAD_DIR: str = Field("./uploads")
+    SPECS_OUTPUT_DIR: str = Field("./specs_output")
     VECTORSTORE_ROOT: str = Field("./vectorstores")
 
     CHUNK_SIZE: int = Field(1000)
@@ -24,5 +24,5 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
+Path(settings.SPECS_OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 Path(settings.VECTORSTORE_ROOT).mkdir(parents=True, exist_ok=True)

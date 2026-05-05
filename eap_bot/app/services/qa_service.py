@@ -1,12 +1,3 @@
-"""
-Q&A service — fully class-based with constructor injection.
-
-Previously this was a procedural module with module-level globals (_PATTERNS)
-and bare private functions.  It is now a proper class:
-  - _PATTERNS is a class-level constant (shared across instances, no global state)
-  - All helpers are instance methods
-  - The LLM is injected via the constructor (no internal LLMFactory call)
-"""
 import logging
 import re
 from typing import Literal
@@ -21,12 +12,7 @@ Source = Literal["json", "rag"]
 
 
 class QAService:
-    """Answers natural-language questions about an EquipmentSpec.
 
-    Strategy:
-      1. Try to answer from the structured JSON spec (fast, deterministic).
-      2. Fall back to RAG over the FAISS vector index (LLM-assisted).
-    """
 
     _PATTERNS: dict[str, re.Pattern] = {
         "linked_vars": re.compile(
@@ -51,9 +37,6 @@ class QAService:
         self._llm = llm_strategy.get_model(temperature=0, require_json=False)
         self._vector_store = vector_store
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
 
     def answer(self, query: str, spec: EquipmentSpec) -> tuple[str, Source]:
         """Return (answer_text, source) where source is 'json' or 'rag'."""
@@ -63,9 +46,6 @@ class QAService:
             return json_answer, "json"
         return self._rag(q, spec), "rag"
 
-    # ------------------------------------------------------------------
-    # Private helpers — structured JSON lookup
-    # ------------------------------------------------------------------
 
     def _try_json(self, q: str, spec: EquipmentSpec) -> str | None:
         if m := self._PATTERNS["linked_vars"].search(q):
@@ -135,9 +115,6 @@ class QAService:
 
         return None
 
-    # ------------------------------------------------------------------
-    # Private helpers — RAG fallback
-    # ------------------------------------------------------------------
 
     def _rag(self, query: str, spec: EquipmentSpec) -> str:
         chunks = self._vector_store.search_with_filters(query, {"tool_id": spec.tool_id}, k=6)
@@ -153,9 +130,6 @@ class QAService:
         )
         return self._llm.invoke(prompt).content
 
-    # ------------------------------------------------------------------
-    # Shared utility
-    # ------------------------------------------------------------------
 
     def _find_event(self, spec: EquipmentSpec, needle: str):
         n = needle.lower()

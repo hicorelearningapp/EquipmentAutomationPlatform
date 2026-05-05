@@ -1,7 +1,5 @@
-"""
-Equipment routes — all service dependencies sourced from ServiceContainer.
-No more `global _extractor` singleton hack.
-"""
+import json
+from io import BytesIO
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -34,26 +32,41 @@ async def upload(
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(400, "Only .pdf files are accepted")
 
-    upload_dir = Path(settings.UPLOAD_DIR)
-    upload_dir.mkdir(parents=True, exist_ok=True)
-    dest = upload_dir / file.filename
-
     contents = await file.read()
     if len(contents) > settings.MAX_UPLOAD_SIZE:
         raise HTTPException(400, "File exceeds MAX_UPLOAD_SIZE")
-    dest.write_bytes(contents)
 
-    text = container.parser.extract_text(str(dest))
+    # 1. Parse from in-memory bytes
+    text = container.parser.extract_text(BytesIO(contents))
     if not text.strip():
         raise HTTPException(400, "Could not extract any text from the PDF")
 
+    # 2. Extract spec and validate
     spec = container.extractor.extract(text)
     report = container.validator.validate(spec)
+
+    # 3. Save to database to get the spec_id
     row = repo.save(filename=file.filename, raw_text=text, spec=spec, report=report)
+
+    # 4. Create the final structured folder: specs_output/{spec_id}_{tool_id}/
+    specs_dir = Path(settings.SPECS_OUTPUT_DIR)
+    specs_dir.mkdir(parents=True, exist_ok=True)
+    
+    safe_tool_id = "".join(c for c in spec.tool_id if c.isalnum() or c in (" ", "_", "-")).strip()
+    folder_name = f"{row.id}_{safe_tool_id}".replace(" ", "_")
+    spec_folder = specs_dir / folder_name
+    spec_folder.mkdir(parents=True, exist_ok=True)
+
+    # 5. Save only the JSON assets into the folder (no PDF, no raw text)
+    (spec_folder / "spec.json").write_text(spec.model_dump_json(indent=4), encoding="utf-8")
+    (spec_folder / "report.json").write_text(report.model_dump_json(indent=4), encoding="utf-8")
+
+    # 6. Add to common vector store
     container.vector_store.add_document(text, metadata={"tool_id": spec.tool_id, "spec_id": row.id})
 
     return {
         "id": row.id,
+        "folder": folder_name,
         "spec": spec.model_dump(),
         "report": report.model_dump(),
     }

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import BinaryIO, Union
 
 from pypdf import PdfReader
 
@@ -6,14 +7,14 @@ from pypdf import PdfReader
 class DocumentParser(ABC):
 
     @abstractmethod
-    def extract_text(self, path: str) -> str:
-        """Return the full plain-text content of the document at *path*."""
+    def extract_text(self, source: Union[str, BinaryIO]) -> str:
+        """Return the full plain-text content of the document. Accepts a path or a binary file-like object."""
 
 
 class PyPDFParser(DocumentParser):
 
-    def extract_text(self, path: str) -> str:
-        reader = PdfReader(path)
+    def extract_text(self, source: Union[str, BinaryIO]) -> str:
+        reader = PdfReader(source)
         pages = []
         for page in reader.pages:
             content = page.extract_text()

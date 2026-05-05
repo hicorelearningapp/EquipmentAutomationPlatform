@@ -1,28 +1,17 @@
-"""
-Equipment spec extractor — receives its LLM strategy via constructor injection.
-No longer self-creates its dependencies; the ServiceContainer provides them.
-"""
 import json
 import logging
 
 from app.schemas.secsgem import EquipmentSpec
 from app.utils.llm_factory import LLMStrategy
-from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 
 
 class EquipmentExtractor:
-    """Extracts a structured EquipmentSpec from raw PDF text using an LLM."""
 
     def __init__(self, llm_strategy: LLMStrategy) -> None:
-        # Dependencies injected — no hard-wired provider choice here.
         self._llm = llm_strategy.get_model(temperature=0, require_json=True)
         self._llm_retry = llm_strategy.get_model(temperature=0.2, require_json=True)
-
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
 
     def extract(self, pdf_text: str) -> EquipmentSpec:
         prompt = self._build_prompt(pdf_text)
@@ -51,13 +40,8 @@ class EquipmentExtractor:
             self._sanitize(data)
             return EquipmentSpec.model_validate(data)
 
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
-
     @staticmethod
     def _sanitize(data: dict) -> None:
-        """Drop state transitions with null from/to_state to avoid validation failures."""
         transitions = data.get("state_transitions") or []
         data["state_transitions"] = [
             t for t in transitions if t.get("from_state") and t.get("to_state")

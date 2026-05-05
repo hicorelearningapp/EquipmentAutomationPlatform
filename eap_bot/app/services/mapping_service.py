@@ -13,16 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 class MappingService:
-    """Suggests SECS/GEM-entity → MES-tag mappings using an LLM."""
 
     def __init__(self, llm_strategy: LLMStrategy) -> None:
-        # Dependencies injected — no hard-wired provider choice here.
         self._llm = llm_strategy.get_model(temperature=0, require_json=True)
         self._llm_retry = llm_strategy.get_model(temperature=0.2, require_json=True)
 
-    # ------------------------------------------------------------------
-    # Public API
-    # ------------------------------------------------------------------
 
     def suggest_mappings(
         self, spec: EquipmentSpec, target_tags: List[MESTag]
@@ -39,14 +34,10 @@ class MappingService:
         sanitized_data = self._sanitize(data, spec, target_tags)
         return MappingSuggestionResponse.model_validate(sanitized_data)
 
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
 
     def _sanitize(
         self, data: dict, spec: EquipmentSpec, target_tags: List[MESTag]
     ) -> dict:
-        """Remove hallucinated entity_ids / tag_ids and low-confidence entries."""
         valid_entity_ids: set[str] = set()
         for v in spec.variables:
             valid_entity_ids.add(v.vid)
