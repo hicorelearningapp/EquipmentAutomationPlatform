@@ -1,14 +1,15 @@
 import json
 from io import BytesIO
 from pathlib import Path
+from typing import Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.config import settings
-from app.crud import SpecRepository
+from app.crud import ProjectRepository, SpecRepository
 from app.db import get_db
 from app.managers.service_container import container
 from app.schemas.secsgem import EquipmentSpec, ValidationReport
@@ -20,6 +21,10 @@ def get_spec_repo(db: Session = Depends(get_db)) -> SpecRepository:
     return SpecRepository(db)
 
 
+def get_project_repo(db: Session = Depends(get_db)) -> ProjectRepository:
+    return ProjectRepository(db)
+
+
 class AskRequest(BaseModel):
     query: str
 
@@ -27,7 +32,9 @@ class AskRequest(BaseModel):
 @router.post("/upload")
 async def upload(
     file: UploadFile = File(...),
-    repo: SpecRepository = Depends(get_spec_repo)
+    project_id: Optional[int] = Form(None),
+    repo: SpecRepository = Depends(get_spec_repo),
+    project_repo: ProjectRepository = Depends(get_project_repo),
 ):
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(400, "Only .pdf files are accepted")
@@ -36,37 +43,60 @@ async def upload(
     if len(contents) > settings.MAX_UPLOAD_SIZE:
         raise HTTPException(400, "File exceeds MAX_UPLOAD_SIZE")
 
-    # 1. Parse from in-memory bytes
+    # 1. Validate project_id if provided
+    project_row = None
+    if project_id is not None:
+        project_row = project_repo.get(project_id)
+        if not project_row:
+            raise HTTPException(404, f"Project with id={project_id} not found")
+
+    # 2. Parse from in-memory bytes
     text = container.parser.extract_text(BytesIO(contents))
     if not text.strip():
         raise HTTPException(400, "Could not extract any text from the PDF")
 
-    # 2. Extract spec and validate
     spec = container.extractor.extract(text)
     report = container.validator.validate(spec)
 
-    # 3. Save to database to get the spec_id
-    row = repo.save(filename=file.filename, raw_text=text, spec=spec, report=report)
+    row = repo.save(
+        filename=file.filename,
+        raw_text=text,
+        spec=spec,
+        report=report,
+        project_id=project_id,
+    )
 
-    # 4. Create the final structured folder: specs_output/{spec_id}_{tool_id}/
-    specs_dir = Path(settings.SPECS_OUTPUT_DIR)
-    specs_dir.mkdir(parents=True, exist_ok=True)
-    
+    # 5. Determine target folder
+    projects_dir = Path(settings.PROJECTS_DIR)
     safe_tool_id = "".join(c for c in spec.tool_id if c.isalnum() or c in (" ", "_", "-")).strip()
     folder_name = f"{row.id}_{safe_tool_id}".replace(" ", "_")
-    spec_folder = specs_dir / folder_name
+
+    if project_row:
+        safe_project = "".join(c for c in project_row.name if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
+        spec_folder = projects_dir / safe_project / folder_name
+    else:
+        spec_folder = projects_dir / "_unassigned" / folder_name
+
     spec_folder.mkdir(parents=True, exist_ok=True)
 
-    # 5. Save only the JSON assets into the folder (no PDF, no raw text)
+    # 6. Save only the JSON assets into the folder (no PDF, no raw text)
     (spec_folder / "spec.json").write_text(spec.model_dump_json(indent=4), encoding="utf-8")
     (spec_folder / "report.json").write_text(report.model_dump_json(indent=4), encoding="utf-8")
 
-    # 6. Add to common vector store
-    container.vector_store.add_document(text, metadata={"tool_id": spec.tool_id, "spec_id": row.id})
+    # 7. Add to common vector store with project metadata
+    container.vector_store.add_document(
+        text,
+        metadata={
+            "tool_id": spec.tool_id,
+            "spec_id": row.id,
+            "project_id": project_id or 0,
+        },
+    )
 
     return {
         "id": row.id,
-        "folder": folder_name,
+        "project_id": project_id,
+        "folder": str(spec_folder),
         "spec": spec.model_dump(),
         "report": report.model_dump(),
     }
