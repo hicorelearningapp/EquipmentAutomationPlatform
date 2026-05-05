@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 class VectorStoreManager:
-    """Manages document chunking, embedding, and FAISS vector storage."""
 
     _WS_RE = re.compile(r"[ \t\xa0]+")
 
