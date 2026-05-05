@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models.models import EquipmentMappingRow, EquipmentSpecRow
+from app.models.models import EquipmentSpecRow
 from app.schemas.mapping import EquipmentMapping
 from app.schemas.secsgem import EquipmentSpec, ValidationReport
 
@@ -40,28 +40,17 @@ class SpecRepository:
             .all()
         )
 
-
-class MappingRepository:
-
-    def __init__(self, db: Session) -> None:
-        self.db = db
-
-    def save(self, mapping: EquipmentMapping) -> EquipmentMappingRow:
-        row = EquipmentMappingRow(
-            spec_id=mapping.spec_id,
-            mapping_json=mapping.model_dump_json(indent=4),
-            is_approved=mapping.is_approved,
-            approved_at=mapping.approved_at,
-        )
-        self.db.add(row)
+    def save_mapping(self, spec_id: int, mapping: EquipmentMapping) -> EquipmentSpecRow | None:
+        row = self.get(spec_id)
+        if not row:
+            return None
+        
+        row.mapping_json = mapping.model_dump_json(indent=4)
+        row.mapping_is_approved = mapping.is_approved
+        row.mapping_approved_at = mapping.approved_at
+        
         self.db.commit()
         self.db.refresh(row)
         return row
 
-    def get_by_spec(self, spec_id: int) -> EquipmentMappingRow | None:
-        return (
-            self.db.query(EquipmentMappingRow)
-            .filter(EquipmentMappingRow.spec_id == spec_id)
-            .order_by(EquipmentMappingRow.created_at.desc())
-            .first()
-        )
+

@@ -7,7 +7,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.crud import MappingRepository, SpecRepository
+from app.crud import SpecRepository
 from app.db import get_db
 from app.managers.service_container import container
 from app.schemas.mapping import (
@@ -22,9 +22,6 @@ router = APIRouter(prefix="/mapping", tags=["mapping"])
 
 def get_spec_repo(db: Session = Depends(get_db)) -> SpecRepository:
     return SpecRepository(db)
-
-def get_mapping_repo(db: Session = Depends(get_db)) -> MappingRepository:
-    return MappingRepository(db)
 
 
 @router.post("/{spec_id}/suggest", response_model=MappingSuggestionResponse)
@@ -46,7 +43,6 @@ def approve(
     spec_id: int,
     mapping_data: EquipmentMapping,
     spec_repo: SpecRepository = Depends(get_spec_repo),
-    mapping_repo: MappingRepository = Depends(get_mapping_repo),
 ):
     row = spec_repo.get(spec_id)
     if not row:
@@ -56,16 +52,19 @@ def approve(
     mapping_data.is_approved = True
     mapping_data.approved_at = datetime.utcnow()
 
-    db_row = mapping_repo.save(mapping_data)
-    return EquipmentMapping.model_validate_json(db_row.mapping_json)
+    updated_row = spec_repo.save_mapping(spec_id, mapping_data)
+    if not updated_row:
+        raise HTTPException(500, "Failed to save mapping")
+        
+    return EquipmentMapping.model_validate_json(updated_row.mapping_json)
 
 
 @router.get("/{spec_id}", response_model=EquipmentMapping)
 def get_current_mapping(
     spec_id: int, 
-    mapping_repo: MappingRepository = Depends(get_mapping_repo)
+    spec_repo: SpecRepository = Depends(get_spec_repo)
 ):
-    db_row = mapping_repo.get_by_spec(spec_id)
-    if not db_row:
+    row = spec_repo.get(spec_id)
+    if not row or not row.mapping_json:
         raise HTTPException(404, "No mapping found for this equipment")
-    return EquipmentMapping.model_validate_json(db_row.mapping_json)
+    return EquipmentMapping.model_validate_json(row.mapping_json)
