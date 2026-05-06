@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import Response
-from pydantic import BaseModel, Field
 
 from app.config import settings
 from app.managers.service_container import container
-from app.schemas.secsgem import EquipmentSpec
 from app.services.storage_service import (
     DocumentNotFoundError,
     InvalidSlugError,
@@ -15,10 +13,6 @@ from app.services.storage_service import (
 from app.utils.embedder import VectorStoreManager
 
 router = APIRouter(prefix="/projects/{project_slug}/equipment", tags=["equipment"])
-
-
-class AskRequest(BaseModel):
-    query: str = Field(min_length=1)
 
 
 def get_storage() -> StorageService:
@@ -112,37 +106,3 @@ def download_json(
         "Content-Disposition": f'attachment; filename="{document_id}_{document.tool_id}.json"'
     }
     return Response(content=content, media_type="application/json", headers=headers)
-
-
-@router.post("/{document_id}/ask")
-def ask(
-    project_slug: str,
-    document_id: str,
-    body: AskRequest,
-    storage: StorageService = Depends(get_storage),
-):
-    try:
-        spec_json = storage.read_spec_json(project_slug, document_id)
-        spec = EquipmentSpec.model_validate_json(spec_json)
-        vector_store = VectorStoreManager(storage.vectorstore_path(project_slug))
-        qa_service = container.create_qa_service(
-            vector_store,
-            vector_filters={
-                "project_slug": project_slug,
-                "document_id": document_id,
-            },
-        )
-        answer_text, source = qa_service.answer(body.query, spec)
-    except InvalidSlugError as exc:
-        raise HTTPException(400, str(exc)) from exc
-    except (ProjectNotFoundError, DocumentNotFoundError) as exc:
-        raise HTTPException(404, str(exc)) from exc
-    except StorageError as exc:
-        raise HTTPException(500, str(exc)) from exc
-
-    return {
-        "project_slug": project_slug,
-        "document_id": document_id,
-        "answer": answer_text,
-        "source": source,
-    }
