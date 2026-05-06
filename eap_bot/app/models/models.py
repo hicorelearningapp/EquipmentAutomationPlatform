@@ -36,3 +36,14 @@ class EquipmentSpecRow(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     project = relationship("ProjectRow", back_populates="specs")
+
+
+class MappingTemplateRow(Base):
+    __tablename__ = "mapping_templates"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False, index=True)
+    tool_type = Column(String, nullable=False, index=True)  # e.g. "Plasma Etch"
+    template_json = Column(Text, nullable=False)            # JSON list of MappingEntry dicts
+    source_spec_id = Column(Integer, ForeignKey("equipment_specs.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)

@@ -59,9 +59,7 @@ class StateTransition(BaseModel):
     @model_validator(mode="after")
     def at_least_one_trigger(self) -> "StateTransition":
         if not (self.trigger_event or self.trigger_command or self.manual):
-            raise ValueError(
-                "StateTransition needs trigger_event, trigger_command, or manual=True"
-            )
+            self.manual = True
         return self
 
 

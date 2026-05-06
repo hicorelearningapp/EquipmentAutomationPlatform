@@ -20,6 +20,13 @@ class MappingEntry(BaseModel):
     reasoning: Optional[str] = Field(None, description="Explanation for the mapping suggestion")
 
 
+class UnmappedEntity(BaseModel):
+    entity_id: str
+    entity_type: Literal["variable", "event", "alarm"]
+    name: str
+    reason: str = "No confident match found"
+
+
 class EquipmentMapping(BaseModel):
     spec_id: int
     mappings: List[MappingEntry] = []
@@ -33,3 +40,30 @@ class MappingSuggestionRequest(BaseModel):
 
 class MappingSuggestionResponse(BaseModel):
     suggestions: List[MappingEntry]
+    unmapped: List[UnmappedEntity] = []
+
+
+class MappingTemplateCreate(BaseModel):
+    name: str
+    tool_type: str
+
+
+class MappingTemplateOut(BaseModel):
+    id: int
+    name: str
+    tool_type: str
+    source_spec_id: Optional[int]
+    created_at: datetime
+    mappings: List[MappingEntry] = []
+
+    class Config:
+        from_attributes = True
+
+
+class CompletenessReport(BaseModel):
+    spec_id: int
+    is_complete: bool
+    ready_for_codegen: bool
+    total_entities: int
+    mapped_count: int
+    unmapped_entities: List[UnmappedEntity] = []

@@ -5,7 +5,12 @@ import json
 import logging
 from typing import List
 
-from app.schemas.mapping import MESTag, MappingEntry, MappingSuggestionResponse
+from app.schemas.mapping import (
+    MESTag, 
+    MappingEntry, 
+    MappingSuggestionResponse, 
+    UnmappedEntity
+)
 from app.schemas.secsgem import EquipmentSpec
 from app.utils.llm_factory import LLMStrategy
 
@@ -32,7 +37,41 @@ class MappingService:
             data = json.loads(raw)
 
         sanitized_data = self._sanitize(data, spec, target_tags)
-        return MappingSuggestionResponse.model_validate(sanitized_data)
+        
+        response = MappingSuggestionResponse.model_validate(sanitized_data)
+        response.unmapped = self._find_unmapped(spec, response.suggestions)
+        return response
+
+
+
+    def _find_unmapped(
+        self, spec: EquipmentSpec, suggestions: List[MappingEntry]
+    ) -> List[UnmappedEntity]:
+        mapped_entity_ids = {s.entity_id for s in suggestions}
+        unmapped = []
+
+        for v in spec.variables:
+            if v.vid not in mapped_entity_ids:
+                unmapped.append(UnmappedEntity(
+                    entity_id=v.vid,
+                    entity_type="variable",
+                    name=v.name,
+                ))
+        for e in spec.events:
+            if e.ceid not in mapped_entity_ids:
+                unmapped.append(UnmappedEntity(
+                    entity_id=e.ceid,
+                    entity_type="event",
+                    name=e.name,
+                ))
+        for a in spec.alarms:
+            if a.alarm_id not in mapped_entity_ids:
+                unmapped.append(UnmappedEntity(
+                    entity_id=a.alarm_id,
+                    entity_type="alarm",
+                    name=a.name,
+                ))
+        return unmapped
 
 
     def _sanitize(

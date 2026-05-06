@@ -1,0 +1,10 @@
+{
+    "issues": [
+        {
+            "severity": "warning",
+            "code": "transition_trigger_not_found",
+            "message": "Transition #4 trigger_event='A10301' does not match any Event",
+            "entity_id": "transition[4]"
+        }
+    ]
+}

@@ -1,0 +1,318 @@
+{
+    "tool_id": "CMP-8000-FEM",
+    "tool_type": "CMP",
+    "model": "CMP-Master 8000",
+    "protocol": "SECS/GEM",
+    "connection": {
+        "host": "Fab-Alpha / Bay 4",
+        "port": 5012,
+        "mode": "HSMS (SEMI E37)"
+    },
+    "variables": [
+        {
+            "vid": "V6501",
+            "name": "Platen1Speed",
+            "type": "float",
+            "unit": "RPM",
+            "category": "SV",
+            "access": "read",
+            "description": "Rotational speed of primary platen",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V6502",
+            "name": "Platen2Speed",
+            "type": "float",
+            "unit": "RPM",
+            "category": "SV",
+            "access": "read",
+            "description": "Rotational speed of secondary platen",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V6503",
+            "name": "Head1Pressure",
+            "type": "float",
+            "unit": "PSI",
+            "category": "SV",
+            "access": "read",
+            "description": "Downforce pressure on head 1",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V6504",
+            "name": "Head2Pressure",
+            "type": "float",
+            "unit": "PSI",
+            "category": "SV",
+            "access": "read",
+            "description": "Downforce pressure on head 2",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V6505",
+            "name": "Slurry1Flow",
+            "type": "float",
+            "unit": "mL/m",
+            "category": "SV",
+            "access": "read",
+            "description": "Flow rate of type-A slurry",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V6506",
+            "name": "Slurry2Flow",
+            "type": "float",
+            "unit": "mL/m",
+            "category": "SV",
+            "access": "read",
+            "description": "Flow rate of type-B slurry",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V6507",
+            "name": "Pad1Temp",
+            "type": "float",
+            "unit": "C",
+            "category": "SV",
+            "access": "read",
+            "description": "Surface temperature of pad 1",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V6508",
+            "name": "SlurrypH",
+            "type": "float",
+            "unit": "pH",
+            "category": "SV",
+            "access": "read",
+            "description": "Measured pH value of active slurry",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V6509",
+            "name": "WaferTemp",
+            "type": "float",
+            "unit": "C",
+            "category": "SV",
+            "access": "read",
+            "description": "Non-contact wafer surface temperature",
+            "confidence": 1.0
+        },
+        {
+            "vid": "V6510",
+            "name": "TotalWafers",
+            "type": "integer",
+            "unit": "-",
+            "category": "SV",
+            "access": "read",
+            "description": "Total wafers processed (project scope)",
+            "confidence": 1.0
+        }
+    ],
+    "events": [
+        {
+            "ceid": "E6601",
+            "name": "WaferLoaded",
+            "description": "Wafer entered loading station",
+            "linked_vids": [
+                "V6510"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E6602",
+            "name": "PolishStage1Start",
+            "description": "Primary polishing initiated",
+            "linked_vids": [
+                "V6501",
+                "V6503",
+                "V6505"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E6603",
+            "name": "PolishStage1End",
+            "description": "Primary polishing complete",
+            "linked_vids": [
+                "V6501",
+                "V6507"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E6604",
+            "name": "PolishStage2Start",
+            "description": "Secondary polishing initiated",
+            "linked_vids": [
+                "V6502",
+                "V6504",
+                "V6506"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E6605",
+            "name": "RinseStarted",
+            "description": "DI water rinse initiated",
+            "linked_vids": [
+                "V6509"
+            ],
+            "report": true,
+            "confidence": 1.0
+        },
+        {
+            "ceid": "E6606",
+            "name": "WaferUnloaded",
+            "description": "Wafer exited to output cassette",
+            "linked_vids": [
+                "V6510"
+            ],
+            "report": true,
+            "confidence": 1.0
+        }
+    ],
+    "alarms": [
+        {
+            "alarm_id": "A6701",
+            "name": "LowSlurry",
+            "severity": "warning",
+            "linked_vid": null,
+            "description": "Slurry tank level below 10%",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A6702",
+            "name": "PadWearOut",
+            "severity": "warning",
+            "linked_vid": null,
+            "description": "Polishing pad life at threshold",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A6703",
+            "name": "PlatenMotorOverheat",
+            "severity": "critical",
+            "linked_vid": null,
+            "description": "Motor temp exceeded safe limit",
+            "confidence": 1.0
+        },
+        {
+            "alarm_id": "A6704",
+            "name": "VacuumLoss",
+            "severity": "critical",
+            "linked_vid": null,
+            "description": "Loss of wafer hold-down vacuum",
+            "confidence": 1.0
+        }
+    ],
+    "remote_commands": [
+        {
+            "rcmd": "START_POLISH",
+            "description": "Start polishing process",
+            "parameters": [
+                {
+                    "name": "RECIPE_ID",
+                    "type": "string"
+                },
+                {
+                    "name": "PLATEN_ID",
+                    "type": "string"
+                }
+            ],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "ABORT_STEP",
+            "description": "Stop current step, retract heads",
+            "parameters": [],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "ADJUST_SPEED",
+            "description": "Change platen speed on the fly",
+            "parameters": [
+                {
+                    "name": "SPEED_RPM",
+                    "type": "string"
+                }
+            ],
+            "confidence": 1.0
+        },
+        {
+            "rcmd": "MAINT_WASH",
+            "description": "High-pressure pad cleaning cycle",
+            "parameters": [],
+            "confidence": 1.0
+        }
+    ],
+    "states": [
+        {
+            "state_id": "IDLE",
+            "name": "Idle",
+            "description": "Initial state"
+        },
+        {
+            "state_id": "POLISHING",
+            "name": "Polishing",
+            "description": "Polishing process in progress"
+        },
+        {
+            "state_id": "RINSING",
+            "name": "Rinsing",
+            "description": "Rinsing process in progress"
+        },
+        {
+            "state_id": "COMPLETED",
+            "name": "Completed",
+            "description": "Process completed"
+        },
+        {
+            "state_id": "ERROR",
+            "name": "Error",
+            "description": "Error state"
+        }
+    ],
+    "state_transitions": [
+        {
+            "from_state": "IDLE",
+            "to_state": "POLISHING",
+            "trigger_event": null,
+            "trigger_command": "START_POLISH",
+            "manual": false
+        },
+        {
+            "from_state": "POLISHING",
+            "to_state": "RINSING",
+            "trigger_event": "E6605",
+            "trigger_command": null,
+            "manual": false
+        },
+        {
+            "from_state": "RINSING",
+            "to_state": "COMPLETED",
+            "trigger_event": "E6606",
+            "trigger_command": null,
+            "manual": false
+        },
+        {
+            "from_state": "POLISHING",
+            "to_state": "ERROR",
+            "trigger_event": null,
+            "trigger_command": null,
+            "manual": true
+        },
+        {
+            "from_state": "ERROR",
+            "to_state": "IDLE",
+            "trigger_event": null,
+            "trigger_command": null,
+            "manual": true
+        }
+    ]
+}

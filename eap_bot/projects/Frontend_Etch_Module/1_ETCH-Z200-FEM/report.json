@@ -1,0 +1,10 @@
+{
+    "issues": [
+        {
+            "severity": "warning",
+            "code": "transition_trigger_not_found",
+            "message": "Transition #2 trigger_event='A6303' does not match any Event",
+            "entity_id": "transition[2]"
+        }
+    ]
+}

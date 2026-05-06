@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models.models import EquipmentSpecRow, ProjectRow
+from app.models.models import EquipmentSpecRow, MappingTemplateRow, ProjectRow
 from app.schemas.mapping import EquipmentMapping
 from app.schemas.secsgem import EquipmentSpec, ValidationReport
 
@@ -88,3 +88,43 @@ class ProjectRepository:
             .order_by(EquipmentSpecRow.created_at.desc())
             .all()
         )
+
+
+class MappingTemplateRepository:
+
+    def __init__(self, db: Session) -> None:
+        self.db = db
+
+    def save(
+        self,
+        name: str,
+        tool_type: str,
+        mappings: list,         # list of MappingEntry objects
+        source_spec_id: int,
+    ) -> MappingTemplateRow:
+        import json
+        row = MappingTemplateRow(
+            name=name,
+            tool_type=tool_type,
+            template_json=json.dumps([m.model_dump() for m in mappings]),
+            source_spec_id=source_spec_id,
+        )
+        self.db.add(row)
+        self.db.commit()
+        self.db.refresh(row)
+        return row
+
+    def get(self, template_id: int) -> MappingTemplateRow | None:
+        return self.db.query(MappingTemplateRow).filter(
+            MappingTemplateRow.id == template_id
+        ).first()
+
+    def list_all(self) -> list[MappingTemplateRow]:
+        return self.db.query(MappingTemplateRow).order_by(
+            MappingTemplateRow.created_at.desc()
+        ).all()
+
+    def list_by_tool_type(self, tool_type: str) -> list[MappingTemplateRow]:
+        return self.db.query(MappingTemplateRow).filter(
+            MappingTemplateRow.tool_type.ilike(tool_type)
+        ).all()
