@@ -16,15 +16,22 @@ logger = logging.getLogger(__name__)
 class VectorStoreManager:
 
     _WS_RE = re.compile(r"[ \t\xa0]+")
+    _EMBEDDINGS: HuggingFaceEmbeddings | None = None
 
-    def __init__(self, vector_dir: Path | str = settings.VECTORSTORE_ROOT) -> None:
+    def __init__(self, vector_dir: Path | str) -> None:
         self.vector_dir = Path(vector_dir)
         self._faiss_cache: FAISS | None = None
-        self._embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
-        )
+        self._embeddings = self._get_embeddings()
+
+    @classmethod
+    def _get_embeddings(cls) -> HuggingFaceEmbeddings:
+        if cls._EMBEDDINGS is None:
+            cls._EMBEDDINGS = HuggingFaceEmbeddings(
+                model_name="sentence-transformers/all-MiniLM-L6-v2",
+                model_kwargs={"device": "cpu"},
+                encode_kwargs={"normalize_embeddings": True},
+            )
+        return cls._EMBEDDINGS
 
     def _load_or_create_faiss(self) -> FAISS | None:
         """Return the cached FAISS index, loading from disk if needed."""

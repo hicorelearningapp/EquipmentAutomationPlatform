@@ -1,32 +1,35 @@
 from datetime import datetime
-from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ProjectCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=1)
+
+
+class DocumentMetadata(BaseModel):
+    id: str
+    original_filename: str
+    pdf_path: str
+    json_path: str
+    tool_id: str
+    tool_type: str
+    uploaded_at: datetime
+    extraction_status: str = "completed"
+    vector_indexed: bool = False
 
 
 class ProjectOut(BaseModel):
-    id: int
     name: str
+    slug: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-class SpecSummary(BaseModel):
-    id: int
-    tool_id: str
-    tool_type: str
-    filename: str
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
+    updated_at: datetime
+    document_count: int
 
 
-class ProjectDetail(ProjectOut):
-    specs: list[SpecSummary] = []
+class ProjectMetadata(ProjectOut):
+    documents: list[DocumentMetadata] = Field(default_factory=list)
+
+
+class ProjectDetail(ProjectMetadata):
+    pass

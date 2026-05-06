@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Literal
+from typing import Any, Literal
 
 from app.schemas.secsgem import EquipmentSpec
 from app.utils.embedder import VectorStoreManager
@@ -32,10 +32,16 @@ class QAService:
         ),
     }
 
-    def __init__(self, llm_strategy: LLMStrategy, vector_store: VectorStoreManager) -> None:
+    def __init__(
+        self,
+        llm_strategy: LLMStrategy,
+        vector_store: VectorStoreManager,
+        vector_filters: dict[str, Any] | None = None,
+    ) -> None:
         # LLM used only for RAG-based answers (JSON answers need no LLM call).
         self._llm = llm_strategy.get_model(temperature=0, require_json=False)
         self._vector_store = vector_store
+        self._vector_filters = vector_filters or {}
 
 
     def answer(self, query: str, spec: EquipmentSpec) -> tuple[str, Source]:
@@ -117,7 +123,8 @@ class QAService:
 
 
     def _rag(self, query: str, spec: EquipmentSpec) -> str:
-        chunks = self._vector_store.search_with_filters(query, {"tool_id": spec.tool_id}, k=6)
+        filters = {"tool_id": spec.tool_id, **self._vector_filters}
+        chunks = self._vector_store.search_with_filters(query, filters, k=6)
         if not chunks:
             logger.warning("RAG: no chunks found for tool_id=%s", spec.tool_id)
             return "No relevant context found in the indexed document."

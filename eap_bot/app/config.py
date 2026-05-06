@@ -1,18 +1,17 @@
-from pydantic_settings import BaseSettings
 from pydantic import Field
-from pathlib import Path
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     GROQ_API_KEY: str = Field("")
-    
-    LLM_PROVIDER: str = Field("groq") # 'groq' or 'ollama'
+
+    LLM_PROVIDER: str = Field("groq")  # 'groq' or 'ollama'
     LLM_MODEL_NAME: str = Field("llama-3.3-70b-versatile")
     OLLAMA_BASE_URL: str = Field("http://localhost:11434")
 
-    DATABASE_URL: str = Field("sqlite:///./app.db")
-    PROJECTS_DIR: str = Field("./projects")
-    VECTORSTORE_ROOT: str = Field("./vectorstores")
+    # Use an absolute path on Azure, e.g. /var/lib/eap/storage.
+    # The relative default is intended only for local development.
+    EAP_STORAGE_ROOT: str = Field("./runtime_storage")
 
     CHUNK_SIZE: int = Field(1000)
     CHUNK_OVERLAP: int = Field(200)
@@ -23,6 +22,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-Path(settings.PROJECTS_DIR).mkdir(parents=True, exist_ok=True)
-Path(settings.VECTORSTORE_ROOT).mkdir(parents=True, exist_ok=True)
