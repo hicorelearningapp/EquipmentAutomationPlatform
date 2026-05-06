@@ -2,5 +2,16 @@ venv/
 .env
 *.pyc
 __pycache__/
+*.db
+app.db
+projects/
+vectorstores/
+runtime_storage/
+eap_bot/app.db
+eap_bot/projects/
+eap_bot/vectorstores/
+eap_bot/runtime_storage/
 Sample Documents/
 .venv/
+.uv-cache/
+.vendor/
