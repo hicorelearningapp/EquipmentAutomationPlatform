@@ -118,9 +118,11 @@ FAISS vectorstore filtered to the selected document.
 - `app/services/storage_service.py`: filesystem layout, safe slugs, metadata,
   PDF/spec writes, and path validation.
 - `app/routers/project_routes.py`: filesystem-backed project APIs.
-- `app/routers/equipment_routes.py`: filesystem-backed upload and JSON download.
+- `app/routers/equipment_routes.py`: filesystem-backed upload, JSON download,
+  and document-scoped Q&A.
 - `app/utils/embedder.py`: FAISS persistence for one project-local vectorstore.
 - `app/services/equipment_extractor.py`: LLM extraction into `EquipmentSpec`.
+- `app/services/qa_service.py`: JSON-first and RAG-backed question answering.
 - `app/validators/spec_validator.py`: internal deterministic validation.
 
 ## Notes

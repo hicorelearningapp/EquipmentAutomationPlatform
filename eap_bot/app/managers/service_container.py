@@ -12,13 +12,15 @@ logger = logging.getLogger(__name__)
 
 class ServiceContainer:
     def __init__(self) -> None:
-        logger.info("ServiceContainer: initialising services …")
+        logger.info("ServiceContainer: initialising services ...")
 
         self.llm_strategy: LLMStrategy = LLMFactory.create_strategy()
 
         self.parser: DocumentParser = DocumentParserFactory.create()
         self.validator: SpecValidator = SpecValidator()
-        self.extractor: EquipmentExtractor = EquipmentExtractor(llm_strategy=self.llm_strategy)
+        self.extractor: EquipmentExtractor = EquipmentExtractor(
+            llm_strategy=self.llm_strategy
+        )
 
         logger.info("ServiceContainer: all services ready.")
 
@@ -32,5 +34,6 @@ class ServiceContainer:
             vector_store=vector_store,
             vector_filters=vector_filters,
         )
+
 
 container = ServiceContainer()
