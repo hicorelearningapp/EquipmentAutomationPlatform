@@ -101,6 +101,29 @@ class VectorStoreManager:
             return []
         return vs.similarity_search(query, k=k)
 
+    def remove_document(self, document_id: str) -> int:
+        """Delete all chunks whose metadata.document_id matches. Returns count removed."""
+        vs = self._load_or_create_faiss()
+        if vs is None:
+            return 0
+        ids_to_remove = [
+            doc_id
+            for doc_id, doc in vs.docstore._dict.items()
+            if doc.metadata.get("document_id") == document_id
+        ]
+        if not ids_to_remove:
+            return 0
+        vs.delete(ids=ids_to_remove)
+        self.vector_dir.mkdir(parents=True, exist_ok=True)
+        vs.save_local(str(self.vector_dir))
+        self._faiss_cache = vs
+        logger.info(
+            "FAISS index updated and cached (%d chunks removed for document_id=%s)",
+            len(ids_to_remove),
+            document_id,
+        )
+        return len(ids_to_remove)
+
     def search_with_filters(self, query: str, filters: Dict, k: int = 6) -> List[LC_Document]:
         vs = self._load_or_create_faiss()
         if vs is None:

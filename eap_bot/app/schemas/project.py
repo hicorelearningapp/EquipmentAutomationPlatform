@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field
 
 
 class ProjectCreate(BaseModel):
@@ -20,8 +20,10 @@ class DocumentMetadata(BaseModel):
 
 
 class ProjectOut(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     name: str
-    slug: str
+    id: str = Field(validation_alias=AliasChoices("id", "slug"))
     created_at: datetime
     updated_at: datetime
     document_count: int

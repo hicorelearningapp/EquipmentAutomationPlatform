@@ -2,8 +2,9 @@ import logging
 
 from fastapi import FastAPI
 
-from app.routers.equipment_routes import router as equipment_router
-from app.routers.project_routes import router as project_router
+from app.routers.equipment_routes import EquipmentAPI
+from app.routers.mapping_routes import MappingAPI
+from app.routers.project_routes import ProjectAPI
 from app.services.storage_service import StorageService
 
 logging.basicConfig(
@@ -13,8 +14,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="EAP SECS/GEM Extractor")
-app.include_router(project_router)
-app.include_router(equipment_router)
+
+project_api = ProjectAPI()
+equipment_api = EquipmentAPI()
+mapping_api = MappingAPI()
+
+app.include_router(project_api.router)
+app.include_router(equipment_api.router)
+app.include_router(mapping_api.router)
 
 
 @app.on_event("startup")
