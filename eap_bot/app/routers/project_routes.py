@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.managers.service_container import container
-from app.schemas.project import ProjectCreate, ProjectDetail, ProjectOut
+from app.schemas.project import ProjectCreate, ProjectDetail
 from app.schemas.secsgem import EquipmentSpec
 from app.services.storage_service import (
     DocumentNotFoundError,
@@ -27,14 +27,19 @@ class ProjectAPI:
 
     def register_routes(self):
         self.router.post("", response_model=ProjectDetail, status_code=201)(self.create_project)
-        self.router.get("", response_model=list[ProjectOut])(self.list_projects)
+        self.router.get("")(self.list_projects)
         self.router.get("/{project_id}", response_model=ProjectDetail)(self.get_project)
         self.router.delete("/{project_id}")(self.delete_project)
         self.router.post("/{project_id}/ask")(self.ask)
 
     def create_project(self, body: ProjectCreate):
         try:
-            return self.storage.create_project(body.name)
+            return self.storage.create_project(
+                project_name=body.ProjectName,
+                vendor_name=body.VendorName,
+                tool=body.Tool,
+                project_version=body.ProjectVersion,
+            )
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
         except ProjectExistsError as exc:
@@ -42,7 +47,8 @@ class ProjectAPI:
 
     def list_projects(self):
         try:
-            return self.storage.list_projects()
+            projects = self.storage.list_projects()
+            return {"Projects": projects}
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 
@@ -58,6 +64,7 @@ class ProjectAPI:
 
     def delete_project(self, project_id: str):
         try:
+            project = self.storage.get_project(project_id)
             self.storage.delete_project(project_id)
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
@@ -65,7 +72,7 @@ class ProjectAPI:
             raise HTTPException(404, str(exc)) from exc
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
-        return {"status": "success", "message": f"Project '{project_id}' deleted"}
+        return {"ProjectName": project.ProjectName, "ProjectID": project.ProjectID, "Status": "deleted"}
 
     def ask(self, project_id: str, body: AskRequest):
         try:
