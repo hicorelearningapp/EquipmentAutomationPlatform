@@ -161,6 +161,23 @@ class StorageService:
         self._write_metadata(metadata)
         return document
 
+    def mark_failed(self, project_id: str, document_id: str) -> DocumentMetadata:
+        metadata = self.get_project(project_id)
+
+        for doc in metadata.documents:
+            if doc.DocumentId == document_id:
+                doc.Status = "failed"
+                document = doc
+                break
+        else:
+            raise DocumentNotFoundError(
+                f"Document '{document_id}' was not found in project '{project_id}'"
+            )
+
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+        return document
+
     def list_projects(self) -> list[ProjectMetadata]:
         projects: list[ProjectMetadata] = []
         for child in self.root.iterdir():

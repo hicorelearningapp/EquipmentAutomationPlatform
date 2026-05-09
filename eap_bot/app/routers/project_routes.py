@@ -21,16 +21,16 @@ class AskRequest(BaseModel):
 
 class ProjectAPI:
     def __init__(self):
-        self.router = APIRouter(prefix="/projects", tags=["projects"])
+        self.router = APIRouter(tags=["projects"])
         self.storage = StorageService()
         self.register_routes()
 
     def register_routes(self):
-        self.router.post("", response_model=ProjectDetail, status_code=201)(self.create_project)
-        self.router.get("")(self.list_projects)
-        self.router.get("/{project_id}", response_model=ProjectDetail)(self.get_project)
-        self.router.delete("/{project_id}")(self.delete_project)
-        self.router.post("/{project_id}/ask")(self.ask)
+        self.router.post("/AddProject", response_model=ProjectDetail, status_code=201)(self.create_project)
+        self.router.get("/GetAllProjects")(self.list_projects)
+        self.router.get("/LoadProject/{project_id}", response_model=ProjectDetail)(self.get_project)
+        self.router.delete("/DeleteProject/{project_id}")(self.delete_project)
+        self.router.post("/Ask/{project_id}")(self.ask)
 
     def create_project(self, body: ProjectCreate):
         try:

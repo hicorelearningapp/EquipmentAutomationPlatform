@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class Variable(BaseModel):
-    vid: str
+    vid: int
     name: str
     type: Literal["float", "integer", "string", "boolean"]
     unit: Optional[str] = None
@@ -26,19 +26,19 @@ class RemoteCommand(BaseModel):
 
 
 class Event(BaseModel):
-    ceid: str
+    ceid: int
     name: str
     description: Optional[str] = None
-    linked_vids: list[str] = []
+    linked_vids: list[int] = []
     report: bool = True
     confidence: float = Field(ge=0.0, le=1.0)
 
 
 class Alarm(BaseModel):
-    alarm_id: str
+    alarm_id: int
     name: str
     severity: Literal["critical", "warning", "info"]
-    linked_vid: Optional[str] = None
+    linked_vid: Optional[int] = None
     description: Optional[str] = None
     confidence: float = Field(ge=0.0, le=1.0)
 

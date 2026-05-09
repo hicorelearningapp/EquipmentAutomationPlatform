@@ -62,7 +62,7 @@ EXPECTED JSON FORMAT:
   "connection": {{"host": "string", "port": 123, "mode": "string"}},
   "variables": [
     {{
-      "vid": "string",
+      "vid": 123,
       "name": "string",
       "type": "float|integer|string|boolean",
       "unit": "string",
@@ -74,20 +74,20 @@ EXPECTED JSON FORMAT:
   ],
   "events": [
     {{
-      "ceid": "string",
+      "ceid": 123,
       "name": "string",
       "description": "string",
-      "linked_vids": ["string"],
+      "linked_vids": [123],
       "report": true,
       "confidence": 0.0 to 1.0
     }}
   ],
   "alarms": [
     {{
-      "alarm_id": "string",
+      "alarm_id": 123,
       "name": "string",
       "severity": "critical|warning|info",
-      "linked_vid": "string",
+      "linked_vid": 123,
       "description": "string",
       "confidence": 0.0 to 1.0
     }}
