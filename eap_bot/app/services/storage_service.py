@@ -7,6 +7,7 @@ from pathlib import Path
 
 from app.config import settings
 from app.schemas.project import DocumentMetadata, ProjectMetadata
+from app.schemas.mapping import ProjectMapping
 from app.schemas.secsgem import EquipmentSpec
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class DocumentNotFoundError(StorageError):
 
 class StorageService:
     DOCUMENTS_DIR = "Documents"
+    MESTAG_DIR = "MESTagDocuments"
     EXTRACTED_JSON_DIR = "ExtractedJson"
     VECTORSTORE_DIR = "Vectorstore"
     METADATA_DIR = "Metadata"
@@ -63,7 +65,6 @@ class StorageService:
         project_name: str,
         vendor_name: str,
         tool: str,
-        project_version: str = "1.0",
     ) -> ProjectMetadata:
         display_name = project_name.strip()
         if not display_name:
@@ -89,12 +90,11 @@ class StorageService:
             ProjectName=display_name,
             VendorName=vendor_name,
             Tool=tool,
-            ProjectVersion=project_version,
             CreatedAt=now,
             LastUpdatedOn=now,
             Status="active",
-            document_count=0,
-            documents=[],
+            DocumentCount=0,
+            Documents=[],
         )
         self._write_metadata(metadata)
         return metadata
@@ -103,6 +103,7 @@ class StorageService:
         self,
         project_id: str,
         document_id: str,
+        document_type: str,
         filename: str,
         file_size: float,
         pages: int,
@@ -114,6 +115,7 @@ class StorageService:
 
         document = DocumentMetadata(
             DocumentId=document_id,
+            DocumentType=document_type,
             FileName=filename,
             FileSize=file_size,
             Pages=pages,
@@ -121,16 +123,16 @@ class StorageService:
             UploadedBy="",
             Status="uploaded",
             DocumentPath=pdf_path.relative_to(project_dir).as_posix(),
-            json_path=json_path.relative_to(project_dir).as_posix(),
-            tool_id="",
-            tool_type="",
-            vector_indexed=False,
+            JsonPath=json_path.relative_to(project_dir).as_posix(),
+            ToolId="",
+            ToolType="",
+            VectorIndexed=False,
         )
 
-        documents = [doc for doc in metadata.documents if doc.DocumentId != document_id]
-        documents.append(document)
-        metadata.documents = sorted(documents, key=lambda doc: doc.UploadDate)
-        metadata.document_count = len(metadata.documents)
+        Documents = [doc for doc in metadata.Documents if doc.DocumentId != document_id]
+        Documents.append(document)
+        metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate)
+        metadata.DocumentCount = len(metadata.Documents)
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
         return document
@@ -144,12 +146,12 @@ class StorageService:
     ) -> DocumentMetadata:
         metadata = self.get_project(project_id)
 
-        for doc in metadata.documents:
+        for doc in metadata.Documents:
             if doc.DocumentId == document_id:
                 doc.Status = "completed"
-                doc.tool_id = spec.tool_id
-                doc.tool_type = spec.tool_type
-                doc.vector_indexed = vector_indexed
+                doc.ToolId = spec.tool_id
+                doc.ToolType = spec.tool_type
+                doc.VectorIndexed = vector_indexed
                 document = doc
                 break
         else:
@@ -164,7 +166,7 @@ class StorageService:
     def mark_failed(self, project_id: str, document_id: str) -> DocumentMetadata:
         metadata = self.get_project(project_id)
 
-        for doc in metadata.documents:
+        for doc in metadata.Documents:
             if doc.DocumentId == document_id:
                 doc.Status = "failed"
                 document = doc
@@ -209,14 +211,14 @@ class StorageService:
         document = self.get_document(project_id, document_id)
 
         pdf_path = self._project_relative_path(project_id, document.DocumentPath)
-        json_path = self._project_relative_path(project_id, document.json_path)
+        json_path = self._project_relative_path(project_id, document.JsonPath)
         if pdf_path.exists():
             pdf_path.unlink()
         if json_path.exists():
             json_path.unlink()
 
-        metadata.documents = [doc for doc in metadata.documents if doc.DocumentId != document_id]
-        metadata.document_count = len(metadata.documents)
+        metadata.Documents = [doc for doc in metadata.Documents if doc.DocumentId != document_id]
+        metadata.DocumentCount = len(metadata.Documents)
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
 
@@ -225,7 +227,7 @@ class StorageService:
     ) -> tuple[str, Path, Path]:
         metadata = self.get_project(project_id)
         base_id = self.slugify(Path(original_filename).stem, fallback="document")
-        existing_ids = {doc.id for doc in metadata.documents}
+        existing_ids = {doc.DocumentId for doc in metadata.Documents}
 
         document_id = base_id
         counter = 2
@@ -257,6 +259,7 @@ class StorageService:
         self,
         project_id: str,
         document_id: str,
+        document_type: str,
         original_filename: str,
         spec: EquipmentSpec,
         vector_indexed: bool,
@@ -270,6 +273,7 @@ class StorageService:
 
         document = DocumentMetadata(
             DocumentId=document_id,
+            DocumentType=document_type,
             FileName=original_filename,
             FileSize=file_size,
             Pages=pages,
@@ -277,32 +281,49 @@ class StorageService:
             UploadedBy="",
             Status="completed",
             DocumentPath=pdf_path.relative_to(project_dir).as_posix(),
-            json_path=json_path.relative_to(project_dir).as_posix(),
-            tool_id=spec.tool_id,
-            tool_type=spec.tool_type,
-            vector_indexed=vector_indexed,
+            JsonPath=json_path.relative_to(project_dir).as_posix(),
+            ToolId=spec.tool_id,
+            ToolType=spec.tool_type,
+            VectorIndexed=vector_indexed,
         )
 
-        documents = [doc for doc in metadata.documents if doc.id != document_id]
-        documents.append(document)
-        metadata.documents = sorted(documents, key=lambda doc: doc.uploaded_at)
-        metadata.document_count = len(metadata.documents)
+        Documents = [doc for doc in metadata.Documents if doc.DocumentId != document_id]
+        Documents.append(document)
+        metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate)
+        metadata.DocumentCount = len(metadata.Documents)
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
         return document
 
     def get_document(self, project_id: str, document_id: str) -> DocumentMetadata:
         metadata = self.get_project(project_id)
-        for document in metadata.documents:
+        for document in metadata.Documents:
             if document.DocumentId == document_id:
                 return document
         raise DocumentNotFoundError(
             f"Document '{document_id}' was not found in project '{project_id}'"
         )
 
+    def get_mapping(self, project_id: str) -> ProjectMapping:
+        path = self.mapping_path(project_id)
+        if not path.exists():
+            from app.schemas.mapping import ProjectMapping
+            return ProjectMapping(ProjectID=project_id)
+        try:
+            from app.schemas.mapping import ProjectMapping
+            return ProjectMapping.model_validate_json(path.read_text(encoding="utf-8"))
+        except Exception:
+            from app.schemas.mapping import ProjectMapping
+            return ProjectMapping(ProjectID=project_id)
+
+    def save_mapping(self, project_id: str, mapping: ProjectMapping) -> None:
+        path = self.mapping_path(project_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(mapping.model_dump_json(indent=2), encoding="utf-8")
+
     def read_spec_json(self, project_id: str, document_id: str) -> str:
         document = self.get_document(project_id, document_id)
-        path = self._project_relative_path(project_id, document.json_path)
+        path = self._project_relative_path(project_id, document.JsonPath)
         if not path.exists():
             raise DocumentNotFoundError(
                 f"Extracted JSON for document '{document_id}' was not found"
@@ -312,6 +333,26 @@ class StorageService:
     def vectorstore_path(self, project_id: str) -> Path:
         self.get_project(project_id)
         return self._project_dir(project_id) / self.VECTORSTORE_DIR
+
+    def mapping_path(self, project_id: str) -> Path:
+        return self._project_dir(project_id) / self.METADATA_DIR / "mapping.json"
+
+    def mes_tags_json_path(self, project_id: str) -> Path:
+        return self._project_dir(project_id) / self.METADATA_DIR / "mes_tags.json"
+
+    def save_mes_tags(self, project_id: str, tags: list[dict]) -> None:
+        path = self.mes_tags_json_path(project_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(tags, indent=2), encoding="utf-8")
+
+    def get_mes_tags(self, project_id: str) -> list[dict]:
+        path = self.mes_tags_json_path(project_id)
+        if not path.exists():
+            return []
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return []
 
     def document_pdf_path(self, project_id: str, document_id: str) -> Path:
         self._validate_id(project_id)
@@ -325,6 +366,15 @@ class StorageService:
             self._project_dir(project_id)
             / self.EXTRACTED_JSON_DIR
             / f"{document_id}.json"
+        )
+
+    def mes_tag_path(self, project_id: str, document_id: str) -> Path:
+        self._validate_id(project_id)
+        self._validate_id(document_id)
+        return (
+            self._project_dir(project_id)
+            / self.MESTAG_DIR
+            / f"{document_id}.pdf"
         )
 
     def _resolve_root(self, storage_root: str | Path) -> Path:
@@ -358,6 +408,7 @@ class StorageService:
         project_dir = self._project_dir(project_id)
         for folder in (
             self.DOCUMENTS_DIR,
+            self.MESTAG_DIR,
             self.EXTRACTED_JSON_DIR,
             self.VECTORSTORE_DIR,
             self.METADATA_DIR,

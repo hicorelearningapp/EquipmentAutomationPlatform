@@ -6,6 +6,7 @@ from pypdf import PdfReader
 
 from app.config import settings
 from app.managers.service_container import container
+from app.schemas.project import DocumentType
 from app.schemas.secsgem import EquipmentSpec
 from app.services.storage_service import (
     DocumentNotFoundError,
@@ -33,6 +34,7 @@ class EquipmentAPI:
         self,
         project_id: str,
         file: UploadFile = File(...),
+        document_type: DocumentType = Form(...),
         tool_type: str = Form(""),
         vendor: str = Form(""),
     ):
@@ -54,6 +56,7 @@ class EquipmentAPI:
             document = self.storage.register_document(
                 project_id=project_id,
                 document_id=document_id,
+                document_type=document_type,
                 filename=file.filename,
                 file_size=file_size,
                 pages=pages,
@@ -68,6 +71,7 @@ class EquipmentAPI:
         return {
             "Status": "uploaded",
             "DocumentID": document_id,
+            "DocumentType": document_type,
             "FileName": document.FileName,
             "ToolType": tool_type,
             "Vendor": vendor,
@@ -205,7 +209,7 @@ class EquipmentAPI:
             raise HTTPException(500, str(exc)) from exc
 
         headers = {
-            "Content-Disposition": f'attachment; filename="{document_id}_{document.tool_id}.json"'
+            "Content-Disposition": f'attachment; filename="{document_id}_{document.ToolId}.json"'
         }
         return Response(content=content, media_type="application/json", headers=headers)
 

@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from app.routers.equipment_routes import EquipmentAPI
 from app.routers.mapping_routes import MappingAPI
 from app.routers.project_routes import ProjectAPI
+from app.routers.codegen_routes import CodeGenAPI
 from app.services.storage_service import StorageService
 
 logging.basicConfig(
@@ -18,10 +19,12 @@ app = FastAPI(title="EAP SECS/GEM Extractor")
 project_api = ProjectAPI()
 equipment_api = EquipmentAPI()
 mapping_api = MappingAPI()
+codegen_api = CodeGenAPI()
 
 app.include_router(project_api.router)
 app.include_router(equipment_api.router)
 app.include_router(mapping_api.router)
+app.include_router(codegen_api.router)
 
 
 @app.on_event("startup")

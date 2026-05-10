@@ -1,6 +1,7 @@
 import logging
 
 from app.services.equipment_extractor import EquipmentExtractor
+from app.services.mapping_service import MappingService
 from app.services.qa_service import QAService
 from app.utils.embedder import VectorStoreManager
 from app.utils.llm_factory import LLMFactory, LLMStrategy
@@ -19,6 +20,9 @@ class ServiceContainer:
         self.parser: DocumentParser = DocumentParserFactory.create()
         self.validator: SpecValidator = SpecValidator()
         self.extractor: EquipmentExtractor = EquipmentExtractor(
+            llm_strategy=self.llm_strategy
+        )
+        self.mapping_service: MappingService = MappingService(
             llm_strategy=self.llm_strategy
         )
 

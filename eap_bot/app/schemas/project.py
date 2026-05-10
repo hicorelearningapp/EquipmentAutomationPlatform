@@ -3,6 +3,9 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+from app.schemas.secsgem import EquipmentSpec
+from app.schemas.mapping import ProjectMapping
+
 
 class ToolType(str, Enum):
     NONE = "None"
@@ -12,15 +15,22 @@ class ToolType(str, Enum):
     ETCH = "ETCH"
 
 
+class DocumentType(str, Enum):
+    USER_MANUALS = "User Manuals"
+    TROUBLESHOOTING_GUIDANCE = "Troubleshooting Guidance"
+    GEM_MANUAL = "GEM Manual"
+    VARIABLE_FILES = "Variable Files"
+
+
 class ProjectCreate(BaseModel):
     ProjectName: str = Field(min_length=1)
     VendorName: str
     Tool: ToolType
-    ProjectVersion: str = "1.0"
 
 
 class DocumentMetadata(BaseModel):
     DocumentId: str
+    DocumentType: DocumentType
     FileName: str
     FileSize: float = 0.0
     Pages: int = 0
@@ -28,10 +38,10 @@ class DocumentMetadata(BaseModel):
     UploadedBy: str = ""
     Status: str = "completed"
     DocumentPath: str
-    json_path: str
-    tool_id: str
-    tool_type: str
-    vector_indexed: bool = False
+    JsonPath: str
+    ToolId: str
+    ToolType: str
+    VectorIndexed: bool = False
 
 
 class ProjectOut(BaseModel):
@@ -39,16 +49,22 @@ class ProjectOut(BaseModel):
     ProjectName: str
     VendorName: str
     Tool: ToolType
-    ProjectVersion: str
     CreatedAt: datetime
     LastUpdatedOn: datetime
     Status: str
 
 
 class ProjectMetadata(ProjectOut):
-    document_count: int = 0
-    documents: list[DocumentMetadata] = Field(default_factory=list)
+    DocumentCount: int = 0
+    Documents: list[DocumentMetadata] = Field(default_factory=list)
 
 
 class ProjectDetail(ProjectMetadata):
-    pass
+    Extractions: list[EquipmentSpec] = Field(default_factory=list)
+    Mappings: ProjectMapping = Field(default_factory=ProjectMapping)
+
+
+class AskRequest(BaseModel):
+    Category: str
+    Question: str
+
