@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.managers.service_container import container
-from app.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, ProjectMetadata, DocumentCategory
+from app.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, DocumentCategory
 from app.schemas.secsgem import EquipmentSpec
 from app.services.storage_service import (
     DocumentNotFoundError,
@@ -25,7 +25,7 @@ class ProjectAPI:
         self.register_routes()
 
     def register_routes(self):
-        self.router.post("/AddProject", response_model=ProjectMetadata, status_code=201, response_model_by_alias=False)(self.create_project)
+        self.router.post("/AddProject", response_model=ProjectOut, status_code=201, response_model_by_alias=False)(self.create_project)
         self.router.get("/GetAllProjects", response_model=dict[str, list[ProjectOut]], response_model_by_alias=False)(self.list_projects)
         self.router.get("/LoadProject/{project_id}", response_model=ProjectDetail, response_model_by_alias=False)(self.load_project)
         self.router.delete("/DeleteProject/{project_id}")(self.delete_project)
