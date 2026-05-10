@@ -7,8 +7,9 @@ class VariableMapping(BaseModel):
     Description: str = ""
 
 class ProjectMapping(BaseModel):
-    ProjectID: str = ""
+    ProjectID: int
     Mappings: list[VariableMapping] = Field(default_factory=list)
 
 class MappingUpdateRequest(BaseModel):
-    MESTags: list[str]
+    MESTags: list[str] = Field(default_factory=list)
+    MESTagDocumentIDs: list[str] = Field(default_factory=list)

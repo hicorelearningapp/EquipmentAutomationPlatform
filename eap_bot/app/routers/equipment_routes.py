@@ -1,4 +1,5 @@
 import io
+import logging
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
@@ -6,7 +7,7 @@ from pypdf import PdfReader
 
 from app.config import settings
 from app.managers.service_container import container
-from app.schemas.project import DocumentType
+from app.schemas.project import DocumentCategory
 from app.schemas.secsgem import EquipmentSpec
 from app.services.storage_service import (
     DocumentNotFoundError,
@@ -17,6 +18,8 @@ from app.services.storage_service import (
 )
 from app.utils.embedder import VectorStoreManager
 
+logger = logging.getLogger(__name__)
+
 
 class EquipmentAPI:
     def __init__(self):
@@ -26,15 +29,15 @@ class EquipmentAPI:
 
     def register_routes(self):
         self.router.post("/UploadDocument/{project_id}")(self.upload_document)
-        self.router.get("/Analyze/{project_id}/{document_id}")(self.analyze)
+        self.router.get("/Analyze/{project_id}/{document_id}", response_model_by_alias=False)(self.analyze)
         self.router.get("/Analyze/{project_id}/{document_id}/report")(self.download_report)
         self.router.delete("/DeleteDocument/{project_id}/{document_id}")(self.delete_document)
 
     async def upload_document(
         self,
-        project_id: str,
+        project_id: int,
         file: UploadFile = File(...),
-        document_type: DocumentType = Form(...),
+        document_type: DocumentCategory = Form(...),
         tool_type: str = Form(""),
         vendor: str = Form(""),
     ):
@@ -79,8 +82,9 @@ class EquipmentAPI:
             "FileSize": document.FileSize,
         }
 
-    def analyze(self, project_id: str, document_id: str):
+    def analyze(self, project_id: int, document_id: str):
         try:
+            self.storage.increment_project_version(project_id)
             document = self.storage.get_document(project_id, document_id)
         except (InvalidSlugError, ProjectNotFoundError, DocumentNotFoundError) as exc:
             raise HTTPException(404, str(exc)) from exc
@@ -114,7 +118,7 @@ class EquipmentAPI:
                 metadata={
                     "project_id": project_id,
                     "document_id": document_id,
-                    "tool_id": spec.tool_id,
+                    "tool_id": spec.ToolID,
                 },
             )
             self.storage.complete_extraction(
@@ -123,16 +127,17 @@ class EquipmentAPI:
                 spec=spec,
                 vector_indexed=vector_indexed,
             )
-        except Exception:
+        except Exception as e:
+            logger.error(f"Analysis failed for {project_id}/{document_id}: {str(e)}")
             self.storage.mark_failed(project_id, document_id)
             return self._build_failed_response(project_id, document_id)
 
         return self._build_extraction_response(project_id, document_id, spec)
 
-    def _build_failed_response(self, project_id: str, document_id: str) -> dict:
+    def _build_failed_response(self, project_id: int, document_id: str) -> dict:
         return {
             "ProjectID": project_id,
-            "ExtractionId": document_id,
+            "ExtractionID": document_id,
             "ConfidenceScore": 0.0,
             "ExtractionStatus": "failed",
             "StatusVariables": [],
@@ -142,12 +147,12 @@ class EquipmentAPI:
         }
 
     def _build_extraction_response(
-        self, project_id: str, document_id: str, spec: EquipmentSpec
+        self, project_id: int, document_id: str, spec: EquipmentSpec
     ) -> dict:
         all_confidences = (
-            [v.confidence for v in spec.variables]
-            + [e.confidence for e in spec.events]
-            + [a.confidence for a in spec.alarms]
+            [v.Confidence for v in spec.Variables]
+            + [e.Confidence for e in spec.Events]
+            + [a.Confidence for a in spec.Alarms]
         )
         overall_confidence = (
             sum(all_confidences) / len(all_confidences) if all_confidences else 0.0
@@ -155,49 +160,49 @@ class EquipmentAPI:
 
         return {
             "ProjectID": project_id,
-            "ExtractionId": document_id,
+            "ExtractionID": document_id,
             "ConfidenceScore": round(overall_confidence, 3),
             "ExtractionStatus": "completed",
             "StatusVariables": [
                 {
-                    "SVID": v.vid,
-                    "Name": v.name,
-                    "Description": v.description or "",
-                    "DataType": v.type,
-                    "AccessType": v.access,
+                    "SVID": v.VID,
+                    "Name": v.Name,
+                    "Description": v.Description or "",
+                    "DataType": v.Type,
+                    "AccessType": v.Access,
                     "Value": "",
-                    "Confidence": v.confidence,
+                    "Confidence": v.Confidence,
                 }
-                for v in spec.variables if v.category == "SV"
+                for v in spec.Variables if v.Category == "SV"
             ],
             "DataVariables": [
                 {
-                    "DvID": v.vid,
-                    "Name": v.name,
-                    "Unit": v.unit or "",
-                    "ValueType": v.type,
+                    "DVID": v.VID,
+                    "Name": v.Name,
+                    "Unit": v.Unit or "",
+                    "ValueType": v.Type,
                 }
-                for v in spec.variables if v.category == "DV"
+                for v in spec.Variables if v.Category == "DV"
             ],
             "Events": [
                 {
-                    "CEID": e.ceid,
-                    "EventName": e.name,
-                    "Description": e.description or "",
+                    "CEID": e.CEID,
+                    "EventName": e.Name,
+                    "Description": e.Description or "",
                 }
-                for e in spec.events
+                for e in spec.Events
             ],
             "Alarms": [
                 {
-                    "AlarmId": a.alarm_id,
-                    "AlarmText": a.name,
-                    "Severity": a.severity,
+                    "AlarmID": a.AlarmID,
+                    "AlarmText": a.Name,
+                    "Severity": a.Severity,
                 }
-                for a in spec.alarms
+                for a in spec.Alarms
             ],
         }
 
-    def download_report(self, project_id: str, document_id: str):
+    def download_report(self, project_id: int, document_id: str):
         try:
             document = self.storage.get_document(project_id, document_id)
             content = self.storage.read_spec_json(project_id, document_id)
@@ -209,11 +214,11 @@ class EquipmentAPI:
             raise HTTPException(500, str(exc)) from exc
 
         headers = {
-            "Content-Disposition": f'attachment; filename="{document_id}_{document.ToolId}.json"'
+            "Content-Disposition": f'attachment; filename="{document_id}_{document.ToolID}.json"'
         }
         return Response(content=content, media_type="application/json", headers=headers)
 
-    def delete_document(self, project_id: str, document_id: str):
+    def delete_document(self, project_id: int, document_id: str):
         try:
             self.storage.delete_document(project_id, document_id)
             vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))

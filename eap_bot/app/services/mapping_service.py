@@ -1,89 +1,162 @@
+"""
+MES tag mapping service — receives its LLM strategy via constructor injection.
+"""
 import json
 import logging
 from typing import List
 
-from app.schemas.mapping import ProjectMapping, VariableMapping
+from app.schemas.mapping import (
+    MESTag, 
+    MappingEntry, 
+    MappingSuggestionResponse, 
+    UnmappedEntity
+)
 from app.schemas.secsgem import EquipmentSpec
 from app.utils.llm_factory import LLMStrategy
 
 logger = logging.getLogger(__name__)
 
+
 class MappingService:
+
     def __init__(self, llm_strategy: LLMStrategy) -> None:
         self._llm = llm_strategy.get_model(temperature=0, require_json=True)
+        self._llm_retry = llm_strategy.get_model(temperature=0.2, require_json=True)
 
-    def generate_mapping(self, project_id: str, mes_tags: List[dict], extractions: List[EquipmentSpec]) -> ProjectMapping:
-        # 1. Prepare target variables list from all extractions
-        target_variables = []
-        for spec in extractions:
-            for v in spec.variables:
-                target_variables.append({
-                    "ID": str(v.vid),
-                    "Name": v.name,
-                    "Description": v.description or "",
-                    "Category": v.category  # SV, DV
-                })
-            for e in spec.events:
-                target_variables.append({
-                    "ID": str(e.ceid),
-                    "Name": e.name,
-                    "Description": e.description or "",
-                    "Category": "CE"
-                })
 
-        # 2. Build and invoke prompt
-        prompt = self._build_prompt(mes_tags, target_variables)
+    def suggest_mappings(
+        self, spec: EquipmentSpec, target_tags: List[MESTag]
+    ) -> MappingSuggestionResponse:
+        prompt = self._build_prompt(spec, target_tags)
         try:
             raw = self._llm.invoke(prompt).content
             data = json.loads(raw)
-            mappings_data = data.get("Mappings", [])
-            
-            final_mappings = []
-            for m in mappings_data:
-                # Validation through Pydantic (VariableMapping)
-                try:
-                    final_mappings.append(VariableMapping.model_validate(m))
-                except Exception as ve:
-                    logger.warning(f"Skipping invalid mapping entry: {ve}")
-            
-            return ProjectMapping(ProjectID=project_id, Mappings=final_mappings)
-            
         except Exception as e:
-            logger.error(f"Mapping generation failed: {e}")
-            raise
+            logger.warning("Primary mapping failed (%s) — retrying.", e)
+            raw = self._llm_retry.invoke(prompt).content
+            data = json.loads(raw)
 
-    def _build_prompt(self, mes_tags: List[dict], target_variables: List[dict]) -> str:
-        return f"""You are an expert in Semiconductor Equipment Automation (SECS/GEM) and MES integration.
-Your task is to map factory MES tags to the available equipment variables (SVIDs) and events (CEIDs).
+        sanitized_data = self._sanitize(data, spec, target_tags)
+        
+        response = MappingSuggestionResponse.model_validate(sanitized_data)
+        response.unmapped = self._find_unmapped(spec, response.suggestions)
+        return response
 
-### INPUT: MES TAGS
+
+
+    def _find_unmapped(
+        self, spec: EquipmentSpec, suggestions: List[MappingEntry]
+    ) -> List[UnmappedEntity]:
+        mapped_entity_ids = {s.entity_id for s in suggestions}
+        unmapped = []
+
+        for v in spec.variables:
+            if v.vid not in mapped_entity_ids:
+                unmapped.append(UnmappedEntity(
+                    entity_id=v.vid,
+                    entity_type="variable",
+                    name=v.name,
+                ))
+        for e in spec.events:
+            if e.ceid not in mapped_entity_ids:
+                unmapped.append(UnmappedEntity(
+                    entity_id=e.ceid,
+                    entity_type="event",
+                    name=e.name,
+                ))
+        for a in spec.alarms:
+            if a.alarm_id not in mapped_entity_ids:
+                unmapped.append(UnmappedEntity(
+                    entity_id=a.alarm_id,
+                    entity_type="alarm",
+                    name=a.name,
+                ))
+        return unmapped
+
+
+    def _sanitize(
+        self, data: dict, spec: EquipmentSpec, target_tags: List[MESTag]
+    ) -> dict:
+        valid_entity_ids: set[str] = set()
+        for v in spec.variables:
+            valid_entity_ids.add(v.vid)
+        for e in spec.events:
+            valid_entity_ids.add(e.ceid)
+        for a in spec.alarms:
+            valid_entity_ids.add(a.alarm_id)
+
+        valid_tag_ids = {t.tag_id for t in target_tags}
+
+        valid_suggestions = [
+            s
+            for s in data.get("suggestions", [])
+            if (
+                s.get("entity_id") in valid_entity_ids
+                and s.get("tag_id") in valid_tag_ids
+                and s.get("confidence", 0) >= 0.4
+            )
+        ]
+        data["suggestions"] = valid_suggestions
+        return data
+
+    def _build_prompt(self, spec: EquipmentSpec, target_tags: List[MESTag]) -> str:
+        equipment_entities = []
+        for v in spec.variables:
+            equipment_entities.append({
+                "entity_id": v.vid,
+                "entity_type": "variable",
+                "name": v.name,
+                "description": v.description,
+                "type": v.type,
+                "unit": v.unit,
+            })
+        for e in spec.events:
+            equipment_entities.append({
+                "entity_id": e.ceid,
+                "entity_type": "event",
+                "name": e.name,
+                "description": e.description,
+            })
+        for a in spec.alarms:
+            equipment_entities.append({
+                "entity_id": a.alarm_id,
+                "entity_type": "alarm",
+                "name": a.name,
+                "description": a.description,
+            })
+
+        mes_tags = [
+            {
+                "tag_id": t.tag_id,
+                "name": t.name,
+                "description": t.description,
+                "expected_type": t.expected_type,
+                "expected_unit": t.expected_unit,
+            }
+            for t in target_tags
+        ]
+
+        schema = json.dumps(MappingSuggestionResponse.model_json_schema(), indent=2)
+
+        return f"""You are a semiconductor automation expert. Your task is to map Equipment Entities (Variables, Events, Alarms) to MES Tags.
+
+EQUIPMENT ENTITIES:
+{json.dumps(equipment_entities, indent=2)}
+
+TARGET MES TAGS:
 {json.dumps(mes_tags, indent=2)}
 
-### TARGET: EQUIPMENT VARIABLES & EVENTS
-{json.dumps(target_variables, indent=2)}
+OUTPUT REQUIREMENT:
+Provide a list of suggested mappings in JSON format.
+Each mapping should include the `entity_id`, the `entity_type` (variable, event, or alarm), the `tag_id`, a `confidence` score (0.0 to 1.0), and a brief `reasoning`.
 
-### INSTRUCTIONS:
-1. For each MES Tag, find the most relevant Equipment Variable or Event.
-2. Use semantic similarity between Names and Descriptions.
-3. Mapping Rules:
-   - If an MES Tag relates to a status, measurement, or value (e.g., 'ChamberPressure', 'Status'), map it to an SVID (Category: SV or DV).
-   - If an MES Tag relates to an occurrence, state change, or trigger (e.g., 'ProcessStarted', 'AlarmOccurred'), map it to a CEID (Category: CE).
-4. Output the result as a single JSON object with a "Mappings" key.
-5. Each mapping MUST use PascalCase keys: MESTag, SVID, CEID, Description.
-6. Populate only SVID or CEID per mapping. If mapped to SVID, leave CEID empty.
-7. If no confident match is found, leave both SVID and CEID empty.
+HARD RULES:
+1. Do not map entities if confidence is below 0.4.
+2. Ensure data types match (e.g., do not map a float variable to a string MES tag unless explicitly required).
+3. Do not invent or hallucinate IDs. Only use exact IDs provided in the lists above.
 
-### EXPECTED JSON FORMAT:
-{{
-  "Mappings": [
-    {{
-      "MESTag": "string",
-      "SVID": "string",
-      "CEID": "string",
-      "Description": "string (briefly explain the rationale for this match)"
-    }}
-  ]
-}}
+JSON SCHEMA:
+{schema}
 
-Output ONLY the JSON object. No prose.
+Only output the JSON object. No prose.
 """

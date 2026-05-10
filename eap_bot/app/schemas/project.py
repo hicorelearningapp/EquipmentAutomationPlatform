@@ -1,10 +1,8 @@
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
-
-from app.schemas.secsgem import EquipmentSpec
-from app.schemas.mapping import ProjectMapping
 
 
 class ToolType(str, Enum):
@@ -15,7 +13,7 @@ class ToolType(str, Enum):
     ETCH = "ETCH"
 
 
-class DocumentType(str, Enum):
+class DocumentCategory(str, Enum):
     USER_MANUALS = "User Manuals"
     TROUBLESHOOTING_GUIDANCE = "Troubleshooting Guidance"
     GEM_MANUAL = "GEM Manual"
@@ -26,45 +24,58 @@ class ProjectCreate(BaseModel):
     ProjectName: str = Field(min_length=1)
     VendorName: str
     Tool: ToolType
+    ProjectVersion: str = "1.0.0"
 
 
 class DocumentMetadata(BaseModel):
-    DocumentId: str
-    DocumentType: DocumentType
-    FileName: str
-    FileSize: float = 0.0
-    Pages: int = 0
-    UploadDate: datetime
-    UploadedBy: str = ""
-    Status: str = "completed"
-    DocumentPath: str
-    JsonPath: str
-    ToolId: str
-    ToolType: str
-    VectorIndexed: bool = False
+    DocumentID: str = Field(alias="document_id")
+    DocumentType: DocumentCategory = Field(alias="document_type")
+    FileName: str = Field(alias="filename")
+    FileSize: float = Field(default=0.0, alias="file_size")
+    Pages: int = Field(default=0, alias="pages")
+    UploadDate: datetime = Field(alias="upload_date")
+    UploadedBy: str = Field(default="", alias="uploaded_by")
+    Status: str = Field(default="completed", alias="status")
+    DocumentPath: str = Field(alias="document_path")
+    JsonPath: str = Field(alias="json_path")
+    ToolID: str = Field(alias="tool_id")
+    ToolType: str = Field(alias="tool_type")
+    VectorIndexed: bool = Field(default=False, alias="vector_indexed")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class ProjectOut(BaseModel):
-    ProjectID: str
-    ProjectName: str
-    VendorName: str
-    Tool: ToolType
-    CreatedAt: datetime
-    LastUpdatedOn: datetime
-    Status: str
+    ProjectID: int = Field(alias="project_id")
+    ProjectName: str = Field(alias="project_name")
+    VendorName: str = Field(alias="vendor_name")
+    Tool: ToolType = Field(alias="tool")
+    CreatedAt: datetime = Field(alias="created_at")
+    LastUpdatedOn: datetime = Field(alias="last_updated_on")
+    Status: str = Field(alias="status")
+    ProjectVersion: str = Field(default="1.0.0", alias="project_version")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class ProjectMetadata(ProjectOut):
-    DocumentCount: int = 0
-    Documents: list[DocumentMetadata] = Field(default_factory=list)
+    DocumentCount: int = Field(default=0, alias="document_count")
+    Documents: list[DocumentMetadata] = Field(default_factory=list, alias="documents")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class ProjectDetail(ProjectMetadata):
-    Extractions: list[EquipmentSpec] = Field(default_factory=list)
-    Mappings: ProjectMapping = Field(default_factory=ProjectMapping)
+    Extractions: list[Any] = Field(default_factory=list)
+    Mappings: list[Any] = Field(default_factory=list)
 
 
 class AskRequest(BaseModel):
     Category: str
     Question: str
-

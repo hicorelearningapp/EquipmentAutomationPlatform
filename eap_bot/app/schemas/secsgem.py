@@ -3,95 +3,139 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class Variable(BaseModel):
-    vid: int
-    name: str
-    type: Literal["float", "integer", "string", "boolean"]
-    unit: Optional[str] = None
-    category: Literal["SV", "DV"]
-    access: Literal["read", "write", "read/write"] = "read"
-    description: Optional[str] = None
-    confidence: float = Field(ge=0.0, le=1.0)
+    VID: int = Field(alias="vid")
+    Name: str = Field(alias="name")
+    Type: str = Field(alias="type")
+    Unit: Optional[str] = Field(default=None, alias="unit")
+    Category: str = Field(alias="category")
+    Access: str = Field(alias="access")
+    Description: Optional[str] = Field(default=None, alias="description")
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class RCMDParameter(BaseModel):
-    name: str
-    type: str
+    Name: str = Field(alias="name")
+    Type: str = Field(alias="type")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class RemoteCommand(BaseModel):
-    rcmd: str
-    description: Optional[str] = None
-    parameters: list[RCMDParameter] = []
-    confidence: float = Field(ge=0.0, le=1.0)
+    RCMD: str = Field(alias="rcmd")
+    Description: Optional[str] = Field(default=None, alias="description")
+    Parameters: list[RCMDParameter] = Field(default_factory=list, alias="parameters")
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class Event(BaseModel):
-    ceid: int
-    name: str
-    description: Optional[str] = None
-    linked_vids: list[int] = []
-    report: bool = True
-    confidence: float = Field(ge=0.0, le=1.0)
+    CEID: int = Field(alias="ceid")
+    Name: str = Field(alias="name")
+    Description: Optional[str] = Field(default=None, alias="description")
+    LinkedVIDs: list[int] = Field(default_factory=list, alias="linked_vids")
+    Report: bool = Field(default=True, alias="report")
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class Alarm(BaseModel):
-    alarm_id: int
-    name: str
-    severity: Literal["critical", "warning", "info"]
-    linked_vid: Optional[int] = None
-    description: Optional[str] = None
-    confidence: float = Field(ge=0.0, le=1.0)
+    AlarmID: int = Field(alias="alarm_id")
+    Name: str = Field(alias="name")
+    Severity: str = Field(alias="severity")
+    LinkedVID: Optional[int] = Field(default=None, alias="linked_vid")
+    Description: Optional[str] = Field(default=None, alias="description")
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class State(BaseModel):
-    state_id: str
-    name: str
-    description: Optional[str] = None
+    StateID: str = Field(alias="state_id")
+    Name: str = Field(alias="name")
+    Description: Optional[str] = Field(default=None, alias="description")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class StateTransition(BaseModel):
-    from_state: str
-    to_state: str
-    trigger_event: Optional[str] = None
-    trigger_command: Optional[str] = None
-    manual: bool = False
+    FromState: str = Field(alias="from_state")
+    ToState: str = Field(alias="to_state")
+    TriggerEvent: Optional[str] = Field(default=None, alias="trigger_event")
+    TriggerCommand: Optional[str] = Field(default=None, alias="trigger_command")
+    Manual: bool = Field(default=False, alias="manual")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
     @model_validator(mode="after")
     def at_least_one_trigger(self) -> "StateTransition":
-        if not (self.trigger_event or self.trigger_command or self.manual):
-            self.manual = True
+        if not (self.TriggerEvent or self.TriggerCommand or self.Manual):
+            self.Manual = True
         return self
 
 
-class Connection(BaseModel):
-    host: Optional[str] = None
-    port: Optional[int] = None
-    mode: Optional[str] = None
+class ConnectionInfo(BaseModel):
+    Host: Optional[str] = Field(default=None, alias="host")
+    Port: Optional[int] = Field(default=None, alias="port")
+    Mode: Optional[str] = Field(default=None, alias="mode")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class EquipmentSpec(BaseModel):
-    tool_id: str
-    tool_type: str
-    model: Optional[str] = None
-    protocol: str = "SECS/GEM"
-    connection: Optional[Connection] = None
-    variables: list[Variable] = []
-    events: list[Event] = []
-    alarms: list[Alarm] = []
-    remote_commands: list[RemoteCommand] = []
-    states: list[State] = []
-    state_transitions: list[StateTransition] = []
+    ToolID: str = Field(alias="tool_id")
+    ToolType: str = Field(alias="tool_type")
+    Model: Optional[str] = Field(default=None, alias="model")
+    Protocol: str = Field(default="SECS/GEM", alias="protocol")
+    Connection: Optional[ConnectionInfo] = Field(default=None, alias="connection")
+    Variables: list[Variable] = Field(default_factory=list, alias="variables")
+    Events: list[Event] = Field(default_factory=list, alias="events")
+    Alarms: list[Alarm] = Field(default_factory=list, alias="alarms")
+    RemoteCommands: list[RemoteCommand] = Field(default_factory=list, alias="remote_commands")
+    States: list[State] = Field(default_factory=list, alias="states")
+    StateTransitions: list[StateTransition] = Field(default_factory=list, alias="state_transitions")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class ValidationIssue(BaseModel):
-    severity: Literal["error", "warning"]
-    code: str
-    message: str
-    entity_id: Optional[str] = None
+    Severity: str = Field(alias="severity")
+    Code: str = Field(alias="code")
+    Message: str = Field(alias="message")
+    EntityID: Optional[str] = Field(default=None, alias="entity_id")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class ValidationReport(BaseModel):
-    issues: list[ValidationIssue] = []
+    Issues: list[ValidationIssue] = Field(default_factory=list, alias="issues")
+
+    model_config = {
+        "populate_by_name": True
+    }
 
     def is_clean(self) -> bool:
-        return not any(i.severity == "error" for i in self.issues)
+        return not any(i.Severity == "error" for i in self.Issues)

@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from app.config import settings
-from app.schemas.project import DocumentMetadata, ProjectMetadata
+from app.schemas.project import DocumentMetadata, ProjectMetadata, ProjectCreate, ProjectOut
 from app.schemas.mapping import ProjectMapping
 from app.schemas.secsgem import EquipmentSpec
 
@@ -51,6 +51,13 @@ class StorageService:
         self.root = self._resolve_root(storage_root)
         self._ensure_root()
 
+    def _get_next_id(self) -> int:
+        ids = []
+        for child in self.root.iterdir():
+            if child.is_dir() and child.name.isdigit():
+                ids.append(int(child.name))
+        return max(ids) + 1 if ids else 1
+
     @classmethod
     def slugify(cls, value: str, fallback: str = "item") -> str:
         slug = cls._SLUG_RE.sub("_", value.strip().lower()).strip("_")
@@ -60,40 +67,20 @@ class StorageService:
     def now() -> datetime:
         return datetime.now(timezone.utc)
 
-    def create_project(
-        self,
-        project_name: str,
-        vendor_name: str,
-        tool: str,
-    ) -> ProjectMetadata:
-        display_name = project_name.strip()
-        if not display_name:
-            raise InvalidSlugError("Project name cannot be empty")
-
-        project_id = self.slugify(display_name, fallback="project")
-        project_dir = self._project_dir(project_id)
-        metadata_path = self._metadata_path(project_id)
-
-        if metadata_path.exists():
-            raise ProjectExistsError(
-                f"A project named '{project_name}' already exists as '{project_id}'"
-            )
-        if project_dir.exists() and any(project_dir.iterdir()):
-            raise ProjectExistsError(
-                f"Project folder '{project_dir}' already exists but has no metadata file"
-            )
-
+    def create_project(self, project_create: ProjectCreate) -> ProjectMetadata:
+        project_id = self._get_next_id()
         self._ensure_project_dirs(project_id)
+        
         now = self.now()
         metadata = ProjectMetadata(
             ProjectID=project_id,
-            ProjectName=display_name,
-            VendorName=vendor_name,
-            Tool=tool,
+            ProjectName=project_create.ProjectName,
+            ProjectVersion=project_create.ProjectVersion,
+            VendorName=project_create.VendorName,
+            Tool=project_create.Tool,
             CreatedAt=now,
             LastUpdatedOn=now,
             Status="active",
-            DocumentCount=0,
             Documents=[],
         )
         self._write_metadata(metadata)
@@ -101,7 +88,7 @@ class StorageService:
 
     def register_document(
         self,
-        project_id: str,
+        project_id: int,
         document_id: str,
         document_type: str,
         filename: str,
@@ -114,7 +101,7 @@ class StorageService:
         json_path = self.spec_json_path(project_id, document_id)
 
         document = DocumentMetadata(
-            DocumentId=document_id,
+            DocumentID=document_id,
             DocumentType=document_type,
             FileName=filename,
             FileSize=file_size,
@@ -124,12 +111,12 @@ class StorageService:
             Status="uploaded",
             DocumentPath=pdf_path.relative_to(project_dir).as_posix(),
             JsonPath=json_path.relative_to(project_dir).as_posix(),
-            ToolId="",
+            ToolID="",
             ToolType="",
             VectorIndexed=False,
         )
 
-        Documents = [doc for doc in metadata.Documents if doc.DocumentId != document_id]
+        Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
         Documents.append(document)
         metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate)
         metadata.DocumentCount = len(metadata.Documents)
@@ -139,7 +126,7 @@ class StorageService:
 
     def complete_extraction(
         self,
-        project_id: str,
+        project_id: int,
         document_id: str,
         spec: EquipmentSpec,
         vector_indexed: bool,
@@ -147,10 +134,10 @@ class StorageService:
         metadata = self.get_project(project_id)
 
         for doc in metadata.Documents:
-            if doc.DocumentId == document_id:
+            if doc.DocumentID == document_id:
                 doc.Status = "completed"
-                doc.ToolId = spec.tool_id
-                doc.ToolType = spec.tool_type
+                doc.ToolID = spec.ToolID
+                doc.ToolType = spec.ToolType
                 doc.VectorIndexed = vector_indexed
                 document = doc
                 break
@@ -163,11 +150,11 @@ class StorageService:
         self._write_metadata(metadata)
         return document
 
-    def mark_failed(self, project_id: str, document_id: str) -> DocumentMetadata:
+    def mark_failed(self, project_id: int, document_id: str) -> DocumentMetadata:
         metadata = self.get_project(project_id)
 
         for doc in metadata.Documents:
-            if doc.DocumentId == document_id:
+            if doc.DocumentID == document_id:
                 doc.Status = "failed"
                 document = doc
                 break
@@ -180,33 +167,42 @@ class StorageService:
         self._write_metadata(metadata)
         return document
 
-    def list_projects(self) -> list[ProjectMetadata]:
-        projects: list[ProjectMetadata] = []
+    def list_projects(self) -> list[ProjectOut]:
+        projects: list[ProjectOut] = []
         for child in self.root.iterdir():
-            if not child.is_dir():
+            if not child.is_dir() or not child.name.isdigit():
                 continue
             metadata_path = child / self.METADATA_DIR / self.METADATA_FILE
             if not metadata_path.exists():
-                logger.warning("Skipping storage folder without metadata: %s", child)
                 continue
-            projects.append(self._read_metadata(metadata_path))
-        return sorted(projects, key=lambda p: p.LastUpdatedOn, reverse=True)
+            
+            try:
+                # Read raw to get DocumentCount
+                raw_data = json.loads(metadata_path.read_text(encoding="utf-8"))
+                doc_count = len(raw_data.get("Documents", []))
+                
+                # Validate into ProjectOut
+                project = ProjectOut.model_validate({**raw_data, "DocumentCount": doc_count})
+                projects.append(project)
+            except Exception as e:
+                logger.error(f"Error reading project at {child}: {e}")
+                continue
+                
+        return sorted(projects, key=lambda p: p.ProjectID)
 
-    def get_project(self, project_id: str) -> ProjectMetadata:
-        self._validate_id(project_id)
+    def get_project(self, project_id: int) -> ProjectMetadata:
         metadata_path = self._metadata_path(project_id)
         if not metadata_path.exists():
             raise ProjectNotFoundError(f"Project '{project_id}' was not found")
         return self._read_metadata(metadata_path)
 
-    def delete_project(self, project_id: str) -> None:
-        self._validate_id(project_id)
+    def delete_project(self, project_id: int) -> None:
         project_dir = self._project_dir(project_id)
         if not self._metadata_path(project_id).exists():
             raise ProjectNotFoundError(f"Project '{project_id}' was not found")
         shutil.rmtree(project_dir)
 
-    def delete_document(self, project_id: str, document_id: str) -> None:
+    def delete_document(self, project_id: int, document_id: str) -> None:
         metadata = self.get_project(project_id)
         document = self.get_document(project_id, document_id)
 
@@ -217,17 +213,17 @@ class StorageService:
         if json_path.exists():
             json_path.unlink()
 
-        metadata.Documents = [doc for doc in metadata.Documents if doc.DocumentId != document_id]
+        metadata.Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
         metadata.DocumentCount = len(metadata.Documents)
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
 
     def prepare_document_paths(
-        self, project_id: str, original_filename: str
+        self, project_id: int, original_filename: str
     ) -> tuple[str, Path, Path]:
         metadata = self.get_project(project_id)
         base_id = self.slugify(Path(original_filename).stem, fallback="document")
-        existing_ids = {doc.DocumentId for doc in metadata.Documents}
+        existing_ids = {doc.DocumentID for doc in metadata.Documents}
 
         document_id = base_id
         counter = 2
@@ -257,7 +253,7 @@ class StorageService:
 
     def add_document_metadata(
         self,
-        project_id: str,
+        project_id: int,
         document_id: str,
         document_type: str,
         original_filename: str,
@@ -272,7 +268,7 @@ class StorageService:
         json_path = self.spec_json_path(project_id, document_id)
 
         document = DocumentMetadata(
-            DocumentId=document_id,
+            DocumentID=document_id,
             DocumentType=document_type,
             FileName=original_filename,
             FileSize=file_size,
@@ -287,7 +283,7 @@ class StorageService:
             VectorIndexed=vector_indexed,
         )
 
-        Documents = [doc for doc in metadata.Documents if doc.DocumentId != document_id]
+        Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
         Documents.append(document)
         metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate)
         metadata.DocumentCount = len(metadata.Documents)
@@ -295,16 +291,16 @@ class StorageService:
         self._write_metadata(metadata)
         return document
 
-    def get_document(self, project_id: str, document_id: str) -> DocumentMetadata:
+    def get_document(self, project_id: int, document_id: str) -> DocumentMetadata:
         metadata = self.get_project(project_id)
         for document in metadata.Documents:
-            if document.DocumentId == document_id:
+            if document.DocumentID == document_id:
                 return document
         raise DocumentNotFoundError(
             f"Document '{document_id}' was not found in project '{project_id}'"
         )
 
-    def get_mapping(self, project_id: str) -> ProjectMapping:
+    def get_mapping(self, project_id: int) -> ProjectMapping:
         path = self.mapping_path(project_id)
         if not path.exists():
             from app.schemas.mapping import ProjectMapping
@@ -316,12 +312,12 @@ class StorageService:
             from app.schemas.mapping import ProjectMapping
             return ProjectMapping(ProjectID=project_id)
 
-    def save_mapping(self, project_id: str, mapping: ProjectMapping) -> None:
+    def save_mapping(self, project_id: int, mapping: ProjectMapping) -> None:
         path = self.mapping_path(project_id)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(mapping.model_dump_json(indent=2), encoding="utf-8")
 
-    def read_spec_json(self, project_id: str, document_id: str) -> str:
+    def read_spec_json(self, project_id: int, document_id: str) -> str:
         document = self.get_document(project_id, document_id)
         path = self._project_relative_path(project_id, document.JsonPath)
         if not path.exists():
@@ -330,23 +326,23 @@ class StorageService:
             )
         return path.read_text(encoding="utf-8")
 
-    def vectorstore_path(self, project_id: str) -> Path:
+    def vectorstore_path(self, project_id: int) -> Path:
         self.get_project(project_id)
         return self._project_dir(project_id) / self.VECTORSTORE_DIR
 
-    def mapping_path(self, project_id: str) -> Path:
+    def mapping_path(self, project_id: int) -> Path:
         return self._project_dir(project_id) / self.METADATA_DIR / "mapping.json"
 
-    def mes_tags_json_path(self, project_id: str) -> Path:
-        return self._project_dir(project_id) / self.METADATA_DIR / "mes_tags.json"
+    def mes_tags_json_path(self, project_id: int, document_id: str) -> Path:
+        return self._project_dir(project_id) / "MESTags" / f"{document_id}.json"
 
-    def save_mes_tags(self, project_id: str, tags: list[dict]) -> None:
-        path = self.mes_tags_json_path(project_id)
+    def save_mes_tags(self, project_id: int, document_id: str, tags: list[dict]) -> None:
+        path = self.mes_tags_json_path(project_id, document_id)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(tags, indent=2), encoding="utf-8")
 
-    def get_mes_tags(self, project_id: str) -> list[dict]:
-        path = self.mes_tags_json_path(project_id)
+    def get_mes_tags(self, project_id: int, document_id: str) -> list[dict]:
+        path = self.mes_tags_json_path(project_id, document_id)
         if not path.exists():
             return []
         try:
@@ -354,22 +350,23 @@ class StorageService:
         except Exception:
             return []
 
-    def document_pdf_path(self, project_id: str, document_id: str) -> Path:
-        self._validate_id(project_id)
-        self._validate_id(document_id)
+    def list_mes_tag_documents(self, project_id: int) -> list[str]:
+        base_dir = self._project_dir(project_id) / "MESTags"
+        if not base_dir.exists():
+            return []
+        return [f.stem for f in base_dir.glob("*.json")]
+
+    def document_pdf_path(self, project_id: int, document_id: str) -> Path:
         return self._project_dir(project_id) / self.DOCUMENTS_DIR / f"{document_id}.pdf"
 
-    def spec_json_path(self, project_id: str, document_id: str) -> Path:
-        self._validate_id(project_id)
-        self._validate_id(document_id)
+    def spec_json_path(self, project_id: int, document_id: str) -> Path:
         return (
             self._project_dir(project_id)
             / self.EXTRACTED_JSON_DIR
             / f"{document_id}.json"
         )
 
-    def mes_tag_path(self, project_id: str, document_id: str) -> Path:
-        self._validate_id(project_id)
+    def mes_tag_path(self, project_id: int, document_id: str) -> Path:
         self._validate_id(document_id)
         return (
             self._project_dir(project_id)
@@ -403,8 +400,7 @@ class StorageService:
         except OSError as exc:
             raise StorageError(f"EAP_STORAGE_ROOT is not writable: {self.root}") from exc
 
-    def _ensure_project_dirs(self, project_id: str) -> None:
-        self._validate_id(project_id)
+    def _ensure_project_dirs(self, project_id: int) -> None:
         project_dir = self._project_dir(project_id)
         for folder in (
             self.DOCUMENTS_DIR,
@@ -417,16 +413,15 @@ class StorageService:
             self._assert_inside_root(path)
             path.mkdir(parents=True, exist_ok=True)
 
-    def _project_dir(self, project_id: str) -> Path:
-        self._validate_id(project_id)
-        path = (self.root / project_id).resolve()
+    def _project_dir(self, project_id: int) -> Path:
+        path = (self.root / str(project_id)).resolve()
         self._assert_inside_root(path)
         return path
 
-    def _metadata_path(self, project_id: str) -> Path:
+    def _metadata_path(self, project_id: int) -> Path:
         return self._project_dir(project_id) / self.METADATA_DIR / self.METADATA_FILE
 
-    def _project_relative_path(self, project_id: str, relative_path: str) -> Path:
+    def _project_relative_path(self, project_id: int, relative_path: str) -> Path:
         if Path(relative_path).is_absolute():
             raise InvalidSlugError("Stored project paths must be relative")
         project_dir = self._project_dir(project_id)

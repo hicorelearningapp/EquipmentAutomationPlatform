@@ -16,7 +16,7 @@ class SpecValidator:
         self._check_unit_consistency(spec, issues)
         self._check_critical_sections(spec, issues)
 
-        return ValidationReport(issues=issues)
+        return ValidationReport(Issues=issues)
 
     @staticmethod
     def _dup_ids(values: list[str]) -> list[str]:
@@ -26,97 +26,97 @@ class SpecValidator:
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
         pairs = [
-            ("Variable", [v.vid for v in spec.variables]),
-            ("Event", [e.ceid for e in spec.events]),
-            ("Alarm", [a.alarm_id for a in spec.alarms]),
-            ("RemoteCommand", [c.rcmd for c in spec.remote_commands]),
-            ("State", [s.state_id for s in spec.states]),
+            ("Variable", [v.VID for v in spec.Variables]),
+            ("Event", [e.CEID for e in spec.Events]),
+            ("Alarm", [a.AlarmID for a in spec.Alarms]),
+            ("RemoteCommand", [c.RCMD for c in spec.RemoteCommands]),
+            ("State", [s.StateID for s in spec.States]),
         ]
         for kind, ids in pairs:
             for dup in self._dup_ids(ids):
                 issues.append(
                     ValidationIssue(
-                        severity="error",
-                        code="duplicate_id",
-                        message=f"Duplicate {kind} id: {dup}",
-                        entity_id=dup,
+                        Severity="error",
+                        Code="duplicate_id",
+                        Message=f"Duplicate {kind} id: {dup}",
+                        EntityID=str(dup),
                     )
                 )
 
     def _check_linked_vids(
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
-        known = {v.vid for v in spec.variables}
-        for e in spec.events:
-            for vid in e.linked_vids:
+        known = {v.VID for v in spec.Variables}
+        for e in spec.Events:
+            for vid in e.LinkedVIDs:
                 if vid not in known:
                     issues.append(
                         ValidationIssue(
-                            severity="error",
-                            code="linked_vid_not_found",
-                            message=f"Event {e.ceid} references unknown VID {vid}",
-                            entity_id=e.ceid,
+                            Severity="error",
+                            Code="linked_vid_not_found",
+                            Message=f"Event {e.CEID} references unknown VID {vid}",
+                            EntityID=str(e.CEID),
                         )
                     )
-        for a in spec.alarms:
-            if a.linked_vid and a.linked_vid not in known:
+        for a in spec.Alarms:
+            if a.LinkedVID and a.LinkedVID not in known:
                 issues.append(
                     ValidationIssue(
-                        severity="error",
-                        code="linked_vid_not_found",
-                        message=f"Alarm {a.alarm_id} references unknown VID {a.linked_vid}",
-                        entity_id=a.alarm_id,
+                        Severity="error",
+                        Code="linked_vid_not_found",
+                        Message=f"Alarm {a.AlarmID} references unknown VID {a.LinkedVID}",
+                        EntityID=str(a.AlarmID),
                     )
                 )
 
     def _check_transition_states(
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
-        state_names = {s.name for s in spec.states} | {s.state_id for s in spec.states}
-        for i, t in enumerate(spec.state_transitions):
-            for field in ("from_state", "to_state"):
+        state_names = {s.Name for s in spec.States} | {s.StateID for s in spec.States}
+        for i, t in enumerate(spec.StateTransitions):
+            for field in ("FromState", "ToState"):
                 value = getattr(t, field)
                 if value not in state_names:
                     issues.append(
                         ValidationIssue(
-                            severity="error",
-                            code="transition_state_not_found",
-                            message=(
+                            Severity="error",
+                            Code="transition_state_not_found",
+                            Message=(
                                 f"Transition #{i} {field}={value!r} "
                                 f"does not match any State"
                             ),
-                            entity_id=f"transition[{i}]",
+                            EntityID=f"transition[{i}]",
                         )
                     )
 
     def _check_transition_triggers(
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
-        event_names = {e.name for e in spec.events} | {e.ceid for e in spec.events}
-        rcmd_names = {c.rcmd for c in spec.remote_commands}
-        for i, t in enumerate(spec.state_transitions):
-            if t.trigger_event and t.trigger_event not in event_names:
+        event_names = {e.Name for e in spec.Events} | {str(e.CEID) for e in spec.Events}
+        rcmd_names = {c.RCMD for c in spec.RemoteCommands}
+        for i, t in enumerate(spec.StateTransitions):
+            if t.TriggerEvent and t.TriggerEvent not in event_names:
                 issues.append(
                     ValidationIssue(
-                        severity="warning",
-                        code="transition_trigger_not_found",
-                        message=(
-                            f"Transition #{i} trigger_event={t.trigger_event!r} "
+                        Severity="warning",
+                        Code="transition_trigger_not_found",
+                        Message=(
+                            f"Transition #{i} TriggerEvent={t.TriggerEvent!r} "
                             f"does not match any Event"
                         ),
-                        entity_id=f"transition[{i}]",
+                        EntityID=f"transition[{i}]",
                     )
                 )
-            if t.trigger_command and t.trigger_command not in rcmd_names:
+            if t.TriggerCommand and t.TriggerCommand not in rcmd_names:
                 issues.append(
                     ValidationIssue(
-                        severity="warning",
-                        code="transition_trigger_not_found",
-                        message=(
-                            f"Transition #{i} trigger_command={t.trigger_command!r} "
+                        Severity="warning",
+                        Code="transition_trigger_not_found",
+                        Message=(
+                            f"Transition #{i} TriggerCommand={t.TriggerCommand!r} "
                             f"does not match any RemoteCommand"
                         ),
-                        entity_id=f"transition[{i}]",
+                        EntityID=f"transition[{i}]",
                     )
                 )
 
@@ -124,52 +124,52 @@ class SpecValidator:
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
         by_name: dict[str, set[str]] = {}
-        for v in spec.variables:
-            if v.unit:
-                by_name.setdefault(v.name.lower(), set()).add(v.unit)
+        for v in spec.Variables:
+            if v.Unit:
+                by_name.setdefault(v.Name.lower(), set()).add(v.Unit)
         for name, units in by_name.items():
             if len(units) > 1:
                 issues.append(
                     ValidationIssue(
-                        severity="warning",
-                        code="unit_mismatch",
-                        message=f"Variable {name!r} has inconsistent units: {sorted(units)}",
-                        entity_id=name,
+                        Severity="warning",
+                        Code="unit_mismatch",
+                        Message=f"Variable {name!r} has inconsistent units: {sorted(units)}",
+                        EntityID=name,
                     )
                 )
 
     def _check_critical_sections(
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
-        if not spec.variables:
+        if not spec.Variables:
             issues.append(
                 ValidationIssue(
-                    severity="error",
-                    code="extraction_empty",
-                    message="No Variables extracted",
+                    Severity="error",
+                    Code="extraction_empty",
+                    Message="No Variables extracted",
                 )
             )
-        if not spec.events:
+        if not spec.Events:
             issues.append(
                 ValidationIssue(
-                    severity="error",
-                    code="extraction_empty",
-                    message="No Events extracted",
+                    Severity="error",
+                    Code="extraction_empty",
+                    Message="No Events extracted",
                 )
             )
-        if not spec.alarms:
+        if not spec.Alarms:
             issues.append(
                 ValidationIssue(
-                    severity="warning",
-                    code="section_missing",
-                    message="No Alarms extracted",
+                    Severity="warning",
+                    Code="section_missing",
+                    Message="No Alarms extracted",
                 )
             )
-        if not spec.remote_commands:
+        if not spec.RemoteCommands:
             issues.append(
                 ValidationIssue(
-                    severity="warning",
-                    code="section_missing",
-                    message="No RemoteCommands extracted",
+                    Severity="warning",
+                    Code="section_missing",
+                    Message="No RemoteCommands extracted",
                 )
             )

@@ -59,43 +59,43 @@ class QAService:
             event = self._find_event(spec, target)
             if not event:
                 return f"No event matching {target!r} found in spec."
-            if not event.linked_vids:
-                return f"Event {event.ceid} ({event.name}) has no linked VIDs."
-            by_vid = {v.vid: v.name for v in spec.variables}
-            parts = [f"{vid} {by_vid.get(vid, '?')}" for vid in event.linked_vids]
-            return f"{event.ceid} {event.name} -> " + ", ".join(parts)
+            if not event.LinkedVIDs:
+                return f"Event {event.CEID} ({event.Name}) has no linked VIDs."
+            by_vid = {v.VID: v.Name for v in spec.Variables}
+            parts = [f"{vid} {by_vid.get(vid, '?')}" for vid in event.LinkedVIDs]
+            return f"{event.CEID} {event.Name} -> " + ", ".join(parts)
 
         if m := self._PATTERNS["trigger_cmd"].search(q):
             target = m.group(1).strip().rstrip("?").strip()
             event = self._find_event(spec, target)
-            for t in spec.state_transitions:
-                if event and (t.trigger_event in (event.name, event.ceid)) and t.trigger_command:
-                    return f"{t.trigger_command} (transition {t.from_state} -> {t.to_state})"
-                if t.trigger_command and target.lower() in t.trigger_command.lower():
-                    return f"{t.trigger_command} (transition {t.from_state} -> {t.to_state})"
+            for t in spec.StateTransitions:
+                if event and (t.TriggerEvent in (event.Name, event.CEID)) and t.TriggerCommand:
+                    return f"{t.TriggerCommand} (transition {t.FromState} -> {t.ToState})"
+                if t.TriggerCommand and target.lower() in t.TriggerCommand.lower():
+                    return f"{t.TriggerCommand} (transition {t.FromState} -> {t.ToState})"
             return f"No command found that triggers {target!r}."
 
         if m := self._PATTERNS["list_alarms_sev"].search(q):
             sev = m.group(1).lower()
-            matches = [a for a in spec.alarms if a.severity == sev]
+            matches = [a for a in spec.Alarms if a.Severity.lower() == sev]
             if not matches:
                 return f"No {sev} alarms."
             return ", ".join(
-                f"{a.alarm_id} {a.name}: {a.description or '(no description)'}"
+                f"{a.AlarmID} {a.Name}: {a.Description or '(no description)'}"
                 for a in matches
             )
 
         if m := self._PATTERNS["next_state"].search(q):
             target = m.group(1).strip().rstrip("?").strip().lower()
             match_keys = {target}
-            for s in spec.states:
-                if s.name.lower() == target or s.state_id.lower() == target:
-                    match_keys |= {s.name.lower(), s.state_id.lower()}
-            id_to_name = {s.state_id: s.name for s in spec.states}
+            for s in spec.States:
+                if s.Name.lower() == target or s.StateID.lower() == target:
+                    match_keys |= {s.Name.lower(), s.StateID.lower()}
+            id_to_name = {s.StateID: s.Name for s in spec.States}
             nexts = [
-                f"{t.to_state} ({id_to_name.get(t.to_state, '?')})"
-                for t in spec.state_transitions
-                if t.from_state.lower() in match_keys
+                f"{t.ToState} ({id_to_name.get(t.ToState, '?')})"
+                for t in spec.StateTransitions
+                if t.FromState.lower() in match_keys
             ]
             if not nexts:
                 return f"No transitions found from {m.group(1).strip().rstrip('?')!r}."
@@ -104,15 +104,15 @@ class QAService:
         if m := self._PATTERNS["list_kind"].search(q):
             kind = m.group(1).lower()
             if kind == "variables":
-                items = [f"{v.vid} {v.name} ({v.category})" for v in spec.variables]
+                items = [f"{v.VID} {v.Name} ({v.Category})" for v in spec.Variables]
             elif kind == "events":
-                items = [f"{e.ceid} {e.name}" for e in spec.events]
+                items = [f"{e.CEID} {e.Name}" for e in spec.Events]
             elif kind == "alarms":
-                items = [f"{a.alarm_id} {a.name} [{a.severity}]" for a in spec.alarms]
+                items = [f"{a.AlarmID} {a.Name} [{a.Severity}]" for a in spec.Alarms]
             elif kind == "commands":
-                items = [f"{c.rcmd} {c.description or ''}".strip() for c in spec.remote_commands]
+                items = [f"{c.RCMD} {c.Description or ''}".strip() for c in spec.RemoteCommands]
             elif kind == "states":
-                items = [f"{s.state_id} {s.name}" for s in spec.states]
+                items = [f"{s.StateID} {s.Name}" for s in spec.States]
             else:
                 items = []
             if not items:
@@ -123,10 +123,10 @@ class QAService:
 
 
     def _rag(self, query: str, spec: EquipmentSpec) -> str:
-        filters = {"tool_id": spec.tool_id, **self._vector_filters}
+        filters = {"tool_id": spec.ToolID, **self._vector_filters}
         chunks = self._vector_store.search_with_filters(query, filters, k=6)
         if not chunks:
-            logger.warning("RAG: no chunks found for tool_id=%s", spec.tool_id)
+            logger.warning("RAG: no chunks found for ToolID=%s", spec.ToolID)
             return "No relevant context found in the indexed document."
 
         context = "\n\n---\n\n".join(c.page_content for c in chunks)
@@ -140,10 +140,10 @@ class QAService:
 
     def _find_event(self, spec: EquipmentSpec, needle: str):
         n = needle.lower()
-        for e in spec.events:
-            if e.name.lower() == n or e.ceid.lower() == n:
+        for e in spec.Events:
+            if e.Name.lower() == n or str(e.CEID).lower() == n:
                 return e
-        for e in spec.events:
-            if n in e.name.lower():
+        for e in spec.Events:
+            if n in e.Name.lower():
                 return e
         return None

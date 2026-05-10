@@ -42,9 +42,9 @@ class EquipmentExtractor:
 
     @staticmethod
     def _sanitize(data: dict) -> None:
-        transitions = data.get("state_transitions") or []
-        data["state_transitions"] = [
-            t for t in transitions if t.get("from_state") and t.get("to_state")
+        transitions = data.get("StateTransitions") or data.get("state_transitions") or []
+        data["StateTransitions"] = [
+            t for t in transitions if (t.get("FromState") or t.get("from_state")) and (t.get("ToState") or t.get("to_state"))
         ]
 
     def _build_prompt(self, pdf_text: str) -> str:
@@ -55,82 +55,82 @@ CRITICAL: DO NOT output the schema itself. You must output a JSON object populat
 
 EXPECTED JSON FORMAT:
 {{
-  "tool_id": "string",
-  "tool_type": "string",
-  "model": "string (optional)",
-  "protocol": "SECS/GEM",
-  "connection": {{"host": "string", "port": 123, "mode": "string"}},
-  "variables": [
+  "ToolID": "string",
+  "ToolType": "string",
+  "Model": "string (optional)",
+  "Protocol": "SECS/GEM",
+  "Connection": {{"Host": "string", "Port": 123, "Mode": "string"}},
+  "Variables": [
     {{
-      "vid": 123,
-      "name": "string",
-      "type": "float|integer|string|boolean",
-      "unit": "string",
-      "category": "SV|DV",
-      "access": "read|write|read/write",
-      "description": "string",
-      "confidence": 0.0 to 1.0
+      "VID": 123,
+      "Name": "string",
+      "Type": "float|integer|string|boolean",
+      "Unit": "string",
+      "Category": "SV|DV",
+      "Access": "read|write|read/write",
+      "Description": "string",
+      "Confidence": 0.0 to 1.0
     }}
   ],
-  "events": [
+  "Events": [
     {{
-      "ceid": 123,
-      "name": "string",
-      "description": "string",
-      "linked_vids": [123],
-      "report": true,
-      "confidence": 0.0 to 1.0
+      "CEID": 123,
+      "Name": "string",
+      "Description": "string",
+      "LinkedVIDs": [123],
+      "Report": true,
+      "Confidence": 0.0 to 1.0
     }}
   ],
-  "alarms": [
+  "Alarms": [
     {{
-      "alarm_id": 123,
-      "name": "string",
-      "severity": "critical|warning|info",
-      "linked_vid": 123,
-      "description": "string",
-      "confidence": 0.0 to 1.0
+      "AlarmID": 123,
+      "Name": "string",
+      "Severity": "critical|warning|info",
+      "LinkedVID": 123,
+      "Description": "string",
+      "Confidence": 0.0 to 1.0
     }}
   ],
-  "remote_commands": [
+  "RemoteCommands": [
     {{
-      "rcmd": "string",
-      "description": "string",
-      "parameters": [{{"name": "string", "type": "string"}}],
-      "confidence": 0.0 to 1.0
+      "RCMD": "string",
+      "Description": "string",
+      "Parameters": [{{ "Name": "string", "Type": "string" }}],
+      "Confidence": 0.0 to 1.0
     }}
   ],
-  "states": [
-    {{"state_id": "string", "name": "string", "description": "string"}}
+  "States": [
+    {{ "StateID": "string", "Name": "string", "Description": "string" }}
   ],
-  "state_transitions": [
+  "StateTransitions": [
     {{
-      "from_state": "string",
-      "to_state": "string",
-      "trigger_event": "string",
-      "trigger_command": "string",
-      "manual": false
+      "FromState": "string",
+      "ToState": "string",
+      "TriggerEvent": "string",
+      "TriggerCommand": "string",
+      "Manual": false
     }}
   ]
 }}
 
-CONFIDENCE RUBRIC (set the `confidence` field per-entity):
+CONFIDENCE RUBRIC (set the `Confidence` field per-entity):
 - 1.0  = verbatim from a clearly labeled table
 - 0.7  = inferred from prose with a clear section heading or strong signal
 - <0.5 = guessed from weak context
 
 HARD RULES:
-- Populate `Event.linked_vids` from any "Linked VIDs" column or comma-separated VID list following an event description.
-- Populate `state_transitions` from text matching `<State> -> <State> (Triggered by <event/command>)` patterns.
-  - `from_state` and `to_state` are REQUIRED, must be non-null state names matching entries in `states`.
-  - If the trigger is an event, set `trigger_event` (the event name) and leave `trigger_command` null.
-  - If the trigger is a command, set `trigger_command` (the RCMD name) and leave `trigger_event` null.
-  - If the transition is described as "manual" with no event/command, set `manual: true` and leave both trigger fields null.
-  - Never set both `trigger_event` and `trigger_command`.
-- `Alarm.severity` MUST be lowercase: `critical`, `warning`, or `info`.
+- Populate `LinkedVIDs` from any "Linked VIDs" column or comma-separated VID list following an event description.
+- Populate `StateTransitions` from text matching `<State> -> <State> (Triggered by <event/command>)` patterns.
+  - `FromState` and `ToState` are REQUIRED, must be non-null state names matching entries in `States`.
+  - If the trigger is an event, set `TriggerEvent` (the event name) and leave `TriggerCommand` null.
+  - If the trigger is a command, set `TriggerCommand` (the RCMD name) and leave `TriggerEvent` null.
+  - If the transition is described as "manual" with no event/command, set `Manual: true` and leave both trigger fields null.
+  - Never set both `TriggerEvent` and `TriggerCommand`.
+- `Severity` MUST be lowercase: `critical`, `warning`, or `info`.
 - If a section is absent from the document, return an empty list. Do NOT invent IDs, names, or fields.
 - Output a single JSON object that validates against the schema above. Nothing else.
 
 ### DOCUMENT
-{pdf_text}
+{{pdf_text}}
 """
