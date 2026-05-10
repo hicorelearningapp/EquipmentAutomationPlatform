@@ -16,3 +16,4 @@ Sample Documents/
 .uv-cache/
 .vendor/
 eap_bot_copy/
+.env.server
