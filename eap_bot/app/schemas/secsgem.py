@@ -52,6 +52,7 @@ class Event(BaseModel):
     Name: str = Field(alias="name")
     Description: Optional[str] = Field(default=None, alias="description")
     LinkedVIDs: list[int] = Field(default_factory=list, alias="linked_vids")
+    ReportID: Optional[str] = Field(default=None, alias="report_id")
     Report: bool = Field(default=True, alias="report")
     Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
 
@@ -101,22 +102,12 @@ class StateTransition(BaseModel):
         return self
 
 
-class ConnectionInfo(BaseModel):
-    Host: Optional[str] = Field(default=None, alias="host")
-    Port: Optional[int] = Field(default=None, alias="port")
-    Mode: Optional[str] = Field(default=None, alias="mode")
-
-    model_config = {
-        "populate_by_name": True
-    }
-
-
 class EquipmentSpec(BaseModel):
+    DocumentType: Optional[str] = Field(default=None, alias="document_type")
     ToolID: str = Field(alias="tool_id")
     ToolType: str = Field(alias="tool_type")
     Model: Optional[str] = Field(default=None, alias="model")
     Protocol: str = Field(default="SECS/GEM", alias="protocol")
-    Connection: Optional[ConnectionInfo] = Field(default=None, alias="connection")
     StatusVariables: list[StatusVariable] = Field(default_factory=list, alias="StatusVariable")
     DataVariables: list[DataVariable] = Field(default_factory=list, alias="DataVariable")
     Events: list[Event] = Field(default_factory=list, alias="events")

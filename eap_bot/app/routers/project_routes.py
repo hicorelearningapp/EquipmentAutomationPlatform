@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.managers.service_container import container
-from app.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, DocumentCategory, ProjectUpdate, ProjectMetadata
+from app.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, DocumentCategory, ProjectUpdate, ProjectMetadata, AggregatedSpec
 from app.schemas.secsgem import EquipmentSpec
 from app.services.storage_service import (
     DocumentNotFoundError,
@@ -68,7 +68,7 @@ class ProjectAPI:
                         self.storage.save_spec_json(json_path, spec)
                         
                         vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
-                        vector_indexed = vector_store.add_document(
+                        vector_store.add_document(
                             text,
                             metadata={
                                 "project_id": project_id,
@@ -80,21 +80,28 @@ class ProjectAPI:
                             project_id=project_id,
                             document_id=doc.DocumentID,
                             spec=spec,
-                            vector_indexed=vector_indexed,
                         )
                     except Exception as e:
                         logger.error(f"Failed to auto-analyze {doc.DocumentID}: {str(e)}")
                         self.storage.mark_failed(project_id, doc.DocumentID)
 
-            # 2. Collect all extractions and mappings
-            extractions = []
+            # 2. Collect all extractions and merge them
+            aggregated = AggregatedSpec()
             for doc in metadata.Documents:
                 # Reload to get fresh status
                 fresh_doc = self.storage.get_document(project_id, doc.DocumentID)
                 if fresh_doc.Status == "completed":
                     try:
                         spec_json = self.storage.read_spec_json(project_id, doc.DocumentID)
-                        extractions.append(EquipmentSpec.model_validate_json(spec_json))
+                        spec = EquipmentSpec.model_validate_json(spec_json)
+                        
+                        aggregated.StatusVariables.extend(spec.StatusVariables)
+                        aggregated.DataVariables.extend(spec.DataVariables)
+                        aggregated.Events.extend(spec.Events)
+                        aggregated.Alarms.extend(spec.Alarms)
+                        aggregated.RemoteCommands.extend(spec.RemoteCommands)
+                        aggregated.States.extend(spec.States)
+                        aggregated.StateTransitions.extend(spec.StateTransitions)
                     except Exception as e:
                         logger.warning(f"Failed to read spec for {doc.DocumentID}: {e}")
                         continue
@@ -106,7 +113,7 @@ class ProjectAPI:
             
             return ProjectDetail(
                 **updated_metadata.model_dump(),
-                Extractions=extractions,
+                Extractions=aggregated,
                 Mappings=mapping
             )
 

@@ -77,7 +77,7 @@ class StorageService:
         metadata = ProjectOut(
             ProjectID=project_id,
             ProjectName=project_create.ProjectName,
-            ProjectVersion=project_create.ProjectVersion,
+            ProjectVersion="1.0",
             VendorName=project_create.VendorName,
             Tool=project_create.Tool,
             CreatedAt=now,
@@ -110,17 +110,11 @@ class StorageService:
             UploadDate=self.now(),
             UploadedBy="",
             Status="uploaded",
-            DocumentPath=pdf_path.relative_to(project_dir).as_posix(),
-            JsonPath=json_path.relative_to(project_dir).as_posix(),
-            ToolID="",
-            ToolType="",
-            VectorIndexed=False,
         )
 
         Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
         Documents.append(document)
         metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate)
-        metadata.DocumentCount = len(metadata.Documents)
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
         return document
@@ -130,16 +124,14 @@ class StorageService:
         project_id: int,
         document_id: str,
         spec: EquipmentSpec,
-        vector_indexed: bool,
     ) -> DocumentMetadata:
         metadata = self.get_project(project_id)
 
         for doc in metadata.Documents:
             if doc.DocumentID == document_id:
                 doc.Status = "completed"
-                doc.ToolID = spec.ToolID
-                doc.ToolType = spec.ToolType
-                doc.VectorIndexed = vector_indexed
+                if spec.DocumentType:
+                    doc.DocumentType = spec.DocumentType
                 document = doc
                 break
         else:
@@ -178,12 +170,8 @@ class StorageService:
                 continue
             
             try:
-                # Read raw to get DocumentCount
                 raw_data = json.loads(metadata_path.read_text(encoding="utf-8"))
-                doc_count = len(raw_data.get("Documents", []))
-                
-                # Validate into ProjectOut
-                project = ProjectOut.model_validate({**raw_data, "DocumentCount": doc_count})
+                project = ProjectOut.model_validate(raw_data)
                 projects.append(project)
             except Exception as e:
                 logger.error(f"Error reading project at {child}: {e}")
@@ -328,17 +316,11 @@ class StorageService:
             UploadDate=self.now(),
             UploadedBy="",
             Status="completed",
-            DocumentPath=pdf_path.relative_to(project_dir).as_posix(),
-            JsonPath=json_path.relative_to(project_dir).as_posix(),
-            ToolId=spec.tool_id,
-            ToolType=spec.tool_type,
-            VectorIndexed=vector_indexed,
         )
 
         Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
         Documents.append(document)
         metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate)
-        metadata.DocumentCount = len(metadata.Documents)
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
         return document
@@ -370,8 +352,8 @@ class StorageService:
         path.write_text(mapping.model_dump_json(indent=2), encoding="utf-8")
 
     def read_spec_json(self, project_id: int, document_id: str) -> str:
-        document = self.get_document(project_id, document_id)
-        path = self._project_relative_path(project_id, document.JsonPath)
+        self.get_document(project_id, document_id)
+        path = self.spec_json_path(project_id, document_id)
         if not path.exists():
             raise DocumentNotFoundError(
                 f"Extracted JSON for document '{document_id}' was not found"

@@ -32,14 +32,12 @@ class EquipmentAPI:
         self.router.get("/Analyze/{project_id}/{document_id}", response_model_by_alias=False)(self.analyze)
         self.router.get("/Analyze/{project_id}/{document_id}/report")(self.download_report)
         self.router.delete("/DeleteDocument/{project_id}/{document_id}")(self.delete_document)
+        self.router.post("/UpdateExtracted/{project_id}/{document_id}")(self.update_extracted)
 
     async def upload_document(
         self,
         project_id: int,
         file: UploadFile = File(...),
-        document_type: DocumentCategory = Form(...),
-        tool_type: str = Form(""),
-        vendor: str = Form(""),
     ):
         if not file.filename or not file.filename.lower().endswith(".pdf"):
             raise HTTPException(400, "Only .pdf files are accepted")
@@ -59,7 +57,7 @@ class EquipmentAPI:
             document = self.storage.register_document(
                 project_id=project_id,
                 document_id=document_id,
-                document_type=document_type,
+                document_type=DocumentCategory.USER_MANUALS,
                 filename=file.filename,
                 file_size=file_size,
                 pages=pages,
@@ -74,10 +72,8 @@ class EquipmentAPI:
         return {
             "Status": "uploaded",
             "DocumentID": document_id,
-            "DocumentType": document_type,
+            "DocumentType": "Pending AI Classification",
             "FileName": document.FileName,
-            "ToolType": tool_type,
-            "Vendor": vendor,
             "Pages": document.Pages,
             "FileSize": document.FileSize,
         }
@@ -113,7 +109,7 @@ class EquipmentAPI:
             json_path = self.storage.spec_json_path(project_id, document_id)
             self.storage.save_spec_json(json_path, spec)
             vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
-            vector_indexed = vector_store.add_document(
+            vector_store.add_document(
                 text,
                 metadata={
                     "project_id": project_id,
@@ -125,7 +121,6 @@ class EquipmentAPI:
                 project_id=project_id,
                 document_id=document_id,
                 spec=spec,
-                vector_indexed=vector_indexed,
             )
         except Exception as e:
             logger.error(f"Analysis failed for {project_id}/{document_id}: {str(e)}")
@@ -233,3 +228,15 @@ class EquipmentAPI:
             "Status": "success",
             "Message": f"Document {document_id} deleted",
         }
+
+    def update_extracted(self, project_id: int, document_id: str, spec: EquipmentSpec):
+        try:
+            self.storage.increment_project_version(project_id)
+            self.storage.save_spec_json(project_id, document_id, spec.model_dump_json(by_alias=True, exclude_none=True))
+            return {"Status": "success", "Message": "Extraction updated successfully"}
+        except InvalidSlugError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except ProjectNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc

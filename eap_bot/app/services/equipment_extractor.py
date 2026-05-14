@@ -55,11 +55,11 @@ CRITICAL: DO NOT output the schema itself. You must output a JSON object populat
 
 EXPECTED JSON FORMAT:
 {{
+  "DocumentType": "string (User Manuals|Troubleshooting Guidance|GEM Manual|Variable Files)",
   "ToolID": "string",
   "ToolType": "string",
   "Model": "string (optional)",
   "Protocol": "SECS/GEM",
-  "Connection": {{"Host": "string", "Port": 123, "Mode": "string"}},
   "StatusVariable":[
     {{
       "SVID": 123,
@@ -83,9 +83,10 @@ EXPECTED JSON FORMAT:
   "Events": [
     {{
       "CEID": 123,
-      "EventName": "string",
+      "Name": "string",
       "Description": "string",
       "LinkedVIDs": [123],
+      "ReportID": "string",
       "Confidence": 0.0 to 1.0 (double)
     }}
   ],
@@ -127,6 +128,7 @@ CONFIDENCE RUBRIC (set the `Confidence` field per-entity):
 - <0.5 = guessed from weak context
 
 HARD RULES:
+- For every Event, you MUST extract the ReportID and the LinkedVIDs (Variables) associated with that report. If the document does not specify a ReportID, you MUST suggest a logical one (e.g. "RPT_{{CEID}}"). Do not leave it null.
 - Populate `LinkedVIDs` from any "Linked VIDs" column or comma-separated VID list following an event description.
 - Populate `StateTransitions` from text matching `<State> -> <State> (Triggered by <event/command>)` patterns.
   - `FromState` and `ToState` are REQUIRED, must be non-null state names matching entries in `States`.
@@ -139,5 +141,5 @@ HARD RULES:
 - Output a single JSON object that validates against the schema above. Nothing else.
 
 ### DOCUMENT
-{{pdf_text}}
+{pdf_text}
 """

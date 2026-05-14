@@ -24,13 +24,6 @@ class ProjectCreate(BaseModel):
     ProjectName: str = Field(min_length=1)
     VendorName: str = Field(min_length=1)
     Tool: ToolType = ToolType.NONE
-    ProjectVersion: str = "1.0"
-
-    @field_validator("ProjectVersion", mode="before")
-    def set_default_version(cls, v):
-        if not v or str(v).strip() == "":
-            return "1.0"
-        return v
 
 
 class DocumentMetadata(BaseModel):
@@ -42,11 +35,6 @@ class DocumentMetadata(BaseModel):
     UploadDate: datetime = Field(alias="upload_date")
     UploadedBy: str = Field(default="", alias="uploaded_by")
     Status: str = Field(default="completed", alias="status")
-    DocumentPath: str = Field(alias="document_path")
-    JsonPath: str = Field(alias="json_path")
-    ToolID: str = Field(alias="tool_id")
-    ToolType: str = Field(alias="tool_type")
-    VectorIndexed: bool = Field(default=False, alias="vector_indexed")
 
     model_config = {
         "populate_by_name": True
@@ -69,7 +57,6 @@ class ProjectOut(BaseModel):
 
 
 class ProjectMetadata(ProjectOut):
-    DocumentCount: int = Field(default=0, alias="document_count")
     Documents: list[DocumentMetadata] = Field(default_factory=list, alias="documents")
 
     model_config = {
@@ -77,8 +64,17 @@ class ProjectMetadata(ProjectOut):
     }
 
 
+class AggregatedSpec(BaseModel):
+    StatusVariables: list[Any] = Field(default_factory=list)
+    DataVariables: list[Any] = Field(default_factory=list)
+    Events: list[Any] = Field(default_factory=list)
+    Alarms: list[Any] = Field(default_factory=list)
+    RemoteCommands: list[Any] = Field(default_factory=list)
+    States: list[Any] = Field(default_factory=list)
+    StateTransitions: list[Any] = Field(default_factory=list)
+
 class ProjectDetail(ProjectMetadata):
-    Extractions: list[Any] = Field(default_factory=list)
+    Extractions: AggregatedSpec = Field(default_factory=AggregatedSpec)
     Mappings: list[Any] = Field(default_factory=list)
 
 
