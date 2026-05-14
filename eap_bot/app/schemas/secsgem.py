@@ -2,15 +2,25 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field, model_validator
 
 
-class Variable(BaseModel):
-    VID: int = Field(alias="vid")
+class StatusVariable(BaseModel):
+    SVID: int = Field(alias="svid")
     Name: str = Field(alias="name")
-    Type: str = Field(alias="type")
-    Unit: Optional[str] = Field(default=None, alias="unit")
-    Category: str = Field(alias="category")
-    Access: str = Field(alias="access")
     Description: Optional[str] = Field(default=None, alias="description")
+    DataType: str = Field(alias="data_type")
+    AccessType: str = Field(alias="access_type")
+    Value: Optional[str] = Field(default=None, alias="value")
     Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
+
+    model_config = {
+        "populate_by_name": True
+    }
+
+
+class DataVariable(BaseModel):
+    DvID: int = Field(alias="dvid")
+    Name: str = Field(alias="name")
+    ValueType: str = Field(alias="value_type")
+    Unit: Optional[str] = Field(default=None, alias="unit")
 
     model_config = {
         "populate_by_name": True
@@ -107,7 +117,8 @@ class EquipmentSpec(BaseModel):
     Model: Optional[str] = Field(default=None, alias="model")
     Protocol: str = Field(default="SECS/GEM", alias="protocol")
     Connection: Optional[ConnectionInfo] = Field(default=None, alias="connection")
-    Variables: list[Variable] = Field(default_factory=list, alias="variables")
+    StatusVariables: list[StatusVariable] = Field(default_factory=list, alias="StatusVariable")
+    DataVariables: list[DataVariable] = Field(default_factory=list, alias="DataVariable")
     Events: list[Event] = Field(default_factory=list, alias="events")
     Alarms: list[Alarm] = Field(default_factory=list, alias="alarms")
     RemoteCommands: list[RemoteCommand] = Field(default_factory=list, alias="remote_commands")

@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
 from app.managers.service_container import container
-from app.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, DocumentCategory
+from app.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, DocumentCategory, ProjectUpdate, ProjectMetadata
 from app.schemas.secsgem import EquipmentSpec
 from app.services.storage_service import (
     DocumentNotFoundError,
@@ -28,6 +28,7 @@ class ProjectAPI:
         self.router.post("/AddProject", response_model=ProjectOut, status_code=201, response_model_by_alias=False)(self.create_project)
         self.router.get("/GetAllProjects", response_model=dict[str, list[ProjectOut]], response_model_by_alias=False)(self.list_projects)
         self.router.get("/LoadProject/{project_id}", response_model=ProjectDetail, response_model_by_alias=False)(self.load_project)
+        self.router.put("/UpdateProject/{project_id}", response_model=ProjectOut, response_model_by_alias=False)(self.update_project)
         self.router.delete("/DeleteProject/{project_id}")(self.delete_project)
         self.router.get("/GetKnowledgeCategory/{project_id}")(self.get_knowledge_category)
         self.router.post("/Ask/{project_id}")(self.ask_project)
@@ -111,6 +112,14 @@ class ProjectAPI:
 
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
+        except ProjectNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc
+
+    def update_project(self, project_id: int, body: ProjectUpdate):
+        try:
+            return self.storage.update_project_metadata(project_id, body)
         except ProjectNotFoundError as exc:
             raise HTTPException(404, str(exc)) from exc
         except StorageError as exc:

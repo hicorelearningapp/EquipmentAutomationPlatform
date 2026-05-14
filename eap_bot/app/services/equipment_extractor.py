@@ -60,26 +60,33 @@ EXPECTED JSON FORMAT:
   "Model": "string (optional)",
   "Protocol": "SECS/GEM",
   "Connection": {{"Host": "string", "Port": 123, "Mode": "string"}},
-  "Variables": [
+  "StatusVariable":[
     {{
-      "VID": 123,
+      "SVID": 123,
       "Name": "string",
-      "Type": "float|integer|string|boolean",
-      "Unit": "string",
-      "Category": "SV|DV",
-      "Access": "read|write|read/write",
       "Description": "string",
-      "Confidence": 0.0 to 1.0
+      "DataType": "string",
+      "AccessType": "string",
+      "Value": "string",
+      "Confidence": 0.0 to 1.0 (double)
+    }}
+  ],
+  "DataVariable": [
+    {{
+      "DvID": 123,
+      "Name": "string",
+      "ValueType": "string (float|integer|string|boolean)",
+      "Unit": "string",
+      "Confidence": 0.0 to 1.0 (double)
     }}
   ],
   "Events": [
     {{
       "CEID": 123,
-      "Name": "string",
+      "EventName": "string",
       "Description": "string",
       "LinkedVIDs": [123],
-      "Report": true,
-      "Confidence": 0.0 to 1.0
+      "Confidence": 0.0 to 1.0 (double)
     }}
   ],
   "Alarms": [

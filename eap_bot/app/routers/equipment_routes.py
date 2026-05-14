@@ -150,7 +150,7 @@ class EquipmentAPI:
         self, project_id: int, document_id: str, spec: EquipmentSpec
     ) -> dict:
         all_confidences = (
-            [v.Confidence for v in spec.Variables]
+            [v.Confidence for v in spec.StatusVariables]
             + [e.Confidence for e in spec.Events]
             + [a.Confidence for a in spec.Alarms]
         )
@@ -165,24 +165,24 @@ class EquipmentAPI:
             "ExtractionStatus": "completed",
             "StatusVariables": [
                 {
-                    "SVID": v.VID,
+                    "SVID": v.SVID,
                     "Name": v.Name,
                     "Description": v.Description or "",
-                    "DataType": v.Type,
-                    "AccessType": v.Access,
-                    "Value": "",
+                    "DataType": v.DataType,
+                    "AccessType": v.AccessType,
+                    "Value": v.Value or "",
                     "Confidence": v.Confidence,
                 }
-                for v in spec.Variables if v.Category == "SV"
+                for v in spec.StatusVariables
             ],
             "DataVariables": [
                 {
-                    "DVID": v.VID,
+                    "DvID": v.DvID,
                     "Name": v.Name,
                     "Unit": v.Unit or "",
-                    "ValueType": v.Type,
+                    "ValueType": v.ValueType,
                 }
-                for v in spec.Variables if v.Category == "DV"
+                for v in spec.DataVariables
             ],
             "Events": [
                 {

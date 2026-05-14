@@ -23,5 +23,4 @@ class Settings(BaseSettings):
     CHUNK_OVERLAP: int = Field(200)
     MAX_UPLOAD_SIZE: int = Field(50 * 1024 * 1024)
 
-
 settings = Settings()

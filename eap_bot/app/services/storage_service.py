@@ -4,6 +4,7 @@ import re
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from app.config import settings
 from app.schemas.project import DocumentMetadata, ProjectMetadata, ProjectCreate, ProjectOut
@@ -39,6 +40,7 @@ class StorageService:
     EXTRACTED_JSON_DIR = "ExtractedJson"
     VECTORSTORE_DIR = "Vectorstore"
     METADATA_DIR = "Metadata"
+    CODE_DIR = "Code"
     METADATA_FILE = "project.json"
 
     _SLUG_RE = re.compile(r"[^a-z0-9]+")
@@ -67,12 +69,12 @@ class StorageService:
     def now() -> datetime:
         return datetime.now(timezone.utc)
 
-    def create_project(self, project_create: ProjectCreate) -> ProjectMetadata:
+    def create_project(self, project_create: ProjectCreate) -> ProjectOut:
         project_id = self._get_next_id()
         self._ensure_project_dirs(project_id)
         
         now = self.now()
-        metadata = ProjectMetadata(
+        metadata = ProjectOut(
             ProjectID=project_id,
             ProjectName=project_create.ProjectName,
             ProjectVersion=project_create.ProjectVersion,
@@ -81,7 +83,6 @@ class StorageService:
             CreatedAt=now,
             LastUpdatedOn=now,
             Status="active",
-            Documents=[],
         )
         self._write_metadata(metadata)
         return metadata
@@ -202,6 +203,45 @@ class StorageService:
             raise ProjectNotFoundError(f"Project '{project_id}' was not found")
         shutil.rmtree(project_dir)
 
+    def increment_project_version(self, project_id: int) -> str:
+        metadata = self.get_project(project_id)
+        current_version = metadata.ProjectVersion or "1.0"
+        
+        try:
+            parts = current_version.split(".")
+            if len(parts) >= 2:
+                # 2-tier logic: increment the second part
+                major = parts[0]
+                minor = int(parts[1]) + 1
+                new_version = f"{major}.{minor}"
+            else:
+                # Fallback for non-standard versions
+                new_version = f"{current_version}.1"
+        except (ValueError, IndexError):
+            new_version = "1.1"
+
+        metadata.ProjectVersion = new_version
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+        logger.info(f"Project {project_id} version bumped: {current_version} -> {new_version}")
+        return new_version
+
+    def update_project_metadata(self, project_id: int, update: Any) -> ProjectOut:
+        metadata = self.get_project(project_id)
+        
+        if update.ProjectName is not None:
+            metadata.ProjectName = update.ProjectName
+        if update.VendorName is not None:
+            metadata.VendorName = update.VendorName
+        if update.Tool is not None:
+            metadata.Tool = update.Tool
+        if update.ProjectVersion is not None:
+            metadata.ProjectVersion = update.ProjectVersion
+            
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+        return ProjectOut.model_validate(metadata.model_dump())
+
     def delete_document(self, project_id: int, document_id: str) -> None:
         metadata = self.get_project(project_id)
         document = self.get_document(project_id, document_id)
@@ -217,6 +257,18 @@ class StorageService:
         metadata.DocumentCount = len(metadata.Documents)
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
+
+    def save_project_code(self, project_id: int, category: str, source_code: str) -> None:
+        project_dir = self._project_dir(project_id)
+        if not self._metadata_path(project_id).exists():
+            raise ProjectNotFoundError(f"Project '{project_id}' was not found")
+        
+        code_dir = project_dir / self.CODE_DIR
+        code_dir.mkdir(parents=True, exist_ok=True)
+        
+        code_file = code_dir / category
+        code_file.write_text(source_code, encoding="utf-8")
+        logger.info("Saved generated code to %s", code_file)
 
     def prepare_document_paths(
         self, project_id: int, original_filename: str
@@ -436,7 +488,7 @@ class StorageService:
         except (OSError, ValueError) as exc:
             raise StorageError(f"Could not read project metadata at {path}") from exc
 
-    def _write_metadata(self, metadata: ProjectMetadata) -> None:
+    def _write_metadata(self, metadata: ProjectOut | ProjectMetadata) -> None:
         self._ensure_project_dirs(metadata.ProjectID)
         path = self._metadata_path(metadata.ProjectID)
         payload = json.dumps(metadata.model_dump(mode="json"), indent=2)

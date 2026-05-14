@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ToolType(str, Enum):
@@ -22,9 +22,15 @@ class DocumentCategory(str, Enum):
 
 class ProjectCreate(BaseModel):
     ProjectName: str = Field(min_length=1)
-    VendorName: str
-    Tool: ToolType
-    ProjectVersion: str = "1.0.0"
+    VendorName: str = Field(min_length=1)
+    Tool: ToolType = ToolType.NONE
+    ProjectVersion: str = "1.0"
+
+    @field_validator("ProjectVersion", mode="before")
+    def set_default_version(cls, v):
+        if not v or str(v).strip() == "":
+            return "1.0"
+        return v
 
 
 class DocumentMetadata(BaseModel):
@@ -50,12 +56,12 @@ class DocumentMetadata(BaseModel):
 class ProjectOut(BaseModel):
     ProjectID: int = Field(alias="project_id")
     ProjectName: str = Field(alias="project_name")
-    VendorName: str = Field(alias="vendor_name")
+    VendorName: str = Field(default="", alias="vendor_name")
     Tool: ToolType = Field(alias="tool")
     CreatedAt: datetime = Field(alias="created_at")
     LastUpdatedOn: datetime = Field(alias="last_updated_on")
     Status: str = Field(alias="status")
-    ProjectVersion: str = Field(default="1.0.0", alias="project_version")
+    ProjectVersion: str = Field(default="1.0", alias="project_version")
 
     model_config = {
         "populate_by_name": True
@@ -74,6 +80,13 @@ class ProjectMetadata(ProjectOut):
 class ProjectDetail(ProjectMetadata):
     Extractions: list[Any] = Field(default_factory=list)
     Mappings: list[Any] = Field(default_factory=list)
+
+
+class ProjectUpdate(BaseModel):
+    ProjectName: Optional[str] = None
+    VendorName: Optional[str] = None
+    Tool: Optional[ToolType] = None
+    ProjectVersion: Optional[str] = None
 
 
 class AskRequest(BaseModel):
