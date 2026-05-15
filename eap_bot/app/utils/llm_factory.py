@@ -17,10 +17,11 @@ class GroqStrategy(LLMStrategy):
             "model": settings.LLM_MODEL_NAME,
             "api_key": settings.GROQ_API_KEY,
             "temperature": temperature,
+            "max_retries": 6,
         }
         if require_json:
             kwargs["model_kwargs"] = {"response_format": {"type": "json_object"}}
-            
+
         return ChatGroq(**kwargs)
 
 

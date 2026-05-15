@@ -1,7 +1,10 @@
 import json
 import logging
-from typing import Optional
+from concurrent.futures import ThreadPoolExecutor
 
+import tiktoken
+
+from app.config import settings
 from app.schemas.secsgem import EquipmentSpec
 from app.utils.llm_factory import LLMStrategy
 
@@ -12,20 +15,25 @@ class EquipmentExtractor:
     """Extracts SECS/GEM equipment specifications from PDF text.
 
     Uses a Map-Reduce strategy for large documents:
-      1. Split the text into token-safe chunks.
-      2. Extract a partial EquipmentSpec from each chunk (Map).
+      1. Split the text into token-sized chunks.
+      2. Extract a partial EquipmentSpec from each chunk in parallel (Map).
       3. Merge all partial specs into one, deduplicating by ID (Reduce).
 
     Small documents that fit within a single chunk bypass the
     chunking/merging entirely for zero overhead.
     """
 
-    MAX_CHUNK_CHARS = 8000
-    CHUNK_OVERLAP = 200
+    # cl100k_base is the OpenAI tokenizer; close enough to Llama tokenization
+    # for chunking decisions (within ~10%). Avoids a heavier transformers dep.
+    _ENCODER_NAME = "cl100k_base"
 
     def __init__(self, llm_strategy: LLMStrategy) -> None:
         self._llm = llm_strategy.get_model(temperature=0, require_json=True)
         self._llm_retry = llm_strategy.get_model(temperature=0.2, require_json=True)
+        self._encoder = tiktoken.get_encoding(self._ENCODER_NAME)
+        self._chunk_tokens = settings.EXTRACTOR_CHUNK_TOKENS
+        self._chunk_overlap_tokens = settings.EXTRACTOR_CHUNK_OVERLAP_TOKENS
+        self._max_parallel = settings.EXTRACTOR_MAX_PARALLEL
 
     # ------------------------------------------------------------------
     # Public API
@@ -34,24 +42,32 @@ class EquipmentExtractor:
     def extract(self, pdf_text: str) -> EquipmentSpec:
         """Extract an EquipmentSpec from the full document text.
 
-        Automatically chunks large documents to stay within LLM token limits.
+        Automatically chunks large documents and extracts chunks in parallel.
         """
         chunks = self._chunk_text(pdf_text)
 
         if len(chunks) == 1:
             return self._extract_chunk(chunks[0], chunk_num=1, total_chunks=1)
 
-        logger.info("Document split into %d chunks for extraction.", len(chunks))
+        workers = min(self._max_parallel, len(chunks))
+        logger.info(
+            "Document split into %d chunks; extracting up to %d in parallel.",
+            len(chunks), workers,
+        )
 
-        partial_specs: list[EquipmentSpec] = []
-        for i, chunk in enumerate(chunks, 1):
-            logger.info("Extracting chunk %d/%d ...", i, len(chunks))
-            spec = self._extract_chunk(chunk, chunk_num=i, total_chunks=len(chunks))
-            partial_specs.append(spec)
+        partial_specs: list[EquipmentSpec] = [None] * len(chunks)  # type: ignore[list-item]
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {
+                executor.submit(self._extract_chunk, chunk, i + 1, len(chunks)): i
+                for i, chunk in enumerate(chunks)
+            }
+            for future in futures:
+                idx = futures[future]
+                partial_specs[idx] = future.result()
 
         merged = self._merge_specs(partial_specs)
         logger.info(
-            "Merged %d chunks → %d SVs, %d DVs, %d Events, %d Alarms, %d RCMDs",
+            "Merged %d chunks - %d SVs, %d DVs, %d Events, %d Alarms, %d RCMDs",
             len(chunks),
             len(merged.StatusVariables),
             len(merged.DataVariables),
@@ -66,33 +82,23 @@ class EquipmentExtractor:
     # ------------------------------------------------------------------
 
     def _chunk_text(self, text: str) -> list[str]:
-        """Split text into overlapping chunks, preferring section boundaries."""
-        max_chars = self.MAX_CHUNK_CHARS
-        overlap = self.CHUNK_OVERLAP
+        """Split text into overlapping token-sized chunks."""
+        tokens = self._encoder.encode(text)
 
-        if len(text) <= max_chars:
+        if len(tokens) <= self._chunk_tokens:
             return [text]
 
         chunks: list[str] = []
         start = 0
+        stride = self._chunk_tokens - self._chunk_overlap_tokens
 
-        while start < len(text):
-            end = start + max_chars
-
-            if end >= len(text):
-                chunks.append(text[start:])
+        while start < len(tokens):
+            end = start + self._chunk_tokens
+            chunk_tokens = tokens[start:end]
+            chunks.append(self._encoder.decode(chunk_tokens))
+            if end >= len(tokens):
                 break
-
-            # Find a clean break point within the slice
-            slice_ = text[start:end]
-            for sep in ["\n\n", "\n", " "]:
-                idx = slice_.rfind(sep)
-                if idx > max_chars // 2:
-                    end = start + idx + len(sep)
-                    break
-
-            chunks.append(text[start:end])
-            start = end - overlap
+            start += stride
 
         return chunks
 
@@ -101,7 +107,7 @@ class EquipmentExtractor:
     # ------------------------------------------------------------------
 
     def _extract_chunk(self, chunk: str, chunk_num: int, total_chunks: int) -> EquipmentSpec:
-        """Extract from a single chunk. Returns an empty spec on failure."""
+        """Extract from a single chunk. Returns an empty spec on failure in multi-chunk mode."""
         if total_chunks > 1:
             preamble = (
                 f"This is section {chunk_num} of {total_chunks} from a larger document. "
@@ -112,9 +118,9 @@ class EquipmentExtractor:
             preamble = ""
 
         prompt = self._build_prompt(preamble + chunk)
-        raw = self._llm.invoke(prompt).content
 
         try:
+            raw = self._llm.invoke(prompt).content
             data = json.loads(raw)
             if "$defs" in data:
                 raise ValueError(
@@ -125,7 +131,7 @@ class EquipmentExtractor:
         except Exception as e:
             error_msg = str(e)
             logger.warning(
-                "Primary extraction failed for chunk %d/%d (%s) — retrying.",
+                "Primary extraction failed for chunk %d/%d (%s) - retrying.",
                 chunk_num, total_chunks, error_msg,
             )
             retry_prompt = (
@@ -143,7 +149,7 @@ class EquipmentExtractor:
                 return EquipmentSpec.model_validate(data)
             except Exception as retry_err:
                 if total_chunks == 1:
-                    raise  # Single-chunk doc: propagate the error
+                    raise
                 logger.error(
                     "Chunk %d/%d failed after retry (%s). Returning empty spec for this chunk.",
                     chunk_num, total_chunks, retry_err,
@@ -163,7 +169,6 @@ class EquipmentExtractor:
         """
         merged = EquipmentSpec(ToolID="", ToolType="")
 
-        # Scalar fields: first non-empty value wins
         for spec in specs:
             if not merged.DocumentType and spec.DocumentType:
                 merged.DocumentType = spec.DocumentType
@@ -174,7 +179,6 @@ class EquipmentExtractor:
             if not merged.Model and spec.Model:
                 merged.Model = spec.Model
 
-        # List fields: concatenate then deduplicate
         merged.StatusVariables = EquipmentExtractor._dedup_by_key(
             [sv for s in specs for sv in s.StatusVariables], key="SVID"
         )
@@ -201,10 +205,7 @@ class EquipmentExtractor:
 
     @staticmethod
     def _dedup_by_key(items: list, key: str) -> list:
-        """Keep only the highest-confidence entry per unique key value.
-
-        Items without a Confidence attribute are treated as confidence=1.0.
-        """
+        """Keep only the highest-confidence entry per unique key value."""
         best: dict = {}
         for item in items:
             id_val = getattr(item, key)

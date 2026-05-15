@@ -81,6 +81,7 @@ class EquipmentAPI:
     def analyze(self, project_id: int, document_id: str):
         try:
             self.storage.increment_project_version(project_id)
+            self.storage.write_sml_template(project_id)
             document = self.storage.get_document(project_id, document_id)
         except (InvalidSlugError, ProjectNotFoundError, DocumentNotFoundError) as exc:
             raise HTTPException(404, str(exc)) from exc

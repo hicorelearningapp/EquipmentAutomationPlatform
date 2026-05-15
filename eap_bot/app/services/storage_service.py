@@ -10,6 +10,7 @@ from app.config import settings
 from app.schemas.project import DocumentMetadata, ProjectMetadata, ProjectCreate, ProjectOut
 from app.schemas.mapping import ProjectMapping
 from app.schemas.secsgem import EquipmentSpec
+from app.services.sml_template import SML_TEMPLATE_CONTENT, SML_TEMPLATE_FILENAME
 
 logger = logging.getLogger(__name__)
 
@@ -141,7 +142,23 @@ class StorageService:
 
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
+        self.write_sml_template(project_id)
         return document
+
+    def sml_template_path(self, project_id: int) -> Path:
+        return self._project_dir(project_id) / SML_TEMPLATE_FILENAME
+
+    def write_sml_template(self, project_id: int) -> None:
+        """Drop the hardcoded SML script template into the project directory.
+
+        Idempotent: only writes if the file does not already exist, so re-running
+        Analyze on the same project does not clobber edits made downstream.
+        """
+        path = self.sml_template_path(project_id)
+        if path.exists():
+            return
+        path.write_text(SML_TEMPLATE_CONTENT, encoding="utf-8")
+        logger.info("Wrote SML template to %s", path)
 
     def mark_failed(self, project_id: int, document_id: str) -> DocumentMetadata:
         metadata = self.get_project(project_id)
