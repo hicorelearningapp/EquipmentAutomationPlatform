@@ -9,6 +9,7 @@ from app.config import settings
 from app.managers.service_container import container
 from app.schemas.project import DocumentCategory
 from app.schemas.secsgem import EquipmentSpec
+from app.services.sml_template import SML_TEMPLATE_CONTENT
 from app.services.storage_service import (
     DocumentNotFoundError,
     InvalidSlugError,
@@ -140,6 +141,7 @@ class EquipmentAPI:
             "DataVariables": [],
             "Events": [],
             "Alarms": [],
+            "SmlTemplate": SML_TEMPLATE_CONTENT,
         }
 
     def _build_extraction_response(
@@ -196,6 +198,7 @@ class EquipmentAPI:
                 }
                 for a in spec.Alarms
             ],
+            "SmlTemplate": SML_TEMPLATE_CONTENT,
         }
 
     def download_report(self, project_id: int, document_id: str):

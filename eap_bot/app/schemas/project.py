@@ -76,6 +76,7 @@ class AggregatedSpec(BaseModel):
 class ProjectDetail(ProjectMetadata):
     Extractions: AggregatedSpec = Field(default_factory=AggregatedSpec)
     Mappings: list[Any] = Field(default_factory=list)
+    SmlTemplate: str = ""
 
 
 class ProjectUpdate(BaseModel):

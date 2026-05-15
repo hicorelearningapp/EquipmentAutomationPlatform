@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from app.managers.service_container import container
 from app.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, DocumentCategory, ProjectUpdate, ProjectMetadata, AggregatedSpec
 from app.schemas.secsgem import EquipmentSpec
+from app.services.sml_template import SML_TEMPLATE_CONTENT
 from app.services.storage_service import (
     DocumentNotFoundError,
     InvalidSlugError,
@@ -107,14 +108,16 @@ class ProjectAPI:
                         continue
 
             mapping = self.storage.get_mapping(project_id)
-            
+            self.storage.write_sml_template(project_id)
+
             # Reload metadata to get updated statuses and document list
             updated_metadata = self.storage.get_project(project_id)
-            
+
             return ProjectDetail(
                 **updated_metadata.model_dump(),
                 Extractions=aggregated,
-                Mappings=mapping
+                Mappings=mapping,
+                SmlTemplate=SML_TEMPLATE_CONTENT,
             )
 
         except InvalidSlugError as exc:
