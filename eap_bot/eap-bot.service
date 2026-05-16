@@ -1,0 +1,14 @@
+[Unit]
+Description=EAP Bot Backend Service
+After=network.target
+
+[Service]
+User=azureuser
+Group=azureuser
+WorkingDirectory=/home/azureuser/eap_bot
+Environment="PATH=/home/azureuser/eap_bot/venv/bin"
+ExecStart=/home/azureuser/eap_bot/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
