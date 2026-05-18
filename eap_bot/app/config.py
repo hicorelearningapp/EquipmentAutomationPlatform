@@ -6,8 +6,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     GROQ_API_KEY: str = Field("")
+    GOOGLE_API_KEY: str = Field("")
 
-    LLM_PROVIDER: str = Field("groq")  # 'groq' or 'ollama'
+    LLM_PROVIDER: str = Field("groq")  # 'groq', 'gemini', or 'ollama'
     LLM_MODEL_NAME: str = Field("llama-3.3-70b-versatile")
     OLLAMA_BASE_URL: str = Field("http://localhost:11434")
     

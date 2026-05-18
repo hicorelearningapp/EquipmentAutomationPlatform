@@ -16,3 +16,4 @@ python-multipart
 streamlit
 requests
 tiktoken
+langchain-google-genai

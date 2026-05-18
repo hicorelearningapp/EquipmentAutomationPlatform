@@ -40,6 +40,22 @@ class OllamaStrategy(LLMStrategy):
         return ChatOllama(**kwargs)
 
 
+class GeminiStrategy(LLMStrategy):
+    def get_model(self, temperature: float = 0.0, require_json: bool = False) -> BaseChatModel:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        
+        kwargs = {
+            "model": settings.LLM_MODEL_NAME,
+            "google_api_key": settings.GOOGLE_API_KEY,
+            "temperature": temperature,
+            "max_retries": 6,
+        }
+        if require_json:
+            kwargs["model_kwargs"] = {"response_mime_type": "application/json"}
+
+        return ChatGoogleGenerativeAI(**kwargs)
+
+
 class LLMFactory:
     @staticmethod
     def create_strategy() -> LLMStrategy:
@@ -48,5 +64,7 @@ class LLMFactory:
             return GroqStrategy()
         elif provider == "ollama":
             return OllamaStrategy()
+        elif provider == "gemini":
+            return GeminiStrategy()
         else:
             raise ValueError(f"Unsupported LLM_PROVIDER: {provider}")
