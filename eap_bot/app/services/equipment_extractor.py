@@ -301,7 +301,7 @@ EXPECTED JSON FORMAT:
   ],
   "RemoteCommands": [
     {{
-      "RCMD": "string",
+      "RCMD": "string - the name of the command/message",
       "Description": "string",
       "Parameters": [{{ "Name": "string", "Type": "string" }}],
       "Confidence": 0.0 to 1.0

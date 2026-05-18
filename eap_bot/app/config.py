@@ -8,10 +8,11 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = Field("")
     GOOGLE_API_KEY: str = Field("")
 
-    LLM_PROVIDER: str = Field("gemini")  # 'groq', 'gemini', or 'ollama'
+    LLM_PROVIDER: str = Field("mistral")  # 'groq', 'gemini', or 'ollama'
     LLM_MODEL_NAME: str = Field("gemini-3.1-flash-lite")
     OLLAMA_BASE_URL: str = Field("http://localhost:11434")
     
+    MISTRAL_API_KEY: str = Field("")
     # Legacy / Server specific fields
     vectorstore_root: str = Field("./vectorstores")
     specs_output_root: str = Field("./specs_output")

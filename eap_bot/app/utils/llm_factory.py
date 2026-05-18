@@ -55,6 +55,20 @@ class GeminiStrategy(LLMStrategy):
 
         return ChatGoogleGenerativeAI(**kwargs)
 
+class MistralStrategy(LLMStrategy):
+    def get_model(self, temperature: float = 0.0, require_json: bool = False) -> BaseChatModel:
+        from langchain_mistralai import ChatMistralAI
+
+        kwargs = {
+            "model": settings.LLM_MODEL_NAME,
+            "api_key": settings.MISTRAL_API_KEY,
+            "temperature": temperature,
+            "max_retries": 6,
+        }
+        if require_json:
+            kwargs["model_kwargs"] = {"response_format": {"type": "json_object"}}
+
+        return ChatMistralAI(**kwargs)
 
 class LLMFactory:
     @staticmethod
@@ -66,5 +80,8 @@ class LLMFactory:
             return OllamaStrategy()
         elif provider == "gemini":
             return GeminiStrategy()
+        elif provider == "mistral":
+            return MistralStrategy()
         else:
             raise ValueError(f"Unsupported LLM_PROVIDER: {provider}")
+
