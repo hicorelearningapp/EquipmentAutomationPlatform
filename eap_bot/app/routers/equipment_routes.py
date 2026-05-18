@@ -11,6 +11,7 @@ from app.schemas.project import DocumentCategory
 from app.schemas.secsgem import EquipmentSpec
 from app.services.sml_template import SML_TEMPLATES
 from app.services.storage_service import (
+    DocumentExistsError,
     DocumentNotFoundError,
     InvalidSlugError,
     ProjectNotFoundError,
@@ -63,6 +64,8 @@ class EquipmentAPI:
                 file_size=file_size,
                 pages=pages,
             )
+        except DocumentExistsError as exc:
+            raise HTTPException(409, str(exc)) from exc
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
         except ProjectNotFoundError as exc:

@@ -35,6 +35,10 @@ class DocumentNotFoundError(StorageError):
     pass
 
 
+class DocumentExistsError(StorageError):
+    pass
+
+
 class StorageService:
     DOCUMENTS_DIR = "Documents"
     MESTAG_DIR = "MESTagDocuments"
@@ -278,6 +282,12 @@ class StorageService:
         self, project_id: int, original_filename: str
     ) -> tuple[str, Path, Path]:
         metadata = self.get_project(project_id)
+        for doc in metadata.Documents:
+            if doc.FileName.lower() == original_filename.lower():
+                raise DocumentExistsError(
+                    f"Document '{original_filename}' already exists in project '{project_id}'."
+                )
+
         base_id = self.slugify(Path(original_filename).stem, fallback="document")
         existing_ids = {doc.DocumentID for doc in metadata.Documents}
 
