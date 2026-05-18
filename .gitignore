@@ -18,3 +18,5 @@ Sample Documents/
 eap_bot_copy/
 .env.server
 *.pdf
+codebase_summary.txt
+codebase_packer.py
