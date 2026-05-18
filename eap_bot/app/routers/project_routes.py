@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from app.managers.service_container import container
 from app.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, DocumentCategory, ProjectUpdate, ProjectMetadata, AggregatedSpec
 from app.schemas.secsgem import EquipmentSpec
-from app.services.sml_template import SML_TEMPLATE_CONTENT
+from app.services.sml_template import SML_TEMPLATES
 from app.services.storage_service import (
     DocumentNotFoundError,
     InvalidSlugError,
@@ -65,6 +65,17 @@ class ProjectAPI:
                             continue
 
                         spec = container.extractor.extract(text)
+
+                        # Generate reports (non-fatal)
+                        try:
+                            reports, links = container.report_service.generate(spec, text)
+                            spec.Reports = reports
+                            spec.EventReportLinks = links
+                        except Exception as exc:
+                            logger.error(f"Report generation failed for {doc.DocumentID} (non-fatal): {exc}")
+                            spec.Reports = []
+                            spec.EventReportLinks = []
+
                         json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
                         self.storage.save_spec_json(json_path, spec)
                         
@@ -103,9 +114,25 @@ class ProjectAPI:
                         aggregated.RemoteCommands.extend(spec.RemoteCommands)
                         aggregated.States.extend(spec.States)
                         aggregated.StateTransitions.extend(spec.StateTransitions)
+                        aggregated.Reports.extend(spec.Reports)
+                        aggregated.EventReportLinks.extend(spec.EventReportLinks)
                     except Exception as e:
                         logger.warning(f"Failed to read spec for {doc.DocumentID}: {e}")
                         continue
+
+            # 3. Deduplicate aggregated arrays by primary ID
+            aggregated.StatusVariables = self._dedup_by(aggregated.StatusVariables, "SVID")
+            aggregated.DataVariables = self._dedup_by(aggregated.DataVariables, "DvID")
+            aggregated.Events = self._dedup_by(aggregated.Events, "CEID")
+            aggregated.Alarms = self._dedup_by(aggregated.Alarms, "AlarmID")
+            aggregated.RemoteCommands = self._dedup_by(aggregated.RemoteCommands, "RCMD")
+            aggregated.States = self._dedup_by(aggregated.States, "StateID")
+            aggregated.StateTransitions = self._dedup_transitions(aggregated.StateTransitions)
+            aggregated.Reports = self._dedup_by(aggregated.Reports, "RPTID")
+            aggregated.EventReportLinks = self._dedup_by(aggregated.EventReportLinks, "CEID")
+
+            # 4. Place SmlTemplate inside Extractions
+            aggregated.SmlTemplate = SML_TEMPLATES
 
             mapping = self.storage.get_mapping(project_id)
             self.storage.write_sml_template(project_id)
@@ -117,7 +144,6 @@ class ProjectAPI:
                 **updated_metadata.model_dump(),
                 Extractions=aggregated,
                 Mappings=mapping,
-                SmlTemplate=SML_TEMPLATE_CONTENT,
             )
 
         except InvalidSlugError as exc:
@@ -191,3 +217,32 @@ class ProjectAPI:
             "ProjectID": project_id,
             "Categories": [t.value for t in DocumentCategory]
         }
+
+    # ── Deduplication helpers ─────────────────────────────────────────────────
+
+    @staticmethod
+    def _dedup_by(items: list, key: str) -> list:
+        """Keep first occurrence of each item by a primary-key attribute."""
+        seen = set()
+        result = []
+        for item in items:
+            val = getattr(item, key, None) if hasattr(item, key) else item.get(key)
+            if val not in seen:
+                seen.add(val)
+                result.append(item)
+        return result
+
+    @staticmethod
+    def _dedup_transitions(items: list) -> list:
+        """Deduplicate state transitions by (FromState, ToState, TriggerEvent, TriggerCommand)."""
+        seen = set()
+        result = []
+        for t in items:
+            if hasattr(t, "FromState"):
+                key = (t.FromState, t.ToState, t.TriggerEvent, t.TriggerCommand)
+            else:
+                key = (t.get("FromState"), t.get("ToState"), t.get("TriggerEvent"), t.get("TriggerCommand"))
+            if key not in seen:
+                seen.add(key)
+                result.append(t)
+        return result

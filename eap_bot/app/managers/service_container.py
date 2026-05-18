@@ -3,6 +3,7 @@ import logging
 from app.services.equipment_extractor import EquipmentExtractor
 from app.services.mapping_service import MappingService
 from app.services.qa_service import QAService
+from app.services.report_service import ReportService
 from app.utils.embedder import VectorStoreManager
 from app.utils.llm_factory import LLMFactory, LLMStrategy
 from app.utils.pdf_reader import DocumentParser, DocumentParserFactory
@@ -23,6 +24,9 @@ class ServiceContainer:
             llm_strategy=self.llm_strategy
         )
         self.mapping_service: MappingService = MappingService(
+            llm_strategy=self.llm_strategy
+        )
+        self.report_service: ReportService = ReportService(
             llm_strategy=self.llm_strategy
         )
 

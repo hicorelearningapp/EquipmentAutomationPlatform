@@ -93,8 +93,22 @@ class EquipmentAPI:
             try:
                 spec_json = self.storage.read_spec_json(project_id, document_id)
                 spec = EquipmentSpec.model_validate_json(spec_json)
+
+                if not spec.Reports:
+                    logger.info("Reports missing in completed spec for %s/%s, generating now...", project_id, document_id)
+                    pdf_path = self.storage.document_pdf_path(project_id, document_id)
+                    text = container.parser.extract_text(str(pdf_path))
+                    reports, links = container.report_service.generate(spec, text)
+                    if reports:
+                        spec.Reports = reports
+                        spec.EventReportLinks = links
+                        json_path = self.storage.spec_json_path(project_id, document_id)
+                        self.storage.save_spec_json(json_path, spec)
             except StorageError as exc:
                 raise HTTPException(500, str(exc)) from exc
+            except Exception as exc:
+                logger.error("Self-healing report generation failed (non-fatal): %s", exc)
+
             return self._build_extraction_response(project_id, document_id, spec)
 
         if document.Status == "failed":
@@ -107,6 +121,18 @@ class EquipmentAPI:
                 raise ValueError("Could not extract any text from the PDF")
 
             spec = container.extractor.extract(text)
+
+            try:
+                reports, links = container.report_service.generate(spec, text)
+                spec.Reports = reports
+                spec.EventReportLinks = links
+            except Exception as exc:
+                logger.error(
+                    "Report generation failed for %s/%s (non-fatal): %s",
+                    project_id, document_id, exc,
+                )
+                spec.Reports = []
+                spec.EventReportLinks = []
 
             json_path = self.storage.spec_json_path(project_id, document_id)
             self.storage.save_spec_json(json_path, spec)
@@ -141,6 +167,8 @@ class EquipmentAPI:
             "DataVariables": [],
             "Events": [],
             "Alarms": [],
+            "Reports": [],
+            "EventReportLinks": [],
             "SmlTemplate": SML_TEMPLATES,
         }
 
@@ -198,6 +226,24 @@ class EquipmentAPI:
                 }
                 for a in spec.Alarms
             ],
+            "Reports": [
+                {
+                    "RPTID": r.RPTID,
+                    "Name": r.Name,
+                    "LinkedVIDs": r.LinkedVIDs,
+                    "Confidence": r.Confidence,
+                    "Reasoning": r.Reasoning or "",
+                }
+                for r in spec.Reports
+            ],
+            "EventReportLinks": [
+                {
+                    "CEID": lnk.CEID,
+                    "EventName": lnk.EventName,
+                    "RPTIDs": lnk.RPTIDs,
+                }
+                for lnk in spec.EventReportLinks
+            ],
             "SmlTemplate": SML_TEMPLATES,
         }
 
@@ -236,7 +282,8 @@ class EquipmentAPI:
     def update_extracted(self, project_id: int, document_id: str, spec: EquipmentSpec):
         try:
             self.storage.increment_project_version(project_id)
-            self.storage.save_spec_json(project_id, document_id, spec.model_dump_json(by_alias=True, exclude_none=True))
+            json_path = self.storage.spec_json_path(project_id, document_id)
+            self.storage.save_spec_json(json_path, spec)
             return {"Status": "success", "Message": "Extraction updated successfully"}
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc

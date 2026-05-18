@@ -1,6 +1,8 @@
 from typing import Literal, Optional
 from pydantic import BaseModel, Field, model_validator
 
+from app.schemas.report import ReportDefinition, EventReportLink
+
 
 class StatusVariable(BaseModel):
     SVID: int = Field(alias="svid")
@@ -115,6 +117,8 @@ class EquipmentSpec(BaseModel):
     RemoteCommands: list[RemoteCommand] = Field(default_factory=list, alias="remote_commands")
     States: list[State] = Field(default_factory=list, alias="states")
     StateTransitions: list[StateTransition] = Field(default_factory=list, alias="state_transitions")
+    Reports: list[ReportDefinition] = Field(default_factory=list, alias="reports")
+    EventReportLinks: list[EventReportLink] = Field(default_factory=list, alias="event_report_links")
 
     model_config = {
         "populate_by_name": True
