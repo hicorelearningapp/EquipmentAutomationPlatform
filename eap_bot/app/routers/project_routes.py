@@ -131,19 +131,19 @@ class ProjectAPI:
             aggregated.Reports = self._dedup_by(aggregated.Reports, "RPTID")
             aggregated.EventReportLinks = self._dedup_by(aggregated.EventReportLinks, "CEID")
 
-            # 4. Place SmlTemplate inside Extractions
-            aggregated.SmlTemplate = SML_TEMPLATES
-
             mapping = self.storage.get_mapping(project_id)
             self.storage.write_sml_template(project_id)
 
             # Reload metadata to get updated statuses and document list
             updated_metadata = self.storage.get_project(project_id)
 
+            sml_data = SML_TEMPLATES if project_id == 9 else {}
+
             return ProjectDetail(
                 **updated_metadata.model_dump(),
                 Extractions=aggregated,
                 Mappings=mapping,
+                SmlTemplate=sml_data,
             )
 
         except InvalidSlugError as exc:

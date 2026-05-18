@@ -74,11 +74,11 @@ class AggregatedSpec(BaseModel):
     StateTransitions: list[Any] = Field(default_factory=list)
     Reports: list[Any] = Field(default_factory=list)
     EventReportLinks: list[Any] = Field(default_factory=list)
-    SmlTemplate: Any = Field(default_factory=dict)
 
 class ProjectDetail(ProjectMetadata):
     Extractions: AggregatedSpec = Field(default_factory=AggregatedSpec)
     Mappings: list[Any] = Field(default_factory=list)
+    SmlTemplate: Any = Field(default_factory=dict)
 
 
 class ProjectUpdate(BaseModel):
