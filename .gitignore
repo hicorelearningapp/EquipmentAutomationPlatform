@@ -17,3 +17,4 @@ Sample Documents/
 .vendor/
 eap_bot_copy/
 .env.server
+*.pdf
