@@ -137,7 +137,7 @@ class ProjectAPI:
             # Reload metadata to get updated statuses and document list
             updated_metadata = self.storage.get_project(project_id)
 
-            sml_data = SML_TEMPLATES if project_id == 9 else {}
+            sml_data = SML_TEMPLATES
 
             return ProjectDetail(
                 **updated_metadata.model_dump(),
