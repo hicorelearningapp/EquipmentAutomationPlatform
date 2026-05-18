@@ -121,6 +121,8 @@ class EquipmentExtractor:
 
         try:
             raw = self._llm.invoke(prompt).content
+            if isinstance(raw, list):
+                raw = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in raw)
             data = json.loads(raw)
             if "$defs" in data:
                 raise ValueError(
@@ -142,6 +144,8 @@ class EquipmentExtractor:
             )
             try:
                 raw = self._llm_retry.invoke(retry_prompt).content
+                if isinstance(raw, list):
+                    raw = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in raw)
                 data = json.loads(raw)
                 if "$defs" in data:
                     raise ValueError("Model persistently returned the schema instead of the data.")

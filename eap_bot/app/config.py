@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = Field("")
     GOOGLE_API_KEY: str = Field("")
 
-    LLM_PROVIDER: str = Field("groq")  # 'groq', 'gemini', or 'ollama'
-    LLM_MODEL_NAME: str = Field("llama-3.3-70b-versatile")
+    LLM_PROVIDER: str = Field("gemini")  # 'groq', 'gemini', or 'ollama'
+    LLM_MODEL_NAME: str = Field("gemini-3.1-flash-lite")
     OLLAMA_BASE_URL: str = Field("http://localhost:11434")
     
     # Legacy / Server specific fields

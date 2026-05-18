@@ -30,10 +30,14 @@ class MappingService:
         prompt = self._build_prompt(spec, target_tags)
         try:
             raw = self._llm.invoke(prompt).content
+            if isinstance(raw, list):
+                raw = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in raw)
             data = json.loads(raw)
         except Exception as e:
             logger.warning("Primary mapping failed (%s) — retrying.", e)
             raw = self._llm_retry.invoke(prompt).content
+            if isinstance(raw, list):
+                raw = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in raw)
             data = json.loads(raw)
 
         sanitized_data = self._sanitize(data, spec, target_tags)

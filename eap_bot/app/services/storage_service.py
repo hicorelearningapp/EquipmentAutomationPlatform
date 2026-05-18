@@ -251,15 +251,14 @@ class StorageService:
         metadata = self.get_project(project_id)
         document = self.get_document(project_id, document_id)
 
-        pdf_path = self._project_relative_path(project_id, document.DocumentPath)
-        json_path = self._project_relative_path(project_id, document.JsonPath)
+        pdf_path = self.document_pdf_path(project_id, document_id)
+        json_path = self.spec_json_path(project_id, document_id)
         if pdf_path.exists():
             pdf_path.unlink()
         if json_path.exists():
             json_path.unlink()
 
         metadata.Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
-        metadata.DocumentCount = len(metadata.Documents)
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
 

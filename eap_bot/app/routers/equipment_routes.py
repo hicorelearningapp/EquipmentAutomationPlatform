@@ -111,9 +111,6 @@ class EquipmentAPI:
 
             return self._build_extraction_response(project_id, document_id, spec)
 
-        if document.Status == "failed":
-            return self._build_failed_response(project_id, document_id)
-
         try:
             pdf_path = self.storage.document_pdf_path(project_id, document_id)
             text = container.parser.extract_text(str(pdf_path))
@@ -167,6 +164,9 @@ class EquipmentAPI:
             "DataVariables": [],
             "Events": [],
             "Alarms": [],
+            "RemoteCommands": [],
+            "States": [],
+            "StateTransitions": [],
             "Reports": [],
             "EventReportLinks": [],
             "SmlTemplate": SML_TEMPLATES,
@@ -225,6 +225,32 @@ class EquipmentAPI:
                     "Severity": a.Severity,
                 }
                 for a in spec.Alarms
+            ],
+            "RemoteCommands": [
+                {
+                    "RCMD": rc.RCMD,
+                    "Description": rc.Description or "",
+                    "Parameters": [p.model_dump() for p in rc.Parameters],
+                }
+                for rc in spec.RemoteCommands
+            ],
+            "States": [
+                {
+                    "StateID": st.StateID,
+                    "Name": st.Name,
+                    "Description": st.Description or "",
+                }
+                for st in spec.States
+            ],
+            "StateTransitions": [
+                {
+                    "FromState": tr.FromState,
+                    "ToState": tr.ToState,
+                    "TriggerEvent": tr.TriggerEvent or "",
+                    "TriggerCommand": tr.TriggerCommand or "",
+                    "Manual": tr.Manual,
+                }
+                for tr in spec.StateTransitions
             ],
             "Reports": [
                 {
