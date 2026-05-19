@@ -18,3 +18,5 @@ requests
 tiktoken
 langchain-google-genai
 langchain-mistralai
+pdfplumber
+

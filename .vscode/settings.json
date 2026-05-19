@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/eap_bot"
+    ],
+    "python.defaultInterpreterPath": "${workspaceFolder}/venv/Scripts/python.exe"
+}

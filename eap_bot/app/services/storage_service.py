@@ -44,6 +44,7 @@ class StorageService:
     MESTAG_DIR = "MESTagDocuments"
     EXTRACTED_JSON_DIR = "ExtractedJson"
     VECTORSTORE_DIR = "Vectorstore"
+    EXTRACTED_TABLES_DIR = "ExtractedTables"
     METADATA_DIR = "Metadata"
     CODE_DIR = "Code"
     METADATA_FILE = "project.json"
@@ -390,6 +391,91 @@ class StorageService:
         self.get_project(project_id)
         return self._project_dir(project_id) / self.VECTORSTORE_DIR
 
+    def extracted_tables_path(self, project_id: int) -> Path:
+        return self._project_dir(project_id) / self.EXTRACTED_TABLES_DIR
+
+    def save_extracted_tables(self, project_id: int, spec: "EquipmentSpec") -> None:
+        import csv
+        tables_dir = self.extracted_tables_path(project_id)
+        tables_dir.mkdir(parents=True, exist_ok=True)
+
+        table_configs = [
+            (
+                "status_variables.csv",
+                ["SVID", "Name", "Description", "DataType", "AccessType", "Value", "Confidence"],
+                spec.StatusVariables,
+                "SVID",
+            ),
+            (
+                "data_variables.csv",
+                ["DvID", "Name", "ValueType", "Unit"],
+                spec.DataVariables,
+                "DvID",
+            ),
+            (
+                "events.csv",
+                ["CEID", "Name", "Description", "LinkedVIDs", "ReportID", "Confidence"],
+                spec.Events,
+                "CEID",
+            ),
+            (
+                "alarms.csv",
+                ["AlarmID", "Name", "Severity", "LinkedVID", "Description", "Confidence"],
+                spec.Alarms,
+                "AlarmID",
+            ),
+            (
+                "remote_commands.csv",
+                ["RCMD", "Description", "Parameters", "Confidence"],
+                spec.RemoteCommands,
+                "RCMD",
+            ),
+            (
+                "states.csv",
+                ["StateID", "Name", "Description"],
+                spec.States,
+                "StateID",
+            ),
+            (
+                "state_transitions.csv",
+                ["FromState", "ToState", "TriggerEvent", "TriggerCommand", "Manual"],
+                spec.StateTransitions,
+                None,  # dedup by (FromState, ToState) tuple
+            ),
+        ]
+
+        for filename, headers, items, id_field in table_configs:
+            csv_path = tables_dir / filename
+            existing: dict = {}
+
+            # Load existing rows keyed by primary ID
+            if csv_path.exists():
+                with open(csv_path, newline="", encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        if id_field:
+                            existing[row[id_field]] = row
+                        else:
+                            key = (row["FromState"], row["ToState"])
+                            existing[key] = row
+
+            # Merge new items — new data wins on conflict
+            for item in items:
+                row = {h: str(getattr(item, h, "") or "") for h in headers}
+                if id_field:
+                    key = row[id_field]
+                else:
+                    key = (row["FromState"], row["ToState"])
+                existing[key] = row
+
+            with open(csv_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=headers)
+                writer.writeheader()
+                writer.writerows(existing.values())
+
+            logger.info("Saved %d rows to %s", len(existing), csv_path)
+
+
     def mapping_path(self, project_id: int) -> Path:
         return self._project_dir(project_id) / self.METADATA_DIR / "mapping.json"
 
@@ -468,6 +554,7 @@ class StorageService:
             self.EXTRACTED_JSON_DIR,
             self.VECTORSTORE_DIR,
             self.METADATA_DIR,
+            self.EXTRACTED_TABLES_DIR,
         ):
             path = project_dir / folder
             self._assert_inside_root(path)

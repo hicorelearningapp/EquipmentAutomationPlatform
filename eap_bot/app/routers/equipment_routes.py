@@ -10,6 +10,7 @@ from app.managers.service_container import container
 from app.schemas.project import DocumentCategory
 from app.schemas.secsgem import EquipmentSpec
 from app.services.sml_template import SML_TEMPLATES
+from app.services.equipment_extractor import TableAwareExtractor
 from app.services.storage_service import (
     DocumentExistsError,
     DocumentNotFoundError,
@@ -27,11 +28,13 @@ class EquipmentAPI:
     def __init__(self):
         self.router = APIRouter(tags=["documents"])
         self.storage = StorageService()
+        self.table_extractor = TableAwareExtractor(container.llm_strategy)
         self.register_routes()
 
     def register_routes(self):
         self.router.post("/UploadDocument/{project_id}")(self.upload_document)
         self.router.get("/Analyze/{project_id}/{document_id}", response_model_by_alias=False)(self.analyze)
+        self.router.get("/AnalyzeProject/{project_id}", response_model_by_alias=False)(self.analyze_project)
         self.router.get("/Analyze/{project_id}/{document_id}/report")(self.download_report)
         self.router.delete("/DeleteDocument/{project_id}/{document_id}")(self.delete_document)
         self.router.post("/UpdateExtracted/{project_id}/{document_id}")(self.update_extracted)
@@ -120,7 +123,13 @@ class EquipmentAPI:
             if not text.strip():
                 raise ValueError("Could not extract any text from the PDF")
 
-            spec = container.extractor.extract(text)
+            spec, table_ok = self.table_extractor.extract(pdf_path)
+            if not table_ok:
+                logger.info(
+                    "Table extraction found no classifiable tables for %s/%s — falling back to text chunker",
+                    project_id, document_id,
+                )
+                spec = container.extractor.extract(text)
 
             try:
                 reports, links = container.report_service.generate(spec, text)
@@ -150,6 +159,7 @@ class EquipmentAPI:
                 document_id=document_id,
                 spec=spec,
             )
+            self.storage.save_extracted_tables(project_id, spec)
         except Exception as e:
             logger.error(f"Analysis failed for {project_id}/{document_id}: {str(e)}")
             self.storage.mark_failed(project_id, document_id)
@@ -320,3 +330,143 @@ class EquipmentAPI:
             raise HTTPException(404, str(exc)) from exc
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
+
+    def analyze_project(self, project_id: int):
+        try:
+            self.storage.increment_project_version(project_id)
+            self.storage.write_sml_template(project_id)
+            metadata = self.storage.get_project(project_id)
+        except (InvalidSlugError, ProjectNotFoundError) as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc
+
+        # 1. Batch Analysis for all pending documents
+        for doc in metadata.Documents:
+            if doc.Status != "completed":
+                logger.info("Auto-analyzing document %s for project %s", doc.DocumentID, project_id)
+                try:
+                    pdf_path = self.storage.document_pdf_path(project_id, doc.DocumentID)
+                    text = container.parser.extract_text(str(pdf_path))
+                    if not text.strip():
+                        logger.warning("Empty text from %s", doc.DocumentID)
+                        continue
+
+                    spec, table_ok = self.table_extractor.extract(pdf_path)
+                    if not table_ok:
+                        logger.info(
+                            "Table extraction found no classifiable tables for %s — falling back to text chunker",
+                            doc.DocumentID,
+                        )
+                        spec = container.extractor.extract(text)
+
+                    # Generate reports (non-fatal)
+                    try:
+                        reports, links = container.report_service.generate(spec, text)
+                        spec.Reports = reports
+                        spec.EventReportLinks = links
+                    except Exception as exc:
+                        logger.error("Report generation failed for %s (non-fatal): %s", doc.DocumentID, exc)
+                        spec.Reports = []
+                        spec.EventReportLinks = []
+
+                    json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
+                    self.storage.save_spec_json(json_path, spec)
+
+                    vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
+                    vector_store.add_document(
+                        text,
+                        metadata={
+                            "project_id": project_id,
+                            "document_id": doc.DocumentID,
+                            "tool_id": spec.ToolID,
+                        },
+                    )
+                    self.storage.complete_extraction(
+                        project_id=project_id,
+                        document_id=doc.DocumentID,
+                        spec=spec,
+                    )
+                    self.storage.save_extracted_tables(project_id, spec)
+                except Exception as e:
+                    logger.error("Failed to auto-analyze %s: %s", doc.DocumentID, e)
+                    self.storage.mark_failed(project_id, doc.DocumentID)
+
+        # 2. Collect all extractions and merge them
+        aggregated = EquipmentSpec(
+            DocumentType=metadata.Documents[0].DocumentType if metadata.Documents else "GEM Manual",
+            ToolID=metadata.ProjectName,
+            ToolType=metadata.Tool.value if hasattr(metadata, "Tool") and metadata.Tool else "Semiconductor Processing Equipment",
+        )
+
+        # Reload metadata to get fresh statuses
+        metadata = self.storage.get_project(project_id)
+        for doc in metadata.Documents:
+            if doc.Status == "completed":
+                try:
+                    spec_json = self.storage.read_spec_json(project_id, doc.DocumentID)
+                    spec = EquipmentSpec.model_validate_json(spec_json)
+
+                    if not spec.Reports:
+                        logger.info("Reports missing in completed spec for %s/%s, generating now...", project_id, doc.DocumentID)
+                        pdf_path = self.storage.document_pdf_path(project_id, doc.DocumentID)
+                        text = container.parser.extract_text(str(pdf_path))
+                        reports, links = container.report_service.generate(spec, text)
+                        if reports:
+                            spec.Reports = reports
+                            spec.EventReportLinks = links
+                            json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
+                            self.storage.save_spec_json(json_path, spec)
+
+                    aggregated.StatusVariables.extend(spec.StatusVariables)
+                    aggregated.DataVariables.extend(spec.DataVariables)
+                    aggregated.Events.extend(spec.Events)
+                    aggregated.Alarms.extend(spec.Alarms)
+                    aggregated.RemoteCommands.extend(spec.RemoteCommands)
+                    aggregated.States.extend(spec.States)
+                    aggregated.StateTransitions.extend(spec.StateTransitions)
+                    aggregated.Reports.extend(spec.Reports)
+                    aggregated.EventReportLinks.extend(spec.EventReportLinks)
+                except Exception as e:
+                    logger.warning("Failed to read/merge spec for %s: %s", doc.DocumentID, e)
+                    continue
+
+        # 3. Deduplicate aggregated arrays by primary ID
+        aggregated.StatusVariables = self._dedup_by(aggregated.StatusVariables, "SVID")
+        aggregated.DataVariables = self._dedup_by(aggregated.DataVariables, "DvID")
+        aggregated.Events = self._dedup_by(aggregated.Events, "CEID")
+        aggregated.Alarms = self._dedup_by(aggregated.Alarms, "AlarmID")
+        aggregated.RemoteCommands = self._dedup_by(aggregated.RemoteCommands, "RCMD")
+        aggregated.States = self._dedup_by(aggregated.States, "StateID")
+        aggregated.StateTransitions = self._dedup_transitions(aggregated.StateTransitions)
+        aggregated.Reports = self._dedup_by(aggregated.Reports, "RPTID")
+        aggregated.EventReportLinks = self._dedup_by(aggregated.EventReportLinks, "CEID")
+
+        return self._build_extraction_response(project_id, "project_batch", aggregated)
+
+    @staticmethod
+    def _dedup_by(items: list, key: str) -> list:
+        seen = set()
+        result = []
+        for item in items:
+            val = getattr(item, key, None) if hasattr(item, key) else item.get(key)
+            if val not in seen:
+                seen.add(val)
+                result.append(item)
+        return result
+
+    @staticmethod
+    def _dedup_transitions(items: list) -> list:
+        seen = set()
+        result = []
+        for t in items:
+            key = (
+                getattr(t, "FromState", None),
+                getattr(t, "ToState", None),
+                getattr(t, "TriggerEvent", None),
+                getattr(t, "TriggerCommand", None),
+            )
+            if key not in seen:
+                seen.add(key)
+                result.append(t)
+        return result
