@@ -396,6 +396,20 @@ class StorageService:
 
     def save_extracted_tables(self, project_id: int, spec: "EquipmentSpec") -> None:
         import csv
+        from pydantic import BaseModel
+
+        def _cell_to_str(val: Any) -> str:
+            if val is None:
+                return ""
+            if isinstance(val, BaseModel):
+                return json.dumps(val.model_dump(), ensure_ascii=False)
+            if isinstance(val, list):
+                return json.dumps(
+                    [v.model_dump() if isinstance(v, BaseModel) else v for v in val],
+                    ensure_ascii=False,
+                )
+            return str(val)
+
         tables_dir = self.extracted_tables_path(project_id)
         tables_dir.mkdir(parents=True, exist_ok=True)
 
@@ -461,7 +475,7 @@ class StorageService:
 
             # Merge new items — new data wins on conflict
             for item in items:
-                row = {h: str(getattr(item, h, "") or "") for h in headers}
+                row = {h: _cell_to_str(getattr(item, h, None)) for h in headers}
                 if id_field:
                     key = row[id_field]
                 else:

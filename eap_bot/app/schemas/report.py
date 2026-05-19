@@ -2,21 +2,17 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 class ReportDefinition(BaseModel):
-    RPTID: str = Field(alias="rptid")
-    Name: str = Field(alias="name")
-    LinkedVIDs: list[int] = Field(default_factory=list, alias="linked_vids")
-    Confidence: float = Field(default=0.7, ge=0.0, le=1.0, alias="confidence")
-    Reasoning: Optional[str] = Field(default=None, alias="reasoning")
-
-    model_config = {"populate_by_name": True}
+    RPTID: str
+    Name: str
+    LinkedVIDs: list[int] = Field(default_factory=list)
+    Confidence: float = Field(default=0.7, ge=0.0, le=1.0)
+    Reasoning: Optional[str] = None
 
 
 class EventReportLink(BaseModel):
-    CEID: int = Field(alias="ceid")
-    EventName: str = Field(alias="event_name")
-    RPTIDs: list[str] = Field(default_factory=list, alias="rptids")
-
-    model_config = {"populate_by_name": True}
+    CEID: int
+    EventName: str
+    RPTIDs: list[str] = Field(default_factory=list)
 
 
 class ReportSuggestionResponse(BaseModel):

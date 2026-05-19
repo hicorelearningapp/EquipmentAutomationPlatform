@@ -5,97 +5,65 @@ from app.schemas.report import ReportDefinition, EventReportLink
 
 
 class StatusVariable(BaseModel):
-    SVID: int = Field(alias="svid")
-    Name: str = Field(alias="name")
-    Description: Optional[str] = Field(default=None, alias="description")
-    DataType: str = Field(alias="data_type")
-    AccessType: str = Field(alias="access_type")
-    Value: Optional[str] = Field(default=None, alias="value")
-    Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    SVID: int
+    Name: str
+    Description: Optional[str] = None
+    DataType: str
+    AccessType: str
+    Value: Optional[str] = None
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
 class DataVariable(BaseModel):
-    DvID: int = Field(alias="dvid")
-    Name: str = Field(alias="name")
-    ValueType: str = Field(alias="value_type")
-    Unit: Optional[str] = Field(default=None, alias="unit")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    DvID: int
+    Name: str
+    ValueType: str
+    Unit: Optional[str] = None
 
 
 class RCMDParameter(BaseModel):
-    Name: str = Field(alias="name")
-    Type: str = Field(alias="type")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    Name: str
+    Type: str
 
 
 class RemoteCommand(BaseModel):
-    RCMD: str = Field(alias="rcmd")
-    Description: Optional[str] = Field(default=None, alias="description")
-    Parameters: list[RCMDParameter] = Field(default_factory=list, alias="parameters")
-    Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    RCMD: str
+    Description: Optional[str] = None
+    Parameters: list[RCMDParameter] = Field(default_factory=list)
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
 class Event(BaseModel):
-    CEID: int = Field(alias="ceid")
-    Name: str = Field(alias="name")
-    Description: Optional[str] = Field(default=None, alias="description")
-    LinkedVIDs: list[int] = Field(default_factory=list, alias="linked_vids")
-    ReportID: Optional[str] = Field(default=None, alias="report_id")
-    Report: bool = Field(default=True, alias="report")
-    Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    CEID: int
+    Name: str
+    Description: Optional[str] = None
+    LinkedVIDs: list[int] = Field(default_factory=list)
+    ReportID: Optional[str] = None
+    Report: bool = True
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
 class Alarm(BaseModel):
-    AlarmID: int = Field(alias="alarm_id")
-    Name: str = Field(alias="name")
-    Severity: str = Field(alias="severity")
-    LinkedVID: Optional[int] = Field(default=None, alias="linked_vid")
-    Description: Optional[str] = Field(default=None, alias="description")
-    Confidence: float = Field(default=1.0, ge=0.0, le=1.0, alias="confidence")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    AlarmID: int
+    Name: str
+    Severity: str
+    LinkedVID: Optional[int] = None
+    Description: Optional[str] = None
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
 
 
 class State(BaseModel):
-    StateID: str = Field(alias="state_id")
-    Name: str = Field(alias="name")
-    Description: Optional[str] = Field(default=None, alias="description")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    StateID: str
+    Name: str
+    Description: Optional[str] = None
 
 
 class StateTransition(BaseModel):
-    FromState: str = Field(alias="from_state")
-    ToState: str = Field(alias="to_state")
-    TriggerEvent: Optional[str] = Field(default=None, alias="trigger_event")
-    TriggerCommand: Optional[str] = Field(default=None, alias="trigger_command")
-    Manual: bool = Field(default=False, alias="manual")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    FromState: str
+    ToState: str
+    TriggerEvent: Optional[str] = None
+    TriggerCommand: Optional[str] = None
+    Manual: bool = False
 
     @model_validator(mode="after")
     def at_least_one_trigger(self) -> "StateTransition":
@@ -105,43 +73,31 @@ class StateTransition(BaseModel):
 
 
 class EquipmentSpec(BaseModel):
-    DocumentType: Optional[str] = Field(default=None, alias="document_type")
-    ToolID: str = Field(alias="tool_id")
-    ToolType: str = Field(alias="tool_type")
-    Model: Optional[str] = Field(default=None, alias="model")
-    Protocol: str = Field(default="SECS/GEM", alias="protocol")
-    StatusVariables: list[StatusVariable] = Field(default_factory=list, alias="StatusVariable")
-    DataVariables: list[DataVariable] = Field(default_factory=list, alias="DataVariable")
-    Events: list[Event] = Field(default_factory=list, alias="events")
-    Alarms: list[Alarm] = Field(default_factory=list, alias="alarms")
-    RemoteCommands: list[RemoteCommand] = Field(default_factory=list, alias="remote_commands")
-    States: list[State] = Field(default_factory=list, alias="states")
-    StateTransitions: list[StateTransition] = Field(default_factory=list, alias="state_transitions")
-    Reports: list[ReportDefinition] = Field(default_factory=list, alias="reports")
-    EventReportLinks: list[EventReportLink] = Field(default_factory=list, alias="event_report_links")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    DocumentType: Optional[str] = None
+    ToolID: str
+    ToolType: str
+    Model: Optional[str] = None
+    Protocol: str = "SECS/GEM"
+    StatusVariables: list[StatusVariable] = Field(default_factory=list)
+    DataVariables: list[DataVariable] = Field(default_factory=list)
+    Events: list[Event] = Field(default_factory=list)
+    Alarms: list[Alarm] = Field(default_factory=list)
+    RemoteCommands: list[RemoteCommand] = Field(default_factory=list)
+    States: list[State] = Field(default_factory=list)
+    StateTransitions: list[StateTransition] = Field(default_factory=list)
+    Reports: list[ReportDefinition] = Field(default_factory=list)
+    EventReportLinks: list[EventReportLink] = Field(default_factory=list)
 
 
 class ValidationIssue(BaseModel):
-    Severity: str = Field(alias="severity")
-    Code: str = Field(alias="code")
-    Message: str = Field(alias="message")
-    EntityID: Optional[str] = Field(default=None, alias="entity_id")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    Severity: str
+    Code: str
+    Message: str
+    EntityID: Optional[str] = None
 
 
 class ValidationReport(BaseModel):
-    Issues: list[ValidationIssue] = Field(default_factory=list, alias="issues")
-
-    model_config = {
-        "populate_by_name": True
-    }
+    Issues: list[ValidationIssue] = Field(default_factory=list)
 
     def is_clean(self) -> bool:
         return not any(i.Severity == "error" for i in self.Issues)

@@ -41,20 +41,20 @@ Extract any explicit GEM report definitions you find.
 A report definition groups one or more data/status variable IDs (DVIDs or SVIDs)
 under a single Report ID (RPTID) that gets sent when a collection event fires.
 
-Return ONLY a JSON object with a "hints" key containing an array of report definitions.
+Return ONLY a JSON object with a "Hints" key containing an array of report definitions.
 Each element in the array must have:
-  "rptid"      : string  — the report identifier (e.g. "RPT_001" or as named in the doc)
-  "name"       : string  — a short descriptive name
-  "linked_vids": [int]   — list of DVID/SVID integers associated with this report
+  "RPTID"      : string  — the report identifier (e.g. "RPT_001" or as named in the doc)
+  "Name"       : string  — a short descriptive name
+  "LinkedVIDs" : [int]   — list of DVID/SVID integers associated with this report
 
 Example format:
 {{
-  "hints": [
-    {{ "rptid": "RPT_1", "name": "...", "linked_vids": [101, 102] }}
+  "Hints": [
+    {{ "RPTID": "RPT_1", "Name": "...", "LinkedVIDs": [101, 102] }}
   ]
 }}
 
-If you find no report definitions, return {{"hints": []}}.
+If you find no report definitions, return {{"Hints": []}}.
 Do not include any explanation or markdown.
 
 Manual excerpt:
@@ -80,16 +80,16 @@ Rules:
 - Prefer reusing RPTID values from the hints if they exist; otherwise generate
   sequential IDs like "RPT_001", "RPT_002", etc.
 - Each report should have 2-6 linked variable IDs where possible.
-- Set "confidence" between 0.0 and 1.0 based on how certain you are.
-- Optionally include a short "reasoning" string explaining the grouping.
+- Set "Confidence" between 0.0 and 1.0 based on how certain you are.
+- Optionally include a short "Reasoning" string explaining the grouping.
 
-Return ONLY a JSON object with a "reports" key containing the array of reports.
+Return ONLY a JSON object with a "Reports" key containing the array of reports.
 Each element must have:
-  "rptid"      : string
-  "name"       : string
-  "linked_vids": [int]
-  "confidence" : float
-  "reasoning"  : string  (optional)
+  "RPTID"      : string
+  "Name"       : string
+  "LinkedVIDs" : [int]
+  "Confidence" : float
+  "Reasoning"  : string  (optional)
 
 Do not include any explanation or markdown.
 """
@@ -111,11 +111,11 @@ Rules:
 - An event may link to multiple reports; a report may be linked from multiple events.
 - Do NOT invent new RPTIDs — only use the ones listed under Available Reports.
 
-Return ONLY a JSON object with a "links" key containing the array of links.
+Return ONLY a JSON object with a "Links" key containing the array of links.
 Each element must have:
-  "ceid"       : int    — the CEID integer
-  "event_name" : string — the event name
-  "rptids"     : [str]  — list of RPTID strings linked to this event
+  "CEID"      : int    — the CEID integer
+  "EventName" : string — the event name
+  "RPTIDs"    : [str]  — list of RPTID strings linked to this event
 
 Do not include any explanation or markdown.
 """
@@ -249,9 +249,9 @@ class ReportService:
             raise ValueError(
                 f"ReportService step {step}: LLM returned invalid JSON: {exc}\nRaw: {raw[:300]}"
             ) from exc
-        # If it's a dict, find the first key that contains a list (e.g. "reports", "links", "hints")
+        # If it's a dict, find the first key that contains a list (e.g. "Reports", "Links", "Hints")
         if isinstance(result, dict):
-            for key in ["reports", "links", "hints", "data", "items"]:
+            for key in ["Reports", "Links", "Hints", "Data", "Items"]:
                 if key in result and isinstance(result[key], list):
                     return result[key]
             # Fallback: take the first value that is a list

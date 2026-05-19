@@ -269,11 +269,10 @@ class EquipmentExtractor:
     @staticmethod
     def _sanitize(data: dict) -> None:
         """Clean up malformed transition entries before validation."""
-        transitions = data.get("StateTransitions") or data.get("state_transitions") or []
+        transitions = data.get("StateTransitions") or []
         data["StateTransitions"] = [
             t for t in transitions
-            if (t.get("FromState") or t.get("from_state"))
-            and (t.get("ToState") or t.get("to_state"))
+            if t.get("FromState") and t.get("ToState")
         ]
 
     # ------------------------------------------------------------------
@@ -293,7 +292,7 @@ EXPECTED JSON FORMAT:
   "ToolType": "string",
   "Model": "string (optional)",
   "Protocol": "SECS/GEM",
-  "StatusVariable":[
+  "StatusVariables":[
     {{
       "SVID": 123,
       "Name": "string",
@@ -304,7 +303,7 @@ EXPECTED JSON FORMAT:
       "Confidence": 0.0 to 1.0 (double)
     }}
   ],
-  "DataVariable": [
+  "DataVariables": [
     {{
       "DvID": 123,
       "Name": "string",
@@ -427,11 +426,11 @@ The table below was extracted directly from a semiconductor equipment manual.
 The column names may differ from standard SECS/GEM field names — map them intelligently.
 Convert every data row into a JSON array of StatusVariable objects.
 Each object MUST have:
-  "svid": integer, "name": string, "description": string (empty if absent),
-  "data_type": string (e.g. "U4","ASCII","Float","String"),
-  "access_type": string (e.g. "RO","RW"), "value": string (empty if absent),
-  "confidence": float (1.0 if svid+name present else 0.7)
-Return ONLY: {{"StatusVariable": [...]}}  No prose, no markdown fences.
+  "SVID": integer, "Name": string, "Description": string (empty if absent),
+  "DataType": string (e.g. "U4","ASCII","Float","String"),
+  "AccessType": string (e.g. "RO","RW"), "Value": string (empty if absent),
+  "Confidence": float (1.0 if SVID+Name present else 0.7)
+Return ONLY: {{"StatusVariables": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",
 
@@ -440,11 +439,10 @@ The table below was extracted directly from a semiconductor equipment manual.
 The column names may differ from standard SECS/GEM field names — map them intelligently.
 Convert every data row into a JSON array of DataVariable objects.
 Each object MUST have:
-  "dvid": integer, "name": string,
-  "value_type": string (float|integer|string|boolean),
-  "unit": string (empty if absent),
-  "confidence": float (1.0 if dvid+name present else 0.7)
-Return ONLY: {{"DataVariable": [...]}}  No prose, no markdown fences.
+  "DvID": integer, "Name": string,
+  "ValueType": string (float|integer|string|boolean),
+  "Unit": string (empty if absent)
+Return ONLY: {{"DataVariables": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",
 
@@ -453,12 +451,12 @@ The table below was extracted directly from a semiconductor equipment manual.
 The column names may differ from standard SECS/GEM field names — map them intelligently.
 Convert every data row into a JSON array of Collection Event objects.
 Each object MUST have:
-  "ceid": integer, "name": string, "description": string (empty if absent),
-  "linked_vids": [integer] (parse comma-separated VID lists, empty list if absent),
-  "report_id": string (suggest RPT_{{ceid}} if not present),
-  "report": true,
-  "confidence": float (1.0 if ceid+name present else 0.7)
-Return ONLY: {{"events": [...]}}  No prose, no markdown fences.
+  "CEID": integer, "Name": string, "Description": string (empty if absent),
+  "LinkedVIDs": [integer] (parse comma-separated VID lists, empty list if absent),
+  "ReportID": string (suggest RPT_{{CEID}} if not present),
+  "Report": true,
+  "Confidence": float (1.0 if CEID+Name present else 0.7)
+Return ONLY: {{"Events": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",
 
@@ -467,11 +465,11 @@ The table below was extracted directly from a semiconductor equipment manual.
 The column names may differ from standard SECS/GEM field names — map them intelligently.
 Convert every data row into a JSON array of Alarm objects.
 Each object MUST have:
-  "alarm_id": integer, "name": string,
-  "severity": exactly one of "critical"|"warning"|"info" (lowercase),
-  "linked_vid": integer or null, "description": string (empty if absent),
-  "confidence": float (1.0 if alarm_id+name present else 0.7)
-Return ONLY: {{"alarms": [...]}}  No prose, no markdown fences.
+  "AlarmID": integer, "Name": string,
+  "Severity": exactly one of "critical"|"warning"|"info" (lowercase),
+  "LinkedVID": integer or null, "Description": string (empty if absent),
+  "Confidence": float (1.0 if AlarmID+Name present else 0.7)
+Return ONLY: {{"Alarms": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",
 
@@ -480,10 +478,10 @@ The table below was extracted directly from a semiconductor equipment manual.
 The column names may differ from standard SECS/GEM field names — map them intelligently.
 Convert every data row into a JSON array of RemoteCommand objects.
 Each object MUST have:
-  "rcmd": string, "description": string (empty if absent),
-  "parameters": [{{"name": string, "type": "string"}}] (parse from Parameters column, empty list if None/absent),
-  "confidence": float (1.0 if command name present else 0.7)
-Return ONLY: {{"remote_commands": [...]}}  No prose, no markdown fences.
+  "RCMD": string, "Description": string (empty if absent),
+  "Parameters": [{{"Name": string, "Type": string}}] (parse from Parameters column, empty list if None/absent),
+  "Confidence": float (1.0 if command name present else 0.7)
+Return ONLY: {{"RemoteCommands": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",
 
@@ -491,8 +489,8 @@ TABLE (CSV):
 The table below was extracted directly from a semiconductor equipment manual.
 Convert every data row into a JSON array of State objects.
 Each object MUST have:
-  "state_id": string, "name": string, "description": string (empty if absent)
-Return ONLY: {{"states": [...]}}  No prose, no markdown fences.
+  "StateID": string, "Name": string, "Description": string (empty if absent)
+Return ONLY: {{"States": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",
 
@@ -501,11 +499,11 @@ The table below was extracted directly from a semiconductor equipment manual.
 The column names may differ — map them intelligently.
 Convert every data row into a JSON array of StateTransition objects.
 Each object MUST have:
-  "from_state": string (REQUIRED), "to_state": string (REQUIRED),
-  "trigger_event": string or null, "trigger_command": string or null,
-  "manual": boolean (true only if no event/command trigger)
-Never set both trigger_event and trigger_command on the same entry.
-Return ONLY: {{"state_transitions": [...]}}  No prose, no markdown fences.
+  "FromState": string (REQUIRED), "ToState": string (REQUIRED),
+  "TriggerEvent": string or null, "TriggerCommand": string or null,
+  "Manual": boolean (true only if no event/command trigger)
+Never set both TriggerEvent and TriggerCommand on the same entry.
+Return ONLY: {{"StateTransitions": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",
     }
@@ -622,27 +620,21 @@ TABLE (CSV):
 
         spec = EquipmentSpec(ToolID="", ToolType="")
         try:
+            items = data.get(section) or []
             if section == "StatusVariables":
-                items = data.get("StatusVariable") or data.get("StatusVariables") or []
                 spec.StatusVariables = [StatusVariable.model_validate(i) for i in items]
             elif section == "DataVariables":
-                items = data.get("DataVariable") or data.get("DataVariables") or []
                 spec.DataVariables = [DataVariable.model_validate(i) for i in items]
             elif section == "Events":
-                items = data.get("events") or data.get("Events") or []
                 spec.Events = [Event.model_validate(i) for i in items]
             elif section == "Alarms":
-                items = data.get("alarms") or data.get("Alarms") or []
                 spec.Alarms = [Alarm.model_validate(i) for i in items]
             elif section == "RemoteCommands":
-                items = data.get("remote_commands") or data.get("RemoteCommands") or []
                 spec.RemoteCommands = [RemoteCommand.model_validate(i) for i in items]
             elif section == "States":
-                items = data.get("states") or data.get("States") or []
                 spec.States = [State.model_validate(i) for i in items]
             elif section == "StateTransitions":
-                items = data.get("state_transitions") or data.get("StateTransitions") or []
-                valid = [t for t in items if t.get("from_state") and t.get("to_state")]
+                valid = [t for t in items if t.get("FromState") and t.get("ToState")]
                 spec.StateTransitions = [StateTransition.model_validate(t) for t in valid]
         except Exception as exc:
             logger.warning("model_validate failed for %s table response: %s", section, exc)
