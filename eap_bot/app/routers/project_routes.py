@@ -64,7 +64,8 @@ class ProjectAPI:
                             logger.warning(f"Empty text from {doc.DocumentID}")
                             continue
 
-                        spec = container.extractor.extract(text)
+                        tables_dir = self.storage.extracted_tables_path(project_id)
+                        spec = container.extractor.extract(text, pdf_path=pdf_path, tables_dir=tables_dir)
 
                         # Generate reports (non-fatal)
                         try:
@@ -93,6 +94,7 @@ class ProjectAPI:
                             document_id=doc.DocumentID,
                             spec=spec,
                         )
+                        self.storage.save_extracted_tables(project_id, spec)
                     except Exception as e:
                         logger.error(f"Failed to auto-analyze {doc.DocumentID}: {str(e)}")
                         self.storage.mark_failed(project_id, doc.DocumentID)

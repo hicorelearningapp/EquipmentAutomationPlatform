@@ -10,7 +10,6 @@ from app.managers.service_container import container
 from app.schemas.project import DocumentCategory
 from app.schemas.secsgem import EquipmentSpec
 from app.services.sml_template import SML_TEMPLATES
-from app.services.equipment_extractor import TableAwareExtractor
 from app.services.storage_service import (
     DocumentExistsError,
     DocumentNotFoundError,
@@ -28,7 +27,6 @@ class EquipmentAPI:
     def __init__(self):
         self.router = APIRouter(tags=["documents"])
         self.storage = StorageService()
-        self.table_extractor = TableAwareExtractor(container.llm_strategy)
         self.register_routes()
 
     def register_routes(self):
@@ -123,13 +121,8 @@ class EquipmentAPI:
             if not text.strip():
                 raise ValueError("Could not extract any text from the PDF")
 
-            spec, table_ok = self.table_extractor.extract(pdf_path)
-            if not table_ok:
-                logger.info(
-                    "Table extraction found no classifiable tables for %s/%s — falling back to text chunker",
-                    project_id, document_id,
-                )
-                spec = container.extractor.extract(text)
+            tables_dir = self.storage.extracted_tables_path(project_id)
+            spec = container.extractor.extract(text, pdf_path=pdf_path, tables_dir=tables_dir)
 
             try:
                 reports, links = container.report_service.generate(spec, text)
@@ -352,13 +345,8 @@ class EquipmentAPI:
                         logger.warning("Empty text from %s", doc.DocumentID)
                         continue
 
-                    spec, table_ok = self.table_extractor.extract(pdf_path)
-                    if not table_ok:
-                        logger.info(
-                            "Table extraction found no classifiable tables for %s — falling back to text chunker",
-                            doc.DocumentID,
-                        )
-                        spec = container.extractor.extract(text)
+                    tables_dir = self.storage.extracted_tables_path(project_id)
+                    spec = container.extractor.extract(text, pdf_path=pdf_path, tables_dir=tables_dir)
 
                     # Generate reports (non-fatal)
                     try:
