@@ -43,7 +43,6 @@ class EquipmentAPI:
         self.router.get("/AnalyzeProject/{project_id}", response_model_by_alias=False)(self.analyze_project)
         self.router.get("/Analyze/{project_id}/{document_id}/report")(self.download_report)
         self.router.delete("/DeleteDocument/{project_id}/{document_id}")(self.delete_document)
-        self.router.post("/UpdateExtracted/{project_id}/{document_id}")(self.update_extracted)
         self.router.post("/UpdateExtraction/{project_id}/{document_id}")(self.update_extraction)
         self.router.post("/GenerateToolCharacterizationScript/{project_id}")(self.generate_tool_char_script)
         self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
@@ -323,7 +322,7 @@ class EquipmentAPI:
             "Message": f"Document {document_id} deleted",
         }
 
-    def update_extracted(self, project_id: int, document_id: str, spec: EquipmentSpec):
+    def update_extraction(self, project_id: int, document_id: str, spec: EquipmentSpec):
         try:
             self.storage.increment_project_version(project_id)
             json_path = self.storage.spec_json_path(project_id, document_id)
@@ -488,9 +487,6 @@ class EquipmentAPI:
                 seen.add(key)
                 result.append(t)
         return result
-
-    def update_extraction(self, project_id: int, document_id: str, spec: EquipmentSpec):
-        return self.update_extracted(project_id, document_id, spec)
 
     def generate_tool_char_script(self, project_id: int):
         try:
