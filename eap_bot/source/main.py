@@ -2,11 +2,11 @@ import logging
 
 from fastapi import FastAPI
 
-from app.routers.equipment_routes import EquipmentAPI
-from app.routers.mapping_routes import MappingAPI
-from app.routers.project_routes import ProjectAPI
-from app.routers.codegen_routes import CodeGenAPI
-from app.services.storage_service import StorageService
+from source.routers.equipment_routes import EquipmentAPI
+from source.routers.mapping_routes import MappingAPI
+from source.routers.project_routes import ProjectAPI
+from source.routers.codegen_routes import CodeGenAPI
+from source.services.storage_service import StorageService
 
 logging.basicConfig(
     level=logging.INFO,

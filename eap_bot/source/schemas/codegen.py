@@ -20,3 +20,18 @@ class CodeUpdateRequest(BaseModel):
 class ResultUpdateRequest(BaseModel):
     Category: str
     Result: Any
+
+
+class ScriptUpdateRequest(BaseModel):
+    key: str
+    script: str
+
+
+class SmartCodeGenerateRequest(BaseModel):
+    key: str
+    instructions: Optional[str] = None
+
+
+class SmartCodeUpdateRequest(BaseModel):
+    key: str
+    source_code: str

@@ -27,8 +27,8 @@ import json
 import logging
 from typing import Optional
 
-from app.schemas.secsgem import EquipmentSpec, ReportDefinition, EventReportLink
-from app.utils.llm_factory import LLMStrategy
+from source.schemas.secsgem import EquipmentSpec, ReportDefinition, EventReportLink
+from source.utils.llm_factory import LLMStrategy
 
 logger = logging.getLogger(__name__)
 

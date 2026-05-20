@@ -6,11 +6,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from app.config import settings
-from app.schemas.project import DocumentMetadata, ProjectMetadata, ProjectCreate, ProjectOut
-from app.schemas.mapping import ProjectMapping
-from app.schemas.secsgem import EquipmentSpec
-from app.services.sml_template import SML_CHARACTERISATION_TEMPLATE, SML_TEMPLATE_FILENAME
+from source.config import settings
+from source.schemas.project import DocumentMetadata, ProjectMetadata, ProjectCreate, ProjectOut
+from source.schemas.mapping import ProjectMapping
+from source.schemas.secsgem import EquipmentSpec
+from source.services.sml_template import SML_CHARACTERISATION_TEMPLATE, SML_TEMPLATE_FILENAME
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +41,17 @@ class DocumentExistsError(StorageError):
 
 class StorageService:
     DOCUMENTS_DIR = "Documents"
-    MESTAG_DIR = "MESTagDocuments"
+    MESTAG_DIR = "MESTemplates"
     EXTRACTED_JSON_DIR = "ExtractedJson"
     VECTORSTORE_DIR = "Vectorstore"
     EXTRACTED_TABLES_DIR = "ExtractedTables"
-    METADATA_DIR = "Metadata"
+    METADATA_DIR = "ProjectsMetadata"
     CODE_DIR = "Code"
+    TOOL_CHAR_DIR = "ToolCharacterization"
+    TEST_SUMMARY_DIR = "TestSummary"
+    SMART_AUTO_CODE_DIR = "SmartAutoCode"
+    MES_MAPPING_JSON_DIR = "MESMappingJSON"
+    REPORTS_DIR = "Reports"
     METADATA_FILE = "project.json"
 
     _SLUG_RE = re.compile(r"[^a-z0-9]+")
@@ -364,13 +369,13 @@ class StorageService:
     def get_mapping(self, project_id: int) -> ProjectMapping:
         path = self.mapping_path(project_id)
         if not path.exists():
-            from app.schemas.mapping import ProjectMapping
+            from source.schemas.mapping import ProjectMapping
             return ProjectMapping(ProjectID=project_id)
         try:
-            from app.schemas.mapping import ProjectMapping
+            from source.schemas.mapping import ProjectMapping
             return ProjectMapping.model_validate_json(path.read_text(encoding="utf-8"))
         except Exception:
-            from app.schemas.mapping import ProjectMapping
+            from source.schemas.mapping import ProjectMapping
             return ProjectMapping(ProjectID=project_id)
 
     def save_mapping(self, project_id: int, mapping: ProjectMapping) -> None:
@@ -491,7 +496,7 @@ class StorageService:
 
 
     def mapping_path(self, project_id: int) -> Path:
-        return self._project_dir(project_id) / self.METADATA_DIR / "mapping.json"
+        return self._project_dir(project_id) / self.MES_MAPPING_JSON_DIR / "mes_mapping.json"
 
     def mes_tags_json_path(self, project_id: int, document_id: str) -> Path:
         return self._project_dir(project_id) / "MESTags" / f"{document_id}.json"
@@ -569,6 +574,11 @@ class StorageService:
             self.VECTORSTORE_DIR,
             self.METADATA_DIR,
             self.EXTRACTED_TABLES_DIR,
+            self.TOOL_CHAR_DIR,
+            self.TEST_SUMMARY_DIR,
+            self.SMART_AUTO_CODE_DIR,
+            self.MES_MAPPING_JSON_DIR,
+            self.REPORTS_DIR,
         ):
             path = project_dir / folder
             self._assert_inside_root(path)

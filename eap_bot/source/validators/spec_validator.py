@@ -1,6 +1,6 @@
 from collections import Counter
 
-from app.schemas.secsgem import EquipmentSpec, ValidationIssue, ValidationReport
+from source.schemas.secsgem import EquipmentSpec, ValidationIssue, ValidationReport
 
 
 class SpecValidator:

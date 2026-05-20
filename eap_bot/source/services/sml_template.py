@@ -6,7 +6,7 @@ from pathlib import Path
 
 SML_TEMPLATE_FILENAME = "tool_characterization_sequence.txt"
 
-SCRIPTS_DIR = Path(__file__).parent.parent / "scripts"
+SCRIPTS_DIR = Path(__file__).parent.parent.parent / "GEMTestScriptTemplates"
 
 
 def _load_template(filename: str) -> str:

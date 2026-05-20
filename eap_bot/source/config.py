@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     # Use an absolute path on Azure, e.g. /var/lib/eap/storage.
     # The relative default is intended only for local development.
-    EAP_STORAGE_ROOT: str = Field("./runtime_storage")
+    EAP_STORAGE_ROOT: str = Field("./projects")
 
     CHUNK_SIZE: int = Field(1000)
     CHUNK_OVERLAP: int = Field(200)

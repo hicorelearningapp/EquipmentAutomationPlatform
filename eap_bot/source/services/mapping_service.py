@@ -5,14 +5,14 @@ import json
 import logging
 from typing import List
 
-from app.schemas.mapping import (
+from source.schemas.mapping import (
     MESTag, 
     MappingEntry, 
     MappingSuggestionResponse, 
     UnmappedEntity
 )
-from app.schemas.secsgem import EquipmentSpec
-from app.utils.llm_factory import LLMStrategy
+from source.schemas.secsgem import EquipmentSpec
+from source.utils.llm_factory import LLMStrategy
 
 logger = logging.getLogger(__name__)
 

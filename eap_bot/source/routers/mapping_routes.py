@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
-from app.schemas.mapping import MappingUpdateRequest
-from app.services.storage_service import StorageService, StorageError
+from source.schemas.mapping import MappingUpdateRequest
+from source.services.storage_service import StorageService, StorageError
 
 
 class MappingAPI:

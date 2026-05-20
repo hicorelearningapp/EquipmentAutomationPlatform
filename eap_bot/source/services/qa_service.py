@@ -2,9 +2,9 @@ import logging
 import re
 from typing import Any, Literal
 
-from app.schemas.secsgem import EquipmentSpec
-from app.utils.embedder import VectorStoreManager
-from app.utils.llm_factory import LLMStrategy
+from source.schemas.secsgem import EquipmentSpec
+from source.utils.embedder import VectorStoreManager
+from source.utils.llm_factory import LLMStrategy
 
 logger = logging.getLogger(__name__)
 

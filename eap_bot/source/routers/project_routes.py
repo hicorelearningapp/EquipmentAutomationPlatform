@@ -2,11 +2,11 @@ import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from app.managers.service_container import container
-from app.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, DocumentCategory, ProjectUpdate, ProjectMetadata, AggregatedSpec
-from app.schemas.secsgem import EquipmentSpec
-from app.services.sml_template import SML_TEMPLATES
-from app.services.storage_service import (
+from source.managers.service_container import container
+from source.schemas.project import ProjectCreate, ProjectDetail, AskRequest, ProjectOut, DocumentCategory, ProjectUpdate, ProjectMetadata, AggregatedSpec
+from source.schemas.secsgem import EquipmentSpec
+from source.services.sml_template import SML_TEMPLATES
+from source.services.storage_service import (
     DocumentNotFoundError,
     InvalidSlugError,
     ProjectExistsError,
@@ -14,7 +14,7 @@ from app.services.storage_service import (
     StorageError,
     StorageService,
 )
-from app.utils.embedder import VectorStoreManager
+from source.utils.embedder import VectorStoreManager
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +133,88 @@ class ProjectAPI:
             aggregated.Reports = self._dedup_by(aggregated.Reports, "RPTID")
             aggregated.EventReportLinks = self._dedup_by(aggregated.EventReportLinks, "CEID")
 
+            # Map aggregated arrays to omit Confidence/Value
+            clean_aggregated = AggregatedSpec(
+                StatusVariables=[
+                    {
+                        "SVID": v.SVID,
+                        "Name": v.Name,
+                        "Description": v.Description or "",
+                        "DataType": v.DataType,
+                        "AccessType": v.AccessType,
+                    }
+                    for v in aggregated.StatusVariables
+                ],
+                DataVariables=[
+                    {
+                        "DvID": v.DvID,
+                        "Name": v.Name,
+                        "Unit": v.Unit or "",
+                        "ValueType": v.ValueType,
+                    }
+                    for v in aggregated.DataVariables
+                ],
+                Events=[
+                    {
+                        "CEID": e.CEID,
+                        "EventName": e.Name,
+                        "Description": e.Description or "",
+                    }
+                    for e in aggregated.Events
+                ],
+                Alarms=[
+                    {
+                        "AlarmID": a.AlarmID,
+                        "AlarmText": a.Name,
+                        "Severity": a.Severity,
+                    }
+                    for a in aggregated.Alarms
+                ],
+                RemoteCommands=[
+                    {
+                        "RCMD": rc.RCMD,
+                        "Description": rc.Description or "",
+                        "Parameters": [p.model_dump() for p in rc.Parameters],
+                    }
+                    for rc in aggregated.RemoteCommands
+                ],
+                States=[
+                    {
+                        "StateID": st.StateID,
+                        "Name": st.Name,
+                        "Description": st.Description or "",
+                    }
+                    for st in aggregated.States
+                ],
+                StateTransitions=[
+                    {
+                        "FromState": tr.FromState,
+                        "ToState": tr.ToState,
+                        "TriggerEvent": tr.TriggerEvent or "",
+                        "TriggerCommand": tr.TriggerCommand or "",
+                        "Manual": tr.Manual,
+                    }
+                    for tr in aggregated.StateTransitions
+                ],
+                Reports=[
+                    {
+                        "RPTID": r.RPTID,
+                        "Name": r.Name,
+                        "LinkedVIDs": r.LinkedVIDs,
+                        "Reasoning": r.Reasoning or "",
+                    }
+                    for r in aggregated.Reports
+                ],
+                EventReportLinks=[
+                    {
+                        "CEID": lnk.CEID,
+                        "EventName": lnk.EventName,
+                        "RPTIDs": lnk.RPTIDs,
+                    }
+                    for lnk in aggregated.EventReportLinks
+                ],
+            )
+
             mapping = self.storage.get_mapping(project_id)
             self.storage.write_sml_template(project_id)
 
@@ -143,7 +225,7 @@ class ProjectAPI:
 
             return ProjectDetail(
                 **updated_metadata.model_dump(),
-                Extractions=aggregated,
+                Extractions=clean_aggregated,
                 Mappings=mapping,
                 SmlTemplate=sml_data,
             )

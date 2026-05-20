@@ -9,8 +9,8 @@ from typing import Union
 import pdfplumber
 import tiktoken
 
-from app.config import settings
-from app.schemas.secsgem import (
+from source.config import settings
+from source.schemas.secsgem import (
     Alarm,
     DataVariable,
     EquipmentSpec,
@@ -21,25 +21,12 @@ from app.schemas.secsgem import (
     StateTransition,
     StatusVariable,
 )
-from app.utils.llm_factory import LLMStrategy
+from source.utils.llm_factory import LLMStrategy
 
 logger = logging.getLogger(__name__)
 
 
 class EquipmentExtractor:
-    """Extracts SECS/GEM equipment specifications from PDF text.
-
-    Uses a Map-Reduce strategy for large documents:
-      1. Split the text into token-sized chunks.
-      2. Extract a partial EquipmentSpec from each chunk in parallel (Map).
-      3. Merge all partial specs into one, deduplicating by ID (Reduce).
-
-    Small documents that fit within a single chunk bypass the
-    chunking/merging entirely for zero overhead.
-    """
-
-    # cl100k_base is the OpenAI tokenizer; close enough to Llama tokenization
-    # for chunking decisions (within ~10%). Avoids a heavier transformers dep.
     _ENCODER_NAME = "cl100k_base"
 
     def __init__(self, llm_strategy: LLMStrategy) -> None:
@@ -55,13 +42,6 @@ class EquipmentExtractor:
     # ------------------------------------------------------------------
 
     def extract(self, pdf_text: str, pdf_path: Union[str, Path, None] = None, tables_dir: Union[str, Path, None] = None) -> EquipmentSpec:
-        """Extract an EquipmentSpec from the full document text.
-
-        If pdf_path is provided, extracts raw tables from the PDF using pdfplumber,
-        saves them as CSVs to tables_dir (if provided), then sends each classified
-        table as a targeted prompt alongside the standard text chunks for higher accuracy.
-        Falls back to text-only chunking if no tables are found.
-        """
         # Step 1: Extract and save raw tables from PDF
         section_csvs: dict[str, str] = {}  # section -> CSV string
         if pdf_path is not None:
@@ -200,11 +180,6 @@ class EquipmentExtractor:
 
     @staticmethod
     def _merge_specs(specs: list[EquipmentSpec]) -> EquipmentSpec:
-        """Merge multiple partial specs into one, deduplicating by ID.
-
-        For items with the same ID, the entry with higher Confidence wins.
-        Scalar fields (ToolID, ToolType, etc.) take the first non-empty value.
-        """
         merged = EquipmentSpec(ToolID="", ToolType="")
 
         for spec in specs:

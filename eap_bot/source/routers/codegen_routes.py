@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from app.schemas.codegen import CodeUpdateRequest, ResultUpdateRequest
-from app.services.storage_service import StorageService, StorageError, ProjectNotFoundError
+from source.schemas.codegen import CodeUpdateRequest, ResultUpdateRequest
+from source.services.storage_service import StorageService, StorageError, ProjectNotFoundError
 
 class CodeGenAPI:
     def __init__(self):

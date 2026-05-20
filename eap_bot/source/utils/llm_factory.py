@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from langchain_core.language_models.chat_models import BaseChatModel
 
-from app.config import settings
+from source.config import settings
 
 class LLMStrategy(ABC):
     @abstractmethod

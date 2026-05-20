@@ -1,7 +1,7 @@
 from typing import Literal, Optional
 from pydantic import BaseModel, Field, model_validator
 
-from app.schemas.report import ReportDefinition, EventReportLink
+from source.schemas.report import ReportDefinition, EventReportLink
 
 
 class StatusVariable(BaseModel):

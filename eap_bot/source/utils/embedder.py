@@ -8,7 +8,7 @@ from langchain_core.documents import Document as LC_Document
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from app.config import settings
+from source.config import settings
 
 logger = logging.getLogger(__name__)
 
