@@ -54,26 +54,37 @@ class MappingService:
         mapped_entity_ids = {s.entity_id for s in suggestions}
         unmapped = []
 
-        for v in spec.variables:
-            if v.vid not in mapped_entity_ids:
+        for v in spec.StatusVariables:
+            vid_str = str(v.SVID)
+            if vid_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    entity_id=v.vid,
+                    entity_id=vid_str,
                     entity_type="variable",
-                    name=v.name,
+                    name=v.Name,
                 ))
-        for e in spec.events:
-            if e.ceid not in mapped_entity_ids:
+        for v in spec.DataVariables:
+            vid_str = str(v.DvID)
+            if vid_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    entity_id=e.ceid,
+                    entity_id=vid_str,
+                    entity_type="variable",
+                    name=v.Name,
+                ))
+        for e in spec.Events:
+            ceid_str = str(e.CEID)
+            if ceid_str not in mapped_entity_ids:
+                unmapped.append(UnmappedEntity(
+                    entity_id=ceid_str,
                     entity_type="event",
-                    name=e.name,
+                    name=e.Name,
                 ))
-        for a in spec.alarms:
-            if a.alarm_id not in mapped_entity_ids:
+        for a in spec.Alarms:
+            alarm_id_str = str(a.AlarmID)
+            if alarm_id_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    entity_id=a.alarm_id,
+                    entity_id=alarm_id_str,
                     entity_type="alarm",
-                    name=a.name,
+                    name=a.Name,
                 ))
         return unmapped
 
@@ -82,12 +93,14 @@ class MappingService:
         self, data: dict, spec: EquipmentSpec, target_tags: List[MESTag]
     ) -> dict:
         valid_entity_ids: set[str] = set()
-        for v in spec.variables:
-            valid_entity_ids.add(v.vid)
-        for e in spec.events:
-            valid_entity_ids.add(e.ceid)
-        for a in spec.alarms:
-            valid_entity_ids.add(a.alarm_id)
+        for v in spec.StatusVariables:
+            valid_entity_ids.add(str(v.SVID))
+        for v in spec.DataVariables:
+            valid_entity_ids.add(str(v.DvID))
+        for e in spec.Events:
+            valid_entity_ids.add(str(e.CEID))
+        for a in spec.Alarms:
+            valid_entity_ids.add(str(a.AlarmID))
 
         valid_tag_ids = {t.tag_id for t in target_tags}
 
@@ -95,7 +108,7 @@ class MappingService:
             s
             for s in data.get("suggestions", [])
             if (
-                s.get("entity_id") in valid_entity_ids
+                str(s.get("entity_id")) in valid_entity_ids
                 and s.get("tag_id") in valid_tag_ids
                 and s.get("confidence", 0) >= 0.4
             )
@@ -105,28 +118,37 @@ class MappingService:
 
     def _build_prompt(self, spec: EquipmentSpec, target_tags: List[MESTag]) -> str:
         equipment_entities = []
-        for v in spec.variables:
+        for v in spec.StatusVariables:
             equipment_entities.append({
-                "entity_id": v.vid,
+                "entity_id": str(v.SVID),
                 "entity_type": "variable",
-                "name": v.name,
-                "description": v.description,
-                "type": v.type,
-                "unit": v.unit,
+                "name": v.Name,
+                "description": v.Description or "",
+                "type": v.DataType,
+                "unit": "",
             })
-        for e in spec.events:
+        for v in spec.DataVariables:
             equipment_entities.append({
-                "entity_id": e.ceid,
+                "entity_id": str(v.DvID),
+                "entity_type": "variable",
+                "name": v.Name,
+                "description": "",
+                "type": v.ValueType,
+                "unit": v.Unit or "",
+            })
+        for e in spec.Events:
+            equipment_entities.append({
+                "entity_id": str(e.CEID),
                 "entity_type": "event",
-                "name": e.name,
-                "description": e.description,
+                "name": e.Name,
+                "description": e.Description or "",
             })
-        for a in spec.alarms:
+        for a in spec.Alarms:
             equipment_entities.append({
-                "entity_id": a.alarm_id,
+                "entity_id": str(a.AlarmID),
                 "entity_type": "alarm",
-                "name": a.name,
-                "description": a.description,
+                "name": a.Name,
+                "description": a.Description or "",
             })
 
         mes_tags = [

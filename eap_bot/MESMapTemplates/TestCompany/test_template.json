@@ -1,0 +1,23 @@
+[
+  {
+    "tag_id": "MES_SYS_CLOCK",
+    "name": "System Clock",
+    "description": "The current clock or time format on the equipment",
+    "expected_type": "string",
+    "expected_unit": ""
+  },
+  {
+    "tag_id": "MES_CHAMBER_TEMPERATURE",
+    "name": "Chamber Temperature",
+    "description": "Temperature reading of the main processing chamber",
+    "expected_type": "float",
+    "expected_unit": "°C"
+  },
+  {
+    "tag_id": "MES_LOT_START_TRIGGER",
+    "name": "Lot Start Trigger Event",
+    "description": "Event signaling that a lot has started processing",
+    "expected_type": "event",
+    "expected_unit": ""
+  }
+]

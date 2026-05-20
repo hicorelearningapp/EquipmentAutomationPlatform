@@ -37,3 +37,9 @@ class ProjectMapping(BaseModel):
 class MappingUpdateRequest(BaseModel):
     MESTags: List[str] = Field(default_factory=list)
     MESTagDocumentIDs: List[str] = Field(default_factory=list)
+
+
+class MESMappingRequest(BaseModel):
+    family: str
+    template: str
+
