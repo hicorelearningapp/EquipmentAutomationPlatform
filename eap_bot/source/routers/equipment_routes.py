@@ -33,23 +33,23 @@ def updatetestcode(content: str) -> str:
 
 class EquipmentAPI:
     def __init__(self):
-        self.router = APIRouter(tags=["documents"])
+        self.router = APIRouter()
         self.storage = StorageService()
         self.register_routes()
 
     def register_routes(self):
-        self.router.post("/UploadDocument/{project_id}")(self.upload_document)
-        self.router.get("/Analyze/{project_id}/{document_id}", response_model_by_alias=False)(self.analyze)
-        self.router.get("/AnalyzeProject/{project_id}", response_model_by_alias=False)(self.analyze_project)
-        self.router.get("/Analyze/{project_id}/{document_id}/report")(self.download_report)
-        self.router.delete("/DeleteDocument/{project_id}/{document_id}")(self.delete_document)
-        self.router.post("/UpdateExtraction/{project_id}/{document_id}")(self.update_extraction)
-        self.router.post("/GenerateToolCharacterizationScript/{project_id}")(self.generate_tool_char_script)
-        self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
-        self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
-        self.router.post("/GenerateSmartAutomationCode/{project_id}")(self.generate_smart_automation_code)
-        self.router.post("/UpdateSmartAutomationCode/{project_id}")(self.update_smart_automation_code)
-        self.router.post("/GenerateOverallReport/{project_id}")(self.generate_overall_report)
+        self.router.post("/UploadDocument/{project_id}", tags=["documents"])(self.upload_document)
+        self.router.get("/Analyze/{project_id}/{document_id}", response_model_by_alias=False, tags=["documents"])(self.analyze)
+        self.router.get("/AnalyzeProject/{project_id}", response_model_by_alias=False, tags=["documents"])(self.analyze_project)
+        self.router.get("/Analyze/{project_id}/{document_id}/report", tags=["documents"])(self.download_report)
+        self.router.delete("/DeleteDocument/{project_id}/{document_id}", tags=["documents"])(self.delete_document)
+        self.router.post("/UpdateExtraction/{project_id}", tags=["documents"])(self.update_extraction)
+        self.router.post("/GenerateToolCharacterizationScript/{project_id}", tags=["tool characterizations"])(self.generate_tool_char_script)
+        self.router.post("/UpdateToolCharacterizationScript/{project_id}", tags=["tool characterizations"])(self.update_tool_char_script)
+        self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}", tags=["tool characterizations"])(self.generate_tool_char_report_summary)
+        self.router.post("/GenerateSmartAutomationCode/{project_id}", tags=["smart automation"])(self.generate_smart_automation_code)
+        self.router.post("/UpdateSmartAutomationCode/{project_id}", tags=["smart automation"])(self.update_smart_automation_code)
+        self.router.post("/GenerateOverallReport/{project_id}", tags=["smart automation"])(self.generate_overall_report)
 
     async def upload_document(
         self,
@@ -322,10 +322,10 @@ class EquipmentAPI:
             "Message": f"Document {document_id} deleted",
         }
 
-    def update_extraction(self, project_id: int, document_id: str, spec: EquipmentSpec):
+    def update_extraction(self, project_id: int, spec: EquipmentSpec):
         try:
             self.storage.increment_project_version(project_id)
-            json_path = self.storage.spec_json_path(project_id, document_id)
+            json_path = self.storage.spec_json_path(project_id, "project_batch")
             self.storage.save_spec_json(json_path, spec)
             return {"Status": "success", "Message": "Extraction updated successfully"}
         except InvalidSlugError as exc:

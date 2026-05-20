@@ -23,8 +23,8 @@ codegen_api = CodeGenAPI()
 
 app.include_router(project_api.router)
 app.include_router(equipment_api.router)
-app.include_router(mapping_api.router)
-app.include_router(codegen_api.router)
+#app.include_router(mapping_api.router)
+#app.include_router(codegen_api.router)
 
 
 @app.on_event("startup")
