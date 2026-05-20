@@ -3,10 +3,14 @@ import logging
 
 from fastapi import APIRouter, HTTPException
 
+from pathlib import Path
+
 from source.managers.service_container import container
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
+from source.schemas.test_script import GenerateTestScriptsRequest
 from source.services.storage_service import StorageService
+from source.services.test_script_service import TestScriptService
 
 logger = logging.getLogger(__name__)
 
@@ -15,51 +19,44 @@ class ToolCharacterizationAPI:
     def __init__(self):
         self.router = APIRouter(tags=["tool characterizations"])
         self.storage = StorageService()
+        self.test_script_service = TestScriptService()
         self.register_routes()
 
     def register_routes(self):
-        self.router.post("/GenerateToolCharacterizationScript/{project_id}")(self.generate_tool_char_script)
+        self.router.post("/GenerateTestScripts/{project_id}")(self.generate_test_scripts)
         self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
         self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
 
-    def generate_tool_char_script(self, project_id: int):
+    def generate_test_scripts(self, project_id: int, body: GenerateTestScriptsRequest):
         try:
-            metadata = self.storage.get_project(project_id)
-            spec = None
-            for doc in metadata.Documents:
-                if doc.Status == "completed":
-                    spec_json = self.storage.read_spec_json(project_id, doc.DocumentID)
-                    spec = EquipmentSpec.model_validate_json(spec_json)
-                    break
+            filename = body.filename
+            if not filename.endswith(".txt"):
+                filename = f"{filename}.txt"
 
-            if not spec:
-                from source.services.sml_template import SML_CHARACTERISATION_TEMPLATE
-                script_content = SML_CHARACTERISATION_TEMPLATE
-            else:
-                prompt = (
-                    f"Generate a SECS/GEM tool characterization script sequence for the tool '{spec.ToolID}' "
-                    f"of type '{spec.ToolType}'.\n"
-                    f"Use these status variables: {[v.Name for v in spec.StatusVariables[:10]]}\n"
-                    f"Use these events: {[e.Name for e in spec.Events[:10]]}\n"
-                    f"Output only the test sequence steps. Do not include markdown formatting, just plain text."
-                )
-                model = container.llm_strategy.get_model()
-                response = model.invoke(prompt)
-                script_content = response.content
+            # Check project-specific directory first
+            file_path = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR / filename
+            if not file_path.exists():
+                # Check global templates directory
+                file_path = Path(__file__).resolve().parent.parent.parent / "GEMTestScriptTemplates" / filename
+
+            if not file_path.exists():
+                raise HTTPException(404, f"SML test script file '{filename}' not found.")
+
+            content = file_path.read_text(encoding="utf-8")
+            tests = self.test_script_service.parse_sml_to_tests(content)
 
             tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
             tool_char_dir.mkdir(parents=True, exist_ok=True)
 
-            dst_path = tool_char_dir / "tool_characterization_sequence.txt"
-            dst_path.write_text(script_content, encoding="utf-8")
+            json_filename = filename.replace(".txt", ".json")
+            dst_path = tool_char_dir / json_filename
+            dst_path.write_text(json.dumps(tests, indent=2), encoding="utf-8")
 
-            return {
-                "Status": "success",
-                "FilePath": str(dst_path),
-                "Script": script_content
-            }
+            return tests
+        except HTTPException:
+            raise
         except Exception as e:
-            logger.error("Failed to generate tool characterization script: %s", e)
+            logger.error("Failed to generate and parse test scripts: %s", e)
             raise HTTPException(500, str(e))
 
     def update_tool_char_script(self, project_id: int, body: ScriptUpdateRequest):

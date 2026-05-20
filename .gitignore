@@ -22,3 +22,4 @@ codebase_summary.txt
 codebase_packer.py
 test_codegen.py
 deploy.ps1
+scratch/
