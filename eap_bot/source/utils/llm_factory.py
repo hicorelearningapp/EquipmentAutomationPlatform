@@ -70,18 +70,60 @@ class MistralStrategy(LLMStrategy):
 
         return ChatMistralAI(**kwargs)
 
+
+class FallbackLLMStrategy(LLMStrategy):
+    """
+    Wraps a primary and a fallback LLMStrategy using LangChain's .with_fallbacks().
+    When the primary LLM raises an exception (e.g. 429 quota exceeded), LangChain
+    will automatically retry the same call against the fallback model.
+    Consumers (equipment_extractor, mapping_service, etc.) are fully unaware of this.
+    """
+    def __init__(self, primary: LLMStrategy, fallback: LLMStrategy, fallback_model_name: str):
+        self._primary = primary
+        self._fallback = fallback
+        self._fallback_model_name = fallback_model_name
+
+    def get_model(self, temperature: float = 0.0, require_json: bool = False) -> BaseChatModel:
+        primary_model = self._primary.get_model(temperature=temperature, require_json=require_json)
+
+        # Temporarily swap the model name so fallback uses its own model, not the primary's
+        original_model_name = settings.LLM_MODEL_NAME
+        settings.LLM_MODEL_NAME = self._fallback_model_name
+        try:
+            fallback_model = self._fallback.get_model(temperature=temperature, require_json=require_json)
+        finally:
+            settings.LLM_MODEL_NAME = original_model_name
+
+        return primary_model.with_fallbacks([fallback_model])
+
+
+def _make_strategy(provider: str) -> LLMStrategy:
+    """Instantiate an LLMStrategy for a given provider name."""
+    p = provider.lower()
+    if p == "groq":
+        return GroqStrategy()
+    elif p == "ollama":
+        return OllamaStrategy()
+    elif p == "gemini":
+        return GeminiStrategy()
+    elif p == "mistral":
+        return MistralStrategy()
+    else:
+        raise ValueError(f"Unsupported LLM provider: {provider}")
+
+
 class LLMFactory:
     @staticmethod
     def create_strategy() -> LLMStrategy:
-        provider = settings.LLM_PROVIDER.lower()
-        if provider == "groq":
-            return GroqStrategy()
-        elif provider == "ollama":
-            return OllamaStrategy()
-        elif provider == "gemini":
-            return GeminiStrategy()
-        elif provider == "mistral":
-            return MistralStrategy()
-        else:
-            raise ValueError(f"Unsupported LLM_PROVIDER: {provider}")
+        primary = _make_strategy(settings.LLM_PROVIDER)
 
+        # If a fallback provider is configured, compose a FallbackLLMStrategy
+        if settings.LLM_FALLBACK_PROVIDER and settings.LLM_FALLBACK_MODEL_NAME:
+            fallback = _make_strategy(settings.LLM_FALLBACK_PROVIDER)
+            return FallbackLLMStrategy(
+                primary=primary,
+                fallback=fallback,
+                fallback_model_name=settings.LLM_FALLBACK_MODEL_NAME,
+            )
+
+        return primary
