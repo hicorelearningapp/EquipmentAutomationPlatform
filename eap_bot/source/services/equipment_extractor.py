@@ -262,7 +262,7 @@ CRITICAL: DO NOT output the schema itself. You must output a JSON object populat
 
 EXPECTED JSON FORMAT:
 {{
-  "DocumentType": "string (User Manuals|Troubleshooting Guidance|GEM Manual|Variable Files)",
+  "DocumentType": "string (User Manuals|Troubleshooting Guidance|GEM Manual|Variable Files|SML Scripts)",
   "ToolID": "string",
   "ToolType": "string",
   "Model": "string (optional)",

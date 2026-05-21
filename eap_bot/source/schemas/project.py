@@ -18,6 +18,7 @@ class DocumentCategory(str, Enum):
     TROUBLESHOOTING_GUIDANCE = "Troubleshooting Guidance"
     GEM_MANUAL = "GEM Manual"
     VARIABLE_FILES = "Variable Files"
+    SML_SCRIPTS = "SML Scripts"
 
 
 class ProjectCreate(BaseModel):

@@ -1,7 +1,7 @@
 import json
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, File, UploadFile
 
 from pathlib import Path
 
@@ -9,7 +9,7 @@ from source.managers.service_container import container
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
 from source.schemas.test_script import GenerateTestScriptsRequest
-from source.services.storage_service import StorageService
+from source.services.storage_service import StorageService, ProjectNotFoundError
 from source.services.test_script_service import TestScriptService
 
 logger = logging.getLogger(__name__)
@@ -31,11 +31,30 @@ class ToolCharacterizationAPI:
         try:
             filename = body.filename
 
+            # Normalise filename for check
+            sml_filename = filename
+            if not sml_filename.endswith(".txt"):
+                if sml_filename == "ToolCharacterisationTesting":
+                    sml_filename = "tool_characterisation_testing.txt"
+                elif sml_filename == "GeneralGEMTesting":
+                    sml_filename = "general_gem_testing.txt"
+                else:
+                    sml_filename = f"{sml_filename}.txt"
+
             # Check project-specific directory first
-            file_path = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR / filename
-            if not file_path.exists():
-                # Check global templates directory
-                file_path = Path(__file__).resolve().parent.parent.parent / "GEMTestScriptTemplates" / filename
+            project_file_path = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR / sml_filename
+            if project_file_path.exists():
+                file_path = project_file_path
+            else:
+                # Fallback to the respective JSON in GEMTestScriptTemplates
+                if sml_filename == "tool_characterisation_testing.txt":
+                    fallback_filename = "ToolCharacterizationTestScriptjson (1).txt"
+                elif sml_filename == "general_gem_testing.txt":
+                    fallback_filename = "GeneraltestScriptjson (1).txt"
+                else:
+                    fallback_filename = sml_filename
+
+                file_path = Path(__file__).resolve().parent.parent.parent / "GEMTestScriptTemplates" / fallback_filename
 
             if not file_path.exists():
                 raise HTTPException(404, f"Test script file '{filename}' not found.")

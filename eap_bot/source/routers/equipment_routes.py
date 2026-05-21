@@ -55,8 +55,8 @@ class EquipmentAPI:
             raise HTTPException(400, "No filename provided")
 
         ext = Path(file.filename).suffix.lower()
-        if ext not in {".pdf", ".xlsx"}:
-            raise HTTPException(400, "Only .pdf and .xlsx files are accepted")
+        if ext not in {".pdf", ".xlsx", ".txt"}:
+            raise HTTPException(400, "Only .pdf, .xlsx, and .txt files are accepted")
 
         contents = await file.read()
         if len(contents) > settings.MAX_UPLOAD_SIZE:
@@ -67,18 +67,29 @@ class EquipmentAPI:
         if ext == ".pdf":
             pages = len(PdfReader(io.BytesIO(contents)).pages)
             doc_category = DocumentCategory.USER_MANUALS
-        else:
+        elif ext == ".xlsx":
             import openpyxl
             wb = openpyxl.load_workbook(io.BytesIO(contents), read_only=True)
             pages = len(wb.sheetnames)
             wb.close()
             doc_category = DocumentCategory.VARIABLE_FILES
+        else:
+            pages = 1
+            doc_category = DocumentCategory.SML_SCRIPTS
 
         try:
             document_id, file_path, _ = self.storage.prepare_document_paths(
                 project_id, file.filename, extension=ext
             )
             self.storage.save_pdf(file_path, contents)
+
+            if ext == ".txt":
+                tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
+                tool_char_dir.mkdir(parents=True, exist_ok=True)
+                dst_path = tool_char_dir / file.filename
+                dst_path.write_bytes(contents)
+                logger.info("Successfully copied SML script %s to %s", file.filename, dst_path)
+
             document = self.storage.register_document(
                 project_id=project_id,
                 document_id=document_id,
@@ -109,6 +120,8 @@ class EquipmentAPI:
         ext = Path(document.FileName).suffix.lower()
         if ext == ".xlsx":
             return self.storage.document_excel_path(project_id, document.DocumentID, ext=".xlsx")
+        elif ext == ".txt":
+            return self.storage.document_excel_path(project_id, document.DocumentID, ext=".txt")
         return self.storage.document_pdf_path(project_id, document.DocumentID)
 
     def analyze(self, project_id: int, document_id: str):
@@ -127,10 +140,11 @@ class EquipmentAPI:
                 spec = EquipmentSpec.model_validate_json(spec_json)
 
                 is_excel = document.FileName.lower().endswith(".xlsx")
-                if not spec.Reports and not is_excel:
+                is_txt = document.FileName.lower().endswith(".txt")
+                if not spec.Reports and not is_excel and not is_txt:
                     logger.info("Reports missing in completed spec for %s/%s, generating now...", project_id, document_id)
-                    pdf_path = self.storage.document_pdf_path(project_id, document_id)
-                    text = container.parser.extract_text(str(pdf_path))
+                    file_path = self._resolve_document_path(project_id, document)
+                    text = container.parser.extract_text(str(file_path))
                     reports, links = container.report_service.generate(spec, text)
                     if reports:
                         spec.Reports = reports
@@ -145,6 +159,7 @@ class EquipmentAPI:
             return self._build_extraction_response(project_id, document_id, spec)
 
         is_excel = document.FileName.lower().endswith(".xlsx")
+        is_txt = document.FileName.lower().endswith(".txt")
         try:
             file_path = self._resolve_document_path(project_id, document)
             doc_text: str = ""
@@ -159,6 +174,13 @@ class EquipmentAPI:
                     except Exception:
                         spec.ToolID = str(project_id)
                         spec.ToolType = "Semiconductor Processing Equipment"
+                spec.Reports = []
+                spec.EventReportLinks = []
+            elif is_txt:
+                doc_text = file_path.read_text(encoding="utf-8")
+                if not doc_text.strip():
+                    raise ValueError("Could not extract any text from the SML/TXT file")
+                spec = container.extractor.extract(doc_text)
                 spec.Reports = []
                 spec.EventReportLinks = []
             else:
@@ -401,6 +423,7 @@ class EquipmentAPI:
                 logger.info("Auto-analyzing document %s for project %s", doc.DocumentID, project_id)
                 try:
                     is_excel = doc.FileName.lower().endswith(".xlsx")
+                    is_txt = doc.FileName.lower().endswith(".txt")
                     file_path = self._resolve_document_path(project_id, doc)
                     doc_text: str = ""
 
@@ -409,6 +432,14 @@ class EquipmentAPI:
                         if not spec.ToolID:
                             spec.ToolID = metadata.ProjectName
                             spec.ToolType = metadata.Tool.value or "Semiconductor Processing Equipment"
+                        spec.Reports = []
+                        spec.EventReportLinks = []
+                    elif is_txt:
+                        doc_text = file_path.read_text(encoding="utf-8")
+                        if not doc_text.strip():
+                            logger.warning("Empty text from %s", doc.DocumentID)
+                            continue
+                        spec = container.extractor.extract(doc_text)
                         spec.Reports = []
                         spec.EventReportLinks = []
                     else:
@@ -467,10 +498,12 @@ class EquipmentAPI:
                     spec_json = self.storage.read_spec_json(project_id, doc.DocumentID)
                     spec = EquipmentSpec.model_validate_json(spec_json)
 
-                    if not spec.Reports and not doc.FileName.lower().endswith(".xlsx"):
+                    is_excel = doc.FileName.lower().endswith(".xlsx")
+                    is_txt = doc.FileName.lower().endswith(".txt")
+                    if not spec.Reports and not is_excel and not is_txt:
                         logger.info("Reports missing in completed spec for %s/%s, generating now...", project_id, doc.DocumentID)
-                        pdf_path = self.storage.document_pdf_path(project_id, doc.DocumentID)
-                        text = container.parser.extract_text(str(pdf_path))
+                        file_path = self._resolve_document_path(project_id, doc)
+                        text = container.parser.extract_text(str(file_path))
                         reports, links = container.report_service.generate(spec, text)
                         if reports:
                             spec.Reports = reports
