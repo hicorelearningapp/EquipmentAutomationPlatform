@@ -285,7 +285,7 @@ class StorageService:
         logger.info("Saved generated code to %s", code_file)
 
     def prepare_document_paths(
-        self, project_id: int, original_filename: str
+        self, project_id: int, original_filename: str, extension: str = ".pdf"
     ) -> tuple[str, Path, Path]:
         metadata = self.get_project(project_id)
         for doc in metadata.Documents:
@@ -296,12 +296,13 @@ class StorageService:
 
         base_id = self.slugify(Path(original_filename).stem, fallback="document")
         existing_ids = {doc.DocumentID for doc in metadata.Documents}
+        docs_dir = self._project_dir(project_id) / self.DOCUMENTS_DIR
 
         document_id = base_id
         counter = 2
         while (
             document_id in existing_ids
-            or self.document_pdf_path(project_id, document_id).exists()
+            or (docs_dir / f"{document_id}{extension}").exists()
             or self.spec_json_path(project_id, document_id).exists()
         ):
             document_id = f"{base_id}_{counter}"
@@ -309,7 +310,7 @@ class StorageService:
 
         return (
             document_id,
-            self.document_pdf_path(project_id, document_id),
+            docs_dir / f"{document_id}{extension}",
             self.spec_json_path(project_id, document_id),
         )
 
@@ -523,6 +524,9 @@ class StorageService:
 
     def document_pdf_path(self, project_id: int, document_id: str) -> Path:
         return self._project_dir(project_id) / self.DOCUMENTS_DIR / f"{document_id}.pdf"
+
+    def document_excel_path(self, project_id: int, document_id: str, ext: str = ".xlsx") -> Path:
+        return self._project_dir(project_id) / self.DOCUMENTS_DIR / f"{document_id}{ext}"
 
     def spec_json_path(self, project_id: int, document_id: str) -> Path:
         return (

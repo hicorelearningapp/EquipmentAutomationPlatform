@@ -355,10 +355,20 @@ HARD RULES:
     # Table Extraction (PDF → raw CSV → LLM)
     # ------------------------------------------------------------------
 
+    _SHEET_NAME_KEYWORDS: dict[str, set[str]] = {
+        "StatusVariables": {"svid", "sv", "status variable", "status_var", "status"},
+        "DataVariables": {"dvid", "dv", "data variable", "data_var"},
+        "Events": {"ceid", "ce", "collection event", "event"},
+        "Alarms": {"alarm", "alid"},
+        "RemoteCommands": {"rcmd", "remote command", "command"},
+        "States": {"state"},
+        "StateTransitions": {"transition", "state machine"},
+    }
+
     _SECTION_KEYWORDS: dict[str, set[str]] = {
         "StatusVariables": {
             "svid", "sv id", "status variable", "statusvariable",
-            "variable id", "variable name", "access type", "vid",
+            "variable id", "variable name", "access type",
         },
         "DataVariables": {
             "dvid", "dv id", "data variable", "datavariable",
@@ -496,6 +506,75 @@ TABLE (CSV):
                 best_hits = hits
                 best_section = section
         return best_section if best_hits > 0 else None
+
+    def _classify_by_sheet_name(self, sheet_name: str) -> str | None:
+        """Return the section name that best matches an Excel sheet name, or None."""
+        name_lower = sheet_name.lower()
+        for section, keywords in self._SHEET_NAME_KEYWORDS.items():
+            if any(kw in name_lower for kw in keywords):
+                return section
+        return None
+
+    # ------------------------------------------------------------------
+    # Excel Extraction
+    # ------------------------------------------------------------------
+
+    def extract_excel(self, excel_path: Union[str, Path]) -> EquipmentSpec:
+        """Extract a SECS/GEM EquipmentSpec from an Excel workbook.
+
+        Each sheet is converted to CSV and fed to the same per-section LLM
+        prompts used for PDF table extraction. Sheets are classified first by
+        their column headers, then by sheet name as fallback.
+        """
+        import openpyxl
+
+        excel_path = Path(excel_path)
+        try:
+            wb = openpyxl.load_workbook(excel_path, read_only=True, data_only=True)
+        except Exception as exc:
+            logger.error("Failed to open Excel file %s: %s", excel_path.name, exc)
+            return EquipmentSpec(ToolID="", ToolType="")
+
+        partial_specs: list[EquipmentSpec] = []
+
+        for sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+            rows = [
+                [str(cell.value).strip() if cell.value is not None else "" for cell in row]
+                for row in ws.iter_rows()
+            ]
+            rows = [row for row in rows if any(cell for cell in row)]
+            if len(rows) < 2:
+                continue
+
+            section = self._classify_table(rows) or self._classify_by_sheet_name(sheet_name)
+            if not section:
+                logger.info("Sheet '%s' could not be classified — skipping.", sheet_name)
+                continue
+
+            buf = io.StringIO()
+            writer = csv.writer(buf)
+            writer.writerows(rows)
+            csv_str = buf.getvalue()
+
+            logger.info("Extracting sheet '%s' as section '%s'", sheet_name, section)
+            partial = self._extract_from_csv(section, csv_str)
+            if partial:
+                partial_specs.append(partial)
+
+        wb.close()
+
+        if not partial_specs:
+            logger.warning("No classifiable sheets found in %s", excel_path.name)
+            return EquipmentSpec(ToolID="", ToolType="")
+
+        merged = self._merge_specs(partial_specs)
+        logger.info(
+            "Excel extraction done: %d SVs, %d DVs, %d Events, %d Alarms",
+            len(merged.StatusVariables), len(merged.DataVariables),
+            len(merged.Events), len(merged.Alarms),
+        )
+        return merged
 
     def _extract_and_save_tables(
         self, pdf_path: Path, tables_dir: Union[Path, None]

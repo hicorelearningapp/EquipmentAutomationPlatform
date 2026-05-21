@@ -1,6 +1,7 @@
 import io
 import json
 import logging
+from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
@@ -50,25 +51,38 @@ class EquipmentAPI:
         project_id: int,
         file: UploadFile = File(...),
     ):
-        if not file.filename or not file.filename.lower().endswith(".pdf"):
-            raise HTTPException(400, "Only .pdf files are accepted")
+        if not file.filename:
+            raise HTTPException(400, "No filename provided")
+
+        ext = Path(file.filename).suffix.lower()
+        if ext not in {".pdf", ".xlsx"}:
+            raise HTTPException(400, "Only .pdf and .xlsx files are accepted")
 
         contents = await file.read()
         if len(contents) > settings.MAX_UPLOAD_SIZE:
             raise HTTPException(400, "File exceeds MAX_UPLOAD_SIZE")
 
         file_size = float(len(contents))
-        pages = len(PdfReader(io.BytesIO(contents)).pages)
+
+        if ext == ".pdf":
+            pages = len(PdfReader(io.BytesIO(contents)).pages)
+            doc_category = DocumentCategory.USER_MANUALS
+        else:
+            import openpyxl
+            wb = openpyxl.load_workbook(io.BytesIO(contents), read_only=True)
+            pages = len(wb.sheetnames)
+            wb.close()
+            doc_category = DocumentCategory.VARIABLE_FILES
 
         try:
-            document_id, pdf_path, _ = self.storage.prepare_document_paths(
-                project_id, file.filename
+            document_id, file_path, _ = self.storage.prepare_document_paths(
+                project_id, file.filename, extension=ext
             )
-            self.storage.save_pdf(pdf_path, contents)
+            self.storage.save_pdf(file_path, contents)
             document = self.storage.register_document(
                 project_id=project_id,
                 document_id=document_id,
-                document_type=DocumentCategory.USER_MANUALS,
+                document_type=doc_category,
                 filename=file.filename,
                 file_size=file_size,
                 pages=pages,
@@ -91,6 +105,12 @@ class EquipmentAPI:
             "FileSize": document.FileSize,
         }
 
+    def _resolve_document_path(self, project_id: int, document) -> Path:
+        ext = Path(document.FileName).suffix.lower()
+        if ext == ".xlsx":
+            return self.storage.document_excel_path(project_id, document.DocumentID, ext=".xlsx")
+        return self.storage.document_pdf_path(project_id, document.DocumentID)
+
     def analyze(self, project_id: int, document_id: str):
         try:
             self.storage.increment_project_version(project_id)
@@ -106,7 +126,8 @@ class EquipmentAPI:
                 spec_json = self.storage.read_spec_json(project_id, document_id)
                 spec = EquipmentSpec.model_validate_json(spec_json)
 
-                if not spec.Reports:
+                is_excel = document.FileName.lower().endswith(".xlsx")
+                if not spec.Reports and not is_excel:
                     logger.info("Reports missing in completed spec for %s/%s, generating now...", project_id, document_id)
                     pdf_path = self.storage.document_pdf_path(project_id, document_id)
                     text = container.parser.extract_text(str(pdf_path))
@@ -123,38 +144,55 @@ class EquipmentAPI:
 
             return self._build_extraction_response(project_id, document_id, spec)
 
+        is_excel = document.FileName.lower().endswith(".xlsx")
         try:
-            pdf_path = self.storage.document_pdf_path(project_id, document_id)
-            text = container.parser.extract_text(str(pdf_path))
-            if not text.strip():
-                raise ValueError("Could not extract any text from the PDF")
+            file_path = self._resolve_document_path(project_id, document)
+            doc_text: str = ""
 
-            tables_dir = self.storage.extracted_tables_path(project_id)
-            spec = container.extractor.extract(text, pdf_path=pdf_path, tables_dir=tables_dir)
-
-            try:
-                reports, links = container.report_service.generate(spec, text)
-                spec.Reports = reports
-                spec.EventReportLinks = links
-            except Exception as exc:
-                logger.error(
-                    "Report generation failed for %s/%s (non-fatal): %s",
-                    project_id, document_id, exc,
-                )
+            if is_excel:
+                spec = container.extractor.extract_excel(file_path)
+                if not spec.ToolID:
+                    try:
+                        project_meta = self.storage.get_project(project_id)
+                        spec.ToolID = project_meta.ProjectName
+                        spec.ToolType = project_meta.Tool.value or "Semiconductor Processing Equipment"
+                    except Exception:
+                        spec.ToolID = str(project_id)
+                        spec.ToolType = "Semiconductor Processing Equipment"
                 spec.Reports = []
                 spec.EventReportLinks = []
+            else:
+                doc_text = container.parser.extract_text(str(file_path))
+                if not doc_text.strip():
+                    raise ValueError("Could not extract any text from the PDF")
+
+                tables_dir = self.storage.extracted_tables_path(project_id)
+                spec = container.extractor.extract(doc_text, pdf_path=file_path, tables_dir=tables_dir)
+
+                try:
+                    reports, links = container.report_service.generate(spec, doc_text)
+                    spec.Reports = reports
+                    spec.EventReportLinks = links
+                except Exception as exc:
+                    logger.error(
+                        "Report generation failed for %s/%s (non-fatal): %s",
+                        project_id, document_id, exc,
+                    )
+                    spec.Reports = []
+                    spec.EventReportLinks = []
 
             json_path = self.storage.spec_json_path(project_id, document_id)
             self.storage.save_spec_json(json_path, spec)
-            vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
-            vector_store.add_document(
-                text,
-                metadata={
-                    "project_id": project_id,
-                    "document_id": document_id,
-                    "tool_id": spec.ToolID,
-                },
-            )
+            if doc_text:
+                vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
+                vector_store.add_document(
+                    doc_text,
+                    metadata={
+                        "project_id": project_id,
+                        "document_id": document_id,
+                        "tool_id": spec.ToolID,
+                    },
+                )
             self.storage.complete_extraction(
                 project_id=project_id,
                 document_id=document_id,
@@ -362,37 +400,48 @@ class EquipmentAPI:
             if doc.Status != "completed":
                 logger.info("Auto-analyzing document %s for project %s", doc.DocumentID, project_id)
                 try:
-                    pdf_path = self.storage.document_pdf_path(project_id, doc.DocumentID)
-                    text = container.parser.extract_text(str(pdf_path))
-                    if not text.strip():
-                        logger.warning("Empty text from %s", doc.DocumentID)
-                        continue
+                    is_excel = doc.FileName.lower().endswith(".xlsx")
+                    file_path = self._resolve_document_path(project_id, doc)
+                    doc_text: str = ""
 
-                    tables_dir = self.storage.extracted_tables_path(project_id)
-                    spec = container.extractor.extract(text, pdf_path=pdf_path, tables_dir=tables_dir)
-
-                    # Generate reports (non-fatal)
-                    try:
-                        reports, links = container.report_service.generate(spec, text)
-                        spec.Reports = reports
-                        spec.EventReportLinks = links
-                    except Exception as exc:
-                        logger.error("Report generation failed for %s (non-fatal): %s", doc.DocumentID, exc)
+                    if is_excel:
+                        spec = container.extractor.extract_excel(file_path)
+                        if not spec.ToolID:
+                            spec.ToolID = metadata.ProjectName
+                            spec.ToolType = metadata.Tool.value or "Semiconductor Processing Equipment"
                         spec.Reports = []
                         spec.EventReportLinks = []
+                    else:
+                        doc_text = container.parser.extract_text(str(file_path))
+                        if not doc_text.strip():
+                            logger.warning("Empty text from %s", doc.DocumentID)
+                            continue
+
+                        tables_dir = self.storage.extracted_tables_path(project_id)
+                        spec = container.extractor.extract(doc_text, pdf_path=file_path, tables_dir=tables_dir)
+
+                        try:
+                            reports, links = container.report_service.generate(spec, doc_text)
+                            spec.Reports = reports
+                            spec.EventReportLinks = links
+                        except Exception as exc:
+                            logger.error("Report generation failed for %s (non-fatal): %s", doc.DocumentID, exc)
+                            spec.Reports = []
+                            spec.EventReportLinks = []
 
                     json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
                     self.storage.save_spec_json(json_path, spec)
 
-                    vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
-                    vector_store.add_document(
-                        text,
-                        metadata={
-                            "project_id": project_id,
-                            "document_id": doc.DocumentID,
-                            "tool_id": spec.ToolID,
-                        },
-                    )
+                    if doc_text:
+                        vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
+                        vector_store.add_document(
+                            doc_text,
+                            metadata={
+                                "project_id": project_id,
+                                "document_id": doc.DocumentID,
+                                "tool_id": spec.ToolID,
+                            },
+                        )
                     self.storage.complete_extraction(
                         project_id=project_id,
                         document_id=doc.DocumentID,
@@ -418,7 +467,7 @@ class EquipmentAPI:
                     spec_json = self.storage.read_spec_json(project_id, doc.DocumentID)
                     spec = EquipmentSpec.model_validate_json(spec_json)
 
-                    if not spec.Reports:
+                    if not spec.Reports and not doc.FileName.lower().endswith(".xlsx"):
                         logger.info("Reports missing in completed spec for %s/%s, generating now...", project_id, doc.DocumentID)
                         pdf_path = self.storage.document_pdf_path(project_id, doc.DocumentID)
                         text = container.parser.extract_text(str(pdf_path))

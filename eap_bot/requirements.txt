@@ -19,4 +19,5 @@ tiktoken
 langchain-google-genai
 langchain-mistralai
 pdfplumber
+openpyxl
 
