@@ -1,0 +1,191 @@
+[
+  {
+    "TestID": "1",
+    "TestName": "S1F1 Are You There Request",
+    "Category": "EquipmentStatus",
+    "SML": "S1F1 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "2",
+    "TestName": "S1F3 Selected Equipment Status Request Without Values",
+    "Category": "EquipmentStatus",
+    "SML": "S1F3 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "3",
+    "TestName": "S1F3 Selected Equipment Status Request With Values",
+    "Category": "EquipmentStatus",
+    "SML": "S1F3 W\n<L\n  <U4 1001>\n  <U4 1002>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "4",
+    "TestName": "S1F11 Status Variable Namelist Request",
+    "Category": "EquipmentStatus",
+    "SML": "S1F11 W\n<L\n  <U4 1001>\n  <U4 1002>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "5",
+    "TestName": "S1F13 Establish Communications Request Without Values",
+    "Category": "EquipmentStatus",
+    "SML": "S1F13 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "6",
+    "TestName": "S1F15 Request OFF-LINE",
+    "Category": "EquipmentStatus",
+    "SML": "S1F15 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "7",
+    "TestName": "S1F17 Request ON-LINE",
+    "Category": "EquipmentStatus",
+    "SML": "S1F17 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "8",
+    "TestName": "S1F21 Data Variable Namelist Request Without Values",
+    "Category": "EquipmentStatus",
+    "SML": "S1F21 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "9",
+    "TestName": "S1F21 Data Variable Namelist Request With Values",
+    "Category": "EquipmentStatus",
+    "SML": "S1F21 W\n<L\n  <U4 2001>\n  <U4 2002>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "10",
+    "TestName": "S1F23 Collection Event Namelist Request Without Values",
+    "Category": "EquipmentStatus",
+    "SML": "S1F23 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "11",
+    "TestName": "S1F23 Collection Event Namelist Request With Values",
+    "Category": "EquipmentStatus",
+    "SML": "S1F23 W\n<L\n  <U4 3001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "12",
+    "TestName": "S2F13 Equipment Constant Request Without Values",
+    "Category": "EquipmentControl",
+    "SML": "S2F13 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "13",
+    "TestName": "S2F13 Equipment Constant Request With Values",
+    "Category": "EquipmentControl",
+    "SML": "S2F13 W\n<L\n  <U4 5001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "14",
+    "TestName": "S2F15 New Equipment Constant Send Without Values",
+    "Category": "EquipmentControl",
+    "SML": "S2F15 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "15",
+    "TestName": "S2F15 New Equipment Constant Send With Values",
+    "Category": "EquipmentControl",
+    "SML": "S2F15 W\n<L\n  <L\n    <U4 5001>\n    <A \"150\">\n  >\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "16",
+    "TestName": "S2F17 Date and Time Request",
+    "Category": "EquipmentControl",
+    "SML": "S2F17 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "17",
+    "TestName": "S2F23 Trace Initialize Send Delete",
+    "Category": "EquipmentControl",
+    "SML": "S2F23 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "18",
+    "TestName": "S2F23 Trace Initialize Send",
+    "Category": "EquipmentControl",
+    "SML": "S2F23 W\n<L\n  <U4 1>\n  <U4 10>\n  <U4 5>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "19",
+    "TestName": "S2F29 Equipment Constant Namelist Request Without Values",
+    "Category": "EquipmentControl",
+    "SML": "S2F29 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "20",
+    "TestName": "S2F29 Equipment Constant Namelist Request With Values",
+    "Category": "EquipmentControl",
+    "SML": "S2F29 W\n<L\n  <U4 5001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "21",
+    "TestName": "S2F31 Date and Time Set Request",
+    "Category": "EquipmentControl",
+    "SML": "S2F31 W\n<A \"20260514123045\">\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "22",
+    "TestName": "S2F33 Define Report",
+    "Category": "EquipmentControl",
+    "SML": "S2F33 W\n<L\n  <U4 1>\n  <L\n    <U4 1001>\n    <U4 1002>\n  >\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "23",
+    "TestName": "S2F35 Link Event Report",
+    "Category": "EquipmentControl",
+    "SML": "S2F35 W\n<L\n  <U4 3001>\n  <U4 1>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "24",
+    "TestName": "S2F37 Enable Event Report",
+    "Category": "EquipmentControl",
+    "SML": "S2F37 W\n<L\n  <BOOLEAN TRUE>\n  <U4 3001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "25",
+    "TestName": "S2F37 Disable Event Report",
+    "Category": "EquipmentControl",
+    "SML": "S2F37 W\n<L [2]\n  <B 0x00>\n  <L [0]>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "26",
+    "TestName": "S2F39 Multi-block Inquire",
+    "Category": "EquipmentControl",
+    "SML": "S2F39 W\n<U4 2048>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "27",
+    "TestName": "S2F49 Enhanced Remote Command",
+    "Category": "EquipmentControl",
+    "SML": "S2F49 W\n<L\n  <A \"PPSELECT\">\n  <L\n    <L\n      <A \"PPID\">\n      <A \"RECIPE01\">\n    >\n  >\n>\n.",
+    "Status": "NotRun"
+  }
+]

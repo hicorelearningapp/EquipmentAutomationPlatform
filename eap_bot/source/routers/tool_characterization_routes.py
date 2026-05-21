@@ -10,7 +10,6 @@ from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
 from source.schemas.test_script import GenerateTestScriptsRequest
 from source.services.storage_service import StorageService
-from source.services.test_script_service import TestScriptService
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +18,6 @@ class ToolCharacterizationAPI:
     def __init__(self):
         self.router = APIRouter(tags=["tool characterizations"])
         self.storage = StorageService()
-        self.test_script_service = TestScriptService()
         self.register_routes()
 
     def register_routes(self):
@@ -30,8 +28,6 @@ class ToolCharacterizationAPI:
     def generate_test_scripts(self, project_id: int, body: GenerateTestScriptsRequest):
         try:
             filename = body.filename
-            if not filename.endswith(".txt"):
-                filename = f"{filename}.txt"
 
             # Check project-specific directory first
             file_path = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR / filename
@@ -40,15 +36,18 @@ class ToolCharacterizationAPI:
                 file_path = Path(__file__).resolve().parent.parent.parent / "GEMTestScriptTemplates" / filename
 
             if not file_path.exists():
-                raise HTTPException(404, f"SML test script file '{filename}' not found.")
+                raise HTTPException(404, f"Test script file '{filename}' not found.")
 
             content = file_path.read_text(encoding="utf-8")
-            tests = self.test_script_service.parse_sml_to_tests(content)
+            try:
+                tests = json.loads(content)
+            except Exception as e:
+                raise HTTPException(400, f"Invalid JSON format in file '{filename}': {str(e)}")
 
             tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
             tool_char_dir.mkdir(parents=True, exist_ok=True)
 
-            json_filename = filename.replace(".txt", ".json")
+            json_filename = Path(filename).stem + ".json"
             dst_path = tool_char_dir / json_filename
             dst_path.write_text(json.dumps(tests, indent=2), encoding="utf-8")
 

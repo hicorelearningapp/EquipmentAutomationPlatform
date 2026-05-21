@@ -1,0 +1,100 @@
+[
+  {
+    "TestID": "1",
+    "TestName": "S1F1 Are You There Request",
+    "Category": "EquipmentStatus",
+    "SML": "S1F1 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "2",
+    "TestName": "S1F13 Establish Communications Request",
+    "Category": "EquipmentStatus",
+    "SML": "S1F13 W\n<L [0]>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "3",
+    "TestName": "S5F3 Disable All Alarms",
+    "Category": "AlarmManagement",
+    "SML": "S5F3 W\n<L\n  <BOOLEAN FALSE>\n  <U4 1001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "4",
+    "TestName": "S2F37 Disable All Events",
+    "Category": "EquipmentControl",
+    "SML": "S2F37 W\n<L\n  <BOOLEAN FALSE>\n  <U4 2001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "5",
+    "TestName": "S2F35 Unlink Specific Reports",
+    "Category": "EquipmentControl",
+    "SML": "S2F35 W\n<L\n  <U4 2001>\n  <U4 3001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "6",
+    "TestName": "S2F33 Delete Specific Reports",
+    "Category": "EquipmentControl",
+    "SML": "S2F33 W\n<L\n  <U4 3001>\n  <L [0]>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "7",
+    "TestName": "S2F33 Define Reports",
+    "Category": "EquipmentControl",
+    "SML": "S2F33 W\n<L\n  <U4 3001>\n  <L\n    <U4 4001>\n    <U4 5001>\n    <U4 6001>\n  >\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "8",
+    "TestName": "S2F35 Link Reports",
+    "Category": "EquipmentControl",
+    "SML": "S2F35 W\n<L\n  <U4 2001>\n  <U4 3001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "9",
+    "TestName": "S2F37 Enable All Events",
+    "Category": "EquipmentControl",
+    "SML": "S2F37 W\n<L\n  <BOOLEAN TRUE>\n  <U4 2001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "10",
+    "TestName": "S5F3 Enable All Alarms",
+    "Category": "AlarmManagement",
+    "SML": "S5F3 W\n<L\n  <BOOLEAN TRUE>\n  <U4 1001>\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "11",
+    "TestName": "S2F41 PPSELECT",
+    "Category": "EquipmentControl",
+    "SML": "S2F41 W\n<L\n  <A \"PPSELECT\">\n  <L\n    <L\n      <A \"PPID\">\n      <A \"RECIPE_01\">\n    >\n  >\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "12",
+    "TestName": "S2F41 Start Process Program",
+    "Category": "EquipmentControl",
+    "SML": "S2F41 W\n<L\n  <A \"PPSTART\">\n  <L\n    <L\n      <A \"LOTID\">\n      <A \"LOT1001\">\n    >\n  >\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "13",
+    "TestName": "S2F23 Trace Send",
+    "Category": "EventReporting",
+    "SML": "S2F23 W\n<L\n  <U4 7001>\n  <U4 10>\n  <U4 50>\n  <L\n    <U4 5001>\n  >\n>\n.",
+    "Status": "NotRun"
+  },
+  {
+    "TestID": "14",
+    "TestName": "S2F23 Trace Cancelled",
+    "Category": "EventReporting",
+    "SML": "S2F23 W\n<L\n  <U4 7001>\n  <U4 0>\n  <U4 0>\n  <L [0]>\n>\n.",
+    "Status": "NotRun"
+  }
+]

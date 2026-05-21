@@ -2,28 +2,27 @@
 
 Source: "Tool Characterization Testing Sequence Template.docx"
 """
+import json
 from pathlib import Path
-
-SML_TEMPLATE_FILENAME = "tool_characterization_sequence.txt"
 
 SCRIPTS_DIR = Path(__file__).parent.parent.parent / "GEMTestScriptTemplates"
 
+SML_TEMPLATE_FILENAME = "ToolCharacterizationTestScriptjson (1).txt"
 
-def _load_template(filename: str) -> str:
+
+def _load_json_template(filename: str) -> list:
     path = SCRIPTS_DIR / filename
     if path.exists():
         content = path.read_text(encoding="utf-8")
-        # Ensure it has leading/trailing newlines to match the legacy triple-quoted string shape
-        if not content.startswith("\n"):
-            content = "\n" + content
-        if not content.endswith("\n"):
-            content = content + "\n"
-        return content
-    return ""
+        try:
+            return json.loads(content)
+        except Exception:
+            return []
+    return []
 
 
-SML_GENERAL_TEMPLATE = _load_template("general_gem_testing.txt")
-SML_CHARACTERISATION_TEMPLATE = _load_template("tool_characterisation_testing.txt")
+SML_GENERAL_TEMPLATE = _load_json_template("GeneraltestScriptjson (1).txt")
+SML_CHARACTERISATION_TEMPLATE = _load_json_template("ToolCharacterizationTestScriptjson (1).txt")
 
 SML_TEMPLATES = {
     "GeneralGEMTesting": SML_GENERAL_TEMPLATE,

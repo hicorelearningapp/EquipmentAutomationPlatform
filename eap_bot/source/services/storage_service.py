@@ -167,7 +167,7 @@ class StorageService:
         path = self.sml_template_path(project_id)
         if path.exists():
             return
-        path.write_text(SML_CHARACTERISATION_TEMPLATE, encoding="utf-8")
+        path.write_text(json.dumps(SML_CHARACTERISATION_TEMPLATE, indent=2), encoding="utf-8")
         logger.info("Wrote SML template to %s", path)
 
     def mark_failed(self, project_id: int, document_id: str) -> DocumentMetadata:
