@@ -10,6 +10,7 @@ from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
 from source.schemas.test_script import GenerateTestScriptsRequest
 from source.services.storage_service import StorageService
+from source.services.test_script_service import TestScriptService
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ class ToolCharacterizationAPI:
     def __init__(self):
         self.router = APIRouter(tags=["tool characterizations"])
         self.storage = StorageService()
+        self.test_script_service = TestScriptService()
         self.register_routes()
 
     def register_routes(self):
@@ -41,8 +43,12 @@ class ToolCharacterizationAPI:
             content = file_path.read_text(encoding="utf-8")
             try:
                 tests = json.loads(content)
-            except Exception as e:
-                raise HTTPException(400, f"Invalid JSON format in file '{filename}': {str(e)}")
+            except Exception as json_err:
+                logger.info("Content is not valid JSON, trying SML parser fallback: %s", json_err)
+                try:
+                    tests = self.test_script_service.parse_sml_to_tests(content)
+                except Exception as parse_err:
+                    raise HTTPException(400, f"Failed to parse content as either JSON or SML: {parse_err}")
 
             tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
             tool_char_dir.mkdir(parents=True, exist_ok=True)
