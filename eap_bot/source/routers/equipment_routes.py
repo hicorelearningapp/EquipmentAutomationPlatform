@@ -584,7 +584,7 @@ class EquipmentAPI:
     def get_variable(self, project_id: int, document_id: str, categories: str = None):
         """Return variables for one or more categories.
 
-        Pass a comma-separated list of category names, e.g.:
+        Pass a comma-separated list of category names, e.g.:qWA
         ``StatusVariable,Event,Alarm``
 
         Valid values: StatusVariable, DataVariable, Event, Alarm, RemoteCommand, State.
