@@ -21,6 +21,16 @@ class DocumentCategory(str, Enum):
     SML_SCRIPTS = "SML Scripts"
 
 
+class VariableCategory(str, Enum):
+    """Selectable variable categories for the GetVariable endpoint (renders as dropdown in Swagger)."""
+    STATUS_VARIABLE = "StatusVariable"
+    DATA_VARIABLE = "DataVariable"
+    EVENT = "Event"
+    ALARM = "Alarm"
+    REMOTE_COMMAND = "RemoteCommand"
+    STATE = "State"
+
+
 class ProjectCreate(BaseModel):
     ProjectName: str = Field(min_length=1)
     VendorName: str = Field(min_length=1)

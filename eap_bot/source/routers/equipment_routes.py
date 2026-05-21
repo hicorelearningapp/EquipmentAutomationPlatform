@@ -9,7 +9,7 @@ from pypdf import PdfReader
 
 from source.config import settings
 from source.managers.service_container import container
-from source.schemas.project import DocumentCategory
+from source.schemas.project import DocumentCategory, VariableCategory
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest, SmartCodeGenerateRequest, SmartCodeUpdateRequest
 from source.services.sml_template import SML_TEMPLATES
@@ -579,7 +579,11 @@ class EquipmentAPI:
                 result.append(t)
         return result
 
-    def get_variable(self, project_id: int, document_id: str, name: str):
+    def get_variable(self, project_id: int, document_id: str, category: VariableCategory):
+        """
+        Return all extracted variables for the selected category from a document's analysis.
+        Select a category from the dropdown (StatusVariable, DataVariable, Event, Alarm, RemoteCommand, State).
+        """
         try:
             document = self.storage.get_document(project_id, document_id)
             if document.Status != "completed":
@@ -593,35 +597,23 @@ class EquipmentAPI:
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 
-        query = name.lower()
-        results = []
+        if category == VariableCategory.STATUS_VARIABLE:
+            items = [{"Category": "StatusVariable", "Data": sv.model_dump()} for sv in spec.StatusVariables]
+        elif category == VariableCategory.DATA_VARIABLE:
+            items = [{"Category": "DataVariable", "Data": dv.model_dump()} for dv in spec.DataVariables]
+        elif category == VariableCategory.EVENT:
+            items = [{"Category": "Event", "Data": ev.model_dump()} for ev in spec.Events]
+        elif category == VariableCategory.ALARM:
+            items = [{"Category": "Alarm", "Data": al.model_dump()} for al in spec.Alarms]
+        elif category == VariableCategory.REMOTE_COMMAND:
+            items = [{"Category": "RemoteCommand", "Data": rc.model_dump()} for rc in spec.RemoteCommands]
+        elif category == VariableCategory.STATE:
+            items = [{"Category": "State", "Data": st.model_dump()} for st in spec.States]
+        else:
+            items = []
 
-        for sv in spec.StatusVariables:
-            if query == sv.Name.lower():
-                results.append({"Category": "StatusVariable", "Data": sv.model_dump()})
+        if not items:
+            raise HTTPException(404, f"No {category.value} entries found in document '{document_id}'")
 
-        for dv in spec.DataVariables:
-            if query == dv.Name.lower():
-                results.append({"Category": "DataVariable", "Data": dv.model_dump()})
-
-        for ev in spec.Events:
-            if query == ev.Name.lower():
-                results.append({"Category": "Event", "Data": ev.model_dump()})
-
-        for al in spec.Alarms:
-            if query == al.Name.lower() or query == al.AlarmText.lower() if hasattr(al, 'AlarmText') else False:
-                results.append({"Category": "Alarm", "Data": al.model_dump()})
-
-        for rc in spec.RemoteCommands:
-            if query == rc.RCMD.lower():
-                results.append({"Category": "RemoteCommand", "Data": rc.model_dump()})
-
-        for st in spec.States:
-            if query == st.Name.lower():
-                results.append({"Category": "State", "Data": st.model_dump()})
-
-        if not results:
-            raise HTTPException(404, f"Variable '{name}' not found in document '{document_id}'")
-
-        return {"Results": results}
+        return {"Category": category.value, "Count": len(items), "Results": items}
 
