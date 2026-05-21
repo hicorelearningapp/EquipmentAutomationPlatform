@@ -37,7 +37,7 @@ class TestScriptService:
                         header_line = s_l
                         break
 
-                category = "EquipmentControl"  # default fallback
+                category = "Equipment Control"  # default fallback
                 if header_line:
                     parts = header_line.split()
                     if parts:
@@ -46,21 +46,14 @@ class TestScriptService:
                             stream_part = sml_cmd.split("F")[0]
                         else:
                             stream_part = sml_cmd
-
-                        if sml_cmd == "S2F23":
-                            category = "EventReporting"
-                        elif stream_part == "S1":
-                            category = "EquipmentStatus"
-                        elif stream_part == "S2":
-                            category = "EquipmentControl"
-                        elif stream_part == "S5":
-                            category = "AlarmManagement"
-                        elif stream_part == "S6":
-                            category = "EventReporting"
-                        elif stream_part == "S7":
-                            category = "ProcessProgramManagement"
-                        elif stream_part == "S10":
-                            category = "TerminalServices"
+                        
+                        try:
+                            # stream_part is like 'S1', we need the integer 1
+                            stream_id = int(stream_part.replace("S", ""))
+                            from source.services.secs_categories import get_stream_category
+                            category = get_stream_category(stream_id)
+                        except (ValueError, TypeError):
+                            pass
 
                 tests.append(
                     {

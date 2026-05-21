@@ -58,37 +58,66 @@ class ProjectAPI:
                 if doc.Status != "completed":
                     logger.info(f"Auto-analyzing document {doc.DocumentID} for project {project_id}")
                     try:
-                        pdf_path = self.storage.document_pdf_path(project_id, doc.DocumentID)
-                        text = container.parser.extract_text(str(pdf_path))
-                        if not text.strip():
-                            logger.warning(f"Empty text from {doc.DocumentID}")
-                            continue
+                        is_excel = doc.FileName.lower().endswith(".xlsx")
+                        is_txt = doc.FileName.lower().endswith(".txt")
+                        text = ""
 
-                        tables_dir = self.storage.extracted_tables_path(project_id)
-                        spec = container.extractor.extract(text, pdf_path=pdf_path, tables_dir=tables_dir)
-
-                        # Generate reports (non-fatal)
-                        try:
-                            reports, links = container.report_service.generate(spec, text)
-                            spec.Reports = reports
-                            spec.EventReportLinks = links
-                        except Exception as exc:
-                            logger.error(f"Report generation failed for {doc.DocumentID} (non-fatal): {exc}")
+                        if is_excel:
+                            file_path = self.storage.document_excel_path(project_id, doc.DocumentID, ext=".xlsx")
+                            spec = container.extractor.extract_excel(file_path)
+                            if not spec.ToolID:
+                                spec.ToolID = metadata.ProjectName
+                                spec.ToolType = metadata.Tool.value or "Semiconductor Processing Equipment"
                             spec.Reports = []
                             spec.EventReportLinks = []
+                        elif is_txt:
+                            file_path = self.storage.document_excel_path(project_id, doc.DocumentID, ext=".txt")
+                            try:
+                                tool_id = metadata.ProjectName
+                                tool_type = metadata.Tool.value or "Semiconductor Processing Equipment"
+                            except Exception:
+                                tool_id = str(project_id)
+                                tool_type = "Semiconductor Processing Equipment"
+                            spec = EquipmentSpec(
+                                DocumentType=DocumentCategory.SML_SCRIPTS.value,
+                                ToolID=tool_id,
+                                ToolType=tool_type,
+                            )
+                            spec.Reports = []
+                            spec.EventReportLinks = []
+                        else:
+                            file_path = self.storage.document_pdf_path(project_id, doc.DocumentID)
+                            text = container.parser.extract_text(str(file_path))
+                            if not text.strip():
+                                logger.warning(f"Empty text from {doc.DocumentID}")
+                                continue
+
+                            tables_dir = self.storage.extracted_tables_path(project_id)
+                            spec = container.extractor.extract(text, pdf_path=file_path, tables_dir=tables_dir)
+
+                            # Generate reports (non-fatal)
+                            try:
+                                reports, links = container.report_service.generate(spec, text)
+                                spec.Reports = reports
+                                spec.EventReportLinks = links
+                            except Exception as exc:
+                                logger.error(f"Report generation failed for {doc.DocumentID} (non-fatal): {exc}")
+                                spec.Reports = []
+                                spec.EventReportLinks = []
 
                         json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
                         self.storage.save_spec_json(json_path, spec)
                         
-                        vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
-                        vector_store.add_document(
-                            text,
-                            metadata={
-                                "project_id": project_id,
-                                "document_id": doc.DocumentID,
-                                "tool_id": spec.ToolID,
-                            },
-                        )
+                        if text:
+                            vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
+                            vector_store.add_document(
+                                text,
+                                metadata={
+                                    "project_id": project_id,
+                                    "document_id": doc.DocumentID,
+                                    "tool_id": spec.ToolID,
+                                },
+                            )
                         self.storage.complete_extraction(
                             project_id=project_id,
                             document_id=doc.DocumentID,

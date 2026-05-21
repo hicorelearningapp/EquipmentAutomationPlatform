@@ -96,3 +96,5 @@ etc
 and i want you to create separate python files for this
 
 so now give me an implementation plan to create the /GenerateTestScripts 
+
+i want an endpoint that will get the project_id and document_id and the variable name and return that variable json what we extracted in Analyze or Analyze Projects 

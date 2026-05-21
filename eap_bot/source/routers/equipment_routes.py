@@ -43,6 +43,7 @@ class EquipmentAPI:
         self.router.get("/Analyze/{project_id}/{document_id}", response_model_by_alias=False, tags=["documents"])(self.analyze)
         self.router.get("/AnalyzeProject/{project_id}", response_model_by_alias=False, tags=["documents"])(self.analyze_project)
         self.router.get("/Analyze/{project_id}/{document_id}/report", tags=["documents"])(self.download_report)
+        self.router.get("/GetVariable/{project_id}/{document_id}", tags=["documents"])(self.get_variable)
         self.router.delete("/DeleteDocument/{project_id}/{document_id}", tags=["documents"])(self.delete_document)
         self.router.post("/UpdateExtraction/{project_id}", tags=["documents"])(self.update_extraction)
 
@@ -177,10 +178,18 @@ class EquipmentAPI:
                 spec.Reports = []
                 spec.EventReportLinks = []
             elif is_txt:
-                doc_text = file_path.read_text(encoding="utf-8")
-                if not doc_text.strip():
-                    raise ValueError("Could not extract any text from the SML/TXT file")
-                spec = container.extractor.extract(doc_text)
+                try:
+                    project_meta = self.storage.get_project(project_id)
+                    tool_id = project_meta.ProjectName
+                    tool_type = project_meta.Tool.value or "Semiconductor Processing Equipment"
+                except Exception:
+                    tool_id = str(project_id)
+                    tool_type = "Semiconductor Processing Equipment"
+                spec = EquipmentSpec(
+                    DocumentType=DocumentCategory.SML_SCRIPTS.value,
+                    ToolID=tool_id,
+                    ToolType=tool_type,
+                )
                 spec.Reports = []
                 spec.EventReportLinks = []
             else:
@@ -435,11 +444,17 @@ class EquipmentAPI:
                         spec.Reports = []
                         spec.EventReportLinks = []
                     elif is_txt:
-                        doc_text = file_path.read_text(encoding="utf-8")
-                        if not doc_text.strip():
-                            logger.warning("Empty text from %s", doc.DocumentID)
-                            continue
-                        spec = container.extractor.extract(doc_text)
+                        try:
+                            tool_id = metadata.ProjectName
+                            tool_type = metadata.Tool.value or "Semiconductor Processing Equipment"
+                        except Exception:
+                            tool_id = str(project_id)
+                            tool_type = "Semiconductor Processing Equipment"
+                        spec = EquipmentSpec(
+                            DocumentType=DocumentCategory.SML_SCRIPTS.value,
+                            ToolID=tool_id,
+                            ToolType=tool_type,
+                        )
                         spec.Reports = []
                         spec.EventReportLinks = []
                     else:
@@ -563,4 +578,50 @@ class EquipmentAPI:
                 seen.add(key)
                 result.append(t)
         return result
+
+    def get_variable(self, project_id: int, document_id: str, name: str):
+        try:
+            document = self.storage.get_document(project_id, document_id)
+            if document.Status != "completed":
+                raise HTTPException(400, "Document extraction is not completed yet.")
+            spec_json = self.storage.read_spec_json(project_id, document_id)
+            spec = EquipmentSpec.model_validate_json(spec_json)
+        except InvalidSlugError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except (ProjectNotFoundError, DocumentNotFoundError) as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc
+
+        query = name.lower()
+        results = []
+
+        for sv in spec.StatusVariables:
+            if query == sv.Name.lower():
+                results.append({"Category": "StatusVariable", "Data": sv.model_dump()})
+
+        for dv in spec.DataVariables:
+            if query == dv.Name.lower():
+                results.append({"Category": "DataVariable", "Data": dv.model_dump()})
+
+        for ev in spec.Events:
+            if query == ev.Name.lower():
+                results.append({"Category": "Event", "Data": ev.model_dump()})
+
+        for al in spec.Alarms:
+            if query == al.Name.lower() or query == al.AlarmText.lower() if hasattr(al, 'AlarmText') else False:
+                results.append({"Category": "Alarm", "Data": al.model_dump()})
+
+        for rc in spec.RemoteCommands:
+            if query == rc.RCMD.lower():
+                results.append({"Category": "RemoteCommand", "Data": rc.model_dump()})
+
+        for st in spec.States:
+            if query == st.Name.lower():
+                results.append({"Category": "State", "Data": st.model_dump()})
+
+        if not results:
+            raise HTTPException(404, f"Variable '{name}' not found in document '{document_id}'")
+
+        return {"Results": results}
 
