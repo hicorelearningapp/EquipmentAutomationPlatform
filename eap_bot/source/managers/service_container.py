@@ -4,6 +4,7 @@ from source.services.equipment_extractor import EquipmentExtractor
 from source.services.mapping_service import MappingService
 from source.services.qa_service import QAService
 from source.services.report_service import ReportService
+from source.services.storage_service import StorageService
 from source.utils.embedder import VectorStoreManager
 from source.utils.llm_factory import LLMFactory, LLMStrategy
 from source.utils.pdf_reader import DocumentParser, DocumentParserFactory
@@ -17,6 +18,7 @@ class ServiceContainer:
         logger.info("ServiceContainer: initialising services ...")
 
         self.llm_strategy: LLMStrategy = LLMFactory.create_strategy()
+        self.storage: StorageService = StorageService()
 
         self.parser: DocumentParser = DocumentParserFactory.create()
         self.validator: SpecValidator = SpecValidator()
@@ -28,6 +30,17 @@ class ServiceContainer:
         )
         self.report_service: ReportService = ReportService(
             llm_strategy=self.llm_strategy
+        )
+
+        # Import here to avoid circular imports at module load time
+        from source.services.project_service import ProjectService
+        from source.services.document_service import DocumentService
+
+        self.project_service: ProjectService = ProjectService(
+            storage=self.storage, container=self
+        )
+        self.document_service: DocumentService = DocumentService(
+            storage=self.storage, container=self
         )
 
         logger.info("ServiceContainer: all services ready.")
