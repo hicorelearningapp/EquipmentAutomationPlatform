@@ -10,6 +10,8 @@ from pypdf import PdfReader
 from source.config import settings
 from source.managers.service_container import container
 from source.schemas.project import DocumentCategory, VariableCategory
+from typing import Annotated, List
+from fastapi import Query
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest, SmartCodeGenerateRequest, SmartCodeUpdateRequest
 from source.services.sml_template import SML_TEMPLATES
@@ -579,10 +581,11 @@ class EquipmentAPI:
                 result.append(t)
         return result
 
-    def get_variable(self, project_id: int, document_id: str, category: VariableCategory):
-        """
-        Return all extracted variables for the selected category from a document's analysis.
-        Select a category from the dropdown (StatusVariable, DataVariable, Event, Alarm, RemoteCommand, State).
+    def get_variable(self, project_id: int, document_id: str, categories: Annotated[List[VariableCategory], Query()] = None):
+        """Return variables for one or more selected categories.
+
+        *If ``categories`` is omitted, *all* categories are returned.
+        The response groups results by category.
         """
         try:
             document = self.storage.get_document(project_id, document_id)
@@ -597,23 +600,40 @@ class EquipmentAPI:
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 
-        if category == VariableCategory.STATUS_VARIABLE:
-            items = [{"Category": "StatusVariable", "Data": sv.model_dump()} for sv in spec.StatusVariables]
-        elif category == VariableCategory.DATA_VARIABLE:
-            items = [{"Category": "DataVariable", "Data": dv.model_dump()} for dv in spec.DataVariables]
-        elif category == VariableCategory.EVENT:
-            items = [{"Category": "Event", "Data": ev.model_dump()} for ev in spec.Events]
-        elif category == VariableCategory.ALARM:
-            items = [{"Category": "Alarm", "Data": al.model_dump()} for al in spec.Alarms]
-        elif category == VariableCategory.REMOTE_COMMAND:
-            items = [{"Category": "RemoteCommand", "Data": rc.model_dump()} for rc in spec.RemoteCommands]
-        elif category == VariableCategory.STATE:
-            items = [{"Category": "State", "Data": st.model_dump()} for st in spec.States]
-        else:
-            items = []
+        # Default to all categories if none supplied
+        if not categories:
+            categories = [
+                VariableCategory.STATUS_VARIABLE,
+                VariableCategory.DATA_VARIABLE,
+                VariableCategory.EVENT,
+                VariableCategory.ALARM,
+                VariableCategory.REMOTE_COMMAND,
+                VariableCategory.STATE,
+            ]
 
-        if not items:
-            raise HTTPException(404, f"No {category.value} entries found in document '{document_id}'")
+        results_by_cat: dict[str, list[dict]] = {}
+        total_count = 0
+        for cat in categories:
+            if cat == VariableCategory.STATUS_VARIABLE:
+                items = [{"Category": "StatusVariable", "Data": sv.model_dump()} for sv in spec.StatusVariables]
+            elif cat == VariableCategory.DATA_VARIABLE:
+                items = [{"Category": "DataVariable", "Data": dv.model_dump()} for dv in spec.DataVariables]
+            elif cat == VariableCategory.EVENT:
+                items = [{"Category": "Event", "Data": ev.model_dump()} for ev in spec.Events]
+            elif cat == VariableCategory.ALARM:
+                items = [{"Category": "Alarm", "Data": al.model_dump()} for al in spec.Alarms]
+            elif cat == VariableCategory.REMOTE_COMMAND:
+                items = [{"Category": "RemoteCommand", "Data": rc.model_dump()} for rc in spec.RemoteCommands]
+            elif cat == VariableCategory.STATE:
+                items = [{"Category": "State", "Data": st.model_dump()} for st in spec.States]
+            else:
+                items = []
+            if items:
+                results_by_cat[cat.value] = items
+                total_count += len(items)
 
-        return {"Category": category.value, "Count": len(items), "Results": items}
+        if not results_by_cat:
+            raise HTTPException(404, f"No requested categories found in document '{document_id}'")
+
+        return {"Categories": list(results_by_cat.keys()), "TotalCount": total_count, "Results": results_by_cat}
 
