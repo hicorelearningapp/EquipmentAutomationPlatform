@@ -8,7 +8,9 @@ from source.routers.project_routes import ProjectAPI
 from source.routers.codegen_routes import CodeGenAPI
 from source.routers.tool_characterization_routes import ToolCharacterizationAPI
 from source.routers.smart_automation_routes import SmartAutomationAPI
+from source.routers.mes_family_routes import mes_family_api
 from source.services.storage_service import StorageService
+from source.services.mes_family_seed import seed_mes_families
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,6 +30,7 @@ smart_auto_api = SmartAutomationAPI()
 app.include_router(project_api.router)
 app.include_router(equipment_api.router)
 app.include_router(mapping_api.router)
+app.include_router(mes_family_api.router)
 app.include_router(tool_char_api.router)
 app.include_router(smart_auto_api.router)
 #app.include_router(codegen_api.router)
@@ -37,8 +40,10 @@ app.include_router(smart_auto_api.router)
 def validate_storage_root() -> None:
     storage = StorageService()
     logger.info("Using EAP_STORAGE_ROOT=%s", storage.root)
+    seed_mes_families()
 
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
