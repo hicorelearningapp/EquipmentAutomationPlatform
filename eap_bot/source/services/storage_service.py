@@ -472,12 +472,17 @@ class StorageService:
             if csv_path.exists():
                 with open(csv_path, newline="", encoding="utf-8") as f:
                     reader = csv.DictReader(f)
-                    for row in reader:
-                        if id_field:
-                            existing[row[id_field]] = row
-                        else:
-                            key = (row["FromState"], row["ToState"])
-                            existing[key] = row
+                    if reader.fieldnames and (not id_field or id_field in reader.fieldnames):
+                        for row in reader:
+                            if id_field:
+                                if row.get(id_field):
+                                    existing[row[id_field]] = row
+                            else:
+                                if "FromState" in row and "ToState" in row:
+                                    key = (row["FromState"], row["ToState"])
+                                    existing[key] = row
+                    else:
+                        logger.warning("Existing CSV %s has mismatched or missing headers. Skipping existing rows.", filename)
 
             # Merge new items — new data wins on conflict
             for item in items:
@@ -489,7 +494,7 @@ class StorageService:
                 existing[key] = row
 
             with open(csv_path, "w", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=headers)
+                writer = csv.DictWriter(f, fieldnames=headers, extrasaction="ignore")
                 writer.writeheader()
                 writer.writerows(existing.values())
 

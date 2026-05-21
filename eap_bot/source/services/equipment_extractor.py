@@ -625,8 +625,9 @@ TABLE (CSV):
 
             # Save to disk if tables_dir provided
             if tables_dir is not None:
-                tables_dir.mkdir(parents=True, exist_ok=True)
-                csv_path = tables_dir / self._CSV_FILENAMES[section]
+                raw_tables_dir = tables_dir / "RawTables"
+                raw_tables_dir.mkdir(parents=True, exist_ok=True)
+                csv_path = raw_tables_dir / self._CSV_FILENAMES[section]
                 # Append new data rows to existing file, or create fresh
                 if csv_path.exists():
                     existing_lines = csv_path.read_text(encoding="utf-8").splitlines()
@@ -636,7 +637,7 @@ TABLE (CSV):
                     csv_path.write_text("\n".join(combined) + "\n", encoding="utf-8")
                 else:
                     csv_path.write_text(csv_str, encoding="utf-8")
-                logger.info("Saved %s table (%d rows) to %s", section, len(rows), csv_path)
+                logger.info("Saved raw %s table (%d rows) to %s", section, len(rows), csv_path)
 
         return section_csvs
 
