@@ -581,11 +581,14 @@ class EquipmentAPI:
                 result.append(t)
         return result
 
-    def get_variable(self, project_id: int, document_id: str, categories: Annotated[List[VariableCategory], Query()] = None):
-        """Return variables for one or more selected categories.
+    def get_variable(self, project_id: int, document_id: str, categories: str = None):
+        """Return variables for one or more categories.
 
-        *If ``categories`` is omitted, *all* categories are returned.
-        The response groups results by category.
+        Pass a comma-separated list of category names, e.g.:
+        ``StatusVariable,Event,Alarm``
+
+        Valid values: StatusVariable, DataVariable, Event, Alarm, RemoteCommand, State.
+        If omitted, **all** categories are returned.
         """
         try:
             document = self.storage.get_document(project_id, document_id)
@@ -600,20 +603,24 @@ class EquipmentAPI:
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 
-        # Default to all categories if none supplied
-        if not categories:
-            categories = [
-                VariableCategory.STATUS_VARIABLE,
-                VariableCategory.DATA_VARIABLE,
-                VariableCategory.EVENT,
-                VariableCategory.ALARM,
-                VariableCategory.REMOTE_COMMAND,
-                VariableCategory.STATE,
-            ]
+        valid_values = {v.value for v in VariableCategory}
+
+        # Parse comma-separated input or default to all
+        if categories:
+            tokens = [t.strip() for t in categories.split(",") if t.strip()]
+            invalid = [t for t in tokens if t not in valid_values]
+            if invalid:
+                raise HTTPException(
+                    400,
+                    f"Invalid category value(s): {invalid}. Valid values are: {sorted(valid_values)}"
+                )
+            selected = [VariableCategory(t) for t in tokens]
+        else:
+            selected = list(VariableCategory)
 
         results_by_cat: dict[str, list[dict]] = {}
         total_count = 0
-        for cat in categories:
+        for cat in selected:
             if cat == VariableCategory.STATUS_VARIABLE:
                 items = [{"Category": "StatusVariable", "Data": sv.model_dump()} for sv in spec.StatusVariables]
             elif cat == VariableCategory.DATA_VARIABLE:
@@ -633,7 +640,7 @@ class EquipmentAPI:
                 total_count += len(items)
 
         if not results_by_cat:
-            raise HTTPException(404, f"No requested categories found in document '{document_id}'")
+            raise HTTPException(404, f"No data found for the requested categories in document '{document_id}'")
 
         return {"Categories": list(results_by_cat.keys()), "TotalCount": total_count, "Results": results_by_cat}
 
