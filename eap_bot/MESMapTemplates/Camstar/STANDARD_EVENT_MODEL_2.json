@@ -198,6 +198,14 @@
       "RetryCount": 1
     },
     {
+      "Transaction": "TXN_DC_STOP",
+      "Method": "StopDataCollection",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 10,
+      "RetryCount": 1
+    },
+    {
       "Transaction": "TXN_DC_END",
       "Method": "CompleteDataCollection",
       "Direction": "EquipmentToMES",
