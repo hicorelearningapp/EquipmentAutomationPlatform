@@ -1,9 +1,10 @@
 import logging
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
 
 from source.managers.service_container import container
+from source.schemas.project import DocumentCategory
 from source.services.storage_service import (
     DocumentExistsError,
     DocumentNotFoundError,
@@ -31,12 +32,19 @@ class EquipmentAPI:
         self.router.delete("/DeleteDocument/{project_id}/{document_id}", tags=["documents"])(self.delete_document)
         self.router.post("/UpdateExtraction/{project_id}", tags=["documents"])(self.update_extraction)
 
-    async def upload_document(self, project_id: int, file: UploadFile = File(...)):
+    async def upload_document(
+        self,
+        project_id: int,
+        file: UploadFile = File(...),
+        document_type: DocumentCategory = Form(...),
+    ):
         if not file.filename:
             raise HTTPException(400, "No filename provided")
         contents = await file.read()
         try:
-            return container.document_service.upload_document(project_id, file.filename, contents)
+            return container.document_service.upload_document(
+                project_id, file.filename, contents, document_type
+            )
         except ValueError as exc:
             raise HTTPException(400, str(exc)) from exc
         except DocumentExistsError as exc:
