@@ -1,10 +1,285 @@
 {
-  "Events": [],
-  "Alarms": [],
-  "Variables": [],
-  "Payloads": [],
-  "Transactions": [],
-  "ValidationRules": [],
-  "AutoMapping": {},
-  "Logging": {}
+  "MESFamily": "FactoryWorks",
+  "TemplateName": "STANDARD_EVENT_MODEL",
+  "Version": "1.0",
+  "Description": "FactoryWorks MES integration template for semiconductor equipment. FactoryWorks uses a service-oriented, web-API-based dispatch model with optional WIP tracking extensions.",
+  "Events": [
+    {
+      "EventName": "LotStart",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_START",
+      "Payload": "LotStartPayload"
+    },
+    {
+      "EventName": "LotEnd",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_END",
+      "Payload": "LotEndPayload"
+    },
+    {
+      "EventName": "WaferStart",
+      "EventType": "Process",
+      "Transaction": "TXN_WAFER_START",
+      "Payload": "WaferPayload"
+    },
+    {
+      "EventName": "WaferEnd",
+      "EventType": "Process",
+      "Transaction": "TXN_WAFER_END",
+      "Payload": "WaferPayload"
+    },
+    {
+      "EventName": "AlarmSet",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_SET",
+      "Payload": "AlarmPayload"
+    },
+    {
+      "EventName": "AlarmClear",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Payload": "AlarmPayload"
+    },
+    {
+      "EventName": "EquipmentStateChange",
+      "EventType": "State",
+      "Transaction": "TXN_STATE_CHANGE",
+      "Payload": "StateChangePayload"
+    }
+  ],
+  "Alarms": [
+    {
+      "AlarmType": "EquipmentAlarm",
+      "Severity": "Critical",
+      "Transaction": "TXN_ALARM_SET"
+    },
+    {
+      "AlarmType": "ProcessAlarm",
+      "Severity": "Warning",
+      "Transaction": "TXN_PROCESS_WARNING"
+    },
+    {
+      "AlarmType": "CommunicationAlarm",
+      "Severity": "Minor",
+      "Transaction": "TXN_COMM_ALARM"
+    }
+  ],
+  "Variables": [
+    {
+      "MESField": "EquipmentID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "LotID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "WaferID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "SlotNumber",
+      "Type": "Integer",
+      "Required": false
+    },
+    {
+      "MESField": "RecipeName",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "RecipeVersion",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "CarrierID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "PortID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "OperatorID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "EquipmentState",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmID",
+      "Type": "Integer",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmText",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmSeverity",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "EventTime",
+      "Type": "DateTime",
+      "Required": true
+    }
+  ],
+  "Payloads": [
+    {
+      "PayloadName": "LotStartPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "RecipeVersion",
+        "CarrierID",
+        "PortID",
+        "OperatorID",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "LotEndPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "WaferPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "WaferID",
+        "SlotNumber",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "AlarmPayload",
+      "Fields": [
+        "EquipmentID",
+        "AlarmID",
+        "AlarmText",
+        "AlarmSeverity",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "StateChangePayload",
+      "Fields": [
+        "EquipmentID",
+        "EquipmentState",
+        "EventTime"
+      ]
+    }
+  ],
+  "Transactions": [
+    {
+      "Transaction": "TXN_LOT_START",
+      "Method": "StartLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_LOT_END",
+      "Method": "EndLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_WAFER_START",
+      "Method": "StartWafer",
+      "Direction": "EquipmentToMES",
+      "AckRequired": false,
+      "Timeout": 10,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_WAFER_END",
+      "Method": "EndWafer",
+      "Direction": "EquipmentToMES",
+      "AckRequired": false,
+      "Timeout": 10,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_ALARM_SET",
+      "Method": "CreateAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Method": "ClearAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_STATE_CHANGE",
+      "Method": "UpdateEquipmentState",
+      "Direction": "EquipmentToMES",
+      "AckRequired": false,
+      "Timeout": 10,
+      "RetryCount": 1
+    }
+  ],
+  "ValidationRules": [
+    {
+      "Field": "LotID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "RecipeName",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EquipmentID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EventTime",
+      "Rule": "UTCDateTime"
+    },
+    {
+      "Field": "EquipmentState",
+      "Rule": "AllowedValues:Idle,Running,Paused,Error,Maintenance"
+    }
+  ],
+  "AutoMapping": {
+    "Enabled": true,
+    "Strategy": "DynamicVIDMapping",
+    "CanonicalModel": true,
+    "UnknownVIDHandling": "IgnoreAndLog",
+    "RequiredFieldValidation": true
+  },
+  "Logging": {
+    "Enabled": true,
+    "AuditEnabled": true,
+    "StorePayload": true,
+    "StoreRawSECSMessage": true,
+    "LogLevel": "Information"
+  }
 }

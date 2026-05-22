@@ -1,10 +1,296 @@
 {
-  "Events": [],
-  "Alarms": [],
-  "Variables": [],
-  "Payloads": [],
-  "Transactions": [],
-  "ValidationRules": [],
-  "AutoMapping": {},
-  "Logging": {}
+  "MESFamily": "PROMIS",
+  "TemplateName": "STANDARD_EVENT_MODEL",
+  "Version": "1.0",
+  "Description": "PROMIS MES integration template. PROMIS (Flexible Factory Integration System) uses a transaction-based message broker model with strong WIP traceability and genealogy tracking.",
+  "Events": [
+    {
+      "EventName": "LotStart",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_START",
+      "Payload": "LotStartPayload"
+    },
+    {
+      "EventName": "LotEnd",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_END",
+      "Payload": "LotEndPayload"
+    },
+    {
+      "EventName": "LotSplit",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_SPLIT",
+      "Payload": "LotSplitPayload"
+    },
+    {
+      "EventName": "LotMerge",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_MERGE",
+      "Payload": "LotMergePayload"
+    },
+    {
+      "EventName": "AlarmSet",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_SET",
+      "Payload": "AlarmPayload"
+    },
+    {
+      "EventName": "AlarmClear",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Payload": "AlarmPayload"
+    },
+    {
+      "EventName": "RecipeDownload",
+      "EventType": "Control",
+      "Transaction": "TXN_RECIPE_DOWNLOAD",
+      "Payload": "RecipePayload"
+    }
+  ],
+  "Alarms": [
+    {
+      "AlarmType": "EquipmentAlarm",
+      "Severity": "Critical",
+      "Transaction": "TXN_ALARM_SET"
+    },
+    {
+      "AlarmType": "ProcessAlarm",
+      "Severity": "Warning",
+      "Transaction": "TXN_PROCESS_WARNING"
+    },
+    {
+      "AlarmType": "InterlockAlarm",
+      "Severity": "Critical",
+      "Transaction": "TXN_INTERLOCK_ALARM"
+    }
+  ],
+  "Variables": [
+    {
+      "MESField": "EquipmentID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "LotID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "ParentLotID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "ChildLotIDs",
+      "Type": "StringArray",
+      "Required": false
+    },
+    {
+      "MESField": "RecipeName",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "RecipeRevision",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "CarrierID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "PortID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "StepName",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "RouteID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmID",
+      "Type": "Integer",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmText",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmSeverity",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "EventTime",
+      "Type": "DateTime",
+      "Required": true
+    }
+  ],
+  "Payloads": [
+    {
+      "PayloadName": "LotStartPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "RecipeRevision",
+        "CarrierID",
+        "PortID",
+        "StepName",
+        "RouteID",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "LotEndPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "StepName",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "LotSplitPayload",
+      "Fields": [
+        "EquipmentID",
+        "ParentLotID",
+        "ChildLotIDs",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "LotMergePayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "ChildLotIDs",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "AlarmPayload",
+      "Fields": [
+        "EquipmentID",
+        "AlarmID",
+        "AlarmText",
+        "AlarmSeverity",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "RecipePayload",
+      "Fields": [
+        "EquipmentID",
+        "RecipeName",
+        "RecipeRevision",
+        "EventTime"
+      ]
+    }
+  ],
+  "Transactions": [
+    {
+      "Transaction": "TXN_LOT_START",
+      "Method": "StartLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 45,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_LOT_END",
+      "Method": "EndLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 45,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_LOT_SPLIT",
+      "Method": "SplitLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_LOT_MERGE",
+      "Method": "MergeLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_ALARM_SET",
+      "Method": "CreateAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Method": "ClearAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_RECIPE_DOWNLOAD",
+      "Method": "DownloadRecipe",
+      "Direction": "MESToEquipment",
+      "AckRequired": true,
+      "Timeout": 60,
+      "RetryCount": 1
+    }
+  ],
+  "ValidationRules": [
+    {
+      "Field": "LotID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "RecipeName",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EquipmentID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EventTime",
+      "Rule": "UTCDateTime"
+    },
+    {
+      "Field": "RouteID",
+      "Rule": "NonEmptyIfPresent"
+    }
+  ],
+  "AutoMapping": {
+    "Enabled": true,
+    "Strategy": "DynamicVIDMapping",
+    "CanonicalModel": true,
+    "UnknownVIDHandling": "IgnoreAndLog",
+    "RequiredFieldValidation": true
+  },
+  "Logging": {
+    "Enabled": true,
+    "AuditEnabled": true,
+    "StorePayload": true,
+    "StoreRawSECSMessage": true,
+    "LogLevel": "Information"
+  }
 }

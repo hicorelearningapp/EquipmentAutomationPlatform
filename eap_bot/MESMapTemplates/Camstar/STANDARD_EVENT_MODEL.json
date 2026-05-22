@@ -1,10 +1,294 @@
 {
-  "Events": [],
-  "Alarms": [],
-  "Variables": [],
-  "Payloads": [],
-  "Transactions": [],
-  "ValidationRules": [],
-  "AutoMapping": {},
-  "Logging": {}
+  "MESFamily": "Camstar",
+  "TemplateName": "STANDARD_EVENT_MODEL",
+  "Version": "1.0",
+  "Description": "Camstar (now Opcenter) MES integration template. Camstar uses an object-oriented transaction model with container tracking, electronic traveler support, and quality data collection.",
+  "Events": [
+    {
+      "EventName": "LotStart",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_START",
+      "Payload": "LotStartPayload"
+    },
+    {
+      "EventName": "LotEnd",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_END",
+      "Payload": "LotEndPayload"
+    },
+    {
+      "EventName": "ContainerMove",
+      "EventType": "WIP",
+      "Transaction": "TXN_CONTAINER_MOVE",
+      "Payload": "ContainerPayload"
+    },
+    {
+      "EventName": "DataCollectionStart",
+      "EventType": "Quality",
+      "Transaction": "TXN_DC_START",
+      "Payload": "DataCollectionPayload"
+    },
+    {
+      "EventName": "DataCollectionEnd",
+      "EventType": "Quality",
+      "Transaction": "TXN_DC_END",
+      "Payload": "DataCollectionPayload"
+    },
+    {
+      "EventName": "AlarmSet",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_SET",
+      "Payload": "AlarmPayload"
+    },
+    {
+      "EventName": "AlarmClear",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Payload": "AlarmPayload"
+    }
+  ],
+  "Alarms": [
+    {
+      "AlarmType": "EquipmentAlarm",
+      "Severity": "Critical",
+      "Transaction": "TXN_ALARM_SET"
+    },
+    {
+      "AlarmType": "ProcessAlarm",
+      "Severity": "Warning",
+      "Transaction": "TXN_PROCESS_WARNING"
+    },
+    {
+      "AlarmType": "QualityAlarm",
+      "Severity": "Minor",
+      "Transaction": "TXN_QUALITY_ALARM"
+    }
+  ],
+  "Variables": [
+    {
+      "MESField": "EquipmentID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "LotID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "ContainerName",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "ContainerType",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "RecipeName",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "OperationName",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "WorkflowName",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "ProductName",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "DataCollectionName",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "MeasuredValue",
+      "Type": "Float",
+      "Required": false
+    },
+    {
+      "MESField": "MeasurementUnit",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmID",
+      "Type": "Integer",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmText",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmSeverity",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "EventTime",
+      "Type": "DateTime",
+      "Required": true
+    }
+  ],
+  "Payloads": [
+    {
+      "PayloadName": "LotStartPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "ContainerName",
+        "RecipeName",
+        "OperationName",
+        "WorkflowName",
+        "ProductName",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "LotEndPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "OperationName",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "ContainerPayload",
+      "Fields": [
+        "EquipmentID",
+        "ContainerName",
+        "ContainerType",
+        "LotID",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "DataCollectionPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "DataCollectionName",
+        "MeasuredValue",
+        "MeasurementUnit",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "AlarmPayload",
+      "Fields": [
+        "EquipmentID",
+        "AlarmID",
+        "AlarmText",
+        "AlarmSeverity",
+        "EventTime"
+      ]
+    }
+  ],
+  "Transactions": [
+    {
+      "Transaction": "TXN_LOT_START",
+      "Method": "MoveIn",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_LOT_END",
+      "Method": "MoveOut",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_CONTAINER_MOVE",
+      "Method": "ContainerMove",
+      "Direction": "EquipmentToMES",
+      "AckRequired": false,
+      "Timeout": 15,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_DC_START",
+      "Method": "StartDataCollection",
+      "Direction": "EquipmentToMES",
+      "AckRequired": false,
+      "Timeout": 10,
+      "RetryCount": 1
+    },
+    {
+      "Transaction": "TXN_DC_END",
+      "Method": "CompleteDataCollection",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 20,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_ALARM_SET",
+      "Method": "CreateAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Method": "ClearAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    }
+  ],
+  "ValidationRules": [
+    {
+      "Field": "LotID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "RecipeName",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EquipmentID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EventTime",
+      "Rule": "UTCDateTime"
+    },
+    {
+      "Field": "ContainerType",
+      "Rule": "AllowedValues:Cassette,FOUP,Boat,Tray"
+    }
+  ],
+  "AutoMapping": {
+    "Enabled": true,
+    "Strategy": "DynamicVIDMapping",
+    "CanonicalModel": true,
+    "UnknownVIDHandling": "IgnoreAndLog",
+    "RequiredFieldValidation": true
+  },
+  "Logging": {
+    "Enabled": true,
+    "AuditEnabled": true,
+    "StorePayload": true,
+    "StoreRawSECSMessage": true,
+    "LogLevel": "Information"
+  }
 }

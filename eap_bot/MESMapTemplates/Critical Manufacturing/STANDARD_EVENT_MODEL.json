@@ -1,10 +1,327 @@
 {
-  "Events": [],
-  "Alarms": [],
-  "Variables": [],
-  "Payloads": [],
-  "Transactions": [],
-  "ValidationRules": [],
-  "AutoMapping": {},
-  "Logging": {}
+  "MESFamily": "Critical Manufacturing",
+  "TemplateName": "STANDARD_EVENT_MODEL",
+  "Version": "1.0",
+  "Description": "Critical Manufacturing MES (CMF) integration template. CMF is a modern, IoT-ready MES platform with advanced scheduling, genealogy, and Industry 4.0 connectivity built around a microservices architecture.",
+  "Events": [
+    {
+      "EventName": "LotStart",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_START",
+      "Payload": "LotStartPayload"
+    },
+    {
+      "EventName": "LotEnd",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_END",
+      "Payload": "LotEndPayload"
+    },
+    {
+      "EventName": "MaterialIn",
+      "EventType": "Material",
+      "Transaction": "TXN_MATERIAL_IN",
+      "Payload": "MaterialPayload"
+    },
+    {
+      "EventName": "MaterialOut",
+      "EventType": "Material",
+      "Transaction": "TXN_MATERIAL_OUT",
+      "Payload": "MaterialPayload"
+    },
+    {
+      "EventName": "ParametricDataReported",
+      "EventType": "Quality",
+      "Transaction": "TXN_PARAM_DATA",
+      "Payload": "ParametricPayload"
+    },
+    {
+      "EventName": "AlarmSet",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_SET",
+      "Payload": "AlarmPayload"
+    },
+    {
+      "EventName": "AlarmClear",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Payload": "AlarmPayload"
+    },
+    {
+      "EventName": "SchedulerRequest",
+      "EventType": "Control",
+      "Transaction": "TXN_SCHEDULER_REQUEST",
+      "Payload": "SchedulerPayload"
+    }
+  ],
+  "Alarms": [
+    {
+      "AlarmType": "EquipmentAlarm",
+      "Severity": "Critical",
+      "Transaction": "TXN_ALARM_SET"
+    },
+    {
+      "AlarmType": "ProcessAlarm",
+      "Severity": "Warning",
+      "Transaction": "TXN_PROCESS_WARNING"
+    },
+    {
+      "AlarmType": "SPCAlarm",
+      "Severity": "Warning",
+      "Transaction": "TXN_SPC_ALARM"
+    },
+    {
+      "AlarmType": "SchedulerAlarm",
+      "Severity": "Minor",
+      "Transaction": "TXN_SCHEDULER_ALARM"
+    }
+  ],
+  "Variables": [
+    {
+      "MESField": "EquipmentID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "LotID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "MaterialID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "MaterialType",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "RecipeName",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "StepID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "WorkOrderID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "OperationID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "ParameterName",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "ParameterValue",
+      "Type": "Float",
+      "Required": false
+    },
+    {
+      "MESField": "ParameterUnit",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "SchedulerTaskID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmID",
+      "Type": "Integer",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmText",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmSeverity",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "EventTime",
+      "Type": "DateTime",
+      "Required": true
+    }
+  ],
+  "Payloads": [
+    {
+      "PayloadName": "LotStartPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "StepID",
+        "WorkOrderID",
+        "OperationID",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "LotEndPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "StepID",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "MaterialPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "MaterialID",
+        "MaterialType",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "ParametricPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "StepID",
+        "ParameterName",
+        "ParameterValue",
+        "ParameterUnit",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "AlarmPayload",
+      "Fields": [
+        "EquipmentID",
+        "AlarmID",
+        "AlarmText",
+        "AlarmSeverity",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "SchedulerPayload",
+      "Fields": [
+        "EquipmentID",
+        "SchedulerTaskID",
+        "WorkOrderID",
+        "EventTime"
+      ]
+    }
+  ],
+  "Transactions": [
+    {
+      "Transaction": "TXN_LOT_START",
+      "Method": "StartLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_LOT_END",
+      "Method": "EndLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_MATERIAL_IN",
+      "Method": "MaterialIn",
+      "Direction": "EquipmentToMES",
+      "AckRequired": false,
+      "Timeout": 10,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_MATERIAL_OUT",
+      "Method": "MaterialOut",
+      "Direction": "EquipmentToMES",
+      "AckRequired": false,
+      "Timeout": 10,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_PARAM_DATA",
+      "Method": "ReportParametricData",
+      "Direction": "EquipmentToMES",
+      "AckRequired": false,
+      "Timeout": 20,
+      "RetryCount": 1
+    },
+    {
+      "Transaction": "TXN_ALARM_SET",
+      "Method": "CreateAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Method": "ClearAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_SCHEDULER_REQUEST",
+      "Method": "RequestSchedule",
+      "Direction": "MESToEquipment",
+      "AckRequired": true,
+      "Timeout": 60,
+      "RetryCount": 1
+    }
+  ],
+  "ValidationRules": [
+    {
+      "Field": "LotID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "RecipeName",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EquipmentID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EventTime",
+      "Rule": "UTCDateTime"
+    },
+    {
+      "Field": "WorkOrderID",
+      "Rule": "NonEmptyIfPresent"
+    }
+  ],
+  "AutoMapping": {
+    "Enabled": true,
+    "Strategy": "DynamicVIDMapping",
+    "CanonicalModel": true,
+    "UnknownVIDHandling": "IgnoreAndLog",
+    "RequiredFieldValidation": true
+  },
+  "Logging": {
+    "Enabled": true,
+    "AuditEnabled": true,
+    "StorePayload": true,
+    "StoreRawSECSMessage": true,
+    "LogLevel": "Information"
+  }
 }
