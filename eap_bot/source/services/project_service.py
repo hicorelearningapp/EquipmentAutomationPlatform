@@ -208,11 +208,11 @@ class ProjectService:
         if not template_path.exists():
             raise FileNotFoundError(f"MES template not found at {template_path}")
 
-        from source.schemas.mapping import MESTag
+        from source.utils.template_parser import _extract_tags_from_template
         import json
         with open(template_path, "r", encoding="utf-8") as f:
             raw_tags = json.load(f)
-        target_tags = [MESTag.model_validate(t) for t in raw_tags]
+        target_tags = _extract_tags_from_template(raw_tags)
 
         return self._container.mapping_service.suggest_mappings(spec, target_tags)
 

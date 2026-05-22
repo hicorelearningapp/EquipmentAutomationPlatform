@@ -111,8 +111,9 @@ class MesFamilyAPI:
                     matched_old = old_families_by_name[name_key]
 
             if matched_old:
-                assigned_id = matched_old["FamilyID"]
-                used_old_ids.add(assigned_id)
+                assigned_id = matched_old.get("FamilyID")
+                if assigned_id is not None:
+                    used_old_ids.add(assigned_id)
 
                 # Rename directory if name changed
                 old_name = matched_old["Family"]
