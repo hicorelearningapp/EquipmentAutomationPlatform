@@ -1,0 +1,38 @@
+[
+  {
+    "Family": "FactoryWorks",
+    "DefaultProtocol": "",
+    "RequiresAck": true,
+    "Description": "FactoryWorks MES"
+  },
+  {
+    "Family": "FAB300",
+    "DefaultProtocol": "",
+    "RequiresAck": true,
+    "Description": "FAB300 MES"
+  },
+  {
+    "Family": "PROMIS",
+    "DefaultProtocol": "",
+    "RequiresAck": true,
+    "Description": "PROMIS MES"
+  },
+  {
+    "Family": "Camstar",
+    "DefaultProtocol": "",
+    "RequiresAck": true,
+    "Description": "Camstar MES"
+  },
+  {
+    "Family": "Critical Manufacturing",
+    "DefaultProtocol": "",
+    "RequiresAck": true,
+    "Description": "Critical Manufacturing MES"
+  },
+  {
+    "Family": "Custom MES",
+    "DefaultProtocol": "",
+    "RequiresAck": true,
+    "Description": "Custom MES"
+  }
+]
