@@ -30,7 +30,7 @@ class DocumentService:
 
     # ── Upload ────────────────────────────────────────────────────────────────
 
-    def upload_document(self, project_id: int, filename: str, contents: bytes) -> dict:
+    def upload_document(self, project_id: int, filename: str, contents: bytes, doc_category: DocumentCategory) -> dict:
         ext = Path(filename).suffix.lower()
         if ext not in {".pdf", ".xlsx", ".txt"}:
             raise ValueError("Only .pdf, .xlsx, and .txt files are accepted")
@@ -40,30 +40,16 @@ class DocumentService:
 
         file_size = float(len(contents))
 
-        if ext == ".pdf":
-            pages = len(PdfReader(io.BytesIO(contents)).pages)
-            doc_category = DocumentCategory.USER_MANUALS
-        elif ext == ".xlsx":
-            import openpyxl
-            wb = openpyxl.load_workbook(io.BytesIO(contents), read_only=True)
-            pages = len(wb.sheetnames)
-            wb.close()
-            doc_category = DocumentCategory.VARIABLE_FILES
-        else:
-            pages = 1
-            doc_category = DocumentCategory.SML_SCRIPTS
+        from source.services.document_strategies import DocumentProcessorFactory
+        strategy = DocumentProcessorFactory.get_strategy(filename)
+        pages = strategy.get_pages(contents)
 
         document_id, file_path, _ = self.storage.prepare_document_paths(
             project_id, filename, extension=ext
         )
         self.storage.save_pdf(file_path, contents)
 
-        if ext == ".txt":
-            tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
-            tool_char_dir.mkdir(parents=True, exist_ok=True)
-            dst_path = tool_char_dir / filename
-            dst_path.write_bytes(contents)
-            logger.info("Copied SML script %s to %s", filename, dst_path)
+        strategy.post_upload(project_id, filename, contents, self.storage)
 
         document = self.storage.register_document(
             project_id=project_id,
@@ -94,9 +80,9 @@ class DocumentService:
             spec_json = self.storage.read_spec_json(project_id, document_id)
             spec = EquipmentSpec.model_validate_json(spec_json)
 
-            is_excel = document.FileName.lower().endswith(".xlsx")
-            is_txt = document.FileName.lower().endswith(".txt")
-            if not spec.Reports and not is_excel and not is_txt:
+            from source.services.document_strategies import DocumentProcessorFactory, PdfProcessingStrategy
+            strategy = DocumentProcessorFactory.get_strategy(document.FileName)
+            if not spec.Reports and isinstance(strategy, PdfProcessingStrategy):
                 logger.info("Reports missing in completed spec for %s/%s, generating now...", project_id, document_id)
                 file_path = self._resolve_document_path(project_id, document)
                 text = self._container.parser.extract_text(str(file_path))
@@ -109,46 +95,19 @@ class DocumentService:
 
             return self._build_extraction_response(project_id, document_id, spec)
 
-        is_excel = document.FileName.lower().endswith(".xlsx")
-        is_txt = document.FileName.lower().endswith(".txt")
-
         try:
             file_path = self._resolve_document_path(project_id, document)
-            doc_text: str = ""
+            from source.services.document_strategies import DocumentProcessorFactory
+            strategy = DocumentProcessorFactory.get_strategy(document.FileName)
 
-            if is_excel:
-                spec = self._container.extractor.extract_excel(file_path)
-                if not spec.ToolID:
-                    project_meta = self.storage.get_project(project_id)
-                    spec.ToolID = project_meta.ProjectName
-                    spec.ToolType = project_meta.Tool.value or "Semiconductor Processing Equipment"
-                spec.Reports = []
-                spec.EventReportLinks = []
-            elif is_txt:
-                project_meta = self.storage.get_project(project_id)
-                spec = EquipmentSpec(
-                    DocumentType=DocumentCategory.SML_SCRIPTS.value,
-                    ToolID=project_meta.ProjectName,
-                    ToolType=project_meta.Tool.value or "Semiconductor Processing Equipment",
-                )
-                spec.Reports = []
-                spec.EventReportLinks = []
-            else:
-                doc_text = self._container.parser.extract_text(str(file_path))
-                if not doc_text.strip():
-                    raise ValueError("Could not extract any text from the PDF")
-
-                tables_dir = self.storage.extracted_tables_path(project_id)
-                spec = self._container.extractor.extract(doc_text, pdf_path=file_path, tables_dir=tables_dir)
-
-                try:
-                    reports, links = self._container.report_service.generate(spec, doc_text)
-                    spec.Reports = reports
-                    spec.EventReportLinks = links
-                except Exception as exc:
-                    logger.error("Report generation failed for %s/%s (non-fatal): %s", project_id, document_id, exc)
-                    spec.Reports = []
-                    spec.EventReportLinks = []
+            spec, doc_text = strategy.analyze(
+                project_id=project_id,
+                document_id=document_id,
+                document=document,
+                file_path=file_path,
+                storage=self.storage,
+                container=self._container,
+            )
 
             json_path = self.storage.spec_json_path(project_id, document_id)
             self.storage.save_spec_json(json_path, spec)
