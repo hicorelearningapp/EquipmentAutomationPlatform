@@ -1,10 +1,194 @@
 {
-  "Events": [],
-  "Alarms": [],
-  "Variables": [],
-  "Payloads": [],
-  "Transactions": [],
-  "ValidationRules": [],
-  "AutoMapping": {},
-  "Logging": {}
+  "MESFamily": "FAB300",
+  "TemplateName": "STANDARD_EVENT_MODEL",
+  "Version": "1.0",
+  "Description": "Generic MES integration template independent of equipment",
+  "Events": [
+    {
+      "EventName": "LotStart",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_START",
+      "Payload": "LotStartPayload"
+    },
+    {
+      "EventName": "LotEnd",
+      "EventType": "Process",
+      "Transaction": "TXN_LOT_END",
+      "Payload": "LotEndPayload"
+    },
+    {
+      "EventName": "AlarmSet",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_SET",
+      "Payload": "AlarmPayload"
+    },
+    {
+      "EventName": "AlarmClear",
+      "EventType": "Alarm",
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Payload": "AlarmPayload"
+    }
+  ],
+  "Alarms": [
+    {
+      "AlarmType": "EquipmentAlarm",
+      "Severity": "Critical",
+      "Transaction": "TXN_ALARM_SET"
+    },
+    {
+      "AlarmType": "ProcessAlarm",
+      "Severity": "Warning",
+      "Transaction": "TXN_PROCESS_WARNING"
+    }
+  ],
+  "Variables": [
+    {
+      "MESField": "EquipmentID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "LotID",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "RecipeName",
+      "Type": "String",
+      "Required": true
+    },
+    {
+      "MESField": "CarrierID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "PortID",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "SlotNumber",
+      "Type": "Integer",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmID",
+      "Type": "Integer",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmText",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "AlarmSeverity",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "EventTime",
+      "Type": "DateTime",
+      "Required": true
+    }
+  ],
+  "Payloads": [
+    {
+      "PayloadName": "LotStartPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "CarrierID",
+        "PortID",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "LotEndPayload",
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "EventTime"
+      ]
+    },
+    {
+      "PayloadName": "AlarmPayload",
+      "Fields": [
+        "EquipmentID",
+        "AlarmID",
+        "AlarmText",
+        "AlarmSeverity",
+        "EventTime"
+      ]
+    }
+  ],
+  "Transactions": [
+    {
+      "Transaction": "TXN_LOT_START",
+      "Method": "StartLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_LOT_END",
+      "Method": "EndLot",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 30,
+      "RetryCount": 3
+    },
+    {
+      "Transaction": "TXN_ALARM_SET",
+      "Method": "CreateAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_ALARM_CLEAR",
+      "Method": "ClearAlarm",
+      "Direction": "EquipmentToMES",
+      "AckRequired": true,
+      "Timeout": 15,
+      "RetryCount": 2
+    }
+  ],
+  "ValidationRules": [
+    {
+      "Field": "LotID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "RecipeName",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EquipmentID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EventTime",
+      "Rule": "UTCDateTime"
+    }
+  ],
+  "AutoMapping": {
+    "Enabled": true,
+    "Strategy": "DynamicVIDMapping",
+    "CanonicalModel": true,
+    "UnknownVIDHandling": "IgnoreAndLog",
+    "RequiredFieldValidation": true
+  },
+  "Logging": {
+    "Enabled": true,
+    "AuditEnabled": true,
+    "StorePayload": true,
+    "StoreRawSECSMessage": true,
+    "LogLevel": "Information"
+  }
 }
