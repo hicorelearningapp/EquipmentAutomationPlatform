@@ -44,6 +44,22 @@ def _resolve_canonical_family(mes_family: str) -> str:
             return f["Family"]
     raise HTTPException(404, f"MES Family '{mes_family}' not found")
 
+def _increment_minor_version(version: str) -> str:
+    """Increment the minor part of a N.M version string.
+
+    Examples:
+        '1.0' -> '1.1'
+        '1.9' -> '1.10'
+        '2.5' -> '2.6'
+
+    Falls back to '1.1' if the version string is malformed.
+    """
+    try:
+        major, minor = version.split(".", 1)
+        return f"{major}.{int(minor) + 1}"
+    except (ValueError, AttributeError):
+        return "1.1"
+
 class MesFamilyAPI:
     def __init__(self):
         self.router = APIRouter(tags=["MES Families"])
@@ -310,13 +326,8 @@ class MesFamilyAPI:
                 # User provided version: keep as-is
                 pass
             else:
-                # Auto-increment +0.1
-                try:
-                    current_float = float(existing_version)
-                except ValueError:
-                    current_float = 1.0
-                new_float = round(current_float + 0.1, 1)
-                json_data["Version"] = str(new_float)
+                # Auto-increment minor version: N.M -> N.(M+1)
+                json_data["Version"] = _increment_minor_version(existing_version)
 
             # Auto-inject/overwrite TemplateName
             json_data["TemplateName"] = Path(template).stem
