@@ -18,36 +18,42 @@ FAMILIES_FILE: Path = MES_MAP_DIR / "families.json"
 # ── Default families registry ─────────────────────
 DEFAULT_FAMILIES = [
     {
+        "FamilyID": 1,
         "Family": "FactoryWorks",
         "DefaultProtocol": "",
         "RequiresAck": True,
         "Description": "FactoryWorks MES"
     },
     {
+        "FamilyID": 2,
         "Family": "FAB300",
         "DefaultProtocol": "",
         "RequiresAck": True,
         "Description": "FAB300 MES"
     },
     {
+        "FamilyID": 3,
         "Family": "PROMIS",
         "DefaultProtocol": "",
         "RequiresAck": True,
         "Description": "PROMIS MES"
     },
     {
+        "FamilyID": 4,
         "Family": "Camstar",
         "DefaultProtocol": "",
         "RequiresAck": True,
         "Description": "Camstar MES"
     },
     {
+        "FamilyID": 5,
         "Family": "Critical Manufacturing",
         "DefaultProtocol": "",
         "RequiresAck": True,
         "Description": "Critical Manufacturing MES"
     },
     {
+        "FamilyID": 6,
         "Family": "Custom MES",
         "DefaultProtocol": "",
         "RequiresAck": True,
@@ -79,8 +85,6 @@ def seed_mes_families() -> None:
             logger.info("Seeding default MES families to %s", FAMILIES_FILE)
             with open(FAMILIES_FILE, "w", encoding="utf-8") as f:
                 json.dump(DEFAULT_FAMILIES, f, indent=2)
-        else:
-            logger.info("MES families registry already exists at %s, skipping seed", FAMILIES_FILE)
 
         # Read families to see what subdirectories to verify/create
         try:
@@ -89,6 +93,22 @@ def seed_mes_families() -> None:
         except Exception as e:
             logger.error("Failed to read families registry file: %s", e)
             families = DEFAULT_FAMILIES
+
+        # Auto-migration: assign integer FamilyIDs to any entries missing them
+        needs_save = False
+        existing_ids = {fam.get("FamilyID") for fam in families if fam.get("FamilyID") is not None}
+        next_id = max(existing_ids) + 1 if existing_ids else 1
+
+        for fam in families:
+            if fam.get("FamilyID") is None:
+                fam["FamilyID"] = next_id
+                next_id += 1
+                needs_save = True
+
+        if needs_save:
+            logger.info("Saving migrated families registry with integer FamilyIDs")
+            with open(FAMILIES_FILE, "w", encoding="utf-8") as f:
+                json.dump(families, f, indent=2)
 
         # 3. For each family, ensure directory and STANDARD_EVENT_MODEL.json exist
         for fam_entry in families:
@@ -111,3 +131,4 @@ def seed_mes_families() -> None:
         logger.info("MES family seeding complete.")
     except Exception as e:
         logger.error("Error seeding MES families: %s", e, exc_info=True)
+

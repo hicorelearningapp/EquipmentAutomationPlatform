@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 MES_MAP_DIR: Path = Path(__file__).resolve().parent.parent.parent / "MESMapTemplates"
 FAMILIES_FILE: Path = MES_MAP_DIR / "families.json"
 
-class UpdateFamiliesRequest(BaseModel):
-    action: str           # "add" | "update" | "delete"
+class MesFamilySchema(BaseModel):
+    FamilyID: int | None = None
     Family: str
     DefaultProtocol: str = ""
     RequiresAck: bool = True
@@ -52,98 +52,121 @@ class MesFamilyAPI:
     def get_mes_families(self):
         return _load_families()
 
-    def update_mes_families(self, body: UpdateFamiliesRequest):
-        families = _load_families()
-        action = body.action.lower().strip()
-
-        if action == "add":
-            for fam in families:
-                if fam.get("Family", "").lower() == body.Family.lower():
-                    raise HTTPException(409, f"MES Family '{body.Family}' already exists")
+    def update_mes_families(self, body: list[MesFamilySchema]):
+        # 1. Validation
+        seen_names = set()
+        seen_ids = set()
+        for item in body:
+            name_lower = item.Family.strip().lower()
+            if name_lower in seen_names:
+                raise HTTPException(400, f"Duplicate family name '{item.Family}' is not allowed")
+            seen_names.add(name_lower)
             
-            new_fam = {
-                "Family": body.Family,
-                "DefaultProtocol": body.DefaultProtocol,
-                "RequiresAck": body.RequiresAck,
-                "Description": body.Description
-            }
-            families.append(new_fam)
-            _save_families(families)
+            if item.FamilyID is not None:
+                if item.FamilyID in seen_ids:
+                    raise HTTPException(400, f"Duplicate FamilyID '{item.FamilyID}' is not allowed")
+                seen_ids.add(item.FamilyID)
 
-            family_dir = MES_MAP_DIR / body.Family
-            try:
-                family_dir.mkdir(parents=True, exist_ok=True)
-                template_file = family_dir / "STANDARD_EVENT_MODEL.json"
-                if not template_file.exists():
-                    skeleton = {
-                        "Events": [],
-                        "Alarms": [],
-                        "Variables": [],
-                        "Payloads": [],
-                        "Transactions": [],
-                        "ValidationRules": [],
-                        "AutoMapping": {},
-                        "Logging": {}
-                    }
-                    with open(template_file, "w", encoding="utf-8") as f:
-                        json.dump(skeleton, f, indent=2)
-            except Exception as e:
-                logger.error("Failed to create directory structure for new family %s: %s", body.Family, e)
-                raise HTTPException(500, f"Error creating family directory: {e}")
+        # Load old families
+        old_families = _load_families()
+        old_families_by_id = {f["FamilyID"]: f for f in old_families if f.get("FamilyID") is not None}
+        old_families_by_name = {f["Family"].strip().lower(): f for f in old_families}
 
-            return {
-                "Status": "success",
-                "Message": f"MES Family '{body.Family}' added successfully",
-                "Family": new_fam
-            }
+        new_families_list = []
+        used_old_ids = set()
 
-        elif action == "update":
-            found = False
-            for fam in families:
-                if fam.get("Family", "").lower() == body.Family.lower():
-                    fam["DefaultProtocol"] = body.DefaultProtocol
-                    fam["RequiresAck"] = body.RequiresAck
-                    fam["Description"] = body.Description
-                    found = True
-                    break
-            
-            if not found:
-                raise HTTPException(404, f"MES Family '{body.Family}' not found")
-            
-            _save_families(families)
-            return {
-                "Status": "success",
-                "Message": f"MES Family '{body.Family}' updated successfully"
-            }
+        # Step 2: Match incoming families to their old equivalents
+        for item in body:
+            matched_old = None
+            if item.FamilyID is not None and item.FamilyID in old_families_by_id:
+                matched_old = old_families_by_id[item.FamilyID]
+            else:
+                # Fallback to name match
+                name_key = item.Family.strip().lower()
+                if name_key in old_families_by_name:
+                    matched_old = old_families_by_name[name_key]
 
-        elif action == "delete":
-            target_fam = None
-            for fam in families:
-                if fam.get("Family", "").lower() == body.Family.lower():
-                    target_fam = fam
-                    break
-            
-            if not target_fam:
-                raise HTTPException(404, f"MES Family '{body.Family}' not found")
-            
-            families.remove(target_fam)
-            _save_families(families)
+            if matched_old:
+                assigned_id = matched_old["FamilyID"]
+                used_old_ids.add(assigned_id)
 
-            family_dir = MES_MAP_DIR / target_fam["Family"]
-            if family_dir.exists() and family_dir.is_dir():
+                # Rename directory if name changed
+                old_name = matched_old["Family"]
+                if old_name.strip() != item.Family.strip():
+                    old_dir = MES_MAP_DIR / old_name
+                    new_dir = MES_MAP_DIR / item.Family
+                    try:
+                        if old_dir.exists() and old_dir.is_dir():
+                            if old_dir.resolve() != new_dir.resolve():
+                                old_dir.rename(new_dir)
+                        else:
+                            new_dir.mkdir(parents=True, exist_ok=True)
+                    except Exception as e:
+                        logger.error("Failed to rename family directory from %s to %s: %s", old_name, item.Family, e)
+                        raise HTTPException(500, f"Error renaming family directory: {e}")
+            else:
+                assigned_id = None
+
+            new_families_list.append({
+                "FamilyID": assigned_id,
+                "Family": item.Family,
+                "DefaultProtocol": item.DefaultProtocol,
+                "RequiresAck": item.RequiresAck,
+                "Description": item.Description
+            })
+
+        # Step 3: Allocate auto-increment IDs for new families
+        max_id = max([f.get("FamilyID", 0) for f in old_families] + [6])
+        next_id = max_id + 1
+
+        for item in new_families_list:
+            if item["FamilyID"] is None:
+                item["FamilyID"] = next_id
+                next_id += 1
+
+                # Create directory and seed STANDARD_EVENT_MODEL.json
+                family_dir = MES_MAP_DIR / item["Family"]
                 try:
-                    shutil.rmtree(family_dir)
+                    family_dir.mkdir(parents=True, exist_ok=True)
+                    template_file = family_dir / "STANDARD_EVENT_MODEL.json"
+                    if not template_file.exists():
+                        skeleton = {
+                            "Events": [],
+                            "Alarms": [],
+                            "Variables": [],
+                            "Payloads": [],
+                            "Transactions": [],
+                            "ValidationRules": [],
+                            "AutoMapping": {},
+                            "Logging": {}
+                        }
+                        with open(template_file, "w", encoding="utf-8") as f:
+                            json.dump(skeleton, f, indent=2)
                 except Exception as e:
-                    logger.error("Failed to delete directory for family %s: %s", target_fam["Family"], e)
+                    logger.error("Failed to create directory structure for new family %s: %s", item["Family"], e)
+                    raise HTTPException(500, f"Error creating family directory: {e}")
+
+        # Step 4: Process deletions (old families missing in the new list)
+        deleted_families = [f for f in old_families if f.get("FamilyID") not in used_old_ids]
+        for del_fam in deleted_families:
+            del_name = del_fam["Family"]
+            del_dir = MES_MAP_DIR / del_name
+            if del_dir.exists() and del_dir.is_dir():
+                try:
+                    shutil.rmtree(del_dir)
+                except Exception as e:
+                    logger.error("Failed to delete directory for family %s: %s", del_name, e)
                     raise HTTPException(500, f"Failed to delete family directory: {e}")
 
-            return {
-                "Status": "success",
-                "Message": f"MES Family '{target_fam['Family']}' deleted successfully"
-            }
+        # Step 5: Save updated families list to families.json
+        _save_families(new_families_list)
 
-        else:
-            raise HTTPException(400, f"Invalid action '{body.action}'. Allowed actions: add, update, delete")
+        return {
+            "Status": "success",
+            "Message": "MES families updated successfully",
+            "Families": new_families_list
+        }
+
 
     def get_mes_templates(self, mes_family: str):
         family_dir = (MES_MAP_DIR / mes_family).resolve()
