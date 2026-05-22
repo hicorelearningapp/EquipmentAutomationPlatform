@@ -37,6 +37,13 @@ def _save_families(families: list) -> None:
         logger.error("Failed to save families: %s", e)
         raise HTTPException(500, f"Error writing to families database: {e}")
 
+def _resolve_canonical_family(mes_family: str) -> str:
+    families = _load_families()
+    for f in families:
+        if f.get("Family", "").lower() == mes_family.lower():
+            return f["Family"]
+    raise HTTPException(404, f"MES Family '{mes_family}' not found")
+
 class MesFamilyAPI:
     def __init__(self):
         self.router = APIRouter(tags=["MES Families"])
@@ -48,6 +55,7 @@ class MesFamilyAPI:
         self.router.get("/GetMesTemplates/{mes_family}")(self.get_mes_templates)
         self.router.get("/GetMesTemplateInfo/{mes_family}/{template}")(self.get_mes_template_info)
         self.router.post("/AddMesTemplateInfo/{mes_family}")(self.add_mes_template_info)
+        self.router.put("/UpdateMesTemplateInfo/{mes_family}/{template}")(self.update_mes_template_info)
 
     def get_mes_families(self):
         return _load_families()
@@ -204,16 +212,17 @@ class MesFamilyAPI:
             raise HTTPException(500, f"Error reading template info: {e}")
 
     async def add_mes_template_info(self, mes_family: str, file: UploadFile = File(...)):
-        family_dir = (MES_MAP_DIR / mes_family).resolve()
+        canonical_name = _resolve_canonical_family(mes_family)
+        family_dir = (MES_MAP_DIR / canonical_name).resolve()
         if not family_dir.exists() or not family_dir.is_dir() or MES_MAP_DIR not in family_dir.parents:
-            raise HTTPException(404, f"MES Family '{mes_family}' not found")
+            raise HTTPException(404, f"MES Family '{canonical_name}' not found")
 
         if not file.filename or not file.filename.lower().endswith(".json"):
             raise HTTPException(400, "Only .json files are accepted for templates")
 
         template_path = (family_dir / file.filename).resolve()
         if template_path.exists():
-            raise HTTPException(409, f"Template '{file.filename}' already exists in family '{mes_family}'")
+            raise HTTPException(409, f"Template '{file.filename}' already exists in family '{canonical_name}'")
 
         if family_dir not in template_path.parents:
             raise HTTPException(400, "Invalid template filename")
@@ -225,17 +234,108 @@ class MesFamilyAPI:
             except Exception as je:
                 raise HTTPException(400, f"Invalid JSON payload: {je}")
 
+            # Validate MESFamily if present
+            if "MESFamily" in json_data:
+                if json_data["MESFamily"].lower() != canonical_name.lower():
+                    raise HTTPException(
+                        422,
+                        f"MESFamily '{json_data['MESFamily']}' in the template does not match the target family '{canonical_name}'"
+                    )
+
+            # Auto-inject/overwrite TemplateName
+            json_data["TemplateName"] = Path(file.filename).stem
+
+            # Auto-inject MESFamily
+            json_data["MESFamily"] = canonical_name
+
+            # Version handling
+            if "Version" not in json_data:
+                json_data["Version"] = "1.0"
+
             with open(template_path, "w", encoding="utf-8") as f:
                 json.dump(json_data, f, indent=2)
 
             return {
                 "Status": "success",
-                "Message": f"Template '{file.filename}' added successfully to family '{mes_family}'"
+                "Message": f"Template '{file.filename}' added successfully to family '{canonical_name}'"
             }
         except HTTPException as he:
             raise he
         except Exception as e:
             logger.error("Failed to upload template: %s", e)
             raise HTTPException(500, f"Error uploading template: {e}")
+
+    async def update_mes_template_info(self, mes_family: str, template: str, file: UploadFile = File(...)):
+        canonical_name = _resolve_canonical_family(mes_family)
+        family_dir = (MES_MAP_DIR / canonical_name).resolve()
+        if not family_dir.exists() or not family_dir.is_dir() or MES_MAP_DIR not in family_dir.parents:
+            raise HTTPException(404, f"MES Family '{canonical_name}' not found")
+
+        if not template.endswith(".json"):
+            template = f"{template}.json"
+
+        template_path = (family_dir / template).resolve()
+        if not template_path.exists() or family_dir not in template_path.parents:
+            raise HTTPException(404, f"Template '{template}' not found in family '{canonical_name}'")
+
+        if not file.filename or not file.filename.lower().endswith(".json"):
+            raise HTTPException(400, "Only .json files are accepted for templates")
+
+        try:
+            contents = await file.read()
+            try:
+                json_data = json.loads(contents.decode("utf-8"))
+            except Exception as je:
+                raise HTTPException(400, f"Invalid JSON payload: {je}")
+
+            # Validate MESFamily if present
+            if "MESFamily" in json_data:
+                if json_data["MESFamily"].lower() != canonical_name.lower():
+                    raise HTTPException(
+                        422,
+                        f"MESFamily '{json_data['MESFamily']}' in the template does not match the target family '{canonical_name}'"
+                    )
+
+            # Read current on-disk version of the template
+            existing_version = "1.0"
+            try:
+                with open(template_path, "r", encoding="utf-8") as f:
+                    existing_data = json.load(f)
+                    existing_version = existing_data.get("Version", "1.0")
+            except Exception as re:
+                logger.warning("Failed to read existing version from %s, defaulting to 1.0: %s", template_path, re)
+
+            # Version handling
+            if "Version" in json_data:
+                # User provided version: keep as-is
+                pass
+            else:
+                # Auto-increment +0.1
+                try:
+                    current_float = float(existing_version)
+                except ValueError:
+                    current_float = 1.0
+                new_float = round(current_float + 0.1, 1)
+                json_data["Version"] = str(new_float)
+
+            # Auto-inject/overwrite TemplateName
+            json_data["TemplateName"] = Path(template).stem
+
+            # Auto-inject MESFamily
+            json_data["MESFamily"] = canonical_name
+
+            with open(template_path, "w", encoding="utf-8") as f:
+                json.dump(json_data, f, indent=2)
+
+            return {
+                "Status": "success",
+                "Message": f"Template '{template}' updated successfully in family '{canonical_name}'",
+                "Version": json_data["Version"]
+            }
+        except HTTPException as he:
+            raise he
+        except Exception as e:
+            logger.error("Failed to update template: %s", e)
+            raise HTTPException(500, f"Error updating template: {e}")
 
 mes_family_api = MesFamilyAPI()

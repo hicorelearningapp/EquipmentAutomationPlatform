@@ -1,7 +1,7 @@
 {
   "MESFamily": "Custom MES",
   "TemplateName": "STANDARD_EVENT_MODEL",
-  "Version": "1.0",
+  "Version": "2.1",
   "Description": "Generic fallback integration template for custom or proprietary MES systems. Provides a minimal, flexible baseline that can be extended with site-specific events, variables, and transactions.",
   "Events": [
     {

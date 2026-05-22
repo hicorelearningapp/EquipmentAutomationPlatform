@@ -1,8 +1,7 @@
 {
-  "MESFamily": "Camstar",
+  "MESFamily": "Critical Manufacturing",
   "TemplateName": "STANDARD_EVENT_MODEL",
-  "Version": "1.0",
-  "Description": "Camstar (now Opcenter) MES integration template. Camstar uses an object-oriented transaction model with container tracking, electronic traveler support, and quality data collection.",
+  "Description": "Critical Manufacturing MES (CMF) integration template. CMF is a modern, IoT-ready MES platform with advanced scheduling, genealogy, and Industry 4.0 connectivity built around a microservices architecture.",
   "Events": [
     {
       "EventName": "LotStart",
@@ -17,22 +16,23 @@
       "Payload": "LotEndPayload"
     },
     {
-      "EventName": "ContainerMove",
-      "EventType": "WIP",
-      "Transaction": "TXN_CONTAINER_MOVE",
-      "Payload": "ContainerPayload"
+      "EventName": "MaterialIn",
+      "EventType": "Material",
+      "Transaction": "TXN_MATERIAL_IN",
+      "Payload": "MaterialPayload"
+   
     },
     {
-      "EventName": "DataCollectionStart",
-      "EventType": "Quality",
-      "Transaction": "TXN_DC_START",
-      "Payload": "DataCollectionPayload"
+      "EventName": "MaterialOut",
+      "EventType": "Material",
+      "Transaction": "TXN_MATERIAL_OUT",
+      "Payload": "MaterialPayload"
     },
     {
-      "EventName": "DataCollectionEnd",
+      "EventName": "ParametricDataReported",
       "EventType": "Quality",
-      "Transaction": "TXN_DC_END",
-      "Payload": "DataCollectionPayload"
+      "Transaction": "TXN_PARAM_DATA",
+      "Payload": "ParametricPayload"
     },
     {
       "EventName": "AlarmSet",
@@ -45,6 +45,12 @@
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_CLEAR",
       "Payload": "AlarmPayload"
+    },
+    {
+      "EventName": "SchedulerRequest",
+      "EventType": "Control",
+      "Transaction": "TXN_SCHEDULER_REQUEST",
+      "Payload": "SchedulerPayload"
     }
   ],
   "Alarms": [
@@ -59,9 +65,14 @@
       "Transaction": "TXN_PROCESS_WARNING"
     },
     {
-      "AlarmType": "QualityAlarm",
+      "AlarmType": "SPCAlarm",
+      "Severity": "Warning",
+      "Transaction": "TXN_SPC_ALARM"
+    },
+    {
+      "AlarmType": "SchedulerAlarm",
       "Severity": "Minor",
-      "Transaction": "TXN_QUALITY_ALARM"
+      "Transaction": "TXN_SCHEDULER_ALARM"
     }
   ],
   "Variables": [
@@ -76,12 +87,12 @@
       "Required": true
     },
     {
-      "MESField": "ContainerName",
+      "MESField": "MaterialID",
       "Type": "String",
       "Required": false
     },
     {
-      "MESField": "ContainerType",
+      "MESField": "MaterialType",
       "Type": "String",
       "Required": false
     },
@@ -91,32 +102,37 @@
       "Required": true
     },
     {
-      "MESField": "OperationName",
+      "MESField": "StepID",
       "Type": "String",
       "Required": false
     },
     {
-      "MESField": "WorkflowName",
+      "MESField": "WorkOrderID",
       "Type": "String",
       "Required": false
     },
     {
-      "MESField": "ProductName",
+      "MESField": "OperationID",
       "Type": "String",
       "Required": false
     },
     {
-      "MESField": "DataCollectionName",
+      "MESField": "ParameterName",
       "Type": "String",
       "Required": false
     },
     {
-      "MESField": "MeasuredValue",
+      "MESField": "ParameterValue",
       "Type": "Float",
       "Required": false
     },
     {
-      "MESField": "MeasurementUnit",
+      "MESField": "ParameterUnit",
+      "Type": "String",
+      "Required": false
+    },
+    {
+      "MESField": "SchedulerTaskID",
       "Type": "String",
       "Required": false
     },
@@ -147,11 +163,10 @@
       "Fields": [
         "EquipmentID",
         "LotID",
-        "ContainerName",
         "RecipeName",
-        "OperationName",
-        "WorkflowName",
-        "ProductName",
+        "StepID",
+        "WorkOrderID",
+        "OperationID",
         "EventTime"
       ]
     },
@@ -161,28 +176,29 @@
         "EquipmentID",
         "LotID",
         "RecipeName",
-        "OperationName",
+        "StepID",
         "EventTime"
       ]
     },
     {
-      "PayloadName": "ContainerPayload",
+      "PayloadName": "MaterialPayload",
       "Fields": [
         "EquipmentID",
-        "ContainerName",
-        "ContainerType",
         "LotID",
+        "MaterialID",
+        "MaterialType",
         "EventTime"
       ]
     },
     {
-      "PayloadName": "DataCollectionPayload",
+      "PayloadName": "ParametricPayload",
       "Fields": [
         "EquipmentID",
         "LotID",
-        "DataCollectionName",
-        "MeasuredValue",
-        "MeasurementUnit",
+        "StepID",
+        "ParameterName",
+        "ParameterValue",
+        "ParameterUnit",
         "EventTime"
       ]
     },
@@ -195,12 +211,21 @@
         "AlarmSeverity",
         "EventTime"
       ]
+    },
+    {
+      "PayloadName": "SchedulerPayload",
+      "Fields": [
+        "EquipmentID",
+        "SchedulerTaskID",
+        "WorkOrderID",
+        "EventTime"
+      ]
     }
   ],
   "Transactions": [
     {
       "Transaction": "TXN_LOT_START",
-      "Method": "MoveIn",
+      "Method": "StartLot",
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 30,
@@ -208,35 +233,35 @@
     },
     {
       "Transaction": "TXN_LOT_END",
-      "Method": "MoveOut",
+      "Method": "EndLot",
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 30,
       "RetryCount": 3
     },
     {
-      "Transaction": "TXN_CONTAINER_MOVE",
-      "Method": "ContainerMove",
-      "Direction": "EquipmentToMES",
-      "AckRequired": false,
-      "Timeout": 15,
-      "RetryCount": 2
-    },
-    {
-      "Transaction": "TXN_DC_START",
-      "Method": "StartDataCollection",
+      "Transaction": "TXN_MATERIAL_IN",
+      "Method": "MaterialIn",
       "Direction": "EquipmentToMES",
       "AckRequired": false,
       "Timeout": 10,
-      "RetryCount": 1
+      "RetryCount": 2
     },
     {
-      "Transaction": "TXN_DC_END",
-      "Method": "CompleteDataCollection",
+      "Transaction": "TXN_MATERIAL_OUT",
+      "Method": "MaterialOut",
       "Direction": "EquipmentToMES",
-      "AckRequired": true,
-      "Timeout": 20,
+      "AckRequired": false,
+      "Timeout": 10,
       "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_PARAM_DATA",
+      "Method": "ReportParametricData",
+      "Direction": "EquipmentToMES",
+      "AckRequired": false,
+      "Timeout": 20,
+      "RetryCount": 1
     },
     {
       "Transaction": "TXN_ALARM_SET",
@@ -253,6 +278,14 @@
       "AckRequired": true,
       "Timeout": 15,
       "RetryCount": 2
+    },
+    {
+      "Transaction": "TXN_SCHEDULER_REQUEST",
+      "Method": "RequestSchedule",
+      "Direction": "MESToEquipment",
+      "AckRequired": true,
+      "Timeout": 60,
+      "RetryCount": 1
     }
   ],
   "ValidationRules": [
@@ -273,8 +306,8 @@
       "Rule": "UTCDateTime"
     },
     {
-      "Field": "ContainerType",
-      "Rule": "AllowedValues:Cassette,FOUP,Boat,Tray"
+      "Field": "WorkOrderID",
+      "Rule": "NonEmptyIfPresent"
     }
   ],
   "AutoMapping": {
