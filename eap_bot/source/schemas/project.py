@@ -34,6 +34,7 @@ class VariableCategory(str, Enum):
 class ProjectCreate(BaseModel):
     ProjectName: str = Field(min_length=1)
     VendorName: str = Field(min_length=1)
+    ProjectCode: str = Field(min_length=1)
     Tool: ToolType = ToolType.NONE
 
 
@@ -56,6 +57,7 @@ class ProjectOut(BaseModel):
     ProjectID: int = Field(alias="project_id")
     ProjectName: str = Field(alias="project_name")
     VendorName: str = Field(default="", alias="vendor_name")
+    ProjectCode: str = Field(default="", alias="project_code")
     Tool: ToolType = Field(alias="tool")
     CreatedAt: datetime = Field(alias="created_at")
     LastUpdatedOn: datetime = Field(alias="last_updated_on")
@@ -95,6 +97,7 @@ class ProjectDetail(ProjectMetadata):
 class ProjectUpdate(BaseModel):
     ProjectName: Optional[str] = None
     VendorName: Optional[str] = None
+    ProjectCode: Optional[str] = None
     Tool: Optional[ToolType] = None
     ProjectVersion: Optional[str] = None
 

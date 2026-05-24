@@ -31,18 +31,17 @@ class DocumentService:
     # ── Upload ────────────────────────────────────────────────────────────────
 
     def upload_document(self, project_id: int, filename: str, contents: bytes, doc_category: DocumentCategory) -> dict:
-        ext = Path(filename).suffix.lower()
-        if ext not in {".pdf", ".xlsx", ".txt"}:
-            raise ValueError("Only .pdf, .xlsx, and .txt files are accepted")
-
         if len(contents) > settings.MAX_UPLOAD_SIZE:
             raise ValueError("File exceeds MAX_UPLOAD_SIZE")
 
         file_size = float(len(contents))
 
         from source.services.document_strategies import DocumentProcessorFactory
+        # The factory will raise a ValueError if the file extension is not supported
         strategy = DocumentProcessorFactory.get_strategy(filename)
         pages = strategy.get_pages(contents)
+
+        ext = Path(filename).suffix.lower()
 
         document_id, file_path, _ = self.storage.prepare_document_paths(
             project_id, filename, extension=ext
@@ -63,7 +62,7 @@ class DocumentService:
         return {
             "Status": "uploaded",
             "DocumentID": document_id,
-            "DocumentType": "Pending AI Classification",
+            "DocumentType": document.DocumentType.value if hasattr(document.DocumentType, "value") else document.DocumentType,
             "FileName": document.FileName,
             "Pages": document.Pages,
             "FileSize": document.FileSize,
