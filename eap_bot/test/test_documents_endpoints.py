@@ -50,6 +50,7 @@ import json
 import struct
 import sys
 import zlib
+import os
 
 import requests
 
@@ -250,11 +251,12 @@ def _make_minimal_xlsx() -> bytes:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestRunner:
-    def __init__(self, verbose: bool = False, log_file: str = "test_documents_endpoints.log"):
+    def __init__(self, verbose: bool = False, log_file: str = "test_logs/test_documents_endpoints.log"):
         self.verbose = verbose
         self.passed = 0
         self.failed = 0
         self.log_file = log_file
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
         with open(self.log_file, "w", encoding="utf-8") as f:
             f.write("")
 

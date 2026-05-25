@@ -1,0 +1,107 @@
+
+============================================================
+  MES Family API  —  Test Suite
+  Target : http://151.185.41.194:8012
+  Groups : 6
+============================================================
+
+── Group 1: GET /GetMesFamilies ─────────────────────────────
+[PASS] GET http://151.185.41.194:8012/GetMesFamilies
+       Expected 200, Got 200 — Test Case: returns 200
+       [PASS] all 6 seeded families present
+       [PASS] every entry has Family / DefaultProtocol / RequiresAck / Description
+       [PASS] all entries have a non-null FamilyID
+
+── Group 2: POST /UpdateMesFamilies ─────────────────────────
+[PASS] POST http://151.185.41.194:8012/UpdateMesFamilies
+       Expected 200, Got 200 — Test Case: add new family → 200
+       [PASS] 'TestFamily_TEMP_XYZ' present in response Families list  (found: ['FactoryWorks', 'FAB300', 'PROMIS', 'Camstar', 'Critical Manufacturing', 'Custom MES', 'TestFamily_TEMP_XYZ'])
+       [PASS] 'TestFamily_TEMP_XYZ' received an auto-assigned FamilyID  (FamilyID=7)
+       [PASS] response Status is 'success'  (Status='success')
+[PASS] POST http://151.185.41.194:8012/UpdateMesFamilies
+       Expected 400, Got 400 — Test Case: duplicate family name → 400
+       [PASS] error detail mentions 'duplicate'  (detail: {'detail': "duplicate family name 'testfamily_temp_xyz' is not allowed"})
+[PASS] POST http://151.185.41.194:8012/UpdateMesFamilies
+       Expected 400, Got 400 — Test Case: duplicate FamilyID → 400
+       [PASS] error detail mentions 'duplicate'  (detail: {'detail': "duplicate familyid '1' is not allowed"})
+[PASS] POST http://151.185.41.194:8012/UpdateMesFamilies
+       Expected 200, Got 200 — Test Case: remove temp family → 200
+       [PASS] 'TestFamily_TEMP_XYZ' no longer in Families list  (found: ['FactoryWorks', 'FAB300', 'PROMIS', 'Camstar', 'Critical Manufacturing', 'Custom MES'])
+
+── Group 3: GET /GetMesTemplates/{mes_family} ───────────────
+[PASS] GET http://151.185.41.194:8012/GetMesTemplates/FAB300
+       Expected 200, Got 200 — Test Case: known family (FAB300) → 200
+       [PASS] response is a list  (type: list)
+       [PASS] STANDARD_EVENT_MODEL.json is present (seeded at startup)  (files found: ['STANDARD_EVENT_MODEL.json', 'TEST_AUTO_TEMPLATE_DO_NOT_USE.json'])
+[PASS] GET http://151.185.41.194:8012/GetMesTemplates/NonExistentFamily_XYZZY
+       Expected 404, Got 404 — Test Case: unknown family → 404
+       [PASS] error detail mentions the unknown family name  (detail: {'detail': "mes family 'nonexistentfamily_xyzzy' not found"})
+[PASS] GET http://151.185.41.194:8012/GetMesTemplates/Custom%20MES
+       Expected 200, Got 200 — Test Case: known family with possibly no templates → 200
+       [PASS] response is a list (empty list is acceptable)  (type: list)
+
+── Group 4: GET /GetMesTemplateInfo/{mes_family}/{template} ─
+[PASS] GET http://151.185.41.194:8012/GetMesTemplateInfo/FAB300/STANDARD_EVENT_MODEL.json
+       Expected 200, Got 200 — Test Case: FAB300/STANDARD_EVENT_MODEL.json → 200
+       [PASS] body contains all required top-level keys
+[PASS] GET http://151.185.41.194:8012/GetMesTemplateInfo/FAB300/ghost_XYZZY.json
+       Expected 404, Got 404 — Test Case: nonexistent template → 404
+       [PASS] error detail mentions the template name  (detail: {'detail': "template 'ghost_xyzzy.json' not found in family 'fab300'"})
+[PASS] GET http://151.185.41.194:8012/GetMesTemplateInfo/FakeFamily_XYZZY/STANDARD_EVENT_MODEL.json
+       Expected 404, Got 404 — Test Case: nonexistent family → 404
+       [PASS] error detail mentions the family name  (detail: {'detail': "mes family 'fakefamily_xyzzy' not found"})
+[PASS] GET http://151.185.41.194:8012/GetMesTemplateInfo/FAB300/STANDARD_EVENT_MODEL
+       Expected 200, Got 200 — Test Case: template name without .json extension auto-resolved → 200
+       [PASS] body contains all required top-level keys
+
+── Group 5: POST /AddMesTemplateInfo/{mes_family} ───────────
+[FAIL] POST http://151.185.41.194:8012/AddMesTemplateInfo/FAB300
+       Expected 200, Got 409 — Test Case: valid upload → 200
+       Response body: {
+  "detail": "Template 'TEST_AUTO_TEMPLATE_DO_NOT_USE.json' already exists in family 'FAB300'"
+}
+[PASS] POST http://151.185.41.194:8012/AddMesTemplateInfo/FAB300
+       Expected 409, Got 409 — Test Case: duplicate upload → 409
+       [PASS] error detail mentions 'already exists' or 'conflict'  (detail: {'detail': "template 'test_auto_template_do_not_use.json' already exists in family 'fab300'"})
+[PASS] POST http://151.185.41.194:8012/AddMesTemplateInfo/FAB300
+       Expected 400, Got 400 — Test Case: non-.json file → 400
+       [PASS] error detail mentions '.json' or file type  (detail: {'detail': 'only .json files are accepted for templates'})
+[PASS] POST http://151.185.41.194:8012/AddMesTemplateInfo/FAB300
+       Expected 400, Got 400 — Test Case: malformed JSON content → 400
+       [PASS] error detail mentions JSON parse failure  (detail: {'detail': 'invalid json payload: expecting property name enclosed in double quotes: line 1 column 2 (char 1)'})
+[PASS] POST http://151.185.41.194:8012/AddMesTemplateInfo/FAB300
+       Expected 422, Got 422 — Test Case: MESFamily mismatch in payload → 422
+       [PASS] error detail mentions family name mismatch  (detail: {'detail': "mesfamily 'promis' in the template does not match the target family 'fab300'"})
+[PASS] POST http://151.185.41.194:8012/AddMesTemplateInfo/GhostFamily_XYZZY
+       Expected 404, Got 404 — Test Case: upload to nonexistent family → 404
+       [PASS] error detail mentions the unknown family name  (detail: {'detail': "mes family 'ghostfamily_xyzzy' not found"})
+
+── Group 6: PUT /UpdateMesTemplateInfo/{mes_family}/{template}
+[PASS] PUT http://151.185.41.194:8012/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE
+       Expected 200, Got 200 — Test Case: valid update, no Version → 200
+       [FAIL] Version auto-incremented to '1.1'  (got Version='3.1')
+       [PASS] response Status is 'success'  (Status='success')
+[PASS] PUT http://151.185.41.194:8012/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE
+       Expected 200, Got 200 — Test Case: explicit Version='3.0' → 200
+       [PASS] Version preserved as '3.0'  (got Version='3.0')
+[PASS] PUT http://151.185.41.194:8012/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE
+       Expected 422, Got 422 — Test Case: MESFamily mismatch → 422
+       [PASS] error detail mentions family name mismatch  (detail: {'detail': "mesfamily 'promis' in the template does not match the target family 'fab300'"})
+[PASS] PUT http://151.185.41.194:8012/UpdateMesTemplateInfo/FAB300/ghost_template_XYZZY
+       Expected 404, Got 404 — Test Case: nonexistent template → 404
+       [PASS] error detail mentions the template name  (detail: {'detail': "template 'ghost_template_xyzzy.json' not found in family 'fab300'"})
+[PASS] PUT http://151.185.41.194:8012/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE
+       Expected 400, Got 400 — Test Case: non-.json filename → 400
+       [PASS] error detail mentions '.json' or file type  (detail: {'detail': 'only .json files are accepted for templates'})
+[PASS] PUT http://151.185.41.194:8012/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE
+       Expected 400, Got 400 — Test Case: malformed JSON content → 400
+       [PASS] error detail mentions JSON parse failure  (detail: {'detail': 'invalid json payload: expecting property name enclosed in double quotes: line 1 column 2 (char 1)'})
+
+── Cleanup note ─────────────────────────────────────────────
+  ℹ️  'TEST_AUTO_TEMPLATE_DO_NOT_USE.json' was created in MESMapTemplates/FAB300/
+     It is safe to delete. Re-running the suite is also safe — duplicates are handled.
+
+============================================================
+  2 FAILED  —  51/53 assertions passed
+============================================================
+

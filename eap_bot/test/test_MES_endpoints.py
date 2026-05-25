@@ -27,6 +27,7 @@ import argparse
 import io
 import json
 import sys
+import os
 
 import requests
 
@@ -63,11 +64,12 @@ TEMP_FAMILY_NAME = "TestFamily_TEMP_XYZ"
 
 
 class TestRunner:
-    def __init__(self, verbose: bool = False, log_file: str = "test_MES_endpoints.log"):
+    def __init__(self, verbose: bool = False, log_file: str = "test_logs/test_MES_endpoints.log"):
         self.verbose = verbose
         self.passed = 0
         self.failed = 0
         self.log_file = log_file
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
         with open(self.log_file, "w", encoding="utf-8") as f:
             f.write("")
 
