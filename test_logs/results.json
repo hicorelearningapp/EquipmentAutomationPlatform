@@ -1,132 +1,13 @@
 [
   {
-    "test_name": "test_get_mes_families",
+    "test_name": "test_project_details_flow",
+    "file_name": "test_project_endpoints.py",
     "method": "GET",
-    "url": "/GetMesFamilies",
+    "url": "/LoadProject/8",
     "status": "passed",
-    "duration_ms": 4,
+    "duration_ms": 62,
     "expected": 200,
     "got": 200,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_update_mes_families_add_new",
-    "method": "POST",
-    "url": "/UpdateMesFamilies",
-    "status": "passed",
-    "duration_ms": 5,
-    "expected": 200,
-    "got": 200,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_update_mes_families_duplicate_name",
-    "method": "POST",
-    "url": "/UpdateMesFamilies",
-    "status": "passed",
-    "duration_ms": 2,
-    "expected": 400,
-    "got": 400,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_update_mes_families_remove_temp",
-    "method": "POST",
-    "url": "/UpdateMesFamilies",
-    "status": "passed",
-    "duration_ms": 3,
-    "expected": 200,
-    "got": 200,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_get_mes_templates_known_family",
-    "method": "GET",
-    "url": "/GetMesTemplates/FAB300",
-    "status": "passed",
-    "duration_ms": 2,
-    "expected": 200,
-    "got": 200,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_get_mes_templates_unknown_family",
-    "method": "GET",
-    "url": "/GetMesTemplates/NonExistentFamily_XYZZY",
-    "status": "passed",
-    "duration_ms": 1,
-    "expected": 404,
-    "got": 404,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_get_mes_template_info_valid",
-    "method": "GET",
-    "url": "/GetMesTemplateInfo/FAB300/STANDARD_EVENT_MODEL.json",
-    "status": "passed",
-    "duration_ms": 1,
-    "expected": 200,
-    "got": 200,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_get_mes_template_info_nonexistent",
-    "method": "GET",
-    "url": "/GetMesTemplateInfo/FAB300/ghost_XYZZY.json",
-    "status": "passed",
-    "duration_ms": 1,
-    "expected": 404,
-    "got": 404,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_add_mes_template_valid",
-    "method": "POST",
-    "url": "/AddMesTemplateInfo/FAB300",
-    "status": "passed",
-    "duration_ms": 2,
-    "expected": 200,
-    "got": 409,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_add_mes_template_duplicate",
-    "method": "POST",
-    "url": "/AddMesTemplateInfo/FAB300",
-    "status": "passed",
-    "duration_ms": 4,
-    "expected": 409,
-    "got": 409,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_add_mes_template_invalid_ext",
-    "method": "POST",
-    "url": "/AddMesTemplateInfo/FAB300",
-    "status": "passed",
-    "duration_ms": 1,
-    "expected": 400,
-    "got": 400,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_update_mes_template_valid",
-    "method": "PUT",
-    "url": "/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE",
-    "status": "passed",
-    "duration_ms": 2,
-    "expected": 200,
-    "got": 200,
-    "error_msg": null
-  },
-  {
-    "test_name": "test_update_mes_template_mismatch",
-    "method": "PUT",
-    "url": "/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE",
-    "status": "passed",
-    "duration_ms": 3,
-    "expected": 422,
-    "got": 422,
     "error_msg": null
   }
 ]

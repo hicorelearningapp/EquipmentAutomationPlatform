@@ -120,7 +120,8 @@ class EquipmentAPI:
         try:
             self.storage.increment_project_version(project_id)
             json_path = self.storage.spec_json_path(project_id, "project_batch")
-            self.storage.save_spec_json(json_path, spec)
+            spec_obj = EquipmentSpec(**spec)
+            self.storage.save_spec_json(json_path, spec_obj)
             return {"Status": "success", "Message": "Extraction updated successfully"}
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc

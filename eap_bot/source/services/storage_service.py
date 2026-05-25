@@ -91,6 +91,7 @@ class StorageService:
             ProjectVersion="1.0",
             VendorName=project_create.VendorName,
             ProjectCode=project_create.ProjectCode,
+            ProjectDescription=project_create.ProjectDescription,
             Tool=project_create.Tool,
             CreatedAt=now,
             LastUpdatedOn=now,
@@ -251,6 +252,8 @@ class StorageService:
             metadata.VendorName = update.VendorName
         if getattr(update, "ProjectCode", None) is not None:
             metadata.ProjectCode = update.ProjectCode
+        if getattr(update, "ProjectDescription", None) is not None:
+            metadata.ProjectDescription = update.ProjectDescription
         if update.Tool is not None:
             metadata.Tool = update.Tool
         if update.ProjectVersion is not None:

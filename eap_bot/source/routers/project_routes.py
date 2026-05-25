@@ -12,6 +12,7 @@ from source.schemas.project import (
     ProjectMetadata,
     ProjectOut,
     ProjectUpdate,
+    ProjectDetailsResponse,
 )
 from source.schemas.secsgem import EquipmentSpec
 from source.services.sml_template import SML_TEMPLATES
@@ -42,6 +43,7 @@ class ProjectAPI:
         self.router.delete("/DeleteProject/{project_id}")(self.delete_project)
         self.router.get("/GetKnowledgeCategory/{project_id}")(self.get_knowledge_category)
         self.router.post("/Ask/{project_id}")(self.ask_project)
+        self.router.get("/GetProjectDetails/{project_id}", response_model=ProjectDetailsResponse, response_model_by_alias=False)(self.get_project_details)
 
     def create_project(self, body: ProjectCreate):
         try:
@@ -99,6 +101,16 @@ class ProjectAPI:
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
         return {"ProjectName": project.ProjectName, "ProjectID": project.ProjectID, "Status": "deleted"}
+
+    def get_project_details(self, project_id: int):
+        try:
+            return container.project_details_service.get_project_details(project_id)
+        except InvalidSlugError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except ProjectNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc
 
     def ask_project(self, project_id: int, request: AskRequest):
         try:

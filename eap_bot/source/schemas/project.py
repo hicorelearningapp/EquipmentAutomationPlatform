@@ -35,6 +35,7 @@ class ProjectCreate(BaseModel):
     ProjectName: str = Field(min_length=1)
     VendorName: str = Field(min_length=1)
     ProjectCode: str = Field(min_length=1)
+    ProjectDescription: Optional[str] = None
     Tool: ToolType = ToolType.NONE
 
 
@@ -46,6 +47,8 @@ class DocumentMetadata(BaseModel):
     Pages: int = Field(default=0, alias="pages")
     UploadDate: datetime = Field(alias="upload_date")
     UploadedBy: str = Field(default="", alias="uploaded_by")
+    ProjectCode: str = Field(default="", alias="project_code")
+    ProjectDescription: str = Field(default="", alias="project_description")
     Status: str = Field(default="completed", alias="status")
 
     model_config = {
@@ -58,6 +61,7 @@ class ProjectOut(BaseModel):
     ProjectName: str = Field(alias="project_name")
     VendorName: str = Field(default="", alias="vendor_name")
     ProjectCode: str = Field(default="", alias="project_code")
+    ProjectDescription: Optional[str] = Field(default=None, alias="project_description")
     Tool: ToolType = Field(alias="tool")
     CreatedAt: datetime = Field(alias="created_at")
     LastUpdatedOn: datetime = Field(alias="last_updated_on")
@@ -96,6 +100,7 @@ class ProjectDetail(ProjectMetadata):
 
 class ProjectUpdate(BaseModel):
     ProjectName: Optional[str] = None
+    ProjectDescription: Optional[str] = None
     VendorName: Optional[str] = None
     ProjectCode: Optional[str] = None
     Tool: Optional[ToolType] = None
@@ -105,3 +110,21 @@ class ProjectUpdate(BaseModel):
 class AskRequest(BaseModel):
     Category: str
     Question: str
+
+
+class ProjectDetailsResponse(BaseModel):
+    Id: int
+    ProjectName: str
+    ProjectCode: str
+    ProjectDescription: Optional[str] = None
+    VendorName: Optional[str] = None
+    Tool: Optional[str] = None
+    CreatedAt: datetime
+    NumberOfDocuments: int
+    NumberOfSVs: int
+    NumberOfDVs: int
+    NumberOfRemoteCommands: int
+    NumberOfXMLFiles: int
+    NumberOfReports: int
+    NumberOfAlarms: int
+    NumberOfEvents: int

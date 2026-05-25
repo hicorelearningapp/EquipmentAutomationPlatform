@@ -102,6 +102,19 @@ def test_update_mes_families_duplicate_name(client, record_property):
     assert response.status_code == 400
     assert "duplicate" in str(response.json()).lower()
 
+def test_update_mes_families_duplicate_id(client, record_property):
+    record_property("method", "POST")
+    record_property("url", "/UpdateMesFamilies")
+    current = _current_families(client)
+    if len(current) >= 2:
+        dup_id_list = json.loads(json.dumps(current))
+        dup_id_list[1]["FamilyID"] = dup_id_list[0]["FamilyID"]
+        response = client.post("/UpdateMesFamilies", json=dup_id_list)
+        record_property("expected", 400)
+        record_property("got", response.status_code)
+        assert response.status_code == 400
+        assert "duplicate" in str(response.json()).lower()
+
 def test_update_mes_families_remove_temp(client, record_property):
     record_property("method", "POST")
     record_property("url", "/UpdateMesFamilies")
@@ -144,6 +157,18 @@ def test_get_mes_templates_unknown_family(client, record_property):
     assert response.status_code == 404
     assert "nonexistentfamily_xyzzy" in str(response.json()).lower()
 
+def test_get_mes_templates_known_empty(client, record_property):
+    url = "/GetMesTemplates/Custom MES"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 200)
+    record_property("got", response.status_code)
+    assert response.status_code == 200
+    templates = response.json()
+    assert isinstance(templates, list)
+
 
 # ── Group 4 — GET /GetMesTemplateInfo/{mes_family}/{template} ──────────────────
 
@@ -171,6 +196,30 @@ def test_get_mes_template_info_nonexistent(client, record_property):
     record_property("expected", 404)
     record_property("got", response.status_code)
     assert response.status_code == 404
+
+def test_get_mes_template_info_nonexistent_family(client, record_property):
+    url = "/GetMesTemplateInfo/FakeFamily_XYZZY/STANDARD_EVENT_MODEL"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+def test_get_mes_template_info_no_ext(client, record_property):
+    url = f"/GetMesTemplateInfo/{TARGET_FAMILY}/STANDARD_EVENT_MODEL"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 200)
+    record_property("got", response.status_code)
+    assert response.status_code == 200
+    expected_keys = {"Events", "Alarms", "Variables", "Payloads", "Transactions", "ValidationRules", "AutoMapping", "Logging"}
+    body = response.json()
+    missing = expected_keys - body.keys()
+    assert not missing
 
 
 # ── Group 5 — POST /AddMesTemplateInfo/{mes_family} ────────────────────────────
@@ -216,6 +265,38 @@ def test_add_mes_template_invalid_ext(client, record_property):
     record_property("got", response.status_code)
     assert response.status_code == 400
 
+def test_add_mes_template_invalid_json(client, record_property):
+    url = f"/AddMesTemplateInfo/{TARGET_FAMILY}"
+    record_property("method", "POST")
+    record_property("url", url)
+    
+    response = _upload_template(client, TARGET_FAMILY, "invalid.json", b"{this is not valid json!!!}")
+    record_property("expected", 400)
+    record_property("got", response.status_code)
+    assert response.status_code == 400
+
+def test_add_mes_template_mismatched_family(client, record_property):
+    url = f"/AddMesTemplateInfo/{TARGET_FAMILY}"
+    record_property("method", "POST")
+    record_property("url", url)
+    
+    wrong_payload = _template_payload("PROMIS", TEST_TEMPLATE_NAME)
+    response = _upload_template(client, TARGET_FAMILY, f"{TEST_TEMPLATE_NAME}_mismatch.json", wrong_payload)
+    record_property("expected", 422)
+    record_property("got", response.status_code)
+    assert response.status_code == 422
+
+def test_add_mes_template_nonexistent_family(client, record_property):
+    url = "/AddMesTemplateInfo/FakeFamily_XYZZY"
+    record_property("method", "POST")
+    record_property("url", url)
+    
+    payload = _template_payload("FakeFamily_XYZZY", TEST_TEMPLATE_NAME)
+    response = _upload_template(client, "FakeFamily_XYZZY", f"{TEST_TEMPLATE_NAME}.json", payload)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
 
 # ── Group 6 — PUT /UpdateMesTemplateInfo/{mes_family}/{template} ───────────────
 
@@ -248,3 +329,55 @@ def test_update_mes_template_mismatch(client, record_property):
     record_property("expected", 422)
     record_property("got", response.status_code)
     assert response.status_code == 422
+
+def test_update_mes_template_explicit_version(client, record_property):
+    url = f"/UpdateMesTemplateInfo/{TARGET_FAMILY}/{TEST_TEMPLATE_NAME}"
+    record_property("method", "PUT")
+    record_property("url", url)
+    
+    payload = _template_payload(TARGET_FAMILY, TEST_TEMPLATE_NAME)
+    payload["Version"] = "3.0"
+    
+    response = _update_template(client, TARGET_FAMILY, TEST_TEMPLATE_NAME, payload)
+    record_property("expected", 200)
+    record_property("got", response.status_code)
+    assert response.status_code == 200
+    assert response.json().get("Version") == "3.0"
+
+def test_update_mes_template_nonexistent(client, record_property):
+    url = f"/UpdateMesTemplateInfo/{TARGET_FAMILY}/ghost_template_XYZZY"
+    record_property("method", "PUT")
+    record_property("url", url)
+    
+    payload = _template_payload(TARGET_FAMILY, "ghost")
+    response = _update_template(client, TARGET_FAMILY, "ghost_template_XYZZY", payload)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+def test_update_mes_template_invalid_ext(client, record_property):
+    url = f"/UpdateMesTemplateInfo/{TARGET_FAMILY}/{TEST_TEMPLATE_NAME}"
+    record_property("method", "PUT")
+    record_property("url", url)
+    
+    payload = _template_payload(TARGET_FAMILY, TEST_TEMPLATE_NAME)
+    response = _update_template(client, TARGET_FAMILY, TEST_TEMPLATE_NAME, payload, filename="bad.txt", content_type="text/plain")
+    record_property("expected", 400)
+    record_property("got", response.status_code)
+    assert response.status_code == 400
+
+def test_update_mes_template_invalid_json(client, record_property):
+    url = f"/UpdateMesTemplateInfo/{TARGET_FAMILY}/{TEST_TEMPLATE_NAME}"
+    record_property("method", "PUT")
+    record_property("url", url)
+    
+    bad_bytes = b"{this is not json!}"
+    files = {"file": (f"{TEST_TEMPLATE_NAME}.json", io.BytesIO(bad_bytes), "application/json")}
+    response = client.put(url, files=files)
+    record_property("expected", 400)
+    record_property("got", response.status_code)
+    assert response.status_code == 400
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(pytest.main([__file__]))

@@ -9,6 +9,7 @@ from source.utils.embedder import VectorStoreManager
 from source.utils.llm_factory import LLMFactory, LLMStrategy
 from source.utils.pdf_reader import DocumentParser, DocumentParserFactory
 from source.validators.spec_validator import SpecValidator
+from source.services.project_details_service import ProjectDetailsService
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,9 @@ class ServiceContainer:
         )
         self.document_service: DocumentService = DocumentService(
             storage=self.storage, container=self
+        )
+        self.project_details_service: ProjectDetailsService = ProjectDetailsService(
+            storage=self.storage
         )
 
         logger.info("ServiceContainer: all services ready.")

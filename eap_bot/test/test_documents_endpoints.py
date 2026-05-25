@@ -130,6 +130,7 @@ def test_upload_document_xlsx(client, project_state, record_property):
     record_property("expected", 200)
     record_property("got", response.status_code)
     assert response.status_code == 200
+    project_state["xlsx_document_id"] = response.json().get("DocumentID")
 
 def test_upload_document_duplicate(client, project_state, record_property):
     record_property("method", "POST")
@@ -142,17 +143,78 @@ def test_upload_document_duplicate(client, project_state, record_property):
     record_property("got", response.status_code)
     assert response.status_code == 409
 
+def test_upload_document_txt(client, project_state, record_property):
+    record_property("method", "POST")
+    record_property("url", f"/UploadDocument/{project_state['project_id']}")
+    
+    txt_content = b"-- SML script placeholder for automated test --"
+    response = _upload(client, project_state["project_id"], "test_script.txt", txt_content, DOC_CATEGORY_SML, "text/plain")
+    
+    record_property("expected", 200)
+    record_property("got", response.status_code)
+    assert response.status_code == 200
+    assert response.json().get("Status") == "uploaded"
+    project_state["txt_document_id"] = response.json().get("DocumentID")
+
+def test_upload_document_invalid_ext(client, project_state, record_property):
+    record_property("method", "POST")
+    record_property("url", f"/UploadDocument/{project_state['project_id']}")
+    
+    dummy_docx = b"PK\x03\x04" + b"\x00" * 26
+    response = _upload(
+        client, project_state["project_id"], "unsupported.docx", dummy_docx, DOC_CATEGORY_USER,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+    
+    record_property("expected", 400)
+    record_property("got", response.status_code)
+    assert response.status_code == 400
+    assert "extension" in str(response.json()).lower() or "only" in str(response.json()).lower()
+
+def test_upload_document_nonexistent_project(client, record_property):
+    record_property("method", "POST")
+    record_property("url", f"/UploadDocument/{GHOST_PROJECT_ID}")
+    
+    response = _upload(client, GHOST_PROJECT_ID, "any_file.pdf", _make_minimal_pdf(), DOC_CATEGORY_GEM)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+def test_upload_document_missing_file(client, project_state, record_property):
+    record_property("method", "POST")
+    record_property("url", f"/UploadDocument/{project_state['project_id']}")
+    
+    response = client.post(f"/UploadDocument/{project_state['project_id']}", data={"document_type": DOC_CATEGORY_GEM})
+    record_property("expected", 422)
+    record_property("got", response.status_code)
+    assert response.status_code == 422
+
 # ── Group 2 — GET /Analyze/{project_id}/{document_id} ────────────────────────
 
 def test_analyze_document_valid(client, project_state, record_property):
     doc_id = project_state.get("pdf_document_id")
     pytest.skip("Skipping slow LLM analysis test during rapid testing, enable if needed")
-    # Real test code:
-    # url = f"/Analyze/{project_state['project_id']}/{doc_id}"
-    # record_property("method", "GET")
-    # record_property("url", url)
-    # response = client.get(url, timeout=180)
-    # assert response.status_code == 200
+
+def test_analyze_document_nonexistent_doc(client, project_state, record_property):
+    url = f"/Analyze/{project_state['project_id']}/ghost_doc_xyzzy"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+def test_analyze_document_nonexistent_project(client, project_state, record_property):
+    doc_id = project_state.get("pdf_document_id", "test_gem_manual")
+    url = f"/Analyze/{GHOST_PROJECT_ID}/{doc_id}"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
 
 # ── Group 3 — GET /AnalyzeProject/{project_id} ───────────────────────────────
 
@@ -167,11 +229,186 @@ def test_analyze_project_valid(client, project_state, record_property):
     assert response.status_code == 200
     assert response.json().get("ExtractionID") == "project_batch"
 
+def test_analyze_project_nonexistent(client, record_property):
+    url = f"/AnalyzeProject/{GHOST_PROJECT_ID}"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+# ── Group 4 — GET /Analyze/{project_id}/{document_id}/report ─────────────────
+
+def test_download_report_valid(client, project_state, record_property):
+    doc_id = project_state.get("pdf_document_id")
+    url = f"/Analyze/{project_state['project_id']}/{doc_id}/report"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", "200 or 404")
+    record_property("got", response.status_code)
+    assert response.status_code in [200, 404]
+    if response.status_code == 200:
+        cd = response.headers.get("Content-Disposition", "")
+        assert cd
+        assert doc_id in cd
+
+def test_download_report_nonexistent_doc(client, project_state, record_property):
+    url = f"/Analyze/{project_state['project_id']}/ghost_doc_xyzzy/report"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+def test_download_report_nonexistent_project(client, project_state, record_property):
+    doc_id = project_state.get("pdf_document_id", "test_gem_manual")
+    url = f"/Analyze/{GHOST_PROJECT_ID}/{doc_id}/report"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+# ── Group 5 — GET /GetVariable/{project_id}/{document_id} ────────────────────
+
+def test_get_variable_no_categories(client, project_state, record_property):
+    doc_id = project_state.get("pdf_document_id")
+    url = f"/GetVariable/{project_state['project_id']}/{doc_id}"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", "200 or 400")
+    record_property("got", response.status_code)
+    assert response.status_code in [200, 400]
+    if response.status_code == 200:
+        body = response.json()
+        assert "Categories" in body
+        assert "Results" in body
+
+def test_get_variable_single_category(client, project_state, record_property):
+    doc_id = project_state.get("pdf_document_id")
+    url = f"/GetVariable/{project_state['project_id']}/{doc_id}"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url, params={"categories": "StatusVariable"})
+    record_property("expected", "200 or 400")
+    record_property("got", response.status_code)
+    assert response.status_code in [200, 400]
+    if response.status_code == 200:
+        body = response.json()
+        assert "Results" in body
+        for k in body["Results"]:
+            assert k == "StatusVariable"
+
+def test_get_variable_multiple_categories(client, project_state, record_property):
+    doc_id = project_state.get("pdf_document_id")
+    url = f"/GetVariable/{project_state['project_id']}/{doc_id}"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url, params={"categories": "StatusVariable,Event"})
+    record_property("expected", "200 or 400")
+    record_property("got", response.status_code)
+    assert response.status_code in [200, 400]
+
+def test_get_variable_invalid_category(client, project_state, record_property):
+    doc_id = project_state.get("pdf_document_id")
+    url = f"/GetVariable/{project_state['project_id']}/{doc_id}"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url, params={"categories": "NotARealCategory"})
+    record_property("expected", 400)
+    record_property("got", response.status_code)
+    assert response.status_code == 400
+
+def test_get_variable_not_analyzed(client, project_state, record_property):
+    xlsx_id = project_state.get("xlsx_document_id")
+    if not xlsx_id:
+        xlsx_id = "test_variables.xlsx"
+    url = f"/GetVariable/{project_state['project_id']}/{xlsx_id}"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", "400 or 404")
+    record_property("got", response.status_code)
+    assert response.status_code in [400, 404]
+
+def test_get_variable_nonexistent_doc(client, project_state, record_property):
+    url = f"/GetVariable/{project_state['project_id']}/ghost_doc_xyzzy"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+def test_get_variable_nonexistent_project(client, record_property):
+    doc_id = "test_gem_manual"
+    url = f"/GetVariable/{GHOST_PROJECT_ID}/{doc_id}"
+    record_property("method", "GET")
+    record_property("url", url)
+    
+    response = client.get(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+# ── Group 7 — POST /UpdateExtraction/{project_id} ─────────────────────────────
+
+_MINIMAL_SPEC = {
+    "ToolID": "TEST-TOOL-001",
+    "ToolType": "CVD",
+    "Protocol": "SECS/GEM",
+    "StatusVariable": [],
+    "DataVariable": [],
+    "events": [],
+    "alarms": [],
+    "remote_commands": [],
+    "states": [],
+    "state_transitions": [],
+    "reports": [],
+    "event_report_links": [],
+}
+
+def test_update_extraction_valid(client, project_state, record_property):
+    url = f"/UpdateExtraction/{project_state['project_id']}"
+    record_property("method", "POST")
+    record_property("url", url)
+    
+    response = client.post(url, json=_MINIMAL_SPEC)
+    record_property("expected", 200)
+    record_property("got", response.status_code)
+    assert response.status_code == 200
+    assert response.json().get("Status") == "success"
+
+def test_update_extraction_nonexistent_project(client, record_property):
+    url = f"/UpdateExtraction/{GHOST_PROJECT_ID}"
+    record_property("method", "POST")
+    record_property("url", url)
+    
+    response = client.post(url, json=_MINIMAL_SPEC)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
 # ── Group 6 — DELETE /DeleteDocument/{project_id}/{document_id} ──────────────
 
 def test_delete_document(client, project_state, record_property):
-    doc_id = project_state.get("pdf_document_id")
-    url = f"/DeleteDocument/{project_state['project_id']}/{doc_id}"
+    xlsx_id = project_state.get("xlsx_document_id")
+    url = f"/DeleteDocument/{project_state['project_id']}/{xlsx_id}"
     record_property("method", "DELETE")
     record_property("url", url)
     
@@ -179,3 +416,29 @@ def test_delete_document(client, project_state, record_property):
     record_property("expected", 200)
     record_property("got", response.status_code)
     assert response.status_code == 200
+
+def test_delete_document_already_deleted(client, project_state, record_property):
+    xlsx_id = project_state.get("xlsx_document_id")
+    url = f"/DeleteDocument/{project_state['project_id']}/{xlsx_id}"
+    record_property("method", "DELETE")
+    record_property("url", url)
+    
+    response = client.delete(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+def test_delete_document_nonexistent_project(client, project_state, record_property):
+    doc_id = project_state.get("pdf_document_id", "test_gem_manual")
+    url = f"/DeleteDocument/{GHOST_PROJECT_ID}/{doc_id}"
+    record_property("method", "DELETE")
+    record_property("url", url)
+    
+    response = client.delete(url)
+    record_property("expected", 404)
+    record_property("got", response.status_code)
+    assert response.status_code == 404
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(pytest.main([__file__]))

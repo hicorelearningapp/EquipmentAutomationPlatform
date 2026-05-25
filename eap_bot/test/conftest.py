@@ -35,8 +35,14 @@ def pytest_runtest_makereport(item, call):
         expected = props.get("expected", "-")
         got = props.get("got", "-")
         
+        # Extract the test file base name (e.g., "test_documents_endpoints.py")
+        file_name = "unknown_test.py"
+        if item.nodeid:
+            file_name = os.path.basename(item.nodeid.split("::")[0])
+        
         results_list.append({
             "test_name": item.name,
+            "file_name": file_name,
             "method": method,
             "url": url,
             "status": rep.outcome,  # 'passed', 'failed', 'skipped'
@@ -46,24 +52,14 @@ def pytest_runtest_makereport(item, call):
             "error_msg": str(rep.longrepr) if rep.failed else None
         })
 
-def pytest_sessionfinish(session, exitstatus):
-    log_dir = os.path.join(session.config.rootdir, "..", "test_logs")
-    os.makedirs(log_dir, exist_ok=True)
-    
-    # 1. Write JSON
-    json_path = os.path.join(log_dir, "results.json")
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(results_list, f, indent=2)
-        
-    # 2. Write ASCII Table
-    table_path = os.path.join(log_dir, "results_table.log")
-    with open(table_path, "w", encoding="utf-8") as f:
+def _write_ascii_table(file_path, results):
+    with open(file_path, "w", encoding="utf-8") as f:
         # Fixed widths: Status(12), Method(8), Endpoint(50), Assertion(60)
         f.write("┌" + "─"*13 + "┬" + "─"*8 + "┬" + "─"*52 + "┬" + "─"*32 + "┐\n")
         f.write("│ Status      │ Method │ Endpoint                                           │ Result                         │\n")
         f.write("├" + "─"*13 + "┼" + "─"*8 + "┼" + "─"*52 + "┼" + "─"*32 + "┤\n")
         
-        for res in results_list:
+        for res in results:
             if res["status"] == "passed":
                 status_str = "🟢 [PASS] "
             elif res["status"] == "failed":
@@ -85,9 +81,36 @@ def pytest_sessionfinish(session, exitstatus):
         f.write("└" + "─"*13 + "┴" + "─"*8 + "┴" + "─"*52 + "┴" + "─"*32 + "┘\n")
         
         # Add error details if any
-        failures = [r for r in results_list if r["status"] == "failed" and r["error_msg"]]
+        failures = [r for r in results if r["status"] == "failed" and r["error_msg"]]
         if failures:
             f.write("\n\n=== FAILURE DETAILS ===\n")
             for res in failures:
                 f.write(f"\n--- {res['test_name']} ---\n")
                 f.write(res["error_msg"] + "\n")
+
+def pytest_sessionfinish(session, exitstatus):
+    # Compute log_dir relative to this file's location to ensure it is always in the correct workspace path
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    log_dir = os.path.join(project_root, "test_logs")
+    os.makedirs(log_dir, exist_ok=True)
+    
+    # 1. Write JSON
+    json_path = os.path.join(log_dir, "results.json")
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(results_list, f, indent=2)
+        
+    # 2. Write Combined ASCII Table
+    table_path = os.path.join(log_dir, "results_table.log")
+    _write_ascii_table(table_path, results_list)
+    
+    # 3. Write Individual Log Files for each test script
+    # Group results by file_name
+    by_file = {}
+    for res in results_list:
+        by_file.setdefault(res["file_name"], []).append(res)
+        
+    for file_name, file_results in by_file.items():
+        if file_name.endswith(".py"):
+            log_name = file_name[:-3] + ".log"
+            individual_path = os.path.join(log_dir, log_name)
+            _write_ascii_table(individual_path, file_results)
