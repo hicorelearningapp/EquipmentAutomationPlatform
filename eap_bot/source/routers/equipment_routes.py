@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile, Body
 from fastapi.responses import Response
 
 from source.managers.service_container import container
@@ -115,7 +115,7 @@ class EquipmentAPI:
             raise HTTPException(500, str(exc)) from exc
         return {"Status": "success", "Message": f"Document {document_id} deleted"}
 
-    def update_extraction(self, project_id: int, spec):
+    def update_extraction(self, project_id: int, spec: dict = Body(...)):
         from source.schemas.secsgem import EquipmentSpec
         try:
             self.storage.increment_project_version(project_id)

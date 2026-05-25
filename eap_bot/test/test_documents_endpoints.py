@@ -53,6 +53,9 @@ import zlib
 
 import requests
 
+# Force utf-8 encoding for stdout to handle emojis on Windows
+sys.stdout.reconfigure(encoding='utf-8')
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Configuration
@@ -226,7 +229,7 @@ def _make_minimal_xlsx() -> bytes:
     cd_offset = buf.tell()
     for name, crc, comp_size, uncomp_size, offset in central_dir:
         buf.write(struct.pack(
-            "<4s4H3LHHHHHll", b"PK\x01\x02",
+            "<4s6H3L5H2L", b"PK\x01\x02",
             0x0314, 20, 0, 8, 0, 0,
             crc, comp_size, uncomp_size,
             len(name), 0, 0, 0, 0, 0o100644 << 16, offset,
@@ -247,10 +250,25 @@ def _make_minimal_xlsx() -> bytes:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestRunner:
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False, log_file: str = "test_documents_endpoints.log"):
         self.verbose = verbose
         self.passed = 0
         self.failed = 0
+        self.log_file = log_file
+        with open(self.log_file, "w", encoding="utf-8") as f:
+            f.write("")
+
+    def _log(self, console_msg: str, file_msg: str):
+        print(console_msg)
+        with open(self.log_file, "a", encoding="utf-8") as f:
+            f.write(file_msg + "\n")
+
+    def print_section(self, msg: str, file_msg: str = None):
+        if file_msg is None:
+            file_msg = msg
+        print(msg)
+        with open(self.log_file, "a", encoding="utf-8") as f:
+            f.write(file_msg + "\n")
 
     def check_status(
         self,
@@ -260,7 +278,15 @@ class TestRunner:
     ) -> bool:
         ok = response.status_code == expected_status
         symbol = "✅" if ok else "❌"
-        print(f"  {symbol}  [{response.status_code} expected {expected_status}]  {label}")
+        status_text = "[PASS]" if ok else "[FAIL]"
+        
+        method = response.request.method
+        url = response.request.url
+
+        console_msg = f"  {symbol}  [{response.status_code} expected {expected_status}]  {label}"
+        file_msg = f"{status_text} {method} {url}\n       Expected {expected_status}, Got {response.status_code} — Test Case: {label}"
+        self._log(console_msg, file_msg)
+        
         if not ok or self.verbose:
             self._print_body(response)
         if ok:
@@ -271,8 +297,13 @@ class TestRunner:
 
     def check(self, label: str, condition: bool, detail: str = "") -> bool:
         symbol = "✅" if condition else "❌"
+        status_text = "[PASS]" if condition else "[FAIL]"
         suffix = f"  ({detail})" if detail else ""
-        print(f"       ↳ {symbol}  {label}{suffix}")
+        
+        console_msg = f"       ↳ {symbol}  {label}{suffix}"
+        file_msg = f"       {status_text} {label}{suffix}"
+        self._log(console_msg, file_msg)
+        
         if condition:
             self.passed += 1
         else:
@@ -284,14 +315,16 @@ class TestRunner:
             body = json.dumps(response.json(), indent=2)
         except Exception:
             body = response.text
-        print(f"         Response body: {body[:600]}")
+        console_msg = f"         Response body: {body[:600]}"
+        file_msg = f"       Response body: {body}"
+        self._log(console_msg, file_msg)
 
     def summary(self) -> None:
         total = self.passed + self.failed
         status = "ALL PASSED" if self.failed == 0 else f"{self.failed} FAILED"
-        print(f"\n{'=' * 60}")
-        print(f"  {status}  —  {self.passed}/{total} assertions passed")
-        print(f"{'=' * 60}\n")
+        sep = "=" * 60
+        msg = f"\n{sep}\n  {status}  —  {self.passed}/{total} assertions passed\n{sep}\n"
+        self.print_section(msg)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -356,7 +389,7 @@ class TestUploadDocument(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 1: POST /UploadDocument/{project_id} ───────────────")
+        self.r.print_section("\n── Group 1: POST /UploadDocument/{project_id} ───────────────")
 
         # ── 1a  Valid PDF ─────────────────────────────────────────────────────
 
@@ -551,12 +584,12 @@ class TestAnalyzeDocument(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 2: GET /Analyze/{project_id}/{document_id} ─────────")
-        print("     ⏳  Triggering LLM extraction — this may take 30–90 seconds …")
+        self.r.print_section("\n── Group 2: GET /Analyze/{project_id}/{document_id} ─────────")
+        self.r.print_section("     ⏳  Triggering LLM extraction — this may take 30–90 seconds …")
 
         doc_id = self.state.get("pdf_document_id", "")
         if not doc_id:
-            print("     ⚠️  No PDF document_id from Group 1 — skipping Group 2.")
+            self.r.print_section("     ⚠️  No PDF document_id from Group 1 — skipping Group 2.")
             return
 
         # ── 2a  Valid analyze ─────────────────────────────────────────────────
@@ -665,8 +698,8 @@ class TestAnalyzeProject(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 3: GET /AnalyzeProject/{project_id} ────────────────")
-        print("     ⏳  Running AnalyzeProject — may be slow if documents are pending …")
+        self.r.print_section("\n── Group 3: GET /AnalyzeProject/{project_id} ────────────────")
+        self.r.print_section("     ⏳  Running AnalyzeProject — may be slow if documents are pending …")
 
         # ── 3a  Valid project ─────────────────────────────────────────────────
 
@@ -738,11 +771,11 @@ class TestDownloadReport(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 4: GET /Analyze/{project_id}/{document_id}/report ──")
+        self.r.print_section("\n── Group 4: GET /Analyze/{project_id}/{document_id}/report ──")
 
         doc_id = self.state.get("pdf_document_id", "")
         if not doc_id:
-            print("     ⚠️  No PDF document_id from Group 1 — skipping Group 4.")
+            self.r.print_section("     ⚠️  No PDF document_id from Group 1 — skipping Group 4.")
             return
 
         # ── 4a  Valid download ────────────────────────────────────────────────
@@ -844,16 +877,16 @@ class TestGetVariable(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 5: GET /GetVariable/{project_id}/{document_id} ─────")
+        self.r.print_section("\n── Group 5: GET /GetVariable/{project_id}/{document_id} ─────")
 
         doc_id = self.state.get("pdf_document_id", "")
         if not doc_id:
-            print("     ⚠️  No PDF document_id from Group 1 — skipping Group 5.")
+            self.r.print_section("     ⚠️  No PDF document_id from Group 1 — skipping Group 5.")
             return
 
         analysis_status = self.state.get("analysis_status", "unknown")
         if analysis_status != "completed":
-            print(f"     ⚠️  Analysis status='{analysis_status}'. "
+            self.r.print_section(f"     ⚠️  Analysis status='{analysis_status}'. "
                   "GetVariable tests on completed doc may return 400 — running anyway.")
 
         # ── 5a  No categories param → all categories ──────────────────────────
@@ -1033,11 +1066,11 @@ class TestDeleteDocument(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 6: DELETE /DeleteDocument/{project_id}/{document_id}")
+        self.r.print_section("\n── Group 6: DELETE /DeleteDocument/{project_id}/{document_id}")
 
         xlsx_id = self.state.get("xlsx_document_id", "")
         if not xlsx_id:
-            print("     ⚠️  No xlsx document_id from Group 1 — skipping Group 6.")
+            self.r.print_section("     ⚠️  No xlsx document_id from Group 1 — skipping Group 6.")
             return
 
         # ── 6a  Valid delete ──────────────────────────────────────────────────
@@ -1133,7 +1166,7 @@ class TestUpdateExtraction(BaseTestGroup):
     }
 
     def run(self):
-        print("\n── Group 7: POST /UpdateExtraction/{project_id} ─────────────")
+        self.r.print_section("\n── Group 7: POST /UpdateExtraction/{project_id} ─────────────")
 
         # ── 7a  Valid update ──────────────────────────────────────────────────
 
@@ -1208,7 +1241,7 @@ class DocumentsTestSuite:
             r = self.session.get(f"{self.base_url}/health", timeout=5)
             r.raise_for_status()
         except Exception as e:
-            print(f"\n❌  Cannot reach server at {self.base_url}: {e}")
+            self.runner.print_section(f"\n❌  Cannot reach server at {self.base_url}: {e}")
             sys.exit(1)
 
     # ── PDF loading ───────────────────────────────────────────────────────────
@@ -1217,7 +1250,7 @@ class DocumentsTestSuite:
         if self.pdf_path:
             with open(self.pdf_path, "rb") as f:
                 data = f.read()
-            print(f"  📄  Using PDF: {self.pdf_path} ({len(data):,} bytes)")
+            self.runner.print_section(f"  📄  Using PDF: {self.pdf_path} ({len(data):,} bytes)")
             return data
         else:
             data = _make_minimal_pdf(
@@ -1226,14 +1259,14 @@ class DocumentsTestSuite:
                 "Collection Event CEID 201 ProcessStart\n"
                 "Alarm AlarmID 301 HighTemperature Critical\n"
             )
-            print(f"  📄  No --pdf supplied. Using synthetic minimal PDF ({len(data):,} bytes).")
-            print("      For richer extraction tests, pass a real GEM manual with --pdf.")
+            self.runner.print_section(f"  📄  No --pdf supplied. Using synthetic minimal PDF ({len(data):,} bytes).")
+            self.runner.print_section("      For richer extraction tests, pass a real GEM manual with --pdf.")
             return data
 
     # ── Suite-level project setup / teardown ──────────────────────────────────
 
     def _setup(self) -> None:
-        print("\n── Suite Setup: creating temporary test project ─────────────")
+        self.runner.print_section("\n── Suite Setup: creating temporary test project ─────────────")
         payload = {
             "ProjectName": "AutoTest_Documents_Project",
             "VendorName":  "TestVendor",
@@ -1245,16 +1278,16 @@ class DocumentsTestSuite:
         r = self.session.post(f"{self.base_url}/AddProject", json=payload, timeout=15)
 
         if r.status_code not in (200, 201):
-            print(f"  ❌  Failed to create test project: {r.status_code} {r.text[:200]}")
+            self.runner.print_section(f"  ❌  Failed to create test project: {r.status_code} {r.text[:200]}")
             sys.exit(1)
 
         self.project_id = r.json().get("ProjectID")
-        print(f"  ✅  Test project created — ProjectID={self.project_id}")
+        self.runner.print_section(f"  ✅  Test project created — ProjectID={self.project_id}")
 
     def _teardown(self) -> None:
-        print("\n── Suite Teardown: deleting temporary test project ──────────")
+        self.runner.print_section("\n── Suite Teardown: deleting temporary test project ──────────")
         if not self.project_id:
-            print("  ⚠️  No project_id to clean up.")
+            self.runner.print_section("  ⚠️  No project_id to clean up.")
             return
 
         # REQUEST:  DELETE /DeleteProject/<project_id>
@@ -1262,21 +1295,21 @@ class DocumentsTestSuite:
             f"{self.base_url}/DeleteProject/{self.project_id}", timeout=15
         )
         if r.status_code == 200:
-            print(f"  ✅  Project {self.project_id} deleted successfully.")
+            self.runner.print_section(f"  ✅  Project {self.project_id} deleted successfully.")
         else:
-            print(
+            self.runner.print_section(
                 f"  ⚠️  Could not delete project {self.project_id}: "
                 f"{r.status_code} {r.text[:120]}"
             )
-            print("      Please delete it manually to keep the server clean.")
+            self.runner.print_section("      Please delete it manually to keep the server clean.")
 
     # ── Main run ──────────────────────────────────────────────────────────────
 
     def run(self) -> None:
-        print(f"\n{'=' * 60}")
-        print(f"  Documents API  —  Test Suite")
-        print(f"  Target : {self.base_url}")
-        print(f"{'=' * 60}")
+        self.runner.print_section(f"\n{'=' * 60}")
+        self.runner.print_section(f"  Documents API  —  Test Suite")
+        self.runner.print_section(f"  Target : {self.base_url}")
+        self.runner.print_section(f"{'=' * 60}")
 
         self._check_server()
         pdf_bytes = self._load_pdf()

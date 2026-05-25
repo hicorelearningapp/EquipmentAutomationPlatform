@@ -1,0 +1,159 @@
+
+============================================================
+  Documents API  —  Test Suite
+  Target : http://151.185.41.194:8012
+============================================================
+  📄  No --pdf supplied. Using synthetic minimal PDF (742 bytes).
+      For richer extraction tests, pass a real GEM manual with --pdf.
+
+── Suite Setup: creating temporary test project ─────────────
+  ✅  Test project created — ProjectID=15
+
+── Group 1: POST /UploadDocument/{project_id} ───────────────
+[PASS] POST http://151.185.41.194:8012/UploadDocument/15
+       Expected 200, Got 200 — Test Case: valid PDF upload → 200
+       [PASS] Status is 'uploaded'  (Status='uploaded')
+       [PASS] DocumentID is present and non-empty  (DocumentID='test_gem_manual')
+       [PASS] Pages is an integer >= 1  (Pages=1)
+       [PASS] FileSize is a positive number  (FileSize=742.0)
+[PASS] POST http://151.185.41.194:8012/UploadDocument/15
+       Expected 200, Got 200 — Test Case: valid .xlsx upload → 200
+       [PASS] Status is 'uploaded'  (Status='uploaded')
+[PASS] POST http://151.185.41.194:8012/UploadDocument/15
+       Expected 200, Got 200 — Test Case: valid .txt upload → 200
+       [PASS] Status is 'uploaded'  (Status='uploaded')
+[PASS] POST http://151.185.41.194:8012/UploadDocument/15
+       Expected 400, Got 400 — Test Case: unsupported file type (.docx) → 400
+       [FAIL] error detail mentions unsupported extension  (detail: {'detail': 'only .pdf, .xlsx, and .txt files are accepted'})
+[PASS] POST http://151.185.41.194:8012/UploadDocument/15
+       Expected 409, Got 409 — Test Case: duplicate filename → 409
+       [PASS] error detail mentions 'already exists' or 'conflict'  (detail: {'detail': "document 'test_gem_manual.pdf' already exists in project '15'."})
+[PASS] POST http://151.185.41.194:8012/UploadDocument/999999999
+       Expected 404, Got 404 — Test Case: nonexistent project → 404
+       [PASS] error detail mentions 'project' or 'not found'  (detail: {'detail': "project '999999999' was not found"})
+[PASS] POST http://151.185.41.194:8012/UploadDocument/15
+       Expected 422, Got 422 — Test Case: missing file field → 422
+
+── Group 2: GET /Analyze/{project_id}/{document_id} ─────────
+     ⏳  Triggering LLM extraction — this may take 30–90 seconds …
+[PASS] GET http://151.185.41.194:8012/Analyze/15/test_gem_manual
+       Expected 200, Got 200 — Test Case: valid analyze call → 200
+       [PASS] all required extraction keys present in response
+       [PASS] ExtractionStatus is 'completed' or 'failed'  (ExtractionStatus='failed')
+       [PASS] ConfidenceScore is a float between 0.0 and 1.0  (ConfidenceScore=0.0)
+       [PASS] SmlTemplate is present and non-empty  (SmlTemplate present)
+       [PASS] ProjectID in response matches the request  (got ProjectID=15)
+[PASS] GET http://151.185.41.194:8012/Analyze/15/ghost_doc_xyzzy
+       Expected 404, Got 404 — Test Case: nonexistent document_id → 404
+       [PASS] error detail mentions 'document' or 'not found'  (detail: {'detail': "document 'ghost_doc_xyzzy' was not found in project '15'"})
+[PASS] GET http://151.185.41.194:8012/Analyze/999999999/test_gem_manual
+       Expected 404, Got 404 — Test Case: nonexistent project → 404
+       [PASS] error detail mentions 'project' or 'not found'  (detail: {'detail': "project '999999999' was not found"})
+
+── Group 3: GET /AnalyzeProject/{project_id} ────────────────
+     ⏳  Running AnalyzeProject — may be slow if documents are pending …
+[PASS] GET http://151.185.41.194:8012/AnalyzeProject/15
+       Expected 200, Got 200 — Test Case: valid AnalyzeProject → 200
+       [PASS] all required extraction keys present
+       [PASS] ExtractionStatus is 'completed' or 'failed'  (ExtractionStatus='completed')
+       [PASS] ExtractionID is 'project_batch'  (ExtractionID='project_batch')
+[PASS] GET http://151.185.41.194:8012/AnalyzeProject/999999999
+       Expected 404, Got 404 — Test Case: nonexistent project → 404
+       [PASS] error detail mentions 'project' or 'not found'  (detail: {'detail': "project '999999999' was not found"})
+
+── Group 4: GET /Analyze/{project_id}/{document_id}/report ──
+[FAIL] GET http://151.185.41.194:8012/Analyze/15/test_gem_manual/report
+       Expected 200, Got 404 — Test Case: download report for completed doc → 200
+       Response body: {
+  "detail": "Extracted JSON for document 'test_gem_manual' was not found"
+}
+[PASS] GET http://151.185.41.194:8012/Analyze/15/ghost_doc_xyzzy/report
+       Expected 404, Got 404 — Test Case: nonexistent document → 404
+       [PASS] error detail mentions 'document' or 'not found'  (detail: {'detail': "document 'ghost_doc_xyzzy' was not found in project '15'"})
+[PASS] GET http://151.185.41.194:8012/Analyze/999999999/test_gem_manual/report
+       Expected 404, Got 404 — Test Case: nonexistent project → 404
+       [PASS] error detail mentions 'project' or 'not found'  (detail: {'detail': "project '999999999' was not found"})
+
+── Group 5: GET /GetVariable/{project_id}/{document_id} ─────
+     ⚠️  Analysis status='failed'. GetVariable tests on completed doc may return 400 — running anyway.
+[FAIL] GET http://151.185.41.194:8012/GetVariable/15/test_gem_manual
+       Expected 200, Got 400 — Test Case: no categories param → 200 (requires completed extraction)
+       Response body: {
+  "detail": "Document extraction is not completed yet."
+}
+[FAIL] GET http://151.185.41.194:8012/GetVariable/15/test_gem_manual?categories=StatusVariable
+       Expected 200, Got 400 — Test Case: categories=StatusVariable → 200 (if data exists)
+       Response body: {
+  "detail": "Document extraction is not completed yet."
+}
+[FAIL] GET http://151.185.41.194:8012/GetVariable/15/test_gem_manual?categories=StatusVariable%2CEvent
+       Expected 200, Got 400 — Test Case: categories=StatusVariable,Event → 200 (if data exists)
+       Response body: {
+  "detail": "Document extraction is not completed yet."
+}
+[PASS] GET http://151.185.41.194:8012/GetVariable/15/test_gem_manual?categories=NotARealCategory
+       Expected 400, Got 400 — Test Case: invalid category value → 400
+       [FAIL] error detail mentions invalid value or category  (detail: {'detail': 'document extraction is not completed yet.'})
+[FAIL] GET http://151.185.41.194:8012/GetVariable/15/test_variables
+       Expected 400, Got 404 — Test Case: not-yet-analyzed document → 400
+       Response body: {
+  "detail": "No data found for the requested categories in document 'test_variables'"
+}
+[PASS] GET http://151.185.41.194:8012/GetVariable/15/ghost_doc_xyzzy
+       Expected 404, Got 404 — Test Case: nonexistent document → 404
+       [PASS] error detail mentions 'document' or 'not found'  (detail: {'detail': "document 'ghost_doc_xyzzy' was not found in project '15'"})
+[PASS] GET http://151.185.41.194:8012/GetVariable/999999999/test_gem_manual
+       Expected 404, Got 404 — Test Case: nonexistent project → 404
+       [PASS] error detail mentions 'project' or 'not found'  (detail: {'detail': "project '999999999' was not found"})
+
+── Group 6: DELETE /DeleteDocument/{project_id}/{document_id}
+[PASS] DELETE http://151.185.41.194:8012/DeleteDocument/15/test_variables
+       Expected 200, Got 200 — Test Case: valid delete → 200
+       [PASS] Status is 'success'  (Status='success')
+       [PASS] Message field is present  (Message='Document test_variables deleted')
+[PASS] DELETE http://151.185.41.194:8012/DeleteDocument/15/test_variables
+       Expected 404, Got 404 — Test Case: delete already-deleted document → 404
+       [PASS] error detail mentions 'not found' or 'document'  (detail: {'detail': "document 'test_variables' was not found in project '15'"})
+[PASS] DELETE http://151.185.41.194:8012/DeleteDocument/999999999/test_variables
+       Expected 404, Got 404 — Test Case: delete from nonexistent project → 404
+       [PASS] error detail mentions 'project' or 'not found'  (detail: {'detail': "project '999999999' was not found"})
+
+── Group 7: POST /UpdateExtraction/{project_id} ─────────────
+[FAIL] POST http://151.185.41.194:8012/UpdateExtraction/15
+       Expected 200, Got 422 — Test Case: valid EquipmentSpec body → 200
+       Response body: {
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "query",
+        "spec"
+      ],
+      "msg": "Field required",
+      "input": null
+    }
+  ]
+}
+[FAIL] POST http://151.185.41.194:8012/UpdateExtraction/999999999
+       Expected 404, Got 422 — Test Case: nonexistent project → 404
+       Response body: {
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "query",
+        "spec"
+      ],
+      "msg": "Field required",
+      "input": null
+    }
+  ]
+}
+
+── Suite Teardown: deleting temporary test project ──────────
+  ✅  Project 15 deleted successfully.
+
+============================================================
+  9 FAILED  —  47/56 assertions passed
+============================================================
+

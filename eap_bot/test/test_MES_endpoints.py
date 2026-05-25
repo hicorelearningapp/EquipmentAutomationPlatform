@@ -30,6 +30,9 @@ import sys
 
 import requests
 
+# Force utf-8 encoding for stdout to handle emojis on Windows
+sys.stdout.reconfigure(encoding='utf-8')
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Configuration
@@ -59,15 +62,26 @@ TARGET_FAMILY = "FAB300"
 TEMP_FAMILY_NAME = "TestFamily_TEMP_XYZ"
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# TestRunner  —  counts pass / fail, prints structured output
-# ─────────────────────────────────────────────────────────────────────────────
-
 class TestRunner:
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False, log_file: str = "test_MES_endpoints.log"):
         self.verbose = verbose
         self.passed = 0
         self.failed = 0
+        self.log_file = log_file
+        with open(self.log_file, "w", encoding="utf-8") as f:
+            f.write("")
+
+    def _log(self, console_msg: str, file_msg: str):
+        print(console_msg)
+        with open(self.log_file, "a", encoding="utf-8") as f:
+            f.write(file_msg + "\n")
+
+    def print_section(self, msg: str, file_msg: str = None):
+        if file_msg is None:
+            file_msg = msg
+        print(msg)
+        with open(self.log_file, "a", encoding="utf-8") as f:
+            f.write(file_msg + "\n")
 
     def check_status(
         self,
@@ -78,7 +92,15 @@ class TestRunner:
         """Assert the HTTP status code. Always the first assertion in every test."""
         ok = response.status_code == expected_status
         symbol = "✅" if ok else "❌"
-        print(f"  {symbol}  [{response.status_code} expected {expected_status}]  {label}")
+        status_text = "[PASS]" if ok else "[FAIL]"
+        
+        method = response.request.method
+        url = response.request.url
+
+        console_msg = f"  {symbol}  [{response.status_code} expected {expected_status}]  {label}"
+        file_msg = f"{status_text} {method} {url}\n       Expected {expected_status}, Got {response.status_code} — Test Case: {label}"
+        self._log(console_msg, file_msg)
+        
         if not ok or self.verbose:
             self._print_body(response)
         if ok:
@@ -90,8 +112,13 @@ class TestRunner:
     def check(self, label: str, condition: bool, detail: str = "") -> bool:
         """Assert any boolean condition on the response body."""
         symbol = "✅" if condition else "❌"
+        status_text = "[PASS]" if condition else "[FAIL]"
         suffix = f"  ({detail})" if detail else ""
-        print(f"       {'↳'} {symbol}  {label}{suffix}")
+        
+        console_msg = f"       {'↳'} {symbol}  {label}{suffix}"
+        file_msg = f"       {status_text} {label}{suffix}"
+        self._log(console_msg, file_msg)
+        
         if condition:
             self.passed += 1
         else:
@@ -103,14 +130,16 @@ class TestRunner:
             body = json.dumps(response.json(), indent=2)
         except Exception:
             body = response.text
-        print(f"         Response body: {body[:500]}")
+        console_msg = f"         Response body: {body[:500]}"
+        file_msg = f"       Response body: {body}"
+        self._log(console_msg, file_msg)
 
     def summary(self) -> None:
         total = self.passed + self.failed
         status = "ALL PASSED" if self.failed == 0 else f"{self.failed} FAILED"
-        print(f"\n{'=' * 60}")
-        print(f"  {status}  —  {self.passed}/{total} assertions passed")
-        print(f"{'=' * 60}\n")
+        sep = "=" * 60
+        msg = f"\n{sep}\n  {status}  —  {self.passed}/{total} assertions passed\n{sep}\n"
+        self.print_section(msg)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -209,7 +238,7 @@ class TestGetMesFamilies(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 1: GET /GetMesFamilies ─────────────────────────────")
+        self.r.print_section("\n── Group 1: GET /GetMesFamilies ─────────────────────────────")
 
         # REQUEST:  GET /GetMesFamilies   (no body, no params)
         response = self.s.get(self.url("GetMesFamilies"))
@@ -270,7 +299,7 @@ class TestUpdateMesFamilies(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 2: POST /UpdateMesFamilies ─────────────────────────")
+        self.r.print_section("\n── Group 2: POST /UpdateMesFamilies ─────────────────────────")
 
         current = self._current_families()
 
@@ -384,7 +413,7 @@ class TestGetMesTemplates(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 3: GET /GetMesTemplates/{mes_family} ───────────────")
+        self.r.print_section("\n── Group 3: GET /GetMesTemplates/{mes_family} ───────────────")
 
         # ── 3a  Known family ──────────────────────────────────────────────────
 
@@ -463,7 +492,7 @@ class TestGetMesTemplateInfo(BaseTestGroup):
     }
 
     def run(self):
-        print("\n── Group 4: GET /GetMesTemplateInfo/{mes_family}/{template} ─")
+        self.r.print_section("\n── Group 4: GET /GetMesTemplateInfo/{mes_family}/{template} ─")
 
         # ── 4a  Valid family + valid template ─────────────────────────────────
 
@@ -561,7 +590,7 @@ class TestAddMesTemplateInfo(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 5: POST /AddMesTemplateInfo/{mes_family} ───────────")
+        self.r.print_section("\n── Group 5: POST /AddMesTemplateInfo/{mes_family} ───────────")
 
         # Prepare the nominal payload (MESFamily matches TARGET_FAMILY)
         payload = self._template_payload(TARGET_FAMILY, TEST_TEMPLATE_NAME)
@@ -704,7 +733,7 @@ class TestUpdateMesTemplateInfo(BaseTestGroup):
     """
 
     def run(self):
-        print("\n── Group 6: PUT /UpdateMesTemplateInfo/{mes_family}/{template}")
+        self.r.print_section("\n── Group 6: PUT /UpdateMesTemplateInfo/{mes_family}/{template}")
 
         # Ensure the test template exists before running update tests
         self._ensure_template_exists(TARGET_FAMILY, TEST_TEMPLATE_NAME)
@@ -855,20 +884,20 @@ class MesApiTestSuite:
             r = self.session.get(f"{self.base_url}/health", timeout=5)
             r.raise_for_status()
         except Exception as e:
-            print(f"\n❌  Cannot reach server at {self.base_url}: {e}")
+            self.runner.print_section(f"\n❌  Cannot reach server at {self.base_url}: {e}")
             sys.exit(1)
 
     def _cleanup_note(self) -> None:
-        print("\n── Cleanup note ─────────────────────────────────────────────")
-        print(f"  ℹ️  '{TEST_TEMPLATE_NAME}.json' was created in MESMapTemplates/{TARGET_FAMILY}/")
-        print("     It is safe to delete. Re-running the suite is also safe — duplicates are handled.")
+        self.runner.print_section("\n── Cleanup note ─────────────────────────────────────────────")
+        self.runner.print_section(f"  ℹ️  '{TEST_TEMPLATE_NAME}.json' was created in MESMapTemplates/{TARGET_FAMILY}/")
+        self.runner.print_section("     It is safe to delete. Re-running the suite is also safe — duplicates are handled.")
 
     def run(self) -> None:
-        print(f"\n{'=' * 60}")
-        print(f"  MES Family API  —  Test Suite")
-        print(f"  Target : {self.base_url}")
-        print(f"  Groups : {len(self._groups)}")
-        print(f"{'=' * 60}")
+        self.runner.print_section(f"\n{'=' * 60}")
+        self.runner.print_section(f"  MES Family API  —  Test Suite")
+        self.runner.print_section(f"  Target : {self.base_url}")
+        self.runner.print_section(f"  Groups : {len(self._groups)}")
+        self.runner.print_section(f"{'=' * 60}")
 
         self._check_server()
 
