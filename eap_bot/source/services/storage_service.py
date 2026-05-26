@@ -81,6 +81,11 @@ class StorageService:
         return datetime.now(timezone.utc)
 
     def create_project(self, project_create: ProjectCreate) -> ProjectOut:
+        existing_projects = self.list_projects()
+        for p in existing_projects:
+            if p.ProjectName.lower() == project_create.ProjectName.lower():
+                raise ProjectExistsError(f"Project with name '{project_create.ProjectName}' already exists.")
+                
         project_id = self._get_next_id()
         self._ensure_project_dirs(project_id)
         
@@ -247,7 +252,11 @@ class StorageService:
     def update_project_metadata(self, project_id: int, update: Any) -> ProjectOut:
         metadata = self.get_project(project_id)
         
-        if update.ProjectName is not None:
+        if update.ProjectName is not None and update.ProjectName != metadata.ProjectName:
+            existing_projects = self.list_projects()
+            for p in existing_projects:
+                if p.ProjectID != project_id and p.ProjectName.lower() == update.ProjectName.lower():
+                    raise ProjectExistsError(f"Project with name '{update.ProjectName}' already exists.")
             metadata.ProjectName = update.ProjectName
         if update.VendorName is not None:
             metadata.VendorName = update.VendorName

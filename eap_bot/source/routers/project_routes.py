@@ -89,6 +89,8 @@ class ProjectAPI:
             return self.storage.update_project_metadata(project_id, body)
         except ProjectNotFoundError as exc:
             raise HTTPException(404, str(exc)) from exc
+        except ProjectExistsError as exc:
+            raise HTTPException(409, str(exc)) from exc
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 
