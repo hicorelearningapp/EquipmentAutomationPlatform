@@ -1,4 +1,4 @@
-from source.schemas.project import ProjectDetailsResponse
+from source.schemas.project import ProjectDetailsResponse, SystemSummaryResponse
 from source.schemas.secsgem import EquipmentSpec
 from source.services.storage_service import StorageService
 
@@ -62,6 +62,7 @@ class ProjectDetailsService:
                 metadata.Tool.value
                 if hasattr(metadata.Tool, "value") else (metadata.Tool if metadata.Tool else None)
             ),
+            ConnectedToolCount=len(metadata.ConnectedTools) if hasattr(metadata, "ConnectedTools") and metadata.ConnectedTools else 0,
             CreatedAt=metadata.CreatedAt,
             DocumentCount=number_of_documents,
             SVCount=total_svs,
@@ -71,4 +72,27 @@ class ProjectDetailsService:
             ReportCount=total_reports,
             AlarmCount=total_alarms,
             EventCount=total_events,
+        )
+
+    def get_system_summary(self) -> SystemSummaryResponse:
+        projects = self.storage.list_projects()
+        total_sml = 0
+        total_tools = 0
+        
+        for project in projects:
+            tool_char_dir = self.storage._project_dir(project.ProjectID) / self.storage.TOOL_CHAR_DIR
+            if tool_char_dir.is_dir():
+                total_sml += len([f for f in tool_char_dir.iterdir() if f.is_file()])
+            
+            try:
+                full_meta = self.storage.get_project(project.ProjectID)
+                if hasattr(full_meta, "ConnectedTools") and full_meta.ConnectedTools:
+                    total_tools += len(full_meta.ConnectedTools)
+            except Exception:
+                pass
+                
+        return SystemSummaryResponse(
+            TotalProjects=len(projects),
+            TotalSmlScripts=total_sml,
+            TotalConnectedTools=total_tools,
         )

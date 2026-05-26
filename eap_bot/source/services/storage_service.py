@@ -93,6 +93,7 @@ class StorageService:
             ProjectCode=project_create.ProjectCode,
             ProjectDescription=project_create.ProjectDescription,
             Tool=project_create.Tool,
+            ConnectedTools=project_create.ConnectedTools,
             CreatedAt=now,
             LastUpdatedOn=now,
             Status="active",
@@ -256,6 +257,8 @@ class StorageService:
             metadata.ProjectDescription = update.ProjectDescription
         if update.Tool is not None:
             metadata.Tool = update.Tool
+        if update.ConnectedTools is not None:
+            metadata.ConnectedTools = update.ConnectedTools
         if update.ProjectVersion is not None:
             metadata.ProjectVersion = update.ProjectVersion
             
@@ -290,7 +293,7 @@ class StorageService:
         code_file.write_text(source_code, encoding="utf-8")
         logger.info("Saved generated code to %s", code_file)
 
-    def prepare_document_paths(
+    def prepare_docul̥ment_paths(
         self, project_id: int, original_filename: str, extension: str = ".pdf"
     ) -> tuple[str, Path, Path]:
         metadata = self.get_project(project_id)

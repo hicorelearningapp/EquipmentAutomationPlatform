@@ -37,6 +37,7 @@ class ProjectCreate(BaseModel):
     ProjectCode: str = Field(min_length=1)
     ProjectDescription: Optional[str] = None
     Tool: ToolType = ToolType.NONE
+    ConnectedTools: list[str] = Field(default_factory=list)
 
 
 class DocumentMetadata(BaseModel):
@@ -63,6 +64,7 @@ class ProjectOut(BaseModel):
     ProjectCode: str = Field(default="", alias="project_code")
     ProjectDescription: Optional[str] = Field(default=None, alias="project_description")
     Tool: ToolType = Field(alias="tool")
+    ConnectedTools: list[str] = Field(default_factory=list, alias="connected_tools")
     CreatedAt: datetime = Field(alias="created_at")
     LastUpdatedOn: datetime = Field(alias="last_updated_on")
     Status: str = Field(alias="status")
@@ -104,6 +106,7 @@ class ProjectUpdate(BaseModel):
     VendorName: Optional[str] = None
     ProjectCode: Optional[str] = None
     Tool: Optional[ToolType] = None
+    ConnectedTools: Optional[list[str]] = None
     ProjectVersion: Optional[str] = None
 
 
@@ -119,6 +122,7 @@ class ProjectDetailsResponse(BaseModel):
     ProjectDescription: Optional[str] = None
     VendorName: Optional[str] = None
     Tool: Optional[str] = None
+    ConnectedToolCount: int = 0
     CreatedAt: datetime
     DocumentCount: int
     SVCount: int
@@ -128,3 +132,8 @@ class ProjectDetailsResponse(BaseModel):
     ReportCount: int
     AlarmCount: int
     EventCount: int
+
+class SystemSummaryResponse(BaseModel):
+    TotalProjects: int
+    TotalSmlScripts: int
+    TotalConnectedTools: int
