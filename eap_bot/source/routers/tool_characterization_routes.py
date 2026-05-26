@@ -1,14 +1,14 @@
 import json
 import logging
 
-from fastapi import APIRouter, HTTPException, File, UploadFile
+from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 
 from pathlib import Path
 
 from source.managers.service_container import container
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
-from source.schemas.test_script import GenerateTestScriptsRequest, GenerateTestSummaryRequest
+from source.schemas.test_script import GenerateTestScriptsRequest
 from source.services.storage_service import StorageService, ProjectNotFoundError
 from source.services.test_script_service import TestScriptService
 
@@ -25,7 +25,7 @@ class ToolCharacterizationAPI:
     def register_routes(self):
         self.router.post("/GenerateTestScripts/{project_id}")(self.generate_test_scripts)
         self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
-        self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
+        # self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
         self.router.post("/GenerateTestSummary/{project_id}")(self.generate_test_summary)
 
     def generate_test_scripts(self, project_id: int, body: GenerateTestScriptsRequest):
@@ -110,42 +110,61 @@ class ToolCharacterizationAPI:
             logger.error("Failed to update tool characterization script: %s", e)
             raise HTTPException(500, str(e))
 
-    def generate_tool_char_report_summary(self, project_id: int):
+    # def generate_tool_char_report_summary(self, project_id: int):
+    #     try:
+    #         metadata = self.storage.get_project(project_id)
+    #         test_summary = {
+    #             "ProjectID": project_id,
+    #             "ProjectName": metadata.ProjectName,
+    #             "Timestamp": self.storage.now().isoformat(),
+    #             "Status": "completed",
+    #             "TotalTests": 15,
+    #             "PassedTests": 15,
+    #             "FailedTests": 0,
+    #             "SummaryReport": "All SECS/GEM message structures characterized successfully."
+    #         }
+    # 
+    #         test_summary_dir = self.storage._project_dir(project_id) / self.storage.TEST_SUMMARY_DIR
+    #         test_summary_dir.mkdir(parents=True, exist_ok=True)
+    # 
+    #         summary_path = test_summary_dir / "test_summary.json"
+    #         summary_path.write_text(json.dumps(test_summary, indent=2), encoding="utf-8")
+    # 
+    #         return {
+    #             "Status": "success",
+    #             "Summary": test_summary
+    #         }
+    #     except Exception as e:
+    #         logger.error("Failed to generate report summary: %s", e)
+    #         raise HTTPException(500, str(e))
+
+    async def generate_test_summary(
+        self,
+        project_id: int,
+        tool_id: str = Form(...),
+        ip_address: str = Form(...),
+        secs_log: UploadFile = File(...),
+        summary_json: UploadFile = File(...)
+    ):
         try:
-            metadata = self.storage.get_project(project_id)
-            test_summary = {
-                "ProjectID": project_id,
-                "ProjectName": metadata.ProjectName,
-                "Timestamp": self.storage.now().isoformat(),
-                "Status": "completed",
-                "TotalTests": 15,
-                "PassedTests": 15,
-                "FailedTests": 0,
-                "SummaryReport": "All SECS/GEM message structures characterized successfully."
-            }
+            try:
+                secs_log_bytes = await secs_log.read()
+                secs_log_data = json.loads(secs_log_bytes.decode("utf-8"))
+            except Exception as e:
+                raise HTTPException(400, f"secs_log is not a valid JSON file: {e}")
 
-            test_summary_dir = self.storage._project_dir(project_id) / self.storage.TEST_SUMMARY_DIR
-            test_summary_dir.mkdir(parents=True, exist_ok=True)
+            try:
+                summary_json_bytes = await summary_json.read()
+                summary_json_data = json.loads(summary_json_bytes.decode("utf-8"))
+            except Exception as e:
+                raise HTTPException(400, f"summary_json is not a valid JSON file: {e}")
 
-            summary_path = test_summary_dir / "test_summary.json"
-            summary_path.write_text(json.dumps(test_summary, indent=2), encoding="utf-8")
-
-            return {
-                "Status": "success",
-                "Summary": test_summary
-            }
-        except Exception as e:
-            logger.error("Failed to generate report summary: %s", e)
-            raise HTTPException(500, str(e))
-
-    def generate_test_summary(self, project_id: int, body: GenerateTestSummaryRequest):
-        try:
             saved_path = self.storage.save_test_summary(
                 project_id=project_id,
-                tool_id=body.tool_id,
-                ip_address=body.ip_address,
-                secs_log=body.secs_log,
-                summary_json=body.summary_json
+                tool_id=tool_id,
+                ip_address=ip_address,
+                secs_log=secs_log_data,
+                summary_json=summary_json_data
             )
             return {
                 "Status": "success",

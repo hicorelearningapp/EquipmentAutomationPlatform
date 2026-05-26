@@ -325,7 +325,7 @@ class StorageService:
         code_file.write_text(source_code, encoding="utf-8")
         logger.info("Saved generated code to %s", code_file)
 
-    def prepare_docul̥ment_paths(
+    def prepare_document_paths(
         self, project_id: int, original_filename: str, extension: str = ".pdf"
     ) -> tuple[str, Path, Path]:
         metadata = self.get_project(project_id)

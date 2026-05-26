@@ -35,7 +35,7 @@ class ProjectCreate(BaseModel):
     ProjectName: str = Field(min_length=1)
     VendorName: str = Field(min_length=1)
     ProjectCode: str = Field(min_length=1)
-    ProjectDescription: Optional[str] = None
+    ProjectDescription: str = Field(default="")
     Tool: ToolType = ToolType.NONE
     ConnectedTools: list[str] = Field(default_factory=list)
 
@@ -62,7 +62,7 @@ class ProjectOut(BaseModel):
     ProjectName: str = Field(alias="project_name")
     VendorName: str = Field(default="", alias="vendor_name")
     ProjectCode: str = Field(default="", alias="project_code")
-    ProjectDescription: Optional[str] = Field(default=None, alias="project_description")
+    ProjectDescription: str = Field(default="", alias="project_description")
     Tool: ToolType = Field(alias="tool")
     ConnectedTools: list[str] = Field(default_factory=list, alias="connected_tools")
     CreatedAt: datetime = Field(alias="created_at")

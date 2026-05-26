@@ -37,7 +37,7 @@ class ProjectAPI:
         self.register_routes()
 
     def register_routes(self):
-        self.router.post("/AddProject", response_model=ProjectOut, status_code=201, response_model_by_alias=False)(self.create_project)
+        self.router.post("/CreateProject", response_model=ProjectOut, status_code=201, response_model_by_alias=False)(self.create_project)
         self.router.get("/GetAllProjects", response_model=dict[str, list[ProjectOut]], response_model_by_alias=False)(self.list_projects)
         self.router.get("/LoadProject/{project_id}", response_model=ProjectDetail, response_model_by_alias=False)(self.load_project)
         self.router.put("/UpdateProject/{project_id}", response_model=ProjectOut, response_model_by_alias=False)(self.update_project)

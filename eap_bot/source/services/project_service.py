@@ -36,23 +36,33 @@ class ProjectService:
         self.storage.increment_project_version(project_id)
         self.storage.write_sml_template(project_id)
 
-        # Copy default script templates into the project directory
-        try:
-            from source.services.sml_template import SCRIPTS_DIR
-            tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
-            tool_char_dir.mkdir(parents=True, exist_ok=True)
-
-            for script_name in ["general_gem_testing.txt", "tool_characterisation_testing.txt"]:
-                src_path = SCRIPTS_DIR / script_name
-                if src_path.exists():
-                    content = src_path.read_text(encoding="utf-8")
-                    dst_path = tool_char_dir / script_name
-                    dst_path.write_text(content, encoding="utf-8")
-                    logger.info("Saved script %s to %s", script_name, dst_path)
-        except Exception as e:
-            logger.error("Failed to copy script templates for project %s: %s", project_id, e)
-
         metadata = self.storage.get_project(project_id)
+
+        has_user_sml = any(
+            (hasattr(doc, "DocumentType") and
+             (doc.DocumentType == DocumentCategory.SML_SCRIPTS or
+              (hasattr(doc.DocumentType, "value") and doc.DocumentType.value == "SML Scripts")))
+            for doc in metadata.Documents
+        )
+
+        # Copy default script templates into the project directory only if no user SML Scripts exist
+        if not has_user_sml:
+            try:
+                from source.services.sml_template import SCRIPTS_DIR
+                tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
+                tool_char_dir.mkdir(parents=True, exist_ok=True)
+
+                for script_name in ["general_gem_testing.txt", "tool_characterisation_testing.txt"]:
+                    src_path = SCRIPTS_DIR / script_name
+                    if src_path.exists():
+                        content = src_path.read_text(encoding="utf-8")
+                        dst_path = tool_char_dir / script_name
+                        dst_path.write_text(content, encoding="utf-8")
+                        logger.info("Saved script %s to %s", script_name, dst_path)
+            except Exception as e:
+                logger.error("Failed to copy script templates for project %s: %s", project_id, e)
+        else:
+            logger.info("Project %s has user-uploaded SML scripts; skipping template copy", project_id)
 
         # Analyse pending documents
         for doc in metadata.Documents:
