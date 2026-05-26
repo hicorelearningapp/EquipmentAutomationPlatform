@@ -52,6 +52,7 @@ class StorageService:
     SMART_AUTO_CODE_DIR = "SmartAutoCode"
     MES_MAPPING_JSON_DIR = "MESMappingJSON"
     REPORTS_DIR = "Reports"
+    RESULTS_DIR = "Results"
     METADATA_FILE = "project.json"
 
     _SLUG_RE = re.compile(r"[^a-z0-9]+")
@@ -177,6 +178,28 @@ class StorageService:
             return
         path.write_text(json.dumps(SML_CHARACTERISATION_TEMPLATE, indent=2), encoding="utf-8")
         logger.info("Wrote SML template to %s", path)
+
+    def save_test_summary(self, project_id: int, tool_id: str, ip_address: str, secs_log: Any, summary_json: Any) -> str:
+        # 1. Validate tool_id against ConnectedTools
+        metadata = self.get_project(project_id)
+        if not hasattr(metadata, "ConnectedTools") or tool_id not in metadata.ConnectedTools:
+            raise ValueError(f"Tool ID '{tool_id}' is not connected to project {project_id}.")
+            
+        # 2. Build directory path
+        timestamp = self.now().strftime("%Y-%m-%d_%H-%M-%S")
+        results_dir = self._project_dir(project_id) / self.RESULTS_DIR / tool_id / timestamp
+        results_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 3. Write files
+        (results_dir / "secs_logs.json").write_text(json.dumps(secs_log, indent=2), encoding="utf-8")
+        (results_dir / "summary.json").write_text(json.dumps(summary_json, indent=2), encoding="utf-8")
+        (results_dir / "metadata.json").write_text(json.dumps({
+            "ip_address": ip_address,
+            "tool_id": tool_id,
+            "timestamp": timestamp
+        }, indent=2), encoding="utf-8")
+        
+        return str(results_dir)
 
     def mark_failed(self, project_id: int, document_id: str) -> DocumentMetadata:
         metadata = self.get_project(project_id)

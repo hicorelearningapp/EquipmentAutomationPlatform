@@ -108,7 +108,7 @@ class ProjectAPI:
 
     def get_project_details(self, project_id: int):
         try:
-            return container.project_details_service.get_project_details(project_id)
+            return container.project_service.get_project_details(project_id)
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
         except ProjectNotFoundError as exc:
@@ -118,7 +118,7 @@ class ProjectAPI:
 
     def get_system_summary(self):
         try:
-            return container.project_details_service.get_system_summary()
+            return container.project_service.get_system_summary()
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 

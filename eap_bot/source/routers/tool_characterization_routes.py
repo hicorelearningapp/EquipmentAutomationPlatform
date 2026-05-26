@@ -8,7 +8,7 @@ from pathlib import Path
 from source.managers.service_container import container
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
-from source.schemas.test_script import GenerateTestScriptsRequest
+from source.schemas.test_script import GenerateTestScriptsRequest, GenerateTestSummaryRequest
 from source.services.storage_service import StorageService, ProjectNotFoundError
 from source.services.test_script_service import TestScriptService
 
@@ -26,6 +26,7 @@ class ToolCharacterizationAPI:
         self.router.post("/GenerateTestScripts/{project_id}")(self.generate_test_scripts)
         self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
         self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
+        self.router.post("/GenerateTestSummary/{project_id}")(self.generate_test_summary)
 
     def generate_test_scripts(self, project_id: int, body: GenerateTestScriptsRequest):
         try:
@@ -136,3 +137,23 @@ class ToolCharacterizationAPI:
         except Exception as e:
             logger.error("Failed to generate report summary: %s", e)
             raise HTTPException(500, str(e))
+
+    def generate_test_summary(self, project_id: int, body: GenerateTestSummaryRequest):
+        try:
+            saved_path = self.storage.save_test_summary(
+                project_id=project_id,
+                tool_id=body.tool_id,
+                ip_address=body.ip_address,
+                secs_log=body.secs_log,
+                summary_json=body.summary_json
+            )
+            return {
+                "Status": "success",
+                "Message": "Test summary saved successfully",
+                "Path": saved_path
+            }
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except Exception as exc:
+            logger.error("Failed to save test summary: %s", exc)
+            raise HTTPException(500, str(exc)) from exc
