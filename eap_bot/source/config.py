@@ -12,10 +12,9 @@ class Settings(BaseSettings):
     LLM_MODEL_NAME: str = Field("gemini-3.1-flash-lite")
     OLLAMA_BASE_URL: str = Field("http://localhost:11434")
 
-    # Fallback LLM (used when primary hits rate limits / 429 errors)
-    LLM_FALLBACK_PROVIDER: str | None = Field(default=None)  # e.g. 'groq'
-    LLM_FALLBACK_MODEL_NAME: str | None = Field(default=None)  # e.g. 'llama3-70b-8192'
-
+    # Fallback LLMs (used when primary hits rate limits / 429 / quota errors)
+    # Format: "provider:model,provider:model" e.g., "groq:llama3-70b-8192,ollama:llama3"
+    LLM_FALLBACKS: str | None = Field(default=None)
     MISTRAL_API_KEY: str = Field("")
     # Legacy / Server specific fields
     vectorstore_root: str = Field("./vectorstores")

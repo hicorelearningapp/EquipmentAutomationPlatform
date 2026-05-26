@@ -43,8 +43,9 @@ def test_project_details_flow(client: TestClient, record_property):
         assert details.get("ProjectDescription") == "A test project for verification of project details"
         assert details.get("VendorName") == "TestVendorName"
         assert details.get("Tool") == "CVD"
-        assert details.get("NumberOfDocuments") == 0
-        assert details.get("NumberOfSVs") == 0
+        assert details.get("DocumentCount") == 0
+        assert details.get("SVCount") == 0
+        assert details.get("SmlScriptCount") == 0
         
         # 3. Update Project
         url_update = f"/UpdateProject/{project_id}"

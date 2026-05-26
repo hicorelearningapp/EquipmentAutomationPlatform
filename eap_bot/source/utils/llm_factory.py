@@ -17,7 +17,7 @@ class GroqStrategy(LLMStrategy):
             "model": settings.LLM_MODEL_NAME,
             "api_key": settings.GROQ_API_KEY,
             "temperature": temperature,
-            "max_retries": 6,
+            "max_retries": 0,
         }
         if require_json:
             kwargs["model_kwargs"] = {"response_format": {"type": "json_object"}}
@@ -48,7 +48,7 @@ class GeminiStrategy(LLMStrategy):
             "model": settings.LLM_MODEL_NAME,
             "google_api_key": settings.GOOGLE_API_KEY,
             "temperature": temperature,
-            "max_retries": 6,
+            "max_retries": 0,
         }
         if require_json:
             kwargs["model_kwargs"] = {"response_mime_type": "application/json"}
@@ -63,7 +63,7 @@ class MistralStrategy(LLMStrategy):
             "model": settings.LLM_MODEL_NAME,
             "api_key": settings.MISTRAL_API_KEY,
             "temperature": temperature,
-            "max_retries": 6,
+            "max_retries": 0,
         }
         if require_json:
             kwargs["model_kwargs"] = {"response_format": {"type": "json_object"}}
@@ -71,30 +71,51 @@ class MistralStrategy(LLMStrategy):
         return ChatMistralAI(**kwargs)
 
 
-class FallbackLLMStrategy(LLMStrategy):
-    """
-    Wraps a primary and a fallback LLMStrategy using LangChain's .with_fallbacks().
-    When the primary LLM raises an exception (e.g. 429 quota exceeded), LangChain
-    will automatically retry the same call against the fallback model.
-    Consumers (equipment_extractor, mapping_service, etc.) are fully unaware of this.
-    """
-    def __init__(self, primary: LLMStrategy, fallback: LLMStrategy, fallback_model_name: str):
+class RobustFallbackWrapper:
+    def __init__(self, models):
+        self.models = models
+
+    def invoke(self, *args, **kwargs):
+        import logging
+        logger = logging.getLogger(__name__)
+        last_exception = None
+        for i, model in enumerate(self.models):
+            try:
+                response = model.invoke(*args, **kwargs)
+                content_lower = str(response.content).lower()
+                
+                # Custom check for non-HTTP quota errors
+                if "quota" in content_lower or "rate limit" in content_lower or "429" in content_lower:
+                    raise Exception(f"Model {i} returned quota error in text: {response.content[:50]}")
+                    
+                return response
+            except Exception as e:
+                logger.warning(f"LLM fallback triggered. Model {i} failed: {str(e)}")
+                last_exception = e
+                
+        raise RuntimeError(f"All LLM fallbacks exhausted. Last error: {str(last_exception)}")
+
+
+class MultiFallbackLLMStrategy(LLMStrategy):
+    def __init__(self, primary: LLMStrategy, fallbacks: list[tuple[LLMStrategy, str]]):
         self._primary = primary
-        self._fallback = fallback
-        self._fallback_model_name = fallback_model_name
+        self._fallbacks = fallbacks
 
-    def get_model(self, temperature: float = 0.0, require_json: bool = False) -> BaseChatModel:
+    def get_model(self, temperature: float = 0.0, require_json: bool = False):
         primary_model = self._primary.get_model(temperature=temperature, require_json=require_json)
-
-        # Temporarily swap the model name so fallback uses its own model, not the primary's
+        
+        models = [primary_model]
         original_model_name = settings.LLM_MODEL_NAME
-        settings.LLM_MODEL_NAME = self._fallback_model_name
-        try:
-            fallback_model = self._fallback.get_model(temperature=temperature, require_json=require_json)
-        finally:
-            settings.LLM_MODEL_NAME = original_model_name
-
-        return primary_model.with_fallbacks([fallback_model])
+        
+        for strategy, model_name in self._fallbacks:
+            settings.LLM_MODEL_NAME = model_name
+            try:
+                fallback_model = strategy.get_model(temperature=temperature, require_json=require_json)
+                models.append(fallback_model)
+            finally:
+                settings.LLM_MODEL_NAME = original_model_name
+                
+        return RobustFallbackWrapper(models)
 
 
 def _make_strategy(provider: str) -> LLMStrategy:
@@ -117,13 +138,16 @@ class LLMFactory:
     def create_strategy() -> LLMStrategy:
         primary = _make_strategy(settings.LLM_PROVIDER)
 
-        # If a fallback provider is configured, compose a FallbackLLMStrategy
-        if settings.LLM_FALLBACK_PROVIDER and settings.LLM_FALLBACK_MODEL_NAME:
-            fallback = _make_strategy(settings.LLM_FALLBACK_PROVIDER)
-            return FallbackLLMStrategy(
-                primary=primary,
-                fallback=fallback,
-                fallback_model_name=settings.LLM_FALLBACK_MODEL_NAME,
-            )
+        if getattr(settings, "LLM_FALLBACKS", None):
+            fallback_configs = settings.LLM_FALLBACKS.split(",")
+            fallbacks = []
+            for conf in fallback_configs:
+                parts = conf.split(":")
+                if len(parts) == 2:
+                    provider, model_name = parts
+                    fallbacks.append((_make_strategy(provider.strip()), model_name.strip()))
+                    
+            if fallbacks:
+                return MultiFallbackLLMStrategy(primary, fallbacks)
 
         return primary

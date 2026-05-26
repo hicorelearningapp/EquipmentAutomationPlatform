@@ -120,11 +120,11 @@ class ProjectDetailsResponse(BaseModel):
     VendorName: Optional[str] = None
     Tool: Optional[str] = None
     CreatedAt: datetime
-    NumberOfDocuments: int
-    NumberOfSVs: int
-    NumberOfDVs: int
-    NumberOfRemoteCommands: int
-    NumberOfXMLFiles: int
-    NumberOfReports: int
-    NumberOfAlarms: int
-    NumberOfEvents: int
+    DocumentCount: int
+    SVCount: int
+    DVCount: int
+    RCCount: int
+    SmlScriptCount: int
+    ReportCount: int
+    AlarmCount: int
+    EventCount: int

@@ -14,10 +14,14 @@ class ProjectDetailsService:
 
         number_of_documents = len(documents)
 
-        number_of_xml_files = len([
-            d for d in documents
-            if d.FileName.lower().endswith(".xml")
-        ])
+        # Count files in ToolCharacterization folder
+        tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
+        number_of_sml_scripts = 0
+        if tool_char_dir.is_dir():
+            number_of_sml_scripts = len([
+                f for f in tool_char_dir.iterdir()
+                if f.is_file()
+            ])
 
         total_svs = 0
         total_dvs = 0
@@ -59,12 +63,12 @@ class ProjectDetailsService:
                 if hasattr(metadata.Tool, "value") else (metadata.Tool if metadata.Tool else None)
             ),
             CreatedAt=metadata.CreatedAt,
-            NumberOfDocuments=number_of_documents,
-            NumberOfSVs=total_svs,
-            NumberOfDVs=total_dvs,
-            NumberOfRemoteCommands=total_rcmds,
-            NumberOfXMLFiles=number_of_xml_files,
-            NumberOfReports=total_reports,
-            NumberOfAlarms=total_alarms,
-            NumberOfEvents=total_events,
+            DocumentCount=number_of_documents,
+            SVCount=total_svs,
+            DVCount=total_dvs,
+            RCCount=total_rcmds,
+            SmlScriptCount=number_of_sml_scripts,
+            ReportCount=total_reports,
+            AlarmCount=total_alarms,
+            EventCount=total_events,
         )
