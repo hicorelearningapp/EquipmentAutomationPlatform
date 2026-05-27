@@ -584,6 +584,7 @@ TABLE (CSV):
         self,
         pdf_path: Path,
         tables_dir: Union[Path, None],
+       
         tables_store_path: Union[Path, None] = None,
     ) -> dict[str, str]:
         """
