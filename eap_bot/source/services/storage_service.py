@@ -4,7 +4,7 @@ import re
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from source.config import settings
 from source.schemas.project import DocumentMetadata, ProjectMetadata, ProjectCreate, ProjectOut
@@ -191,7 +191,8 @@ class StorageService:
         results_dir.mkdir(parents=True, exist_ok=True)
         
         # 3. Write files
-        (results_dir / "secs_logs.json").write_text(json.dumps(secs_log, indent=2), encoding="utf-8")
+        if secs_log is not None:
+            (results_dir / "secs_logs.json").write_text(json.dumps(secs_log, indent=2), encoding="utf-8")
         (results_dir / "summary.json").write_text(json.dumps(summary_json, indent=2), encoding="utf-8")
         (results_dir / "metadata.json").write_text(json.dumps({
             "ip_address": ip_address,
@@ -200,6 +201,41 @@ class StorageService:
         }, indent=2), encoding="utf-8")
         
         return str(results_dir)
+
+    def get_latest_test_summary(self, project_id: int, tool_id: Optional[str] = None) -> Any:
+        self.get_project(project_id)
+        
+        project_dir = self._project_dir(project_id)
+        results_dir = project_dir / self.RESULTS_DIR
+        if not results_dir.exists():
+            return None
+            
+        if tool_id:
+            tool_dir = results_dir / tool_id
+            if not tool_dir.exists():
+                return None
+            timestamps = sorted([d.name for d in tool_dir.iterdir() if d.is_dir()])
+            if not timestamps:
+                return None
+            latest_timestamp = timestamps[-1]
+            summary_file = tool_dir / latest_timestamp / "summary.json"
+            if summary_file.exists():
+                return json.loads(summary_file.read_text(encoding="utf-8"))
+            return None
+        else:
+            all_summaries = []
+            for tool_dir in results_dir.iterdir():
+                if tool_dir.is_dir():
+                    for ts_dir in tool_dir.iterdir():
+                        if ts_dir.is_dir():
+                            summary_file = ts_dir / "summary.json"
+                            if summary_file.exists():
+                                all_summaries.append((ts_dir.name, summary_file))
+            if not all_summaries:
+                return None
+            all_summaries.sort(key=lambda x: x[0])
+            latest_summary_file = all_summaries[-1][1]
+            return json.loads(latest_summary_file.read_text(encoding="utf-8"))
 
     def mark_failed(self, project_id: int, document_id: str) -> DocumentMetadata:
         metadata = self.get_project(project_id)
