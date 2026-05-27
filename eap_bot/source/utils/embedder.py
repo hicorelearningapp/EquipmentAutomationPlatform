@@ -24,7 +24,7 @@ class VectorStoreManager:
         self._embeddings = self._get_embeddings()
 
     @classmethod
-    def _get_embeddings(cls) -> HuggingFaceEmbeddings:
+    def get_embeddings(cls) -> HuggingFaceEmbeddings:
         if cls._EMBEDDINGS is None:
             cls._EMBEDDINGS = HuggingFaceEmbeddings(
                 model_name="sentence-transformers/all-MiniLM-L6-v2",
@@ -32,6 +32,8 @@ class VectorStoreManager:
                 encode_kwargs={"normalize_embeddings": True},
             )
         return cls._EMBEDDINGS
+
+    _get_embeddings = get_embeddings  # legacy alias
 
     def _load_or_create_faiss(self) -> FAISS | None:
         """Return the cached FAISS index, loading from disk if needed."""

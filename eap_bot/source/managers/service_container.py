@@ -1,5 +1,6 @@
 import logging
 
+from source.services.automap_service import AutoMapService
 from source.services.equipment_extractor import EquipmentExtractor
 from source.services.mapping_service import MappingService
 from source.services.qa_service import QAService
@@ -30,6 +31,10 @@ class ServiceContainer:
         )
         self.report_service: ReportService = ReportService(
             llm_strategy=self.llm_strategy
+        )
+        self.automap_service: AutoMapService = AutoMapService(
+            storage=self.storage,
+            llm_strategy=self.llm_strategy,
         )
 
         # Import here to avoid circular imports at module load time
