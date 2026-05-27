@@ -1,0 +1,414 @@
+[
+  {
+    "GeneratedTime": "2026-05-26T14:54:10.5722154+05:30",
+    "SelectedSmlFile": "GeneralGEMTesting",
+    "Connection": {
+      "IpAddress": "127.0.0.1",
+      "Port": 5001,
+      "DeviceId": "1001"
+    },
+    "Dashboard": {
+      "Total": 27,
+      "Passed": 25,
+      "Failed": 2,
+      "Running": 0
+    },
+    "ExecutionFlow": {
+      "CurrentTestId": "S2F49",
+      "CurrentTestName": "S2F49 Enhanced Remote Command",
+      "Direction": "Host → Equipment",
+      "ExpectedResponse": "S2F50",
+      "CurrentStep": "Completed"
+    },
+    "TestResults": [
+      {
+        "Category": "EquipmentStatus",
+        "Count": 11,
+        "Tests": [
+          {
+            "TestId": 1,
+            "TestName": "S1F1 Are You There Request",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F2]",
+            "Result": "PASS",
+            "Sml": "S1F1 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 2,
+            "TestName": "S1F3 Selected Equipment Status Request Without Values",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F4]",
+            "Result": "PASS",
+            "Sml": "S1F3 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 3,
+            "TestName": "S1F3 Selected Equipment Status Request With Values",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F4]",
+            "Result": "PASS",
+            "Sml": "S1F3 W\n<L\n  <U4 1001>\n  <U4 1002>\n>\n."
+          },
+          {
+            "TestId": 4,
+            "TestName": "S1F11 Status Variable Namelist Request",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F12]",
+            "Result": "PASS",
+            "Sml": "S1F11 W\n<L\n  <U4 1001>\n  <U4 1002>\n>\n."
+          },
+          {
+            "TestId": 5,
+            "TestName": "S1F13 Establish Communications Request Without Values",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F14]",
+            "Result": "PASS",
+            "Sml": "S1F13 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 6,
+            "TestName": "S1F15 Request OFF-LINE",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F16]",
+            "Result": "PASS",
+            "Sml": "S1F15 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 7,
+            "TestName": "S1F17 Request ON-LINE",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F18]",
+            "Result": "PASS",
+            "Sml": "S1F17 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 8,
+            "TestName": "S1F21 Data Variable Namelist Request Without Values",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F22]",
+            "Result": "PASS",
+            "Sml": "S1F21 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 9,
+            "TestName": "S1F21 Data Variable Namelist Request With Values",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F22]",
+            "Result": "PASS",
+            "Sml": "S1F21 W\n<L\n  <U4 2001>\n  <U4 2002>\n>\n."
+          },
+          {
+            "TestId": 10,
+            "TestName": "S1F23 Collection Event Namelist Request Without Values",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F24]",
+            "Result": "PASS",
+            "Sml": "S1F23 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 11,
+            "TestName": "S1F23 Collection Event Namelist Request With Values",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F24]",
+            "Result": "PASS",
+            "Sml": "S1F23 W\n<L\n  <U4 3001>\n>\n."
+          }
+        ]
+      },
+      {
+        "Category": "EquipmentControl",
+        "Count": 16,
+        "Tests": [
+          {
+            "TestId": 12,
+            "TestName": "S2F13 Equipment Constant Request Without Values",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F14]",
+            "Result": "PASS",
+            "Sml": "S2F13 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 13,
+            "TestName": "S2F13 Equipment Constant Request With Values",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F14]",
+            "Result": "PASS",
+            "Sml": "S2F13 W\n<L\n  <U4 5001>\n>\n."
+          },
+          {
+            "TestId": 14,
+            "TestName": "S2F15 New Equipment Constant Send Without Values",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F16]",
+            "Result": "PASS",
+            "Sml": "S2F15 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 15,
+            "TestName": "S2F15 New Equipment Constant Send With Values",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F16]",
+            "Result": "PASS",
+            "Sml": "S2F15 W\n<L\n  <L\n    <U4 5001>\n    <A \"150\">\n  >\n>\n."
+          },
+          {
+            "TestId": 16,
+            "TestName": "S2F17 Date and Time Request",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F18]",
+            "Result": "PASS",
+            "Sml": "S2F17 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 17,
+            "TestName": "S2F23 Trace Initialize Send Delete",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F24]",
+            "Result": "PASS",
+            "Sml": "S2F23 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 18,
+            "TestName": "S2F23 Trace Initialize Send",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F24]",
+            "Result": "PASS",
+            "Sml": "S2F23 W\n<L\n  <U4 1>\n  <U4 10>\n  <U4 5>\n>\n."
+          },
+          {
+            "TestId": 19,
+            "TestName": "S2F29 Equipment Constant Namelist Request Without Values",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F30]",
+            "Result": "PASS",
+            "Sml": "S2F29 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 20,
+            "TestName": "S2F29 Equipment Constant Namelist Request With Values",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F30]",
+            "Result": "PASS",
+            "Sml": "S2F29 W\n<L\n  <U4 5001>\n>\n."
+          },
+          {
+            "TestId": 21,
+            "TestName": "S2F31 Date and Time Set Request",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F32]",
+            "Result": "PASS",
+            "Sml": "S2F31 W\n<A \"20260514123045\">\n."
+          },
+          {
+            "TestId": 22,
+            "TestName": "S2F33 Define Report",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F34]",
+            "Result": "PASS",
+            "Sml": "S2F33 W\n<L\n  <U4 1>\n  <L\n    <U4 1001>\n    <U4 1002>\n  >\n>\n."
+          },
+          {
+            "TestId": 23,
+            "TestName": "S2F35 Link Event Report",
+            "Category": "EquipmentControl",
+            "Status": "Timeout waiting for S2F36",
+            "Result": "FAIL",
+            "Sml": "S2F35 W\n<L\n  <U4 3001>\n  <U4 1>\n>\n."
+          },
+          {
+            "TestId": 24,
+            "TestName": "S2F37 Enable Event Report",
+            "Category": "EquipmentControl",
+            "Status": "Timeout waiting for S2F38",
+            "Result": "FAIL",
+            "Sml": "S2F37 W\n<L\n  <BOOLEAN TRUE>\n  <U4 3001>\n>\n."
+          },
+          {
+            "TestId": 25,
+            "TestName": "S2F37 Disable Event Report",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F38]",
+            "Result": "PASS",
+            "Sml": "S2F37 W\n<L [2]\n  <B 0x00>\n  <L [0]>\n>\n."
+          },
+          {
+            "TestId": 26,
+            "TestName": "S2F39 Multi-block Inquire",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F40]",
+            "Result": "PASS",
+            "Sml": "S2F39 W\n<U4 2048>\n."
+          },
+          {
+            "TestId": 27,
+            "TestName": "S2F49 Enhanced Remote Command",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F50]",
+            "Result": "PASS",
+            "Sml": "S2F49 W\n<L\n  <A \"PPSELECT\">\n  <L\n    <L\n      <A \"PPID\">\n      <A \"RECIPE01\">\n    >\n  >\n>\n."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "GeneratedTime": "2026-05-26T14:55:50.2065422+05:30",
+    "SelectedSmlFile": "ToolCharacterisationTesting",
+    "Connection": {
+      "IpAddress": "127.0.0.1",
+      "Port": 5001,
+      "DeviceId": "1001"
+    },
+    "Dashboard": {
+      "Total": 14,
+      "Passed": 10,
+      "Failed": 4,
+      "Running": 0
+    },
+    "ExecutionFlow": {
+      "CurrentTestId": "S2F23",
+      "CurrentTestName": "S2F23 Trace Cancelled",
+      "Direction": "Host → Equipment",
+      "ExpectedResponse": "S2F24",
+      "CurrentStep": "Completed"
+    },
+    "TestResults": [
+      {
+        "Category": "EquipmentStatus",
+        "Count": 2,
+        "Tests": [
+          {
+            "TestId": 1,
+            "TestName": "S1F1 Are You There Request",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F2]",
+            "Result": "PASS",
+            "Sml": "S1F1 W\n<L [0]>\n."
+          },
+          {
+            "TestId": 2,
+            "TestName": "S1F13 Establish Communications Request",
+            "Category": "EquipmentStatus",
+            "Status": "Completed [S1F14]",
+            "Result": "PASS",
+            "Sml": "S1F13 W\n<L [0]>\n."
+          }
+        ]
+      },
+      {
+        "Category": "AlarmManagement",
+        "Count": 2,
+        "Tests": [
+          {
+            "TestId": 3,
+            "TestName": "S5F3 Disable All Alarms",
+            "Category": "AlarmManagement",
+            "Status": "Completed [S5F4]",
+            "Result": "PASS",
+            "Sml": "S5F3 W\n<L\n  <BOOLEAN FALSE>\n  <U4 1001>\n>\n."
+          },
+          {
+            "TestId": 10,
+            "TestName": "S5F3 Enable All Alarms",
+            "Category": "AlarmManagement",
+            "Status": "Completed [S5F4]",
+            "Result": "PASS",
+            "Sml": "S5F3 W\n<L\n  <BOOLEAN TRUE>\n  <U4 1001>\n>\n."
+          }
+        ]
+      },
+      {
+        "Category": "EquipmentControl",
+        "Count": 8,
+        "Tests": [
+          {
+            "TestId": 4,
+            "TestName": "S2F37 Disable All Events",
+            "Category": "EquipmentControl",
+            "Status": "Timeout waiting for S2F38",
+            "Result": "FAIL",
+            "Sml": "S2F37 W\n<L\n  <BOOLEAN FALSE>\n  <U4 2001>\n>\n."
+          },
+          {
+            "TestId": 5,
+            "TestName": "S2F35 Unlink Specific Reports",
+            "Category": "EquipmentControl",
+            "Status": "Timeout waiting for S2F36",
+            "Result": "FAIL",
+            "Sml": "S2F35 W\n<L\n  <U4 2001>\n  <U4 3001>\n>\n."
+          },
+          {
+            "TestId": 6,
+            "TestName": "S2F33 Delete Specific Reports",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F34]",
+            "Result": "PASS",
+            "Sml": "S2F33 W\n<L\n  <U4 3001>\n  <L [0]>\n>\n."
+          },
+          {
+            "TestId": 7,
+            "TestName": "S2F33 Define Reports",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F34]",
+            "Result": "PASS",
+            "Sml": "S2F33 W\n<L\n  <U4 3001>\n  <L\n    <U4 4001>\n    <U4 5001>\n    <U4 6001>\n  >\n>\n."
+          },
+          {
+            "TestId": 8,
+            "TestName": "S2F35 Link Reports",
+            "Category": "EquipmentControl",
+            "Status": "Timeout waiting for S2F36",
+            "Result": "FAIL",
+            "Sml": "S2F35 W\n<L\n  <U4 2001>\n  <U4 3001>\n>\n."
+          },
+          {
+            "TestId": 9,
+            "TestName": "S2F37 Enable All Events",
+            "Category": "EquipmentControl",
+            "Status": "Timeout waiting for S2F38",
+            "Result": "FAIL",
+            "Sml": "S2F37 W\n<L\n  <BOOLEAN TRUE>\n  <U4 2001>\n>\n."
+          },
+          {
+            "TestId": 11,
+            "TestName": "S2F41 PPSELECT",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F42]",
+            "Result": "PASS",
+            "Sml": "S2F41 W\n<L\n  <A \"PPSELECT\">\n  <L\n    <L\n      <A \"PPID\">\n      <A \"RECIPE_01\">\n    >\n  >\n>\n."
+          },
+          {
+            "TestId": 12,
+            "TestName": "S2F41 Start Process Program",
+            "Category": "EquipmentControl",
+            "Status": "Completed [S2F42]",
+            "Result": "PASS",
+            "Sml": "S2F41 W\n<L\n  <A \"PPSTART\">\n  <L\n    <L\n      <A \"LOTID\">\n      <A \"LOT1001\">\n    >\n  >\n>\n."
+          }
+        ]
+      },
+      {
+        "Category": "EventReporting",
+        "Count": 2,
+        "Tests": [
+          {
+            "TestId": 13,
+            "TestName": "S2F23 Trace Send",
+            "Category": "EventReporting",
+            "Status": "Completed [S2F24]",
+            "Result": "PASS",
+            "Sml": "S2F23 W\n<L\n  <U4 7001>\n  <U4 10>\n  <U4 50>\n  <L\n    <U4 5001>\n  >\n>\n."
+          },
+          {
+            "TestId": 14,
+            "TestName": "S2F23 Trace Cancelled",
+            "Category": "EventReporting",
+            "Status": "Completed [S2F24]",
+            "Result": "PASS",
+            "Sml": "S2F23 W\n<L\n  <U4 7001>\n  <U4 0>\n  <U4 0>\n  <L [0]>\n>\n."
+          }
+        ]
+      }
+    ]
+  }
+]
