@@ -283,6 +283,35 @@ class StorageService:
         val = document_category.value if hasattr(document_category, "value") else str(document_category)
         return val.strip().lower().replace(" ", "_").replace("/", "_")
 
+    def get_populated_categories(self, project_id: int) -> list[str]:
+        """
+        Return the human-readable DocumentCategory values for which
+        a non-empty FAISS vectorstore exists for this project.
+        The internal 'tables' store is treated as 'Variable Files'.
+        """
+        from source.schemas.project import DocumentCategory
+        self.get_project(project_id)
+        base = self._project_dir(project_id) / self.VECTORSTORE_DIR
+
+        slug_to_label = {
+            self._doc_category_to_slug(cat): cat.value
+            for cat in DocumentCategory
+        }
+
+        populated = set()
+        for slug, label in slug_to_label.items():
+            store_path = base / slug
+            if store_path.exists() and any(store_path.iterdir()):
+                populated.add(label)
+
+        # If the internal 'tables' store is non-empty, also expose 'Variable Files'
+        tables_path = base / "tables"
+        if tables_path.exists() and any(tables_path.iterdir()):
+            populated.add(DocumentCategory.VARIABLE_FILES.value)
+
+        # Return in stable enum definition order
+        return [cat.value for cat in DocumentCategory if cat.value in populated]
+
     def mark_failed(self, project_id: int, document_id: str) -> DocumentMetadata:
         metadata = self.get_project(project_id)
 

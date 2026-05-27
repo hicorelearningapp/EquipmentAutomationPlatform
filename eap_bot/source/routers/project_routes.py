@@ -6,7 +6,6 @@ from source.managers.service_container import container
 from source.schemas.project import (
     AggregatedSpec,
     AskRequest,
-    DocumentCategory,
     ProjectCreate,
     ProjectDetail,
     ProjectMetadata,
@@ -42,8 +41,8 @@ class ProjectAPI:
         self.router.get("/LoadProject/{project_id}", response_model=ProjectDetail, response_model_by_alias=False)(self.load_project)
         self.router.put("/UpdateProject/{project_id}", response_model=ProjectOut, response_model_by_alias=False)(self.update_project)
         self.router.delete("/DeleteProject/{project_id}")(self.delete_project)
-        self.router.get("/GetKnowledgeCategory/{project_id}")(self.get_knowledge_category)
-        self.router.post("/Ask/{project_id}")(self.ask_project)
+        self.router.get("/GetKnowledgeCategory/{project_id}", response_model=list[str])(self.get_knowledge_category)
+        self.router.post("/Ask/{project_id}", responses={500: {"description": "Internal Server Error"}})(self.ask_project)
         self.router.get("/GetProjectDetails/{project_id}", response_model=ProjectDetailsResponse, response_model_by_alias=False)(self.get_project_details)
         self.router.get("/GetSystemSummary", response_model=SystemSummaryResponse, response_model_by_alias=False)(self.get_system_summary)
 
@@ -248,6 +247,10 @@ class ProjectAPI:
             raise HTTPException(404, str(exc)) from exc
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
+        except Exception as exc:
+            import traceback
+            traceback.print_exc()
+            raise HTTPException(500, f"Internal Server Error: {str(exc)}") from exc
 
         return {
             "ProjectID": project_id,
@@ -257,11 +260,12 @@ class ProjectAPI:
             "Source": source,
         }
 
-    def get_knowledge_category(self, project_id: int):
-        return {
-            "ProjectID": project_id,
-            "Categories": [t.value for t in DocumentCategory],
-        }
+    def get_knowledge_category(self, project_id: int) -> list[str]:
+        try:
+            self.storage.get_project(project_id)
+        except ProjectNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        return self.storage.get_populated_categories(project_id)
 
     # ── Private helpers ───────────────────────────────────────────────────────
 

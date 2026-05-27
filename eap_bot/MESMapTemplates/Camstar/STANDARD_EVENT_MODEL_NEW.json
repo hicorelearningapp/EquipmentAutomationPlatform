@@ -67,77 +67,92 @@
     {
       "MESField": "EquipmentID",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "LotID",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "ContainerName",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "ContainerType",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "OperationName",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "WorkflowName",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "ProductName",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "DataCollectionName",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "MeasuredValue",
       "Type": "Float",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "MeasurementUnit",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmID",
       "Type": "Integer",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmText",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmSeverity",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
-      "Required": true
+      "Required": true,
+      "Description": ""
     }
   ],
   "Payloads": [

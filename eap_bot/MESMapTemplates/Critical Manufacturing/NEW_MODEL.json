@@ -20,7 +20,6 @@
       "EventType": "Material",
       "Transaction": "TXN_MATERIAL_IN",
       "Payload": "MaterialPayload"
-   
     },
     {
       "EventName": "MaterialOut",
@@ -79,82 +78,98 @@
     {
       "MESField": "EquipmentID",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "LotID",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "MaterialID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "MaterialType",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "StepID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "WorkOrderID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "OperationID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "ParameterName",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "ParameterValue",
       "Type": "Float",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "ParameterUnit",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "SchedulerTaskID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmID",
       "Type": "Integer",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmText",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmSeverity",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
-      "Required": true
+      "Required": true,
+      "Description": ""
     }
   ],
   "Payloads": [

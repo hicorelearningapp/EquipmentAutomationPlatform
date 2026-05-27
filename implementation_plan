@@ -1,0 +1,154 @@
+# Comprehensive Test Plan: MES Family Endpoints
+
+Exhaustive test coverage for all 6 endpoints in [mes_family_routes.py](file:///e:/Github/EquipmentAutomationPlatforms/eap_bot/source/routers/mes_family_routes.py). Tests will follow the same `pytest` + `TestClient` + `conftest.py` framework as the existing [test_MES_endpoints.py](file:///e:/Github/EquipmentAutomationPlatforms/eap_bot/test/test_MES_endpoints.py) and produce the same table-format log output.
+
+> [!IMPORTANT]
+> **No hardcoded counts.** Tests dynamically discover current state from the API before asserting. The test suite is self-cleaning — it creates test data, validates, then removes it.
+
+---
+
+## Existing Tests vs. New Tests
+
+The current [test_MES_endpoints.py](file:///e:/Github/EquipmentAutomationPlatforms/eap_bot/test/test_MES_endpoints.py) has **24 tests**. Several have become **stale** since we removed the `MESFamily` mismatch validation (the `422` tests at L278–287 and L322–331 will now fail). The new suite will **replace** the existing file with ~**55+ tests**.
+
+---
+
+## Test Cases by Endpoint
+
+### 1. `GET /GetMesFamilies` (5 tests)
+
+| # | Test Name | Scenario | Expected | Key Assertions |
+|---|-----------|----------|----------|----------------|
+| 1 | `test_get_families_returns_200` | Basic call | 200 | Returns a list |
+| 2 | `test_get_families_returns_all` | All families present | 200 | Count from API matches count of families from `families.json` on disk (dynamically fetched, not hardcoded) |
+| 3 | `test_get_families_required_keys` | Every entry has required fields | 200 | Each entry has `FamilyID`, `Family`, `DefaultProtocol`, `RequiresAck`, `Description` |
+| 4 | `test_get_families_unique_ids` | No duplicate FamilyIDs | 200 | All `FamilyID` values are unique and non-null |
+| 5 | `test_get_families_unique_names` | No duplicate Family names | 200 | All `Family` names are unique (case-insensitive) |
+
+---
+
+### 2. `POST /UpdateMesFamilies` (12 tests)
+
+| # | Test Name | Scenario | Expected | Key Assertions |
+|---|-----------|----------|----------|----------------|
+| 1 | `test_update_add_new_family` | Add a new family with `FamilyID: null` | 200 | New family appears in response, gets auto-assigned ID |
+| 2 | `test_update_add_new_family_creates_dir` | New family creates disk directory + `STANDARD_EVENT_MODEL.json` | 200 | GET `/GetMesTemplates/{new_family}` returns at least `STANDARD_EVENT_MODEL.json` |
+| 3 | `test_update_duplicate_name_rejected` | Two entries with same `Family` name | 400 | Error message mentions "duplicate" |
+| 4 | `test_update_duplicate_name_case_insensitive` | Same name differing only in case (e.g. `"fab300"` and `"FAB300"`) | 400 | Case-insensitive duplicate caught |
+| 5 | `test_update_duplicate_id_rejected` | Two entries with same `FamilyID` | 400 | Error message mentions "duplicate" |
+| 6 | `test_update_remove_family` | Submit list without a known family | 200 | Removed family no longer in response; its templates dir is cleaned up |
+| 7 | `test_update_rename_family` | Change `Family` name but keep same `FamilyID` | 200 | Old name gone, new name present; templates still accessible under new name |
+| 8 | `test_update_edit_description` | Change `Description`/`DefaultProtocol` of existing family | 200 | Updated fields reflected in subsequent `GET /GetMesFamilies` |
+| 9 | `test_update_empty_list` | Submit empty `[]` | 200 | All families removed (⚠ will be restored in cleanup) |
+| 10 | `test_update_invalid_schema` | Missing required `Family` field | 422 | FastAPI validation error |
+| 11 | `test_update_preserves_existing_ids` | Submit all existing families unchanged | 200 | All FamilyIDs remain identical to before |
+| 12 | `test_update_restore_original` | Cleanup: restore the original family list | 200 | State back to baseline |
+
+---
+
+### 3. `GET /GetMesTemplates/{mes_family}` (6 tests)
+
+| # | Test Name | Scenario | Expected | Key Assertions |
+|---|-----------|----------|----------|----------------|
+| 1 | `test_get_templates_known_family` | Valid family with templates | 200 | Returns list with at least `STANDARD_EVENT_MODEL.json` |
+| 2 | `test_get_templates_count_matches_disk` | Template count matches actual disk files | 200 | Length of response == number of `.json` files in family dir |
+| 3 | `test_get_templates_unknown_family` | Non-existent family | 404 | Error mentions the family name |
+| 4 | `test_get_templates_case_insensitive` | Family name in different case (e.g. `"fab300"` vs `"FAB300"`) | 200 or 404 | Tests whether the endpoint is case-sensitive (current code: it IS case-sensitive for directory lookup but falls back to families.json) |
+| 5 | `test_get_templates_family_with_spaces` | Family with spaces (e.g. `"Custom MES"`) | 200 | Properly handles URL-encoded spaces |
+| 6 | `test_get_templates_returns_only_json` | All returned filenames end in `.json` | 200 | Every entry in list ends with `.json` |
+
+---
+
+### 4. `GET /GetMesTemplateInfo/{mes_family}/{template}` (8 tests)
+
+| # | Test Name | Scenario | Expected | Key Assertions |
+|---|-----------|----------|----------|----------------|
+| 1 | `test_get_template_info_valid` | Known family + known template (with `.json` ext) | 200 | Returns dict with expected template keys |
+| 2 | `test_get_template_info_no_extension` | Template name without `.json` extension | 200 | Auto-appends `.json`, returns same content |
+| 3 | `test_get_template_info_nonexistent_template` | Known family, ghost template name | 404 | Error mentions template name |
+| 4 | `test_get_template_info_nonexistent_family` | Non-existent family | 404 | Error mentions family name |
+| 5 | `test_get_template_info_family_with_spaces` | Family `"Critical Manufacturing"` + template | 200 | Works with URL-encoded spaces |
+| 6 | `test_get_template_info_has_version` | Check returned template has `Version` field | 200 | `Version` key exists |
+| 7 | `test_get_template_info_has_template_name` | Check `TemplateName` field matches filename stem | 200 | `TemplateName` == filename without `.json` |
+| 8 | `test_get_template_info_path_traversal` | Template name like `../../etc/passwd` | 404 | Path traversal blocked |
+
+---
+
+### 5. `POST /AddMesTemplateInfo/{mes_family}` (12 tests)
+
+| # | Test Name | Scenario | Expected | Key Assertions |
+|---|-----------|----------|----------|----------------|
+| 1 | `test_add_template_valid` | Upload valid JSON template | 200 | `Status: success`, template appears in `GetMesTemplates` |
+| 2 | `test_add_template_auto_injects_template_name` | Check saved template has correct `TemplateName` | 200 | `GetMesTemplateInfo` shows `TemplateName` == filename stem |
+| 3 | `test_add_template_auto_injects_family` | Upload JSON with different `MESFamily` | 200 | Saved template has `MESFamily` == canonical family name (override works) |
+| 4 | `test_add_template_no_mesfamily_field` | Upload JSON without `MESFamily` key at all | 200 | `MESFamily` auto-injected correctly |
+| 5 | `test_add_template_auto_version` | Upload JSON without `Version` key | 200 | Saved template has `Version: "1.0"` |
+| 6 | `test_add_template_explicit_version` | Upload JSON with `Version: "5.0"` | 200 | Saved template keeps `Version: "5.0"` |
+| 7 | `test_add_template_no_summary` | Upload JSON without `Summary` field | 200 | No error; summary is optional |
+| 8 | `test_add_template_duplicate` | Upload same filename twice | 409 | `"already exists"` in error message |
+| 9 | `test_add_template_invalid_extension` | Upload `.txt` file | 400 | Rejects non-JSON files |
+| 10 | `test_add_template_invalid_json` | Upload `.json` file with malformed content | 400 | `"Invalid JSON"` in error message |
+| 11 | `test_add_template_nonexistent_family` | Upload to a family that doesn't exist | 404 | Family not found |
+| 12 | `test_add_template_case_insensitive_family` | Upload to `"fab300"` (lowercase) | 200 | Resolves to canonical `"FAB300"` |
+
+---
+
+### 6. `PUT /UpdateMesTemplateInfo/{mes_family}/{template}` (12 tests)
+
+| # | Test Name | Scenario | Expected | Key Assertions |
+|---|-----------|----------|----------|----------------|
+| 1 | `test_update_template_valid_auto_version` | Update without `Version` in payload | 200 | Version auto-incremented from previous |
+| 2 | `test_update_template_explicit_version` | Update with explicit `Version: "9.0"` | 200 | Response `Version == "9.0"` |
+| 3 | `test_update_template_version_increments` | Update twice without version, check increment | 200 | Second update version > first update version |
+| 4 | `test_update_template_overrides_mesfamily` | Payload has wrong `MESFamily` | 200 | Saved file has correct canonical `MESFamily` (override, NOT rejection) |
+| 5 | `test_update_template_no_mesfamily` | Payload has no `MESFamily` key | 200 | `MESFamily` auto-injected to canonical |
+| 6 | `test_update_template_auto_injects_name` | Check `TemplateName` is auto-set from path param | 200 | `TemplateName` matches the URL path template name |
+| 7 | `test_update_template_nonexistent_template` | Valid family, ghost template | 404 | Template not found |
+| 8 | `test_update_template_nonexistent_family` | Ghost family | 404 | Family not found |
+| 9 | `test_update_template_invalid_ext` | Upload a `.txt` file | 400 | Rejects non-JSON |
+| 10 | `test_update_template_invalid_json` | Upload malformed JSON | 400 | `"Invalid JSON"` in error |
+| 11 | `test_update_template_no_ext_in_path` | Template path without `.json` | 200 | Auto-appends `.json`, updates correctly |
+| 12 | `test_update_template_case_insensitive_family` | Family in different case | 200 | Resolves to canonical name |
+
+---
+
+## Cleanup Strategy
+
+The test suite will:
+1. **Before tests**: Snapshot the current family list via `GET /GetMesFamilies`
+2. **During tests**: Create temp families/templates with distinctive names (prefix `_AUTOTEST_`)
+3. **After all tests**: Restore the original family list and delete any leftover test templates
+
+This ensures no residual test data pollutes the server.
+
+---
+
+## Proposed Changes
+
+### [MODIFY] [test_MES_endpoints.py](file:///e:/Github/EquipmentAutomationPlatforms/eap_bot/test/test_MES_endpoints.py)
+
+Replace the entire file with the comprehensive test suite described above (~55 tests).
+
+Key changes from existing tests:
+- **Removed**: `test_add_mes_template_mismatched_family` (expected 422 — no longer applies after MESFamily override change)
+- **Removed**: `test_update_mes_template_mismatch` (expected 422 — same reason)
+- **Added**: Tests for MESFamily override behavior (expects 200, verifies saved value)
+- **Added**: Case-insensitivity tests, path traversal, spaces in names, dynamic count validation, version increment chains, schema validation edge cases
+- **Added**: Proper fixture-based cleanup with snapshot/restore
+
+---
+
+## Verification Plan
+
+### Automated Tests
+```bash
+cd e:\Github\EquipmentAutomationPlatforms\eap_bot
+python -m pytest test/test_MES_endpoints.py -v
+```
+
+Results will appear in `test_logs/test_MES_endpoints.log` in the same table format as [results_table_documents.log](file:///e:/Github/EquipmentAutomationPlatforms/test_logs/results_table_documents.log).
+
+### Expected Outcome
+- All ~55 tests should pass (🟢)
+- No residual test data left on the server
+- Log file generated with the familiar table format

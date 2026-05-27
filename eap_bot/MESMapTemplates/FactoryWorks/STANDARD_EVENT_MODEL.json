@@ -68,72 +68,86 @@
     {
       "MESField": "EquipmentID",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "LotID",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "WaferID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "SlotNumber",
       "Type": "Integer",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "RecipeVersion",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "CarrierID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "PortID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "OperatorID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "EquipmentState",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmID",
       "Type": "Integer",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmText",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmSeverity",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
-      "Required": true
+      "Required": true,
+      "Description": ""
     }
   ],
   "Payloads": [

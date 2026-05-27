@@ -41,25 +41,74 @@
     }
   ],
   "Variables": [
-    { "MESField": "EquipmentID", "Type": "String", "Required": true },
-    { "MESField": "LotID", "Type": "String", "Required": true },
-    { "MESField": "ContainerName", "Type": "String", "Required": false },
-    { "MESField": "RecipeName", "Type": "String", "Required": true },
-    { "MESField": "OperationName", "Type": "String", "Required": false },
-    { "MESField": "EventTime", "Type": "DateTime", "Required": true }
+    {
+      "MESField": "EquipmentID",
+      "Type": "String",
+      "Required": true,
+      "Description": ""
+    },
+    {
+      "MESField": "LotID",
+      "Type": "String",
+      "Required": true,
+      "Description": ""
+    },
+    {
+      "MESField": "ContainerName",
+      "Type": "String",
+      "Required": false,
+      "Description": ""
+    },
+    {
+      "MESField": "RecipeName",
+      "Type": "String",
+      "Required": true,
+      "Description": ""
+    },
+    {
+      "MESField": "OperationName",
+      "Type": "String",
+      "Required": false,
+      "Description": ""
+    },
+    {
+      "MESField": "EventTime",
+      "Type": "DateTime",
+      "Required": true,
+      "Description": ""
+    }
   ],
   "Payloads": [
     {
       "PayloadName": "LotStartPayload",
-      "Fields": ["EquipmentID","LotID","ContainerName","RecipeName","OperationName","EventTime"]
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "ContainerName",
+        "RecipeName",
+        "OperationName",
+        "EventTime"
+      ]
     },
     {
       "PayloadName": "LotEndPayload",
-      "Fields": ["EquipmentID","LotID","RecipeName","OperationName","EventTime"]
+      "Fields": [
+        "EquipmentID",
+        "LotID",
+        "RecipeName",
+        "OperationName",
+        "EventTime"
+      ]
     },
     {
       "PayloadName": "AlarmPayload",
-      "Fields": ["EquipmentID","AlarmID","AlarmText","AlarmSeverity","EventTime"]
+      "Fields": [
+        "EquipmentID",
+        "AlarmID",
+        "AlarmText",
+        "AlarmSeverity",
+        "EventTime"
+      ]
     }
   ],
   "Transactions": [
@@ -97,9 +146,21 @@
     }
   ],
   "ValidationRules": [
-    { "Field": "LotID", "Rule": "Required" },
-    { "Field": "RecipeName", "Rule": "Required" },
-    { "Field": "EquipmentID", "Rule": "Required" },
-    { "Field": "EventTime", "Rule": "UTCDateTime" }
+    {
+      "Field": "LotID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "RecipeName",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EquipmentID",
+      "Rule": "Required"
+    },
+    {
+      "Field": "EventTime",
+      "Rule": "UTCDateTime"
+    }
   ]
 }

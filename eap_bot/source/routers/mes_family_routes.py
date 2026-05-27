@@ -251,13 +251,7 @@ class MesFamilyAPI:
             except Exception as je:
                 raise HTTPException(400, f"Invalid JSON payload: {je}")
 
-            # Validate MESFamily if present
-            if "MESFamily" in json_data:
-                if json_data["MESFamily"].lower() != canonical_name.lower():
-                    raise HTTPException(
-                        422,
-                        f"MESFamily '{json_data['MESFamily']}' in the template does not match the target family '{canonical_name}'"
-                    )
+            # If MESFamily is present, we silently override it later. No validation needed.
 
             # Auto-inject/overwrite TemplateName
             json_data["TemplateName"] = Path(file.filename).stem
@@ -306,12 +300,7 @@ class MesFamilyAPI:
                 raise HTTPException(400, f"Invalid JSON payload: {je}")
 
             # Validate MESFamily if present
-            if "MESFamily" in json_data:
-                if json_data["MESFamily"].lower() != canonical_name.lower():
-                    raise HTTPException(
-                        422,
-                        f"MESFamily '{json_data['MESFamily']}' in the template does not match the target family '{canonical_name}'"
-                    )
+            # If MESFamily is present, we silently override it later. No validation needed.
 
             # Read current on-disk version of the template
             existing_version = "1.0"

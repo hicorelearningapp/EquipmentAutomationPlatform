@@ -1,5 +1,6 @@
 import os
 import json
+import csv
 import pytest
 from fastapi.testclient import TestClient
 
@@ -88,6 +89,24 @@ def _write_ascii_table(file_path, results):
                 f.write(f"\n--- {res['test_name']} ---\n")
                 f.write(res["error_msg"] + "\n")
 
+def _write_csv(file_path, results):
+    fieldnames = [
+        "test_name",
+        "file_name",
+        "method",
+        "url",
+        "status",
+        "duration_ms",
+        "expected",
+        "got",
+        "error_msg",
+    ]
+    with open(file_path, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for res in results:
+            writer.writerow({field: res.get(field) for field in fieldnames})
+
 def pytest_sessionfinish(session, exitstatus):
     # Compute log_dir relative to this file's location to ensure it is always in the correct workspace path
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -98,6 +117,10 @@ def pytest_sessionfinish(session, exitstatus):
     json_path = os.path.join(log_dir, "results.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(results_list, f, indent=2)
+
+    # 1b. Write CSV
+    csv_path = os.path.join(log_dir, "results.csv")
+    _write_csv(csv_path, results_list)
         
     # 2. Write Combined ASCII Table
     table_path = os.path.join(log_dir, "results_table.log")
@@ -114,3 +137,7 @@ def pytest_sessionfinish(session, exitstatus):
             log_name = file_name[:-3] + ".log"
             individual_path = os.path.join(log_dir, log_name)
             _write_ascii_table(individual_path, file_results)
+
+            csv_name = file_name[:-3] + ".csv"
+            individual_csv_path = os.path.join(log_dir, csv_name)
+            _write_csv(individual_csv_path, file_results)

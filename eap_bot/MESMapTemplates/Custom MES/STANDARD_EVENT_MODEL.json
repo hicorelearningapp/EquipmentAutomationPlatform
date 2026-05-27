@@ -51,62 +51,74 @@
     {
       "MESField": "EquipmentID",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "LotID",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
-      "Required": true
+      "Required": true,
+      "Description": ""
     },
     {
       "MESField": "CarrierID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "PortID",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "CustomField1",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "CustomField2",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "CustomField3",
       "Type": "Float",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmID",
       "Type": "Integer",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmText",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "AlarmSeverity",
       "Type": "String",
-      "Required": false
+      "Required": false,
+      "Description": ""
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
-      "Required": true
+      "Required": true,
+      "Description": ""
     }
   ],
   "Payloads": [
