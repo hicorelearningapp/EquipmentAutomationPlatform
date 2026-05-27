@@ -35,9 +35,8 @@ class ProjectCreate(BaseModel):
     ProjectName: str = Field(min_length=1)
     VendorName: str = Field(min_length=1)
     ProjectCode: str = Field(min_length=1)
-    ProjectDescription: str = Field(default="")
+    ProjectDescription: Optional[str] = Field(default="")
     Tool: ToolType = ToolType.NONE
-    ConnectedTools: list[str] = Field(default_factory=list)
 
 
 class DocumentMetadata(BaseModel):
@@ -49,7 +48,7 @@ class DocumentMetadata(BaseModel):
     UploadDate: datetime = Field(alias="upload_date")
     UploadedBy: str = Field(default="", alias="uploaded_by")
     ProjectCode: str = Field(default="", alias="project_code")
-    ProjectDescription: str = Field(default="", alias="project_description")
+    ProjectDescription: Optional[str] = Field(default="", alias="project_description")
     Status: str = Field(default="completed", alias="status")
 
     model_config = {
@@ -62,9 +61,8 @@ class ProjectOut(BaseModel):
     ProjectName: str = Field(alias="project_name")
     VendorName: str = Field(default="", alias="vendor_name")
     ProjectCode: str = Field(default="", alias="project_code")
-    ProjectDescription: str = Field(default="", alias="project_description")
+    ProjectDescription: Optional[str] = Field(default="", alias="project_description")
     Tool: ToolType = Field(alias="tool")
-    ConnectedTools: list[str] = Field(default_factory=list, alias="connected_tools")
     CreatedAt: datetime = Field(alias="created_at")
     LastUpdatedOn: datetime = Field(alias="last_updated_on")
     Status: str = Field(alias="status")
@@ -106,12 +104,10 @@ class ProjectUpdate(BaseModel):
     VendorName: Optional[str] = None
     ProjectCode: Optional[str] = None
     Tool: Optional[ToolType] = None
-    ConnectedTools: Optional[list[str]] = None
     ProjectVersion: Optional[str] = None
 
 
 class AskRequest(BaseModel):
-    Category: str
     Question: str
     DocumentCategory: Optional[str] = None
 

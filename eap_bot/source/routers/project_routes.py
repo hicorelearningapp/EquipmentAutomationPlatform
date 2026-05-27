@@ -252,7 +252,6 @@ class ProjectAPI:
         return {
             "ProjectID": project_id,
             "DocumentID": document_id,
-            "Category": request.Category,
             "DocumentCategory": chunks[0].metadata.get("document_category", ""),
             "Answer": answer_text,
             "Source": source,

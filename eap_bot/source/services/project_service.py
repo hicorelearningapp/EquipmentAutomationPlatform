@@ -329,7 +329,7 @@ class ProjectService:
                 metadata.Tool.value
                 if hasattr(metadata.Tool, "value") else (metadata.Tool if metadata.Tool else None)
             ),
-            ConnectedToolCount=len(metadata.ConnectedTools) if hasattr(metadata, "ConnectedTools") and metadata.ConnectedTools else 0,
+            ConnectedToolCount=self.storage.count_connected_equipments(project_id),
             CreatedAt=metadata.CreatedAt,
             DocumentCount=number_of_documents,
             SVCount=total_svs,
@@ -352,9 +352,7 @@ class ProjectService:
                 total_sml += len([f for f in tool_char_dir.iterdir() if f.is_file()])
             
             try:
-                full_meta = self.storage.get_project(project.ProjectID)
-                if hasattr(full_meta, "ConnectedTools") and full_meta.ConnectedTools:
-                    total_tools += len(full_meta.ConnectedTools)
+                total_tools += self.storage.count_connected_equipments(project.ProjectID)
             except Exception:
                 pass
                 

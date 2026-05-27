@@ -99,7 +99,6 @@ class StorageService:
             ProjectCode=project_create.ProjectCode,
             ProjectDescription=project_create.ProjectDescription,
             Tool=project_create.Tool,
-            ConnectedTools=project_create.ConnectedTools,
             CreatedAt=now,
             LastUpdatedOn=now,
             Status="active",
@@ -180,10 +179,8 @@ class StorageService:
         logger.info("Wrote SML template to %s", path)
 
     def save_test_summary(self, project_id: int, tool_id: str, ip_address: str, secs_log: Any, summary_json: Any) -> str:
-        # 1. Validate tool_id against ConnectedTools
-        metadata = self.get_project(project_id)
-        if not hasattr(metadata, "ConnectedTools") or tool_id not in metadata.ConnectedTools:
-            raise ValueError(f"Tool ID '{tool_id}' is not connected to project {project_id}.")
+        # 1. Validate project exists
+        self.get_project(project_id)
             
         # 2. Build directory path
         timestamp = self.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -236,6 +233,13 @@ class StorageService:
             all_summaries.sort(key=lambda x: x[0])
             latest_summary_file = all_summaries[-1][1]
             return json.loads(latest_summary_file.read_text(encoding="utf-8"))
+
+    def count_connected_equipments(self, project_id: int) -> int:
+        """Count tool subdirectories under Results/ as connected equipments."""
+        results_dir = self._project_dir(project_id) / self.RESULTS_DIR
+        if not results_dir.exists():
+            return 0
+        return len([d for d in results_dir.iterdir() if d.is_dir()])
 
     def vectorstore_path_for_category(self, project_id: int, category_slug: str) -> Path:
         """
@@ -367,8 +371,6 @@ class StorageService:
             metadata.ProjectDescription = update.ProjectDescription
         if update.Tool is not None:
             metadata.Tool = update.Tool
-        if update.ConnectedTools is not None:
-            metadata.ConnectedTools = update.ConnectedTools
         if update.ProjectVersion is not None:
             metadata.ProjectVersion = update.ProjectVersion
             
