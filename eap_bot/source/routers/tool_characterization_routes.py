@@ -1,6 +1,7 @@
 import json
 import logging
 
+from typing import Optional
 from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 
 from pathlib import Path
@@ -27,6 +28,7 @@ class ToolCharacterizationAPI:
         self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
         # self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
         self.router.post("/GenerateTestSummary/{project_id}")(self.generate_test_summary)
+        self.router.get("/GetTestSummary/{project_id}")(self.get_test_summary)
 
     def generate_test_scripts(self, project_id: int, body: GenerateTestScriptsRequest):
         try:
@@ -141,23 +143,35 @@ class ToolCharacterizationAPI:
     async def generate_test_summary(
         self,
         project_id: int,
-        tool_id: str = Form(...),
-        ip_address: str = Form(...),
-        secs_log: UploadFile = File(...),
-        summary_json: UploadFile = File(...)
+        summary_json: UploadFile = File(...),
+        secs_log: Optional[UploadFile] = File(None)
     ):
         try:
-            try:
-                secs_log_bytes = await secs_log.read()
-                secs_log_data = json.loads(secs_log_bytes.decode("utf-8"))
-            except Exception as e:
-                raise HTTPException(400, f"secs_log is not a valid JSON file: {e}")
-
             try:
                 summary_json_bytes = await summary_json.read()
                 summary_json_data = json.loads(summary_json_bytes.decode("utf-8"))
             except Exception as e:
                 raise HTTPException(400, f"summary_json is not a valid JSON file: {e}")
+
+            try:
+                first_item = summary_json_data[0] if isinstance(summary_json_data, list) else summary_json_data
+                conn = first_item.get("Connection", {})
+                tool_id = str(conn.get("DeviceId", ""))
+                ip_address = str(conn.get("IpAddress", ""))
+
+                if not tool_id:
+                    raise ValueError("DeviceId not found in summary_json Connection block")
+            except Exception as e:
+                raise HTTPException(400, f"Failed to extract DeviceId/IpAddress from summary_json: {e}")
+
+            if secs_log is not None:
+                try:
+                    secs_log_bytes = await secs_log.read()
+                    secs_log_data = json.loads(secs_log_bytes.decode("utf-8"))
+                except Exception as e:
+                    raise HTTPException(400, f"secs_log is not a valid JSON file: {e}")
+            else:
+                secs_log_data = None
 
             saved_path = self.storage.save_test_summary(
                 project_id=project_id,
@@ -173,6 +187,22 @@ class ToolCharacterizationAPI:
             }
         except ValueError as exc:
             raise HTTPException(400, str(exc)) from exc
+        except HTTPException:
+            raise
         except Exception as exc:
             logger.error("Failed to save test summary: %s", exc)
+            raise HTTPException(500, str(exc)) from exc
+
+    async def get_test_summary(self, project_id: int, tool_id: Optional[str] = None):
+        try:
+            summary = self.storage.get_latest_test_summary(project_id, tool_id)
+            if summary is None:
+                raise HTTPException(404, "Test summary not found.")
+            return summary
+        except ProjectNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error("Failed to retrieve test summary: %s", exc)
             raise HTTPException(500, str(exc)) from exc
