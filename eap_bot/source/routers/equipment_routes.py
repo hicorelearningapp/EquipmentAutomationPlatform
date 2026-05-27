@@ -105,8 +105,22 @@ class EquipmentAPI:
         try:
             self.storage.delete_document(project_id, document_id)
             from source.utils.embedder import VectorStoreManager
-            vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
-            vector_store.remove_document(document_id)
+            # Remove the document's chunks from every category store that exists
+            all_store_paths = self.storage.all_vectorstore_paths(project_id)
+            for slug, store_path in all_store_paths.items():
+                try:
+                    vs = VectorStoreManager(store_path)
+                    removed = vs.remove_document(document_id)
+                    if removed:
+                        logger.info(
+                            "Removed %d chunks for document %s from %s store",
+                            removed, document_id, slug,
+                        )
+                except Exception as exc:
+                    logger.warning(
+                        "Could not clean up vector store '%s' for document %s: %s",
+                        slug, document_id, exc,
+                    )
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
         except (ProjectNotFoundError, DocumentNotFoundError) as exc:

@@ -237,6 +237,48 @@ class StorageService:
             latest_summary_file = all_summaries[-1][1]
             return json.loads(latest_summary_file.read_text(encoding="utf-8"))
 
+    def vectorstore_path_for_category(self, project_id: int, category_slug: str) -> Path:
+        """
+        Return the FAISS directory for a specific document category or 'tables'.
+        """
+        self.get_project(project_id)
+        return self._project_dir(project_id) / self.VECTORSTORE_DIR / category_slug
+
+    def all_vectorstore_paths(self, project_id: int) -> dict[str, Path]:
+        """
+        Return a dict mapping category_slug -> Path for every known
+        FAISS subdirectory under this project's Vectorstore/ folder.
+        """
+        self.get_project(project_id)
+        base = self._project_dir(project_id) / self.VECTORSTORE_DIR
+        all_slugs = [
+            "gem_manual",
+            "user_manuals",
+            "troubleshooting_guidance",
+            "variable_files",
+            "sml_scripts",
+            "tables",
+        ]
+        result = {
+            slug: base / slug
+            for slug in all_slugs
+            if (base / slug).exists() and any((base / slug).iterdir())
+        }
+        # Legacy compatibility: if the project has a flat (pre-category) vectorstore, include it
+        legacy_path = base
+        if legacy_path.exists() and (legacy_path / "index.faiss").exists():
+            result["legacy"] = legacy_path
+        return result
+
+    @staticmethod
+    def _doc_category_to_slug(document_category) -> str:
+        """
+        Convert a DocumentCategory enum instance or its string value
+        to the filesystem slug used as the FAISS subdirectory name.
+        """
+        val = document_category.value if hasattr(document_category, "value") else str(document_category)
+        return val.strip().lower().replace(" ", "_").replace("/", "_")
+
     def mark_failed(self, project_id: int, document_id: str) -> DocumentMetadata:
         metadata = self.get_project(project_id)
 

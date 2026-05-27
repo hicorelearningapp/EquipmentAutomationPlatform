@@ -59,7 +59,13 @@ class PdfProcessingStrategy(DocumentProcessingStrategy):
             raise ValueError("Could not extract any text from the PDF")
 
         tables_dir = storage.extracted_tables_path(project_id)
-        spec = container.extractor.extract(doc_text, pdf_path=file_path, tables_dir=tables_dir)
+        tables_store_path = storage.vectorstore_path_for_category(project_id, "tables")
+        spec = container.extractor.extract(
+            doc_text,
+            pdf_path=file_path,
+            tables_dir=tables_dir,
+            tables_store_path=tables_store_path,
+        )
 
         try:
             reports, links = container.report_service.generate(spec, doc_text)

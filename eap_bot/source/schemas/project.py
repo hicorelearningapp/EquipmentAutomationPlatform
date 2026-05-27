@@ -113,6 +113,7 @@ class ProjectUpdate(BaseModel):
 class AskRequest(BaseModel):
     Category: str
     Question: str
+    DocumentCategory: Optional[str] = None
 
 
 class ProjectDetailsResponse(BaseModel):

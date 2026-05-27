@@ -38,7 +38,7 @@ class VectorStoreManager:
         if self._faiss_cache is not None:
             return self._faiss_cache
 
-        if self.vector_dir.exists() and any(self.vector_dir.iterdir()):
+        if self.vector_dir.exists() and (self.vector_dir / "index.faiss").exists():
             logger.info("Loading FAISS index from disk: %s", self.vector_dir)
             self._faiss_cache = FAISS.load_local(
                 str(self.vector_dir),

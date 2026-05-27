@@ -112,7 +112,13 @@ class ProjectService:
                 return
 
             tables_dir = self.storage.extracted_tables_path(project_id)
-            spec = self._container.extractor.extract(doc_text, pdf_path=file_path, tables_dir=tables_dir)
+            tables_store_path = self.storage.vectorstore_path_for_category(project_id, "tables")
+            spec = self._container.extractor.extract(
+                doc_text,
+                pdf_path=file_path,
+                tables_dir=tables_dir,
+                tables_store_path=tables_store_path,
+            )
 
             try:
                 reports, links = self._container.report_service.generate(spec, doc_text)
@@ -127,12 +133,17 @@ class ProjectService:
         self.storage.save_spec_json(json_path, spec)
 
         if doc_text:
-            vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
+            category_slug = self.storage._doc_category_to_slug(doc.DocumentType)
+            category_store_path = self.storage.vectorstore_path_for_category(
+                project_id, category_slug
+            )
+            vector_store = VectorStoreManager(category_store_path)
             vector_store.add_document(
                 doc_text,
                 metadata={
                     "project_id": project_id,
                     "document_id": doc.DocumentID,
+                    "document_category": category_slug,
                     "tool_id": spec.ToolID,
                 },
             )

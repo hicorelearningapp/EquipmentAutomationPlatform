@@ -125,24 +125,123 @@ class ProjectAPI:
     def ask_project(self, project_id: int, request: AskRequest):
         try:
             self.storage.get_project(project_id)
-            vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
-            chunks = vector_store.search_with_filters(
-                request.Question, {"project_id": project_id}, k=1
-            )
-            if not chunks:
-                raise HTTPException(404, "No indexed content in this project yet")
+            requested_category = (request.DocumentCategory or "").strip().lower()
 
+            if requested_category in ("", "all"):
+                # Search every category store that exists and merge results
+                all_paths = self.storage.all_vectorstore_paths(project_id)
+                if not all_paths:
+                    raise HTTPException(404, "No indexed content in this project yet")
+
+                all_chunks = []
+                for slug, store_path in all_paths.items():
+                    try:
+                        vs = VectorStoreManager(store_path)
+                        hits = vs.search_with_filters(
+                            request.Question, {"project_id": project_id}, k=4
+                        )
+                        for h in hits:
+                            # Attach source store slug to metadata if not present
+                            if "document_category" not in h.metadata:
+                                h.metadata["document_category"] = slug
+                        all_chunks.extend(hits)
+                    except Exception as exc:
+                        logger.warning("Search failed for store '%s': %s", slug, exc)
+
+                if not all_chunks:
+                    raise HTTPException(404, "No indexed content in this project yet")
+
+                # Deduplicate by (document_id, chunk_id, content) to avoid double answers
+                seen = set()
+                unique_chunks = []
+                for chunk in all_chunks:
+                    key = (
+                        chunk.metadata.get("document_id"),
+                        chunk.metadata.get("chunk_id"),
+                        chunk.page_content[:100],
+                    )
+                    if key not in seen:
+                        seen.add(key)
+                        unique_chunks.append(chunk)
+
+                chunks = unique_chunks[:6]
+
+            else:
+                # Specific category requested — map the string to a slug
+                if requested_category == "tables":
+                    slug = "tables"
+                else:
+                    slug = requested_category.replace(" ", "_").replace("/", "_")
+
+                # If legacy database exists and category is requested, check if it maps there
+                # or find the category folder on disk
+                store_path = self.storage.vectorstore_path_for_category(project_id, slug)
+                
+                # Check legacy flat DB as fallback
+                legacy_base = self.storage._project_dir(project_id) / self.storage.VECTORSTORE_DIR
+                has_legacy = legacy_base.exists() and (legacy_base / "index.faiss").exists()
+
+                if not store_path.exists() or not any(store_path.iterdir()):
+                    if has_legacy:
+                        store_path = legacy_base
+                    else:
+                        raise HTTPException(
+                            404,
+                            f"No indexed content for document category '{request.DocumentCategory}' in this project. "
+                            f"Upload and analyze a document of that type first.",
+                        )
+
+                vs = VectorStoreManager(store_path)
+                chunks = vs.search_with_filters(
+                    request.Question, {"project_id": project_id}, k=6
+                )
+                if not chunks:
+                    raise HTTPException(
+                        404,
+                        f"No results found in the '{request.DocumentCategory}' store for this question.",
+                    )
+
+            # ── Pick the best document and answer ─────────────────────────────
             document_id = chunks[0].metadata.get("document_id")
             if not document_id:
                 raise HTTPException(500, "Indexed chunk is missing document_id metadata")
 
-            spec_json = self.storage.read_spec_json(project_id, document_id)
-            spec = EquipmentSpec.model_validate_json(spec_json)
+            # For the tables store, try to load the document spec; if missing, build fallback
+            try:
+                spec_json = self.storage.read_spec_json(project_id, document_id)
+                spec = EquipmentSpec.model_validate_json(spec_json)
+            except Exception:
+                spec = EquipmentSpec(ToolID="", ToolType="")
+
+            # Use the store from which the winning chunk came
+            winning_category = chunks[0].metadata.get("document_category", "")
+            if winning_category:
+                if winning_category == "legacy":
+                    winning_store_path = self.storage._project_dir(project_id) / self.storage.VECTORSTORE_DIR
+                else:
+                    winning_store_path = self.storage.vectorstore_path_for_category(
+                        project_id, winning_category
+                    )
+            else:
+                # Legacy chunk without document_category metadata — check if flat legacy store exists
+                legacy_base = self.storage._project_dir(project_id) / self.storage.VECTORSTORE_DIR
+                if legacy_base.exists() and (legacy_base / "index.faiss").exists():
+                    winning_store_path = legacy_base
+                else:
+                    winning_store_path = self.storage.vectorstore_path_for_category(
+                        project_id,
+                        requested_category if requested_category not in ("", "all") else "gem_manual",
+                    )
+
+            qa_store = VectorStoreManager(winning_store_path)
             qa_service = container.create_qa_service(
-                vector_store,
+                qa_store,
                 vector_filters={"project_id": project_id, "document_id": document_id},
             )
             answer_text, source = qa_service.answer(request.Question, spec)
+
+        except HTTPException:
+            raise
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
         except (ProjectNotFoundError, DocumentNotFoundError) as exc:
@@ -154,6 +253,7 @@ class ProjectAPI:
             "ProjectID": project_id,
             "DocumentID": document_id,
             "Category": request.Category,
+            "DocumentCategory": chunks[0].metadata.get("document_category", ""),
             "Answer": answer_text,
             "Source": source,
         }

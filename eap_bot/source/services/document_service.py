@@ -112,12 +112,17 @@ class DocumentService:
             self.storage.save_spec_json(json_path, spec)
 
             if doc_text:
-                vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
+                category_slug = self.storage._doc_category_to_slug(document.DocumentType)
+                category_store_path = self.storage.vectorstore_path_for_category(
+                    project_id, category_slug
+                )
+                vector_store = VectorStoreManager(category_store_path)
                 vector_store.add_document(
                     doc_text,
                     metadata={
                         "project_id": project_id,
                         "document_id": document_id,
+                        "document_category": category_slug,
                         "tool_id": spec.ToolID,
                     },
                 )

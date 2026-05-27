@@ -41,11 +41,15 @@ class EquipmentExtractor:
     # Public API
     # ------------------------------------------------------------------
 
-    def extract(self, pdf_text: str, pdf_path: Union[str, Path, None] = None, tables_dir: Union[str, Path, None] = None) -> EquipmentSpec:
+    def extract(self, pdf_text: str, pdf_path: Union[str, Path, None] = None, tables_dir: Union[str, Path, None] = None, tables_store_path: Union[str, Path, None] = None) -> EquipmentSpec:
         # Step 1: Extract and save raw tables from PDF
         section_csvs: dict[str, str] = {}  # section -> CSV string
         if pdf_path is not None:
-            section_csvs = self._extract_and_save_tables(Path(pdf_path), Path(tables_dir) if tables_dir else None)
+            section_csvs = self._extract_and_save_tables(
+                Path(pdf_path),
+                Path(tables_dir) if tables_dir else None,
+                Path(tables_store_path) if tables_store_path else None,
+            )
 
         # Step 2: Text chunks (always run — gives LLM overall document context)
         chunks = self._chunk_text(pdf_text)
@@ -577,7 +581,10 @@ TABLE (CSV):
         return merged
 
     def _extract_and_save_tables(
-        self, pdf_path: Path, tables_dir: Union[Path, None]
+        self,
+        pdf_path: Path,
+        tables_dir: Union[Path, None],
+        tables_store_path: Union[Path, None] = None,
     ) -> dict[str, str]:
         """
         Extract all tables from the PDF using pdfplumber.
@@ -638,6 +645,43 @@ TABLE (CSV):
                 else:
                     csv_path.write_text(csv_str, encoding="utf-8")
                 logger.info("Saved raw %s table (%d rows) to %s", section, len(rows), csv_path)
+
+        # ── Index table rows into the dedicated 'tables' vector store ──────────
+        if tables_store_path is not None and section_rows:
+            try:
+                from source.utils.embedder import VectorStoreManager
+                tables_vs = VectorStoreManager(tables_store_path)
+                for section, rows in section_rows.items():
+                    if len(rows) < 2:
+                        continue
+                    headers = rows[0]
+                    for row_idx, row in enumerate(rows[1:], start=1):
+                        parts = []
+                        for header, cell in zip(headers, row):
+                            if cell:
+                                parts.append(f"{header}: {cell}")
+                        if not parts:
+                            continue
+                        sentence = f"[{section}] " + " | ".join(parts)
+                        tables_vs.add_document(
+                            sentence,
+                            metadata={
+                                "project_id": str(pdf_path.parent.parent.name),
+                                "document_id": pdf_path.stem,
+                                "document_category": "tables",
+                                "section": section,
+                                "row_index": row_idx,
+                            },
+                        )
+                logger.info(
+                    "Indexed table rows from %s into tables vector store at %s",
+                    pdf_path.name, tables_store_path,
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Table vector store indexing failed for %s (non-fatal): %s",
+                    pdf_path.name, exc,
+                )
 
         return section_csvs
 
