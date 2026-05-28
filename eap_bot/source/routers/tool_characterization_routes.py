@@ -10,7 +10,7 @@ from source.managers.service_container import container
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
 from source.schemas.test_script import GenerateTestScriptsRequest
-from source.schemas.project import DocumentCategory
+from source.schemas.project import DocumentCategory, TestResultFileType
 from source.services.document_service import DocumentService
 from source.services.storage_service import StorageService, ProjectNotFoundError
 from source.services.test_script_service import TestScriptService
@@ -29,7 +29,7 @@ class ToolCharacterizationAPI:
         self.router.post("/GenerateTestScripts/{project_id}")(self.generate_test_scripts)
         self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
         # self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
-        self.router.post("/GenerateTestSummary/{project_id}")(self.generate_test_summary)
+        self.router.post("/UploadTestResult/{project_id}")(self.upload_test_result)
         self.router.get("/GetTestSummary/{project_id}")(self.get_test_summary)
 
     def generate_test_scripts(self, project_id: int, body: GenerateTestScriptsRequest):
@@ -142,70 +142,42 @@ class ToolCharacterizationAPI:
     #         logger.error("Failed to generate report summary: %s", e)
     #         raise HTTPException(500, str(e))
 
-    async def generate_test_summary(
+    async def upload_test_result(
         self,
         project_id: int,
-        summary_json: UploadFile = File(...),
-        secs_log: List[UploadFile] = File(default=[])
+        tool_id: str = Form(...),
+        test_script_name: str = Form(...),
+        file_type: TestResultFileType = Form(...),
+        file: UploadFile = File(...)
     ):
         try:
-            try:
-                summary_json_bytes = await summary_json.read()
-                summary_json_data = json.loads(summary_json_bytes.decode("utf-8"))
-            except Exception as e:
-                raise HTTPException(400, f"summary_json is not a valid JSON file: {e}")
-
-            try:
-                first_item = summary_json_data[0] if isinstance(summary_json_data, list) else summary_json_data
-                conn = first_item.get("Connection", {})
-                tool_id = str(conn.get("DeviceId", ""))
-                ip_address = str(conn.get("IpAddress", ""))
-
-                if not tool_id:
-                    raise ValueError("DeviceId not found in summary_json Connection block")
-            except Exception as e:
-                raise HTTPException(400, f"Failed to extract DeviceId/IpAddress from summary_json: {e}")
-
-            secs_log_data = None
-            if secs_log:
-                secs_log_data_list = []
-                doc_service = None
-                for file in secs_log:
-                    if not file.filename:
-                        continue
-                    
-                    filename = file.filename.lower()
-                    file_bytes = await file.read()
-                    
-                    if filename.endswith(".txt"):
-                        if doc_service is None:
-                            doc_service = DocumentService(self.storage, container)
-                        doc_service.upload_document(
-                            project_id=project_id,
-                            filename=file.filename,
-                            contents=file_bytes,
-                            doc_category=DocumentCategory.SML_SCRIPTS
-                        )
-                    elif filename.endswith(".json"):
-                        try:
-                            json_data = json.loads(file_bytes.decode("utf-8"))
-                            secs_log_data_list.append(json_data)
-                        except Exception as e:
-                            raise HTTPException(400, f"file {file.filename} is not a valid JSON file: {e}")
+            if not file.filename:
+                raise HTTPException(400, "No file uploaded")
                 
-                if secs_log_data_list:
-                    secs_log_data = secs_log_data_list[0] if len(secs_log_data_list) == 1 else secs_log_data_list
-
-            saved_path = self.storage.save_test_summary(
+            filename = file.filename.lower()
+            file_bytes = await file.read()
+            
+            # Special case: save .txt SECS logs as SML Scripts
+            if file_type == TestResultFileType.secs_log and filename.endswith(".txt"):
+                doc_service = DocumentService(self.storage, container)
+                doc_service.upload_document(
+                    project_id=project_id,
+                    filename=file.filename,
+                    contents=file_bytes,
+                    doc_category=DocumentCategory.SML_SCRIPTS
+                )
+                
+            saved_path = self.storage.save_single_test_result(
                 project_id=project_id,
                 tool_id=tool_id,
-                ip_address=ip_address,
-                secs_log=secs_log_data,
-                summary_json=summary_json_data
+                test_script_name=test_script_name,
+                file_name=file.filename,
+                file_bytes=file_bytes
             )
+            
             return {
                 "Status": "success",
-                "Message": "Test summary saved successfully",
+                "Message": "File uploaded successfully",
                 "Path": saved_path
             }
         except ValueError as exc:
@@ -213,7 +185,7 @@ class ToolCharacterizationAPI:
         except HTTPException:
             raise
         except Exception as exc:
-            logger.error("Failed to save test summary: %s", exc)
+            logger.error("Failed to upload test result: %s", exc)
             raise HTTPException(500, str(exc)) from exc
 
     async def get_test_summary(self, project_id: int, tool_id: Optional[str] = None):

@@ -18,7 +18,17 @@ class DocumentCategory(str, Enum):
     TROUBLESHOOTING_GUIDANCE = "Troubleshooting Guidance"
     GEM_MANUAL = "GEM Manual"
     VARIABLE_FILES = "Variable Files"
+    COMMUNICATION_LOGS = "Communication Logs"
+    ALARM_FILES = "Alarm Files"
     SML_SCRIPTS = "SML Scripts"
+    SECS_GEM_SCRIPTS = "SECS GEM Scripts"
+    EQUIPMENT_DATA = "Equipment Data"
+
+
+class TestResultFileType(str, Enum):
+    summary_json = "summary_json"
+    secs_log = "secs_log"
+    report = "report"
 
 
 class VariableCategory(str, Enum):

@@ -31,9 +31,10 @@ def custom_openapi():
         version=app.version,
         routes=app.routes,
     )
-    
-    # Swagger UI doesn't understand contentMediaType for array items —
-    # replace it with the legacy format: "binary" so file pickers render correctly.
+
+    # --- Fix 1: Replace contentMediaType with format: binary ---------------
+    # Swagger UI doesn't understand OpenAPI 3.1's contentMediaType for file
+    # uploads; swap it for the legacy format: "binary" it expects.
     def fix_binary_fields(d):
         if isinstance(d, dict):
             if d.get("contentMediaType") == "application/octet-stream":
@@ -44,8 +45,31 @@ def custom_openapi():
         elif isinstance(d, list):
             for item in d:
                 fix_binary_fields(item)
-                
+
     fix_binary_fields(openapi_schema)
+
+    # --- Fix 2: Inline $ref schemas for multipart/form-data ----------------
+    # Swagger UI can't detect format: binary inside array items when it has
+    # to chase a $ref pointer.  Inline the component schema directly so the
+    # file-picker renderer sees the types without indirection.
+    schemas = openapi_schema.get("components", {}).get("schemas", {})
+    for _path, methods in openapi_schema.get("paths", {}).items():
+        for _method, operation in methods.items():
+            if not isinstance(operation, dict):
+                continue
+            mp = (
+                operation
+                .get("requestBody", {})
+                .get("content", {})
+                .get("multipart/form-data", {})
+            )
+            ref = mp.get("schema", {}).get("$ref")
+            if ref and ref.startswith("#/components/schemas/"):
+                schema_name = ref.rsplit("/", 1)[-1]
+                if schema_name in schemas:
+                    import copy
+                    mp["schema"] = copy.deepcopy(schemas[schema_name])
+
     app.openapi_schema = openapi_schema
     return openapi_schema
 

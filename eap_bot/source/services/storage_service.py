@@ -178,26 +178,16 @@ class StorageService:
         path.write_text(json.dumps(SML_CHARACTERISATION_TEMPLATE, indent=2), encoding="utf-8")
         logger.info("Wrote SML template to %s", path)
 
-    def save_test_summary(self, project_id: int, tool_id: str, ip_address: str, secs_log: Any, summary_json: Any) -> str:
-        # 1. Validate project exists
+    def save_single_test_result(self, project_id: int, tool_id: str, test_script_name: str, file_name: str, file_bytes: bytes) -> str:
         self.get_project(project_id)
-            
-        # 2. Build directory path
+        
         timestamp = self.now().strftime("%Y-%m-%d_%H-%M-%S")
-        results_dir = self._project_dir(project_id) / self.RESULTS_DIR / tool_id / timestamp
+        results_dir = self._project_dir(project_id) / self.RESULTS_DIR / tool_id / timestamp / test_script_name
         results_dir.mkdir(parents=True, exist_ok=True)
         
-        # 3. Write files
-        if secs_log is not None:
-            (results_dir / "secs_logs.json").write_text(json.dumps(secs_log, indent=2), encoding="utf-8")
-        (results_dir / "summary.json").write_text(json.dumps(summary_json, indent=2), encoding="utf-8")
-        (results_dir / "metadata.json").write_text(json.dumps({
-            "ip_address": ip_address,
-            "tool_id": tool_id,
-            "timestamp": timestamp
-        }, indent=2), encoding="utf-8")
-        
-        return str(results_dir)
+        file_path = results_dir / file_name
+        file_path.write_bytes(file_bytes)
+        return str(file_path)
 
     def get_latest_test_summary(self, project_id: int, tool_id: Optional[str] = None) -> Any:
         self.get_project(project_id)
@@ -206,28 +196,40 @@ class StorageService:
         results_dir = project_dir / self.RESULTS_DIR
         if not results_dir.exists():
             return None
+
+        def find_summary_in_ts_dir(ts_dir: Path) -> Optional[Path]:
+            # Old structure: ts_dir / "summary.json"
+            if (ts_dir / "summary.json").exists():
+                return ts_dir / "summary.json"
+            # New structure: ts_dir / {test_script_name} / {original_name.json}
+            for script_dir in ts_dir.iterdir():
+                if script_dir.is_dir():
+                    # Look for anything named "summary" + ".json" first
+                    for f in script_dir.iterdir():
+                        if f.is_file() and f.name.endswith(".json") and "summary" in f.name.lower():
+                            return f
+            return None
             
         if tool_id:
             tool_dir = results_dir / tool_id
             if not tool_dir.exists():
                 return None
             timestamps = sorted([d.name for d in tool_dir.iterdir() if d.is_dir()])
-            if not timestamps:
-                return None
-            latest_timestamp = timestamps[-1]
-            summary_file = tool_dir / latest_timestamp / "summary.json"
-            if summary_file.exists():
-                return json.loads(summary_file.read_text(encoding="utf-8"))
+            for ts in reversed(timestamps):
+                summary_file = find_summary_in_ts_dir(tool_dir / ts)
+                if summary_file:
+                    return json.loads(summary_file.read_text(encoding="utf-8"))
             return None
         else:
             all_summaries = []
-            for tool_dir in results_dir.iterdir():
-                if tool_dir.is_dir():
-                    for ts_dir in tool_dir.iterdir():
-                        if ts_dir.is_dir():
-                            summary_file = ts_dir / "summary.json"
-                            if summary_file.exists():
-                                all_summaries.append((ts_dir.name, summary_file))
+            for t_dir in results_dir.iterdir():
+                if t_dir.is_dir():
+                    timestamps = sorted([d.name for d in t_dir.iterdir() if d.is_dir()])
+                    for ts in reversed(timestamps):
+                        summary_file = find_summary_in_ts_dir(t_dir / ts)
+                        if summary_file:
+                            all_summaries.append((ts, summary_file))
+                            break
             if not all_summaries:
                 return None
             all_summaries.sort(key=lambda x: x[0])
