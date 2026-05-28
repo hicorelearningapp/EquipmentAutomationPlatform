@@ -345,11 +345,13 @@ class AutoMapService:
             needs_review=needs_review,
         )
         new_version = self._persist(template_path, template_data, block)
-        return AutoMapResponse(
+        response = AutoMapResponse(
             auto_mapping=block,
             version=new_version,
             template_path=str(template_path),
         )
+        self.storage.save_automap_result(project_id, family, template, response)
+        return response
 
     # ── Persistence ─────────────────────────────────────────────────────────
 

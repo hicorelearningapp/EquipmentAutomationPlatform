@@ -26,9 +26,8 @@ class DocumentCategory(str, Enum):
 
 
 class TestResultFileType(str, Enum):
-    summary_json = "summary_json"
-    secs_log = "secs_log"
-    report = "report"
+    test = "Test"
+    secs_log = "SECSLog"
 
 
 class VariableCategory(str, Enum):
