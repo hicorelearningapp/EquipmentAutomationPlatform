@@ -146,7 +146,7 @@ class ToolCharacterizationAPI:
         self,
         project_id: int,
         summary_json: UploadFile = File(...),
-        secs_log: Optional[List[UploadFile]] = File(default=None)
+        secs_log: List[UploadFile] = File(default=[])
     ):
         try:
             try:
@@ -167,7 +167,7 @@ class ToolCharacterizationAPI:
                 raise HTTPException(400, f"Failed to extract DeviceId/IpAddress from summary_json: {e}")
 
             secs_log_data = None
-            if secs_log is not None:
+            if secs_log:
                 secs_log_data_list = []
                 doc_service = None
                 for file in secs_log:
