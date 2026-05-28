@@ -21,6 +21,36 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="EAP SECS/GEM Extractor")
 
+from fastapi.openapi.utils import get_openapi
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        routes=app.routes,
+    )
+    
+    # Swagger UI doesn't understand contentMediaType for array items —
+    # replace it with the legacy format: "binary" so file pickers render correctly.
+    def fix_binary_fields(d):
+        if isinstance(d, dict):
+            if d.get("contentMediaType") == "application/octet-stream":
+                del d["contentMediaType"]
+                d["format"] = "binary"
+            for v in d.values():
+                fix_binary_fields(v)
+        elif isinstance(d, list):
+            for item in d:
+                fix_binary_fields(item)
+                
+    fix_binary_fields(openapi_schema)
+    app.openapi_schema = openapi_schema
+    return openapi_schema
+
+app.openapi = custom_openapi
+
 project_api = ProjectAPI()
 equipment_api = EquipmentAPI()
 mapping_api = MappingAPI()
