@@ -31,6 +31,7 @@ class EntityRow:
     description: str
     data_type: str
     unit: str
+    entity_class: str = ""
 
     def to_dict(self) -> dict:
         return {
@@ -40,10 +41,12 @@ class EntityRow:
             "description": self.description,
             "data_type": self.data_type,
             "unit": self.unit,
+            "entity_class": self.entity_class,
         }
 
     def text_for_embedding(self) -> str:
-        parts = [self.name]
+        prefix = self.entity_class if self.entity_class else self.entity_type.capitalize()
+        parts = [f"{prefix}: {self.name}"]
         if self.description:
             parts.append(f"— {self.description}")
         if self.unit:
@@ -61,6 +64,7 @@ def flatten_spec(spec: EquipmentSpec) -> List[EntityRow]:
             description=v.Description or "",
             data_type=v.DataType or "",
             unit="",
+            entity_class="Status Variable",
         ))
     for v in spec.DataVariables:
         rows.append(EntityRow(
@@ -70,6 +74,7 @@ def flatten_spec(spec: EquipmentSpec) -> List[EntityRow]:
             description="",
             data_type=v.ValueType or "",
             unit=v.Unit or "",
+            entity_class="Data Variable",
         ))
     for e in spec.Events:
         rows.append(EntityRow(
@@ -79,6 +84,7 @@ def flatten_spec(spec: EquipmentSpec) -> List[EntityRow]:
             description=e.Description or "",
             data_type="",
             unit="",
+            entity_class="Event",
         ))
     for a in spec.Alarms:
         rows.append(EntityRow(
@@ -88,6 +94,7 @@ def flatten_spec(spec: EquipmentSpec) -> List[EntityRow]:
             description=a.Description or "",
             data_type="",
             unit="",
+            entity_class="Alarm",
         ))
     return rows
 

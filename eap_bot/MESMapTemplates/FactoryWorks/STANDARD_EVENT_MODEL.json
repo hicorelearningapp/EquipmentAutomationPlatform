@@ -1,7 +1,7 @@
 {
   "MESFamily": "FactoryWorks",
   "TemplateName": "STANDARD_EVENT_MODEL",
-  "Version": "1.0",
+  "Version": "1.1",
   "Description": "FactoryWorks MES integration template for semiconductor equipment. FactoryWorks uses a service-oriented, web-API-based dispatch model with optional WIP tracking extensions.",
   "Events": [
     {
@@ -283,11 +283,228 @@
     }
   ],
   "AutoMapping": {
-    "Enabled": true,
-    "Strategy": "DynamicVIDMapping",
-    "CanonicalModel": true,
-    "UnknownVIDHandling": "IgnoreAndLog",
-    "RequiredFieldValidation": true
+    "generated_at": "2026-05-28T04:35:48+00:00",
+    "project_id": 5,
+    "stats": {
+      "auto_accepted": 1,
+      "llm_reranked": 2,
+      "needs_review": 21,
+      "total_tags": 24
+    },
+    "suggestions": [
+      {
+        "tag_id": "WaferID",
+        "tag_source": "Variables",
+        "entity_id": "10504",
+        "entity_type": "variable",
+        "name": "WaferID",
+        "confidence": 0.9303344488143921,
+        "method": "vector",
+        "reasoning": null,
+        "alternatives": [
+          {
+            "entity_id": "10501",
+            "entity_type": "variable",
+            "name": "TargetSpecies",
+            "confidence": 0.13590209186077118
+          }
+        ]
+      },
+      {
+        "tag_id": "WaferStart",
+        "tag_source": "Events",
+        "entity_id": "10603",
+        "entity_type": "event",
+        "name": "ImplantStarted",
+        "confidence": 0.656,
+        "method": "llm_rerank",
+        "reasoning": "The candidate's description 'Wafer processing initiation' semantically matches the MES tag's description 'Process'.",
+        "alternatives": [
+          {
+            "entity_id": "10604",
+            "entity_type": "event",
+            "name": "ImplantCompleted",
+            "confidence": 0.16942813992500305
+          },
+          {
+            "entity_id": "10602",
+            "entity_type": "event",
+            "name": "MassAligned",
+            "confidence": 0.1394716203212738
+          },
+          {
+            "entity_id": "10601",
+            "entity_type": "event",
+            "name": "BeamIgnited",
+            "confidence": 0.08759932219982147
+          },
+          {
+            "entity_id": "10605",
+            "entity_type": "event",
+            "name": "AngleCorrected",
+            "confidence": 0.08532071858644485
+          }
+        ]
+      },
+      {
+        "tag_id": "WaferEnd",
+        "tag_source": "Events",
+        "entity_id": "10604",
+        "entity_type": "event",
+        "name": "ImplantCompleted",
+        "confidence": 0.8,
+        "method": "llm_rerank",
+        "reasoning": "WaferEnd semantically matches ImplantCompleted as both indicate the end of a process.",
+        "alternatives": [
+          {
+            "entity_id": "10601",
+            "entity_type": "event",
+            "name": "BeamIgnited",
+            "confidence": 0.10672537237405777
+          },
+          {
+            "entity_id": "10602",
+            "entity_type": "event",
+            "name": "MassAligned",
+            "confidence": 0.07593397796154022
+          },
+          {
+            "entity_id": "10605",
+            "entity_type": "event",
+            "name": "AngleCorrected",
+            "confidence": 0.050747714936733246
+          }
+        ]
+      }
+    ],
+    "needs_review": [
+      {
+        "tag_id": "EquipmentID",
+        "tag_source": "Variables",
+        "top_score": 0.274711012840271,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "LotID",
+        "tag_source": "Variables",
+        "top_score": 0.2698138952255249,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "SlotNumber",
+        "tag_source": "Variables",
+        "top_score": 0.13039585947990417,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "RecipeName",
+        "tag_source": "Variables",
+        "top_score": 0.28998976945877075,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "RecipeVersion",
+        "tag_source": "Variables",
+        "top_score": 0.18971127271652222,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "CarrierID",
+        "tag_source": "Variables",
+        "top_score": 0.2667336165904999,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "PortID",
+        "tag_source": "Variables",
+        "top_score": 0.23226502537727356,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "OperatorID",
+        "tag_source": "Variables",
+        "top_score": 0.1629309356212616,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "EquipmentState",
+        "tag_source": "Variables",
+        "top_score": 0.2526993453502655,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "AlarmID",
+        "tag_source": "Variables",
+        "top_score": 0.23962053656578064,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "AlarmText",
+        "tag_source": "Variables",
+        "top_score": 0.19556939601898193,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "AlarmSeverity",
+        "tag_source": "Variables",
+        "top_score": 0.2620719373226166,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "EventTime",
+        "tag_source": "Variables",
+        "top_score": 0.14555764198303223,
+        "reason": "no_compatible_candidates"
+      },
+      {
+        "tag_id": "LotStart",
+        "tag_source": "Events",
+        "top_score": 0.2344704568386078,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "LotEnd",
+        "tag_source": "Events",
+        "top_score": 0.15883272886276245,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "AlarmSet",
+        "tag_source": "Events",
+        "top_score": 0.17425623536109924,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "AlarmClear",
+        "tag_source": "Events",
+        "top_score": 0.1389550268650055,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "EquipmentStateChange",
+        "tag_source": "Events",
+        "top_score": 0.2820338010787964,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "EquipmentAlarm",
+        "tag_source": "Alarms",
+        "top_score": 0.18095457553863525,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "ProcessAlarm",
+        "tag_source": "Alarms",
+        "top_score": 0.20953890681266785,
+        "reason": "low_confidence"
+      },
+      {
+        "tag_id": "CommunicationAlarm",
+        "tag_source": "Alarms",
+        "top_score": 0.10919655859470367,
+        "reason": "low_confidence"
+      }
+    ]
   },
   "Logging": {
     "Enabled": true,

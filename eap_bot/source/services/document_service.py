@@ -133,6 +133,16 @@ class DocumentService:
                 spec=spec,
             )
             self.storage.save_extracted_tables(project_id, spec)
+
+            # Invalidate entity embeddings cache when spec changes
+            cache_path = self.storage.spec_json_path(project_id, "project_batch").parent / "entity_embeddings.npz"
+            if cache_path.exists():
+                try:
+                    cache_path.unlink()
+                    logger.info("Invalidated entity embeddings cache at %s", cache_path)
+                except Exception as e:
+                    logger.warning("Failed to delete entity embeddings cache: %s", e)
+
         except Exception as e:
             logger.error("Analysis failed for %s/%s: %s", project_id, document_id, str(e))
             self.storage.mark_failed(project_id, document_id)

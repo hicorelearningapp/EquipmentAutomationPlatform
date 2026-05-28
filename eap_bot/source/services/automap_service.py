@@ -95,7 +95,7 @@ def _extract_tagged_sections(template: dict) -> List[dict]:
             "tag_id": name,
             "tag_source": "Events",
             "name": name,
-            "description": e.get("EventType", "") or e.get("Description", "") or "",
+            "description": e.get("Description", "") or "",
             "expected_type": "",
             "expected_unit": "",
         })
@@ -107,7 +107,7 @@ def _extract_tagged_sections(template: dict) -> List[dict]:
             "tag_id": atype,
             "tag_source": "Alarms",
             "name": atype,
-            "description": a.get("Severity", "") or "",
+            "description": a.get("Description", "") or "",
             "expected_type": "",
             "expected_unit": "",
         })
@@ -115,7 +115,7 @@ def _extract_tagged_sections(template: dict) -> List[dict]:
 
 
 def _tag_text_for_embedding(tag: dict) -> str:
-    parts = [tag["name"]]
+    parts = [f"{tag['tag_source']}: {tag['name']}"]
     if tag.get("description"):
         parts.append(f"— {tag['description']}")
     if tag.get("expected_unit"):
@@ -157,6 +157,12 @@ def _load_spec_from_project(storage: StorageService, project_id: int) -> Equipme
             continue
         for k in ("StatusVariables", "DataVariables", "Events", "Alarms", "RemoteCommands"):
             merged[k].extend(d.get(k, []))
+
+    merged["StatusVariables"] = list({v["SVID"]: v for v in merged["StatusVariables"]}.values())
+    merged["DataVariables"] = list({v["DvID"]: v for v in merged["DataVariables"]}.values())
+    merged["Events"] = list({v["CEID"]: v for v in merged["Events"]}.values())
+    merged["Alarms"] = list({v["AlarmID"]: v for v in merged["Alarms"]}.values())
+    merged["RemoteCommands"] = list({v["RCMD"]: v for v in merged["RemoteCommands"]}.values())
 
     return EquipmentSpec.model_validate(merged)
 

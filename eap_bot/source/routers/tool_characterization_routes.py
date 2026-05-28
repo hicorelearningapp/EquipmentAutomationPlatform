@@ -1,7 +1,7 @@
 import json
 import logging
 
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 
 from pathlib import Path
@@ -10,6 +10,8 @@ from source.managers.service_container import container
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
 from source.schemas.test_script import GenerateTestScriptsRequest
+from source.schemas.project import DocumentCategory
+from source.services.document_service import DocumentService
 from source.services.storage_service import StorageService, ProjectNotFoundError
 from source.services.test_script_service import TestScriptService
 
@@ -144,7 +146,7 @@ class ToolCharacterizationAPI:
         self,
         project_id: int,
         summary_json: UploadFile = File(...),
-        secs_log: Optional[UploadFile] = File(None)
+        secs_log: Optional[List[UploadFile]] = File(default=None)
     ):
         try:
             try:
@@ -164,14 +166,35 @@ class ToolCharacterizationAPI:
             except Exception as e:
                 raise HTTPException(400, f"Failed to extract DeviceId/IpAddress from summary_json: {e}")
 
+            secs_log_data = None
             if secs_log is not None:
-                try:
-                    secs_log_bytes = await secs_log.read()
-                    secs_log_data = json.loads(secs_log_bytes.decode("utf-8"))
-                except Exception as e:
-                    raise HTTPException(400, f"secs_log is not a valid JSON file: {e}")
-            else:
-                secs_log_data = None
+                secs_log_data_list = []
+                doc_service = None
+                for file in secs_log:
+                    if not file.filename:
+                        continue
+                    
+                    filename = file.filename.lower()
+                    file_bytes = await file.read()
+                    
+                    if filename.endswith(".txt"):
+                        if doc_service is None:
+                            doc_service = DocumentService(self.storage, container)
+                        doc_service.upload_document(
+                            project_id=project_id,
+                            filename=file.filename,
+                            contents=file_bytes,
+                            doc_category=DocumentCategory.SML_SCRIPTS
+                        )
+                    elif filename.endswith(".json"):
+                        try:
+                            json_data = json.loads(file_bytes.decode("utf-8"))
+                            secs_log_data_list.append(json_data)
+                        except Exception as e:
+                            raise HTTPException(400, f"file {file.filename} is not a valid JSON file: {e}")
+                
+                if secs_log_data_list:
+                    secs_log_data = secs_log_data_list[0] if len(secs_log_data_list) == 1 else secs_log_data_list
 
             saved_path = self.storage.save_test_summary(
                 project_id=project_id,
