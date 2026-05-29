@@ -1,7 +1,9 @@
 import logging
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
+from source.config import settings
 from source.routers.automap_routes import AutoMapAPI
 from source.routers.equipment_routes import EquipmentAPI
 from source.routers.mapping_routes import MappingAPI
@@ -20,6 +22,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="EAP SECS/GEM Extractor")
+app.mount("/projects", StaticFiles(directory=settings.EAP_STORAGE_ROOT), name="projects")
 
 from fastapi.openapi.utils import get_openapi
 

@@ -214,13 +214,17 @@ class StorageService:
         
         results_dir = self._project_dir(project_id) / self.RESULTS_DIR / tool_id
         
-        tests = []
-        secs_logs = []
+        executions = []
         
         if results_dir.exists():
-            for ts_dir in results_dir.iterdir():
+            for ts_dir in sorted(results_dir.iterdir(), key=lambda d: d.name, reverse=True):
                 if not ts_dir.is_dir():
                     continue
+                
+                timestamp = ts_dir.name
+                
+                # Dictionary to group by script_name: { "script_name": {"test": item, "secs_log": item} }
+                scripts_map = {}
                 
                 # Check for metadata files in ts_dir (new structure)
                 for meta_file in ts_dir.glob("*_metadata.json"):
@@ -237,26 +241,32 @@ class StorageService:
                         if not file_path.exists():
                             continue
                             
-                        # Normalize file type to the new TestResultFileType values
+                        # Normalize file type
                         lower_type = str(file_type).lower()
                         if lower_type in ("test", "report", "summary_json"):
-                            norm_type = TestResultFileType.test.value
+                            norm_type = "Test"
+                            key_type = "test"
                         elif lower_type in ("secslog", "secs_log", "secs"):
-                            norm_type = TestResultFileType.secs_log.value
+                            norm_type = "SECSLog"
+                            key_type = "secs_log"
                         else:
                             norm_type = file_type
+                            key_type = file_type.lower()
+
+                        item_path = f"/projects/{project_id}/Results/{tool_id}/{timestamp}/{file_name}"
 
                         item = {
                             "file_name": file_name,
                             "file_type": norm_type,
-                            "path": str(file_path.resolve()),
-                            "test_script_names": test_script_names
+                            "path": item_path
                         }
                         
-                        if norm_type == TestResultFileType.test.value:
-                            tests.append(item)
-                        elif norm_type == TestResultFileType.secs_log.value:
-                            secs_logs.append(item)
+                        for script_name in test_script_names:
+                            if script_name.isdigit():
+                                continue
+                            if script_name not in scripts_map:
+                                scripts_map[script_name] = {}
+                            scripts_map[script_name][key_type] = item
                     except Exception as e:
                         logger.error(f"Error parsing metadata file {meta_file}: {e}")
 
@@ -279,52 +289,50 @@ class StorageService:
                                     
                                     lower_type = str(file_type).lower()
                                     if lower_type in ("test", "report", "summary_json"):
-                                        norm_type = TestResultFileType.test.value
+                                        norm_type = "Test"
+                                        key_type = "test"
                                     elif lower_type in ("secslog", "secs_log", "secs"):
-                                        norm_type = TestResultFileType.secs_log.value
+                                        norm_type = "SECSLog"
+                                        key_type = "secs_log"
                                     else:
                                         norm_type = file_type
+                                        key_type = file_type.lower()
+
+                                    script_name = script_dir.name
+                                    item_path = f"/projects/{project_id}/Results/{tool_id}/{timestamp}/{script_name}/{file_name}"
 
                                     item = {
                                         "file_name": file_name,
                                         "file_type": norm_type,
-                                        "path": str(file_path.resolve()),
-                                        "test_script_names": [script_dir.name]
+                                        "path": item_path
                                     }
                                     
-                                    if norm_type == TestResultFileType.test.value:
-                                        tests.append(item)
-                                    elif norm_type == TestResultFileType.secs_log.value:
-                                        secs_logs.append(item)
+                                    if script_name not in scripts_map:
+                                        scripts_map[script_name] = {}
+                                    scripts_map[script_name][key_type] = item
                                     break
                         except Exception as e:
                             logger.error(f"Error parsing old metadata file {old_meta_file}: {e}")
 
-        # Remove potential duplicates by path
-        seen_paths = set()
-        unique_tests = []
-        for t in tests:
-            if t["path"] not in seen_paths:
-                seen_paths.add(t["path"])
-                unique_tests.append(t)
-                
-        unique_secs_logs = []
-        for s in secs_logs:
-            if s["path"] not in seen_paths:
-                seen_paths.add(s["path"])
-                unique_secs_logs.append(s)
-
-        # Sort the output lists by file_name
-        unique_tests.sort(key=lambda x: x["file_name"])
-        unique_secs_logs.sort(key=lambda x: x["file_name"])
+                if scripts_map:
+                    scripts_list = []
+                    for script_name, artifacts in sorted(scripts_map.items()):
+                        scripts_list.append({
+                            "script_name": script_name,
+                            "artifacts": artifacts
+                        })
+                    
+                    executions.append({
+                        "execution_time": timestamp,
+                        "script_count": len(scripts_list),
+                        "scripts": scripts_list
+                    })
 
         return {
             "status": "success",
             "tool_id": tool_id,
-            "files": {
-                "tests": unique_tests,
-                "secs_logs": unique_secs_logs
-            }
+            "execution_count": len(executions),
+            "executions": executions
         }
 
     def get_latest_test_summary(self, project_id: int, tool_id: Optional[str] = None) -> Any:
@@ -643,14 +651,18 @@ class StorageService:
         logger.info("Saved generated code to %s", code_file)
 
     def prepare_document_paths(
-        self, project_id: int, original_filename: str, extension: str = ".pdf"
+        self, project_id: int, original_filename: str, extension: str = ".pdf", doc_category: Optional[Any] = None
     ) -> tuple[str, Path, Path]:
         metadata = self.get_project(project_id)
-        for doc in metadata.Documents:
-            if doc.FileName.lower() == original_filename.lower():
-                raise DocumentExistsError(
-                    f"Document '{original_filename}' already exists in project '{project_id}'."
-                )
+        
+        is_sml = doc_category and (str(doc_category) == "SML Scripts" or getattr(doc_category, "value", "") == "SML Scripts")
+        
+        if not is_sml:
+            for doc in metadata.Documents:
+                if doc.FileName.lower() == original_filename.lower():
+                    raise DocumentExistsError(
+                        f"Document '{original_filename}' already exists in project '{project_id}'."
+                    )
 
         base_id = self.slugify(Path(original_filename).stem, fallback="document")
         existing_ids = {doc.DocumentID for doc in metadata.Documents}
@@ -658,17 +670,37 @@ class StorageService:
 
         document_id = base_id
         counter = 2
-        while (
-            document_id in existing_ids
-            or (docs_dir / f"{document_id}{extension}").exists()
-            or self.spec_json_path(project_id, document_id).exists()
-        ):
+        
+        def is_id_taken(did: str) -> bool:
+            if is_sml:
+                existing_doc = next((d for d in metadata.Documents if d.DocumentID == did), None)
+                if existing_doc and existing_doc.FileName.lower() == original_filename.lower():
+                    return False
+                    
+            if did in existing_ids:
+                return True
+            if self.spec_json_path(project_id, did).exists():
+                return True
+            if (docs_dir / f"{did}{extension}").exists():
+                return True
+            nested_dir = docs_dir / did
+            if nested_dir.exists() and any(nested_dir.iterdir()):
+                return True
+            return False
+
+        while is_id_taken(document_id):
             document_id = f"{base_id}_{counter}"
             counter += 1
 
+        if is_sml:
+            timestamp = self.now().strftime("%Y-%m-%d_%H-%M-%S")
+            file_path = docs_dir / document_id / timestamp / original_filename
+        else:
+            file_path = docs_dir / f"{document_id}{extension}"
+
         return (
             document_id,
-            docs_dir / f"{document_id}{extension}",
+            file_path,
             self.spec_json_path(project_id, document_id),
         )
 
@@ -893,11 +925,29 @@ class StorageService:
             return []
         return [f.stem for f in base_dir.glob("*.json")]
 
+    def _find_nested_document(self, docs_dir: Path, document_id: str) -> Optional[Path]:
+        nested_dir = docs_dir / document_id
+        if nested_dir.exists() and nested_dir.is_dir():
+            for ts_dir in sorted(nested_dir.iterdir(), key=lambda x: x.name, reverse=True):
+                if ts_dir.is_dir():
+                    for f in ts_dir.iterdir():
+                        if f.is_file():
+                            return f
+        return None
+
     def document_pdf_path(self, project_id: int, document_id: str) -> Path:
-        return self._project_dir(project_id) / self.DOCUMENTS_DIR / f"{document_id}.pdf"
+        docs_dir = self._project_dir(project_id) / self.DOCUMENTS_DIR
+        nested_file = self._find_nested_document(docs_dir, document_id)
+        if nested_file:
+            return nested_file
+        return docs_dir / f"{document_id}.pdf"
 
     def document_excel_path(self, project_id: int, document_id: str, ext: str = ".xlsx") -> Path:
-        return self._project_dir(project_id) / self.DOCUMENTS_DIR / f"{document_id}{ext}"
+        docs_dir = self._project_dir(project_id) / self.DOCUMENTS_DIR
+        nested_file = self._find_nested_document(docs_dir, document_id)
+        if nested_file:
+            return nested_file
+        return docs_dir / f"{document_id}{ext}"
 
     def spec_json_path(self, project_id: int, document_id: str) -> Path:
         return (

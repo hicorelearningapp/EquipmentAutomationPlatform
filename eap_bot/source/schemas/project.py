@@ -11,6 +11,7 @@ class ToolType(str, Enum):
     CVD = "CVD"
     LITHO = "LITHO"
     ETCH = "ETCH"
+    ION_IMPLANTER = "ION_IMPLANTER"
 
 
 class DocumentCategory(str, Enum):
@@ -128,7 +129,7 @@ class ProjectDetailsResponse(BaseModel):
     ProjectDescription: Optional[str] = None
     VendorName: Optional[str] = None
     Tool: Optional[str] = None
-    ConnectedToolCount: int = 0
+    ProjectVersion: Optional[str] = None
     CreatedAt: datetime
     DocumentCount: int
     SVCount: int

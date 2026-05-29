@@ -329,7 +329,7 @@ class ProjectService:
                 metadata.Tool.value
                 if hasattr(metadata.Tool, "value") else (metadata.Tool if metadata.Tool else None)
             ),
-            ConnectedToolCount=self.storage.count_connected_equipments(project_id),
+            ProjectVersion=getattr(metadata, "ProjectVersion", None),
             CreatedAt=metadata.CreatedAt,
             DocumentCount=number_of_documents,
             SVCount=total_svs,

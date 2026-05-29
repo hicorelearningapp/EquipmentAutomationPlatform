@@ -117,6 +117,14 @@ class EntityEmbeddings:
     def dim(self) -> int:
         return int(self.vectors.shape[1]) if self.vectors.size else 0
 
+    def search(self, query_vector: np.ndarray, top_k: int = 5) -> List[EntityRow]:
+        """Perform cosine similarity search against table entity rows."""
+        if self.vectors.size == 0 or query_vector.size == 0:
+            return []
+        scores = np.dot(self.vectors, query_vector.T).flatten()
+        top_indices = np.argsort(scores)[::-1][:top_k]
+        return [self.rows[i] for i in top_indices]
+
 
 def build_or_load(spec: EquipmentSpec, cache_path: Path) -> EntityEmbeddings:
     """

@@ -12,7 +12,7 @@ from source.schemas.codegen import ScriptUpdateRequest
 from source.schemas.test_script import GenerateTestScriptsRequest
 from source.schemas.project import DocumentCategory, TestResultFileType
 from source.services.document_service import DocumentService
-from source.services.storage_service import StorageService, ProjectNotFoundError
+from source.services.storage_service import StorageService, ProjectNotFoundError, DocumentExistsError
 from source.services.test_script_service import TestScriptService
 
 logger = logging.getLogger(__name__)
@@ -30,8 +30,6 @@ class ToolCharacterizationAPI:
         self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
         # self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
         self.router.post("/UploadTestResult")(self.upload_test_result)
-        self.router.get("/GetTestSummary/{project_id}")(self.get_test_summary)
-        self.router.get("/GetTestReports/{project_id}")(self.get_test_reports)
         self.router.get("/GetToolResults/{project_id}")(self.get_tool_results)
 
     def generate_test_scripts(self, project_id: int, body: GenerateTestScriptsRequest):
@@ -164,7 +162,7 @@ class ToolCharacterizationAPI:
                 parts = stem.split("_")
                 if len(parts) > 1:
                     prefix = parts[0]
-                    script_names = [p.strip() for p in parts[1:] if p.strip()]
+                    script_names = [p.strip() for p in parts[1:] if p.strip() and not p.strip().isdigit()]
                 else:
                     prefix = ""
                     script_names = [parts[0].strip()] if parts[0].strip() else []
@@ -221,38 +219,6 @@ class ToolCharacterizationAPI:
             logger.error("Failed to upload test result: %s", exc)
             raise HTTPException(500, str(exc)) from exc
 
-    async def get_test_summary(self, project_id: int, tool_id: Optional[str] = None):
-        try:
-            summary = self.storage.get_latest_test_summary(project_id, tool_id)
-            if summary is None:
-                raise HTTPException(404, "Test summary not found.")
-            return summary
-        except ProjectNotFoundError as exc:
-            raise HTTPException(404, str(exc)) from exc
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error("Failed to retrieve test summary: %s", exc)
-            raise HTTPException(500, str(exc)) from exc
-
-    async def get_test_reports(self, project_id: int, tool_id: str, test_script_names: str):
-        try:
-            # Parse the underscore-separated names
-            script_names = [s.strip() for s in test_script_names.split("_") if s.strip()]
-            if not script_names:
-                raise HTTPException(400, "At least one test script name must be provided")
-                
-            reports = self.storage.get_test_reports(project_id, tool_id, script_names)
-            if not reports:
-                raise HTTPException(404, "No reports found for the given scripts.")
-            return reports
-        except ProjectNotFoundError as exc:
-            raise HTTPException(404, str(exc)) from exc
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error("Failed to retrieve test reports: %s", exc)
-            raise HTTPException(500, str(exc)) from exc
 
     async def get_tool_results(self, project_id: int, tool_id: str):
         try:

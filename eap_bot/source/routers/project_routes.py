@@ -167,7 +167,7 @@ class ProjectAPI:
 
             else:
                 # Specific category requested — map the string to a slug
-                if requested_category == "tables":
+                if requested_category in ("tables", "variable files"):
                     slug = "tables"
                 else:
                     slug = requested_category.replace(" ", "_").replace("/", "_")
@@ -237,7 +237,13 @@ class ProjectAPI:
                 qa_store,
                 vector_filters={"project_id": project_id, "document_id": document_id},
             )
-            answer_text, source = qa_service.answer(request.Question, spec)
+            answer_text, source = qa_service.answer(
+                query=request.Question, 
+                spec=spec,
+                project_id=project_id,
+                document_id=document_id,
+                storage_service=self.storage
+            )
 
         except HTTPException:
             raise

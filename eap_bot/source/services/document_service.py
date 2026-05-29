@@ -44,7 +44,7 @@ class DocumentService:
         ext = Path(filename).suffix.lower()
 
         document_id, file_path, _ = self.storage.prepare_document_paths(
-            project_id, filename, extension=ext
+            project_id, filename, extension=ext, doc_category=doc_category
         )
         self.storage.save_pdf(file_path, contents)
 
