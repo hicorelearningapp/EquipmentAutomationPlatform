@@ -52,6 +52,19 @@ class ProjectCreate(BaseModel):
 class DocumentMetadata(BaseModel):
     DocumentID: str = Field(alias="document_id")
     DocumentType: DocumentCategory = Field(alias="document_type")
+
+    @field_validator("DocumentType", mode="before")
+    def coerce_document_type(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            mapping = {
+                "user manual": DocumentCategory.USER_MANUALS,
+                "variable file": DocumentCategory.VARIABLE_FILES,
+                "alarm file": DocumentCategory.ALARM_FILES,
+                "sml script": DocumentCategory.SML_SCRIPTS,
+                "secs gem script": DocumentCategory.SECS_GEM_SCRIPTS,
+            }
+            return mapping.get(v.strip().lower(), v)
+        return v
     FileName: str = Field(alias="filename")
     FileSize: float = Field(default=0.0, alias="file_size")
     Pages: int = Field(default=0, alias="pages")
