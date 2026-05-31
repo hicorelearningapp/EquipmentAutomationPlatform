@@ -194,16 +194,9 @@ class ProjectAPI:
                 chunks = vs.search_with_filters(
                     request.Question, {"project_id": project_id}, k=6
                 )
-                if not chunks:
-                    raise HTTPException(
-                        404,
-                        f"No results found in the '{request.DocumentCategory}' store for this question.",
-                    )
 
             # ── Pick the best document and answer ─────────────────────────────
-            document_id = chunks[0].metadata.get("document_id")
-            if not document_id:
-                raise HTTPException(500, "Indexed chunk is missing document_id metadata")
+            document_id = chunks[0].metadata.get("document_id") if chunks else "project_batch"
 
             # For the tables store, try to load the document spec; if missing, build fallback
             try:
@@ -212,9 +205,9 @@ class ProjectAPI:
             except Exception:
                 spec = EquipmentSpec(ToolID="", ToolType="")
 
-            # Use the store from which the winning chunk came
-            winning_category = chunks[0].metadata.get("document_category", "")
-            if winning_category:
+            # Use the store from which the winning chunk came, or fallback to the requested store
+            winning_category = chunks[0].metadata.get("document_category", "") if chunks else requested_category
+            if winning_category and winning_category != "all":
                 if winning_category == "legacy":
                     winning_store_path = self.storage._project_dir(project_id) / self.storage.VECTORSTORE_DIR
                 else:
@@ -233,11 +226,17 @@ class ProjectAPI:
                     )
 
             qa_store = VectorStoreManager(winning_store_path)
+            
+            # If we don't have chunks, don't filter by document_id so fallback can search the whole project
+            filters = {"project_id": project_id}
+            if chunks:
+                filters["document_id"] = document_id
+
             qa_service = container.create_qa_service(
                 qa_store,
-                vector_filters={"project_id": project_id, "document_id": document_id},
+                vector_filters=filters,
             )
-            answer_text, source = qa_service.answer(
+            answer_text, source, context_chunks = qa_service.answer(
                 query=request.Question, 
                 spec=spec,
                 project_id=project_id,
@@ -261,9 +260,10 @@ class ProjectAPI:
         return {
             "ProjectID": project_id,
             "DocumentID": document_id,
-            "DocumentCategory": chunks[0].metadata.get("document_category", ""),
+            "DocumentCategory": winning_category,
             "Answer": answer_text,
             "Source": source,
+            "Context": context_chunks
         }
 
     def get_knowledge_category(self, project_id: int) -> list[str]:

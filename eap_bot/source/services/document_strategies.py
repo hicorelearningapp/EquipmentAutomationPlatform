@@ -28,8 +28,8 @@ class DocumentProcessingStrategy(ABC):
         file_path: Path,
         storage: Any,
         container: Any,
-    ) -> Tuple[EquipmentSpec, str]:
-        """Perform parsing and analysis of the document, returning the spec and doc text."""
+    ) -> Tuple[EquipmentSpec, list[tuple[int, str]]]:
+        """Perform parsing and analysis of the document, returning the spec and document pages."""
         pass
 
     def post_upload(
@@ -53,10 +53,12 @@ class PdfProcessingStrategy(DocumentProcessingStrategy):
         file_path: Path,
         storage: Any,
         container: Any,
-    ) -> Tuple[EquipmentSpec, str]:
-        doc_text = container.parser.extract_text(str(file_path))
-        if not doc_text.strip():
+    ) -> Tuple[EquipmentSpec, list[tuple[int, str]]]:
+        pages = container.parser.extract_pages(str(file_path))
+        if not pages:
             raise ValueError("Could not extract any text from the PDF")
+
+        doc_text = "\n".join(t for _, t in pages)
 
         tables_dir = storage.extracted_tables_path(project_id)
         tables_store_path = storage.vectorstore_path_for_category(project_id, "tables")
@@ -80,7 +82,7 @@ class PdfProcessingStrategy(DocumentProcessingStrategy):
             doc_type_val = document.DocumentType.value if hasattr(document.DocumentType, "value") else str(document.DocumentType)
             spec.DocumentType = doc_type_val
 
-        return spec, doc_text
+        return spec, pages
 
 
 class ExcelProcessingStrategy(DocumentProcessingStrategy):
@@ -101,7 +103,7 @@ class ExcelProcessingStrategy(DocumentProcessingStrategy):
         file_path: Path,
         storage: Any,
         container: Any,
-    ) -> Tuple[EquipmentSpec, str]:
+    ) -> Tuple[EquipmentSpec, list[tuple[int, str]]]:
         spec = container.extractor.extract_excel(file_path)
         if not spec.ToolID:
             project_meta = storage.get_project(project_id)
@@ -114,7 +116,7 @@ class ExcelProcessingStrategy(DocumentProcessingStrategy):
             doc_type_val = document.DocumentType.value if hasattr(document.DocumentType, "value") else str(document.DocumentType)
             spec.DocumentType = doc_type_val
 
-        return spec, ""
+        return spec, []
 
 
 class TextProcessingStrategy(DocumentProcessingStrategy):
@@ -131,7 +133,7 @@ class TextProcessingStrategy(DocumentProcessingStrategy):
         file_path: Path,
         storage: Any,
         container: Any,
-    ) -> Tuple[EquipmentSpec, str]:
+    ) -> Tuple[EquipmentSpec, list[tuple[int, str]]]:
         project_meta = storage.get_project(project_id)
         doc_type_val = "SML Scripts"
         if hasattr(document, "DocumentType") and document.DocumentType:
@@ -144,7 +146,7 @@ class TextProcessingStrategy(DocumentProcessingStrategy):
         )
         spec.Reports = []
         spec.EventReportLinks = []
-        return spec, ""
+        return spec, []
 
     def post_upload(
         self, project_id: int, filename: str, contents: bytes, storage: Any

@@ -97,6 +97,52 @@ class VectorStoreManager:
         )
         return True
 
+    def add_pages(self, pages: list[tuple[int, str]], base_metadata: Dict) -> bool:
+        """Chunk, embed, and persist a document while preserving page numbers. Updates the cache."""
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=settings.CHUNK_SIZE,
+            chunk_overlap=settings.CHUNK_OVERLAP,
+            separators=["\n\n", "\n", ".", " "],
+        )
+        
+        all_docs = []
+        chunk_idx = 0
+        for page_num, text in pages:
+            clean = self.normalize_pdf_text(text)
+            if not clean:
+                continue
+            
+            chunks = [c for c in splitter.split_text(clean) if c.strip()]
+            for chunk in chunks:
+                all_docs.append(
+                    LC_Document(
+                        page_content=chunk, 
+                        metadata={**base_metadata, "page_number": page_num, "chunk_id": chunk_idx}
+                    )
+                )
+                chunk_idx += 1
+
+        if not all_docs:
+            logger.warning("add_pages: no usable chunks for base_metadata=%s", base_metadata)
+            return False
+
+        vs = self._load_or_create_faiss()
+        if vs is None:
+            vs = FAISS.from_documents(all_docs, self._embeddings)
+        else:
+            vs.add_documents(all_docs)
+
+        self.vector_dir.mkdir(parents=True, exist_ok=True)
+        vs.save_local(str(self.vector_dir))
+        self._faiss_cache = vs
+        
+        logger.info(
+            "FAISS index updated with page metadata (%d new chunks, base_metadata=%s)",
+            len(all_docs),
+            base_metadata,
+        )
+        return True
+
     def search(self, query: str, k: int = 6) -> List[LC_Document]:
         vs = self._load_or_create_faiss()
         if vs is None:
