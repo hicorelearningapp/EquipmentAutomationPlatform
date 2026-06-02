@@ -345,11 +345,16 @@ class ProjectService:
         projects = self.storage.list_projects()
         total_sml = 0
         total_tools = 0
+        total_scripts_tested = 0
         
         for project in projects:
             tool_char_dir = self.storage._project_dir(project.ProjectID) / self.storage.TOOL_CHAR_DIR
             if tool_char_dir.is_dir():
                 total_sml += len([f for f in tool_char_dir.iterdir() if f.is_file()])
+            
+            results_dir = self.storage._project_dir(project.ProjectID) / self.storage.RESULTS_DIR
+            if results_dir.is_dir():
+                total_scripts_tested += len(list(results_dir.rglob("*.txt")))
             
             try:
                 total_tools += self.storage.count_connected_equipments(project.ProjectID)
@@ -360,4 +365,5 @@ class ProjectService:
             TotalProjects=len(projects),
             TotalSmlScripts=total_sml,
             TotalConnectedTools=total_tools,
+            TotalScriptsTested=total_scripts_tested,
         )

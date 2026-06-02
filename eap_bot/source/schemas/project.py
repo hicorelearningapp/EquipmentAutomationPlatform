@@ -157,6 +157,7 @@ class SystemSummaryResponse(BaseModel):
     TotalProjects: int
     TotalSmlScripts: int
     TotalConnectedTools: int
+    TotalScriptsTested: int = 0
 
 class FrontendStatusVariable(BaseModel):
     SVID: int

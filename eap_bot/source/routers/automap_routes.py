@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class AutoMapAPI:
     def __init__(self) -> None:
         self.router = APIRouter(tags=["automap"])
-        self.router.post("/AutoMap2", response_model=AutoMapResponse)(self.run_automap)
+        # self.router.post("/AutoMap2", response_model=AutoMapResponse)(self.run_automap)
 
     def run_automap(self, body: AutoMapRequest) -> AutoMapResponse:
         try:
