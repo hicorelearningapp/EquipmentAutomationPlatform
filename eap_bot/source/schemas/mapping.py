@@ -7,22 +7,28 @@ class MESTag(BaseModel):
     description: str = ""
     expected_type: str = ""
     expected_unit: str = ""
+    transaction: Optional[str] = None
 
 class MappingEntry(BaseModel):
-    entity_id: str
-    entity_type: str # variable, event, or alarm
-    tag_id: str
-    confidence: float
-    reasoning: str = ""
+    EntityID: str
+    EquipmentID: str = ""
+    EntityType: str # variable, event, or alarm
+    TagID: str
+    Transaction: Optional[str] = None
+    Confidence: float
+    Reasoning: str = ""
+    Method: str = "llm"
 
 class UnmappedEntity(BaseModel):
-    entity_id: str
-    entity_type: str
-    name: str
+    EntityID: str
+    EquipmentID: str = ""
+    EntityType: str
+    Name: str
 
 class MappingSuggestionResponse(BaseModel):
-    suggestions: List[MappingEntry] = Field(default_factory=list)
-    unmapped: List[UnmappedEntity] = Field(default_factory=list)
+    EquipmentID: str = ""
+    Suggestions: List[MappingEntry] = Field(default_factory=list)
+    Unmapped: List[UnmappedEntity] = Field(default_factory=list)
 
 class VariableMapping(BaseModel):
     MESTag: str
@@ -44,29 +50,17 @@ class MESMappingRequest(BaseModel):
     template: str
 
 
-class TestEquipmentVariable(BaseModel):
-    id: str                             # Entity identifier (SVID, DvID, CEID, AlarmID)
-    name: str
-    entity_type: str = "variable"       # "variable", "event", or "alarm"
-    description: Optional[str] = None
-    data_type: str = "String"
+from typing import Dict
 
+from source.schemas.secsgem import EquipmentSpec
 
-class TestMESVariable(BaseModel):
-    tag_id: str                         # Unique ID (e.g. "EquipmentID", "LotStart")
-    name: str                           # Display name
-    entity_type: str = "variable"       # "variable", "event", or "alarm"
-    description: str = ""
-    expected_type: str = ""             # e.g. "String", "Integer"
-
-
-class TestMappingRequest(BaseModel):
+class AutoMapRequest(BaseModel):
     # ── Equipment side (provide ONE of these) ──────────────────────
-    equipment_variables: Optional[List[TestEquipmentVariable]] = None
+    equipment_spec: Optional[EquipmentSpec] = None
     project_id: Optional[int] = None  # fallback: load from project batch spec
 
     # ── MES side (provide ONE of these) ────────────────────────────
-    mes_variables: Optional[List[TestMESVariable]] = None
+    mes_template: Optional[Dict[str, Any]] = None
     family: Optional[str] = None      # fallback: load from template
     template: Optional[str] = None    # fallback: load from template
 

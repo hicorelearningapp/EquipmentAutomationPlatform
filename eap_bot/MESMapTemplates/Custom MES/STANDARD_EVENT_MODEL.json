@@ -8,43 +8,62 @@
       "EventName": "LotStart",
       "EventType": "Process",
       "Transaction": "TXN_LOT_START",
-      "Payload": "LotStartPayload"
+      "Payload": "LotStartPayload",
+      "Enabled": true
     },
     {
       "EventName": "LotEnd",
       "EventType": "Process",
       "Transaction": "TXN_LOT_END",
-      "Payload": "LotEndPayload"
+      "Payload": "LotEndPayload",
+      "Enabled": true
     },
     {
       "EventName": "AlarmSet",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_SET",
-      "Payload": "AlarmPayload"
+      "Payload": "AlarmPayload",
+      "Enabled": true
     },
     {
       "EventName": "AlarmClear",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_CLEAR",
-      "Payload": "AlarmPayload"
+      "Payload": "AlarmPayload",
+      "Enabled": true
     },
     {
       "EventName": "CustomEvent",
       "EventType": "Custom",
       "Transaction": "TXN_CUSTOM_EVENT",
-      "Payload": "CustomPayload"
+      "Payload": "CustomPayload",
+      "Enabled": true
+    },
+    {
+      "EventName": "TrackIn",
+      "EventType": "Process",
+      "Transaction": "TXN_TRACK_IN",
+      "Enabled": true
+    },
+    {
+      "EventName": "TrackOut",
+      "EventType": "Process",
+      "Transaction": "TXN_TRACK_OUT",
+      "Enabled": true
     }
   ],
   "Alarms": [
     {
       "AlarmType": "EquipmentAlarm",
       "Severity": "Critical",
-      "Transaction": "TXN_ALARM_SET"
+      "Transaction": "TXN_ALARM_SET",
+      "Enabled": true
     },
     {
       "AlarmType": "ProcessAlarm",
       "Severity": "Warning",
-      "Transaction": "TXN_PROCESS_WARNING"
+      "Transaction": "TXN_PROCESS_WARNING",
+      "Enabled": true
     }
   ],
   "Variables": [
@@ -52,73 +71,85 @@
       "MESField": "EquipmentID",
       "Type": "String",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "LotID",
       "Type": "String",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "CarrierID",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "PortID",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "CustomField1",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "CustomField2",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "CustomField3",
       "Type": "Float",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "AlarmID",
       "Type": "Integer",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "AlarmText",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "AlarmSeverity",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     }
   ],
   "Payloads": [
@@ -224,13 +255,6 @@
       "Rule": "UTCDateTime"
     }
   ],
-  "AutoMapping": {
-    "Enabled": true,
-    "Strategy": "DynamicVIDMapping",
-    "CanonicalModel": false,
-    "UnknownVIDHandling": "IgnoreAndLog",
-    "RequiredFieldValidation": true
-  },
   "Logging": {
     "Enabled": true,
     "AuditEnabled": true,

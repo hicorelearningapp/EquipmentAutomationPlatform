@@ -9,9 +9,7 @@ from source.managers.service_container import container
 from source.schemas.mapping import (
     MappingUpdateRequest,
     MESMappingRequest,
-    TestEquipmentVariable,
-    TestMESVariable,
-    TestMappingRequest,
+    AutoMapRequest,
     MESTag
 )
 from source.schemas.secsgem import EquipmentSpec, StatusVariable, Event, Alarm
@@ -39,7 +37,7 @@ class MappingAPI:
         # self.router.put("/UpdateMapping/{project_id}")(self.update_mapping)
         # self.router.post("/UploadMESTagDocument/{project_id}")(self.upload_mes_tag_document)
         # self.router.post("/GetMESMapping/{project_id}")(self.get_mes_mapping)
-        self.router.post("/TestMapping")(self.test_mapping)
+        self.router.post("/AutoMap")(self.auto_map)
 
     # def update_mapping(self, project_id: str, body: MappingUpdateRequest):
     #     return {
@@ -79,42 +77,10 @@ class MappingAPI:
     #         logger.error("MES mapping failed: %s", exc)
     #         raise HTTPException(500, f"Error generating mapping suggestions: {exc}") from exc
 
-    def test_mapping(self, body: TestMappingRequest):
+    def auto_map(self, body: AutoMapRequest):
         # 1. Resolve Equipment Spec
-        if body.equipment_variables is not None:
-            status_vars = []
-            events = []
-            alarms = []
-            for v in body.equipment_variables:
-                eid = _safe_int(v.id)
-                if v.entity_type == "variable":
-                    status_vars.append(StatusVariable(
-                        SVID=eid,
-                        Name=v.name,
-                        Description=v.description,
-                        DataType=v.data_type,
-                        AccessType="R"
-                    ))
-                elif v.entity_type == "event":
-                    events.append(Event(
-                        CEID=eid,
-                        Name=v.name,
-                        Description=v.description
-                    ))
-                elif v.entity_type == "alarm":
-                    alarms.append(Alarm(
-                        AlarmID=eid,
-                        Name=v.name,
-                        Severity="Warning",
-                        Description=v.description
-                    ))
-            spec = EquipmentSpec(
-                ToolID="TestTool",
-                ToolType="TestType",
-                StatusVariables=status_vars,
-                Events=events,
-                Alarms=alarms
-            )
+        if body.equipment_spec is not None:
+            spec = body.equipment_spec
         elif body.project_id is not None:
             try:
                 spec_path = self.storage.spec_json_path(body.project_id, "project_batch")
@@ -125,18 +91,11 @@ class MappingAPI:
             except ProjectNotFoundError as exc:
                 raise HTTPException(404, str(exc)) from exc
         else:
-            raise HTTPException(400, "Must provide either equipment_variables or project_id")
+            raise HTTPException(400, "Must provide either equipment_spec or project_id")
 
         # 2. Resolve MES Tags
-        if body.mes_variables is not None:
-            target_tags = []
-            for v in body.mes_variables:
-                target_tags.append(MESTag(
-                    tag_id=v.tag_id,
-                    name=v.name,
-                    description=v.description,
-                    expected_type=v.expected_type,
-                ))
+        if body.mes_template is not None:
+            target_tags = _extract_tags_from_template(body.mes_template)
         elif body.family is not None and body.template is not None:
             template_filename = body.template
             if not template_filename.lower().endswith(".json"):
@@ -159,7 +118,7 @@ class MappingAPI:
                 logger.error("Failed to read/parse template %s: %s", template_path, exc)
                 raise HTTPException(500, f"Error parsing template: {exc}")
         else:
-            raise HTTPException(400, "Must provide either mes_variables or family + template")
+            raise HTTPException(400, "Must provide either mes_template or family + template")
 
         # 3. Get suggestions
         try:

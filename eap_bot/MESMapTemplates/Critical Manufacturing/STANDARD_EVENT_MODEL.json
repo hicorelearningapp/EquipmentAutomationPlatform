@@ -1,10 +1,22 @@
 {
-  "Events": [],
+  "Events": [
+    {
+      "EventName": "TrackIn",
+      "EventType": "Process",
+      "Transaction": "TXN_TRACK_IN",
+      "Enabled": true
+    },
+    {
+      "EventName": "TrackOut",
+      "EventType": "Process",
+      "Transaction": "TXN_TRACK_OUT",
+      "Enabled": true
+    }
+  ],
   "Alarms": [],
   "Variables": [],
   "Payloads": [],
   "Transactions": [],
   "ValidationRules": [],
-  "AutoMapping": {},
   "Logging": {}
 }

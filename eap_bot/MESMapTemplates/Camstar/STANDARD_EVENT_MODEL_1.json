@@ -7,37 +7,55 @@
       "EventName": "LotStart",
       "EventType": "Process",
       "Transaction": "TXN_LOT_START",
-      "Payload": "LotStartPayload"
+      "Payload": "LotStartPayload",
+      "Enabled": true
     },
     {
       "EventName": "LotEnd",
       "EventType": "Process",
       "Transaction": "TXN_LOT_END",
-      "Payload": "LotEndPayload"
+      "Payload": "LotEndPayload",
+      "Enabled": true
     },
     {
       "EventName": "AlarmSet",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_SET",
-      "Payload": "AlarmPayload"
+      "Payload": "AlarmPayload",
+      "Enabled": true
     },
     {
       "EventName": "AlarmClear",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_CLEAR",
-      "Payload": "AlarmPayload"
+      "Payload": "AlarmPayload",
+      "Enabled": true
+    },
+    {
+      "EventName": "TrackIn",
+      "EventType": "Process",
+      "Transaction": "TXN_TRACK_IN",
+      "Enabled": true
+    },
+    {
+      "EventName": "TrackOut",
+      "EventType": "Process",
+      "Transaction": "TXN_TRACK_OUT",
+      "Enabled": true
     }
   ],
   "Alarms": [
     {
       "AlarmType": "EquipmentAlarm",
       "Severity": "Critical",
-      "Transaction": "TXN_ALARM_SET"
+      "Transaction": "TXN_ALARM_SET",
+      "Enabled": true
     },
     {
       "AlarmType": "ProcessAlarm",
       "Severity": "Warning",
-      "Transaction": "TXN_ALARM_SET"
+      "Transaction": "TXN_ALARM_SET",
+      "Enabled": true
     }
   ],
   "Variables": [
@@ -45,37 +63,43 @@
       "MESField": "EquipmentID",
       "Type": "String",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "LotID",
       "Type": "String",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "ContainerName",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "OperationName",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     }
   ],
   "Payloads": [

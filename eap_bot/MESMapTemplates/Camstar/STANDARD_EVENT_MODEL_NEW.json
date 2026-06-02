@@ -7,152 +7,190 @@
       "EventName": "LotStart",
       "EventType": "Process",
       "Transaction": "TXN_LOT_START",
-      "Payload": "LotStartPayload"
+      "Payload": "LotStartPayload",
+      "Enabled": true
     },
     {
       "EventName": "LotEnd",
       "EventType": "Process",
       "Transaction": "TXN_LOT_END",
-      "Payload": "LotEndPayload"
+      "Payload": "LotEndPayload",
+      "Enabled": true
     },
     {
       "EventName": "ContainerMove",
       "EventType": "WIP",
       "Transaction": "TXN_CONTAINER_MOVE",
-      "Payload": "ContainerPayload"
+      "Payload": "ContainerPayload",
+      "Enabled": true
     },
     {
       "EventName": "DataCollectionStart",
       "EventType": "Quality",
       "Transaction": "TXN_DC_START",
-      "Payload": "DataCollectionPayload"
+      "Payload": "DataCollectionPayload",
+      "Enabled": true
     },
     {
       "EventName": "DataCollectionEnd",
       "EventType": "Quality",
       "Transaction": "TXN_DC_END",
-      "Payload": "DataCollectionPayload"
+      "Payload": "DataCollectionPayload",
+      "Enabled": true
     },
     {
       "EventName": "AlarmSet",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_SET",
-      "Payload": "AlarmPayload"
+      "Payload": "AlarmPayload",
+      "Enabled": true
     },
     {
       "EventName": "AlarmClear",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_CLEAR",
-      "Payload": "AlarmPayload"
+      "Payload": "AlarmPayload",
+      "Enabled": true
+    },
+    {
+      "EventName": "TrackIn",
+      "EventType": "Process",
+      "Transaction": "TXN_TRACK_IN",
+      "Enabled": true
+    },
+    {
+      "EventName": "TrackOut",
+      "EventType": "Process",
+      "Transaction": "TXN_TRACK_OUT",
+      "Enabled": true
     }
   ],
   "Alarms": [
     {
       "AlarmType": "EquipmentAlarm",
       "Severity": "Critical",
-      "Transaction": "TXN_ALARM_SET"
+      "Transaction": "TXN_ALARM_SET",
+      "Enabled": true
     },
     {
       "AlarmType": "ProcessAlarm",
       "Severity": "Warning",
-      "Transaction": "TXN_PROCESS_WARNING"
+      "Transaction": "TXN_PROCESS_WARNING",
+      "Enabled": true
     },
     {
       "AlarmType": "QualityAlarm",
       "Severity": "Minor",
-      "Transaction": "TXN_QUALITY_ALARM"
+      "Transaction": "TXN_QUALITY_ALARM",
+      "Enabled": true
     }
   ],
   "Variables": [
     {
       "MESField": "EquipmentID",
+      "EquipmentField":"",
       "Type": "String",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "LotID",
       "Type": "String",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "ContainerName",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "ContainerType",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "OperationName",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "WorkflowName",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "ProductName",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "DataCollectionName",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "MeasuredValue",
       "Type": "Float",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "MeasurementUnit",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "AlarmID",
       "Type": "Integer",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "AlarmText",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "AlarmSeverity",
       "Type": "String",
       "Required": false,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
       "Required": true,
-      "Description": ""
+      "Description": "",
+      "Enabled": true
     }
   ],
   "Payloads": [
@@ -291,13 +329,6 @@
       "Rule": "AllowedValues:Cassette,FOUP,Boat,Tray"
     }
   ],
-  "AutoMapping": {
-    "Enabled": true,
-    "Strategy": "DynamicVIDMapping",
-    "CanonicalModel": true,
-    "UnknownVIDHandling": "IgnoreAndLog",
-    "RequiredFieldValidation": true
-  },
   "Logging": {
     "Enabled": true,
     "AuditEnabled": true,

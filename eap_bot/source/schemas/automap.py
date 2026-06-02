@@ -24,7 +24,7 @@ class AutoMapSuggestion(BaseModel):
     confidence: float
     method: str                 # "vector" | "llm_rerank"
     reasoning: Optional[str] = None
-    alternatives: list[AutoMapAlternative] = Field(default_factory=list)
+    alternatives: list[AutoMapAlternative] = Field(default_factory=list, exclude=True)
 
 
 class NeedsReviewEntry(BaseModel):

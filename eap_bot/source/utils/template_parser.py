@@ -25,6 +25,7 @@ def _extract_tags_from_template(data: Dict[str, Any]) -> List[MESTag]:
                 tag_id=event_name,
                 name=event_name,
                 description=e.get("EventType", ""),
+                transaction=e.get("Transaction", None)
             ))
     # Alarms section
     for a in data.get("Alarms", []):
@@ -34,5 +35,6 @@ def _extract_tags_from_template(data: Dict[str, Any]) -> List[MESTag]:
                 tag_id=alarm_type,
                 name=alarm_type,
                 description=a.get("Severity", ""),
+                transaction=a.get("Transaction", None)
             ))
     return tags

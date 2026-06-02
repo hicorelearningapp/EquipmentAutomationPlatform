@@ -93,8 +93,7 @@ class QAService:
         prompt = (
             "You are an expert equipment engineer. Answer the user's question using ONLY the provided contexts below. "
             "Cite VIDs/CEIDs/AlarmIDs verbatim if present. If the context does not contain the answer, say so.\n\n"
-            "CRITICAL CITATION RULE: For every factual claim, you MUST append a citation using the format [DocumentName, Page X]. "
-            "The DocumentName and Page number are provided in the [UNSTRUCTURED TEXT CONTEXT] blocks below. If page number is unknown, cite the DocumentName.\n\n"
+            "CRITICAL CITATION RULE: For every factual claim, you MUST append a citation using the exact [Source: ...] tag provided in the context blocks below.\n\n"
             "[UNSTRUCTURED TEXT CONTEXT]\n"
             f"{text_context_str or 'None'}\n\n"
             "[STRUCTURED TABULAR CONTEXT]\n"
@@ -143,9 +142,12 @@ class QAService:
         formatted_chunks = []
         if chunks:
             for c in chunks:
-                doc_name = c.metadata.get("document_name", "Unknown Document")
-                page_num = c.metadata.get("page_number", "Unknown Page")
-                formatted_chunks.append(f"[Source: {doc_name}, Page {page_num}]\n{c.page_content}")
+                doc_name = c.metadata.get("document_name") or document_id
+                page_num = c.metadata.get("page_number")
+                source_str = f"Source: {doc_name}"
+                if page_num:
+                    source_str += f", Page {page_num}"
+                formatted_chunks.append(f"[{source_str}]\n{c.page_content}")
             
         # 2. Tabular Entity Search
         lines = []
