@@ -318,6 +318,13 @@
       "Rule": "AllowedValues:Idle,Running,Paused,Error,Maintenance"
     }
   ],
+  "AutoMapping": {
+    "Enabled": true,
+    "Strategy": "DynamicVIDMapping",
+    "CanonicalModel": true,
+    "UnknownVIDHandling": "IgnoreAndLog",
+    "RequiredFieldValidation": true
+  },
   "Logging": {
     "Enabled": true,
     "AuditEnabled": true,

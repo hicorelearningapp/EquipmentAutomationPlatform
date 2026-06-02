@@ -49,13 +49,6 @@ MES_MAP_DIR: Path = Path(__file__).resolve().parent.parent.parent / "MESMapTempl
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
-def _increment_minor_version(version: str) -> str:
-    try:
-        major, minor = version.split(".", 1)
-        return f"{major}.{int(minor) + 1}"
-    except (ValueError, AttributeError):
-        return "1.1"
-
 
 def _resolve_template_path(family: str, template: str) -> Path:
     if not template.lower().endswith(".json"):
@@ -188,8 +181,8 @@ class AutoMapService:
                 project_id=project_id,
                 stats=AutoMapStats(total_tags=0),
             )
-            new_version = self._persist(template_path, template_data, block)
-            return AutoMapResponse(auto_mapping=block, version=new_version, template_path=str(template_path))
+            current_version = template_data.get("Version", "1.0")
+            return AutoMapResponse(auto_mapping=block, version=current_version, template_path=str(template_path))
 
         # 2. Build / load entity embeddings (cached per project)
         cache_path = self.storage.spec_json_path(project_id, "project_batch").parent / "entity_embeddings.npz"
@@ -344,25 +337,11 @@ class AutoMapService:
             suggestions=suggestions,
             needs_review=needs_review,
         )
-        new_version = self._persist(template_path, template_data, block)
+        current_version = template_data.get("Version", "1.0")
         response = AutoMapResponse(
             auto_mapping=block,
-            version=new_version,
+            version=current_version,
             template_path=str(template_path),
         )
         self.storage.save_automap_result(project_id, family, template, response)
         return response
-
-    # ── Persistence ─────────────────────────────────────────────────────────
-
-    @staticmethod
-    def _persist(template_path: Path, template_data: dict, block: AutoMapBlock) -> str:
-        """Write block into template['AutoMapping'] and bump Version."""
-        existing_version = template_data.get("Version", "1.0")
-        new_version = _increment_minor_version(existing_version)
-        template_data["AutoMapping"] = block.model_dump()
-        template_data["Version"] = new_version
-        with open(template_path, "w", encoding="utf-8") as f:
-            json.dump(template_data, f, indent=2)
-        logger.info("AutoMap persisted to %s (version %s -> %s)", template_path, existing_version, new_version)
-        return new_version
