@@ -129,14 +129,65 @@ class EquipmentAPI:
             raise HTTPException(500, str(exc)) from exc
         return {"Status": "success", "Message": f"Document {document_id} deleted"}
 
-    def update_extraction(self, project_id: int, spec: dict = Body(...)):
-        from source.schemas.secsgem import EquipmentSpec
+    def update_extraction(self, project_id: int, request: dict = Body(...)):
+        from source.schemas.project import UpdateExtractionRequest
+        from source.schemas.secsgem import EquipmentSpec, StatusVariable, DataVariable, Event, Alarm, RemoteCommand, State, StateTransition
+        from source.schemas.report import ReportDefinition, EventReportLink
+        
         try:
+            # Validate payload using new schema
+            validated_req = UpdateExtractionRequest(**request)
+            
             self.storage.increment_project_version(project_id)
             json_path = self.storage.spec_json_path(project_id, "project_batch")
-            spec_obj = EquipmentSpec(**spec)
+            
+            # Read existing EquipmentSpec (which holds ToolID/ToolType securely)
+            try:
+                spec_json = self.storage.read_spec_json(project_id, "project_batch")
+                spec_obj = EquipmentSpec.model_validate_json(spec_json)
+            except Exception:
+                spec_obj = EquipmentSpec(ToolID="", ToolType="")
+                
+            # Map fields back to EquipmentSpec format
+            spec_obj.StatusVariables = [
+                StatusVariable(
+                    SVID=sv.SVID, Name=sv.Name, Description=sv.Description,
+                    DataType=sv.DataType, AccessType=sv.AccessType
+                ) for sv in validated_req.StatusVariables
+            ]
+            
+            spec_obj.DataVariables = [
+                DataVariable(
+                    DvID=dv.DvID, Name=dv.Name, Unit=dv.Unit, ValueType=dv.ValueType
+                ) for dv in validated_req.DataVariables
+            ]
+            
+            spec_obj.Events = [
+                Event(
+                    CEID=e.CEID, Name=e.EventName, Description=e.Description
+                ) for e in validated_req.Events
+            ]
+            
+            spec_obj.Alarms = [
+                Alarm(
+                    AlarmID=a.AlarmID, Name=a.AlarmText, Severity=a.Severity
+                ) for a in validated_req.Alarms
+            ]
+            
+            spec_obj.RemoteCommands = [
+                RemoteCommand(
+                    RCMD=rc.RCMD, Description=rc.Description, Parameters=rc.Parameters
+                ) for rc in validated_req.RemoteCommands
+            ]
+            
+            spec_obj.States = [State(**s) for s in validated_req.States]
+            spec_obj.StateTransitions = [StateTransition(**st) for st in validated_req.StateTransitions]
+            spec_obj.Reports = [ReportDefinition(**r) for r in validated_req.Reports]
+            spec_obj.EventReportLinks = [EventReportLink(**erl) for erl in validated_req.EventReportLinks]
+            
             self.storage.save_spec_json(json_path, spec_obj)
             return {"Status": "success", "Message": "Extraction updated successfully"}
+            
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
         except ProjectNotFoundError as exc:

@@ -157,3 +157,46 @@ class SystemSummaryResponse(BaseModel):
     TotalProjects: int
     TotalSmlScripts: int
     TotalConnectedTools: int
+
+class FrontendStatusVariable(BaseModel):
+    SVID: int
+    Name: str
+    Description: Optional[str] = ""
+    DataType: str
+    AccessType: str
+
+class FrontendDataVariable(BaseModel):
+    DvID: int
+    Name: str
+    Unit: Optional[str] = ""
+    ValueType: str
+
+class FrontendEvent(BaseModel):
+    CEID: int
+    EventName: str
+    Description: Optional[str] = ""
+
+class FrontendAlarm(BaseModel):
+    AlarmID: int
+    AlarmText: str
+    Severity: str
+
+class FrontendRemoteCommand(BaseModel):
+    RCMD: str
+    Description: Optional[str] = ""
+    Parameters: list[dict] = Field(default_factory=list)
+
+class UpdateExtractionRequest(BaseModel):
+    ProjectID: int
+    ExtractionID: str
+    ConfidenceScore: float = 0.0
+    ExtractionStatus: str = "completed"
+    StatusVariables: list[FrontendStatusVariable] = Field(default_factory=list)
+    DataVariables: list[FrontendDataVariable] = Field(default_factory=list)
+    Events: list[FrontendEvent] = Field(default_factory=list)
+    Alarms: list[FrontendAlarm] = Field(default_factory=list)
+    RemoteCommands: list[FrontendRemoteCommand] = Field(default_factory=list)
+    States: list[dict] = Field(default_factory=list)
+    StateTransitions: list[dict] = Field(default_factory=list)
+    Reports: list[dict] = Field(default_factory=list)
+    EventReportLinks: list[dict] = Field(default_factory=list)
