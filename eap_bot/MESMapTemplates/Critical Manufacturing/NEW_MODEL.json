@@ -8,68 +8,78 @@
       "EventType": "Process",
       "Transaction": "TXN_LOT_START",
       "Payload": "LotStartPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "LotEnd",
       "EventType": "Process",
       "Transaction": "TXN_LOT_END",
       "Payload": "LotEndPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "MaterialIn",
       "EventType": "Material",
       "Transaction": "TXN_MATERIAL_IN",
       "Payload": "MaterialPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "MaterialOut",
       "EventType": "Material",
       "Transaction": "TXN_MATERIAL_OUT",
       "Payload": "MaterialPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "ParametricDataReported",
       "EventType": "Quality",
       "Transaction": "TXN_PARAM_DATA",
       "Payload": "ParametricPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "AlarmSet",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_SET",
       "Payload": "AlarmPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "AlarmClear",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_CLEAR",
       "Payload": "AlarmPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "SchedulerRequest",
       "EventType": "Control",
       "Transaction": "TXN_SCHEDULER_REQUEST",
       "Payload": "SchedulerPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "TrackIn",
       "EventType": "Process",
       "Transaction": "TXN_TRACK_IN",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "TrackOut",
       "EventType": "Process",
       "Transaction": "TXN_TRACK_OUT",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     }
   ],
   "Alarms": [
@@ -77,25 +87,29 @@
       "AlarmType": "EquipmentAlarm",
       "Severity": "Critical",
       "Transaction": "TXN_ALARM_SET",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "AlarmType": "ProcessAlarm",
       "Severity": "Warning",
       "Transaction": "TXN_PROCESS_WARNING",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "AlarmType": "SPCAlarm",
       "Severity": "Warning",
       "Transaction": "TXN_SPC_ALARM",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "AlarmType": "SchedulerAlarm",
       "Severity": "Minor",
       "Transaction": "TXN_SCHEDULER_ALARM",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     }
   ],
   "Variables": [
@@ -104,112 +118,128 @@
       "Type": "String",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "LotID",
       "Type": "String",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "MaterialID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "MaterialType",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "StepID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "WorkOrderID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "OperationID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "ParameterName",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "ParameterValue",
       "Type": "Float",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "ParameterUnit",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "SchedulerTaskID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "AlarmID",
       "Type": "Integer",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "AlarmText",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "AlarmSeverity",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     }
   ],
   "Payloads": [

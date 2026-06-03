@@ -178,6 +178,22 @@ class StorageService:
         path.write_text(json.dumps(SML_CHARACTERISATION_TEMPLATE, indent=2), encoding="utf-8")
         logger.info("Wrote SML template to %s", path)
 
+    def save_mes_mapping(self, project_id: int, family: str, template: str, data: dict) -> Path:
+        self.get_project(project_id)
+        # Handle template names that might have .json extension
+        template_name = template if template.lower().endswith(".json") else f"{template}.json"
+        template_name = template_name.replace(".json", "_mapped.json")
+        
+        mapping_dir = self._project_dir(project_id) / self.MES_MAPPING_JSON_DIR / family
+        mapping_dir.mkdir(parents=True, exist_ok=True)
+        
+        mapping_path = mapping_dir / template_name
+        with open(mapping_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+            
+        logger.info(f"Saved MES Mapping to {mapping_path}")
+        return mapping_path
+
     def save_multiple_test_results(self, project_id: int, tool_id: str, files_data: list[dict], file_type: str = "unknown") -> list[str]:
         self.get_project(project_id)
         
@@ -774,12 +790,13 @@ class StorageService:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(mapping.model_dump_json(indent=2), encoding="utf-8")
 
-    def save_automap_result(self, project_id: int, family: str, template: str, result: Any) -> None:
-        """Save the AutoMapResponse to MESMappingJSON/{family}/{template}"""
+    def save_automap_result(self, project_id: int, family: str, template: str, result: dict) -> None:
+        """Save the full template with AutoMapping to MESMappingJSON/{family}/{template}"""
         self.get_project(project_id)
         path = self._project_dir(project_id) / self.MES_MAPPING_JSON_DIR / family / template
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(result.model_dump_json(indent=2), encoding="utf-8")
+        import json
+        path.write_text(json.dumps(result, indent=2), encoding="utf-8")
         logger.info("Saved AutoMap result for project %s to %s", project_id, path)
 
     def read_spec_json(self, project_id: int, document_id: str) -> str:
@@ -1029,8 +1046,9 @@ class StorageService:
     def _read_metadata(self, path: Path) -> ProjectMetadata:
         try:
             return ProjectMetadata.model_validate_json(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError) as exc:
-            raise StorageError(f"Could not read project metadata at {path}") from exc
+        except Exception as exc:
+            import traceback
+            raise StorageError(f"Could not read project metadata at {path}. Exception: {exc}\nTraceback: {traceback.format_exc()}") from exc
 
     def _write_metadata(self, metadata: ProjectOut | ProjectMetadata) -> None:
         self._ensure_project_dirs(metadata.ProjectID)

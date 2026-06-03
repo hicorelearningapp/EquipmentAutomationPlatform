@@ -27,7 +27,7 @@ class ProjectService:
 
     # ── Batch analysis + aggregation ─────────────────────────────────────────
 
-    def aggregate_project_data(self, project_id: int) -> tuple[Any, AggregatedSpec]:
+    def aggregate_project_data(self, project_id: int, auto_analyze: bool = False) -> tuple[Any, AggregatedSpec]:
         """
         1. Analyse any pending documents.
         2. Aggregate + deduplicate all completed specs.
@@ -64,18 +64,19 @@ class ProjectService:
         else:
             logger.info("Project %s has user-uploaded SML scripts; skipping template copy", project_id)
 
-        # Analyse pending documents
-        for doc in metadata.Documents:
-            if doc.Status != "completed":
-                logger.info("Auto-analysing document %s for project %s", doc.DocumentID, project_id)
-                try:
-                    self._analyse_single_document(project_id, doc, metadata)
-                except Exception as e:
-                    logger.error("Failed to auto-analyse %s: %s", doc.DocumentID, e)
-                    self.storage.mark_failed(project_id, doc.DocumentID)
+        if auto_analyze:
+            # Analyse pending documents
+            for doc in metadata.Documents:
+                if doc.Status != "completed":
+                    logger.info("Auto-analysing document %s for project %s", doc.DocumentID, project_id)
+                    try:
+                        self._analyse_single_document(project_id, doc, metadata)
+                    except Exception as e:
+                        logger.error("Failed to auto-analyse %s: %s", doc.DocumentID, e)
+                        self.storage.mark_failed(project_id, doc.DocumentID)
 
-        # Reload metadata after analysis
-        metadata = self.storage.get_project(project_id)
+            # Reload metadata after analysis
+            metadata = self.storage.get_project(project_id)
 
         # Build aggregated spec
         aggregated = self._build_aggregated_spec(project_id, metadata)
@@ -104,7 +105,6 @@ class ProjectService:
                 ToolType=tool_type,
             )
             spec.Reports = []
-            spec.EventReportLinks = []
         else:
             doc_text = self._container.parser.extract_text(str(file_path))
             if not doc_text.strip():
@@ -121,13 +121,11 @@ class ProjectService:
             )
 
             try:
-                reports, links = self._container.report_service.generate(spec, doc_text)
+                reports = self._container.report_service.extract_builtin_reports(doc_text)
                 spec.Reports = reports
-                spec.EventReportLinks = links
             except Exception as exc:
-                logger.error("Report generation failed for %s (non-fatal): %s", doc.DocumentID, exc)
+                logger.error("Report extraction failed for %s (non-fatal): %s", doc.DocumentID, exc)
                 spec.Reports = []
-                spec.EventReportLinks = []
 
         json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
         self.storage.save_spec_json(json_path, spec)
@@ -173,10 +171,9 @@ class ProjectService:
                     if not spec.Reports and not is_excel and not is_txt:
                         file_path = self._resolve_document_path(project_id, doc)
                         text = self._container.parser.extract_text(str(file_path))
-                        reports, links = self._container.report_service.generate(spec, text)
+                        reports = self._container.report_service.extract_builtin_reports(text)
                         if reports:
                             spec.Reports = reports
-                            spec.EventReportLinks = links
                             json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
                             self.storage.save_spec_json(json_path, spec)
 
@@ -188,7 +185,6 @@ class ProjectService:
                     aggregated.States.extend(spec.States)
                     aggregated.StateTransitions.extend(spec.StateTransitions)
                     aggregated.Reports.extend(spec.Reports)
-                    aggregated.EventReportLinks.extend(spec.EventReportLinks)
                 except Exception as e:
                     logger.warning("Failed to read/merge spec for %s: %s", doc.DocumentID, e)
                     continue
@@ -202,7 +198,6 @@ class ProjectService:
         aggregated.States = self._dedup_by(aggregated.States, "StateID")
         aggregated.StateTransitions = self._dedup_transitions(aggregated.StateTransitions)
         aggregated.Reports = self._dedup_by(aggregated.Reports, "RPTID")
-        aggregated.EventReportLinks = self._dedup_by(aggregated.EventReportLinks, "CEID")
 
         return aggregated
 

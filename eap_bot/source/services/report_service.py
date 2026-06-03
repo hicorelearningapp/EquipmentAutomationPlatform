@@ -16,7 +16,7 @@ Chain:
 
   Step 3 — CEID linking
       Given the Events and the reports from Step 2, generate the
-      EventReportLink list (which CEID fires which RPTIDs).
+      links mapping CEIDs to RPTIDs.
 
 All three steps produce JSON.  Failures in any step are logged and result
 in an empty list for that step so the caller always gets a valid (possibly
@@ -27,7 +27,7 @@ import json
 import logging
 from typing import Optional
 
-from source.schemas.secsgem import EquipmentSpec, ReportDefinition, EventReportLink
+from source.schemas.secsgem import EquipmentSpec, ReportDefinition
 from source.utils.llm_factory import LLMStrategy
 
 logger = logging.getLogger(__name__)
@@ -45,12 +45,12 @@ Return ONLY a JSON object with a "Hints" key containing an array of report defin
 Each element in the array must have:
   "RPTID"      : string  — the report identifier (e.g. "RPT_001" or as named in the doc)
   "Name"       : string  — a short descriptive name
-  "LinkedVIDs" : [int]   — list of DVID/SVID integers associated with this report
+  "Items"      : [int]   — list of DVID/SVID integers associated with this report
 
 Example format:
 {{
   "Hints": [
-    {{ "RPTID": "RPT_1", "Name": "...", "LinkedVIDs": [101, 102] }}
+    {{ "RPTID": "RPT_1", "Name": "...", "Items": [101, 102] }}
   ]
 }}
 
@@ -87,7 +87,7 @@ Return ONLY a JSON object with a "Reports" key containing the array of reports.
 Each element must have:
   "RPTID"      : string
   "Name"       : string
-  "LinkedVIDs" : [int]
+  "Items"      : [int]
   "Confidence" : float
   "Reasoning"  : string  (optional)
 
@@ -127,15 +127,41 @@ class ReportService:
     def __init__(self, llm_strategy: LLMStrategy) -> None:
         self._llm = llm_strategy.get_model(temperature=0.0, require_json=True)
 
-    def generate(
+    def extract_builtin_reports(self, pdf_text: str = "") -> list[ReportDefinition]:
+        hints = self._step1_extract_hints(pdf_text)
+        reports = []
+        for h in hints:
+            try:
+                reports.append(ReportDefinition.model_validate(h))
+            except Exception as exc:
+                logger.warning("Skipping invalid report hint %s: %s", h, exc)
+        return reports
+
+    def generate_synthetic_reports(
         self,
         spec: EquipmentSpec,
-        pdf_text: str = "",
-    ) -> tuple[list[ReportDefinition], list[EventReportLink]]:
-        hints = self._step1_extract_hints(pdf_text)
+        hints: list[dict] = None
+    ) -> list[ReportDefinition]:
+        if hints is None:
+            hints = [r.model_dump() for r in spec.Reports]
+            
         reports = self._step2_synthesise_reports(spec, hints)
         links = self._step3_link_events(spec, reports)
-        return reports, links
+        
+        # Merge links into reports
+        rpt_to_events = {}
+        for link in links:
+            ceid = link.get("CEID")
+            for rpt_id in link.get("RPTIDs", []):
+                if rpt_id not in rpt_to_events:
+                    rpt_to_events[rpt_id] = []
+                if ceid not in rpt_to_events[rpt_id]:
+                    rpt_to_events[rpt_id].append(ceid)
+                    
+        for r in reports:
+            r.LinkedEvents = rpt_to_events.get(r.RPTID, [])
+            
+        return reports
 
     def _step1_extract_hints(self, pdf_text: str) -> list[dict]:
         if not pdf_text.strip():
@@ -185,18 +211,18 @@ class ReportService:
 
     def _step3_link_events(
         self, spec: EquipmentSpec, reports: list[ReportDefinition]
-    ) -> list[EventReportLink]:
+    ) -> list[dict]:
         if not reports:
             return []
 
         events_text = "\n".join(
-            f"  CEID={e.CEID}  Name={e.Name}  Report={e.Report}"
+            f"  CEID={e.CEID}  Name={e.EventName}  Report={e.Report}"
             + (f"  LinkedVIDs={e.LinkedVIDs}" if e.LinkedVIDs else "")
             for e in spec.Events
         ) or "  (none)"
 
         reports_text = "\n".join(
-            f"  RPTID={r.RPTID}  Name={r.Name}  LinkedVIDs={r.LinkedVIDs}"
+            f"  RPTID={r.RPTID}  Name={r.Name}  Items={r.Items}"
             for r in reports
         )
 
@@ -208,10 +234,11 @@ class ReportService:
             valid_rptids = {r.RPTID for r in reports}
             for item in items:
                 try:
-                    link = EventReportLink.model_validate(item)
-                    link.RPTIDs = [r for r in link.RPTIDs if r in valid_rptids]
-                    if link.RPTIDs:
-                        links.append(link)
+                    # item is a dict like {"CEID": 123, "RPTIDs": ["RPT1"]}
+                    valid_links = [r for r in item.get("RPTIDs", []) if r in valid_rptids]
+                    if valid_links:
+                        item["RPTIDs"] = valid_links
+                        links.append(item)
                 except Exception as exc:
                     logger.warning("Skipping invalid link item %s: %s", item, exc)
             logger.info("ReportService step 3: generated %d event-report links", len(links))

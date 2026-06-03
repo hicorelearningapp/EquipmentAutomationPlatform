@@ -80,7 +80,7 @@ def flatten_spec(spec: EquipmentSpec) -> List[EntityRow]:
         rows.append(EntityRow(
             entity_id=str(e.CEID),
             entity_type="event",
-            name=e.Name,
+            name=e.EventName,
             description=e.Description or "",
             data_type="",
             unit="",
@@ -90,7 +90,7 @@ def flatten_spec(spec: EquipmentSpec) -> List[EntityRow]:
         rows.append(EntityRow(
             entity_id=str(a.AlarmID),
             entity_type="alarm",
-            name=a.Name,
+            name=a.AlarmName,
             description=a.Description or "",
             data_type="",
             unit="",

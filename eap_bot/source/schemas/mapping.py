@@ -10,23 +10,22 @@ class MESTag(BaseModel):
     transaction: Optional[str] = None
 
 class MappingEntry(BaseModel):
-    EntityID: str
+    EquipmentField: str
     EquipmentID: str = ""
     EntityType: str # variable, event, or alarm
-    TagID: str
+    MESField: str
     Transaction: Optional[str] = None
     Confidence: float
     Reasoning: str = ""
     Method: str = "llm"
 
 class UnmappedEntity(BaseModel):
-    EntityID: str
+    EquipmentField: str
     EquipmentID: str = ""
     EntityType: str
     Name: str
 
 class MappingSuggestionResponse(BaseModel):
-    EquipmentID: str = ""
     Suggestions: List[MappingEntry] = Field(default_factory=list)
     Unmapped: List[UnmappedEntity] = Field(default_factory=list)
 
@@ -40,9 +39,11 @@ class ProjectMapping(BaseModel):
     ProjectID: int
     Mappings: List[VariableMapping] = Field(default_factory=list)
 
-class MappingUpdateRequest(BaseModel):
-    MESTags: List[str] = Field(default_factory=list)
-    MESTagDocumentIDs: List[str] = Field(default_factory=list)
+class SaveMappingRequest(BaseModel):
+    project_id: Optional[int] = None
+    family: str
+    template: str
+    Mappings: List[MappingEntry] = Field(default_factory=list)
 
 
 class MESMappingRequest(BaseModel):
@@ -54,13 +55,16 @@ from typing import Dict
 
 from source.schemas.secsgem import EquipmentSpec
 
-class AutoMapRequest(BaseModel):
-    # ── Equipment side (provide ONE of these) ──────────────────────
-    equipment_spec: Optional[EquipmentSpec] = None
-    project_id: Optional[int] = None  # fallback: load from project batch spec
+from enum import Enum
 
-    # ── MES side (provide ONE of these) ────────────────────────────
-    mes_template: Optional[Dict[str, Any]] = None
-    family: Optional[str] = None      # fallback: load from template
-    template: Optional[str] = None    # fallback: load from template
+class AutoMapEntity(str, Enum):
+    VARIABLES = "Variables"
+    EVENTS = "Events"
+    ALARMS = "Alarms"
+
+class AutoMapRequest(BaseModel):
+    project_id: int
+    family: str
+    template: str
+    entity: Optional[AutoMapEntity] = None
 

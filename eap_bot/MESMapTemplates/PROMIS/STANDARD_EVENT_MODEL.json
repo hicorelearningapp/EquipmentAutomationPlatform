@@ -9,61 +9,70 @@
       "EventType": "Process",
       "Transaction": "TXN_LOT_START",
       "Payload": "LotStartPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "LotEnd",
       "EventType": "Process",
       "Transaction": "TXN_LOT_END",
       "Payload": "LotEndPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "LotSplit",
       "EventType": "Process",
       "Transaction": "TXN_LOT_SPLIT",
       "Payload": "LotSplitPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "LotMerge",
       "EventType": "Process",
       "Transaction": "TXN_LOT_MERGE",
       "Payload": "LotMergePayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "AlarmSet",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_SET",
       "Payload": "AlarmPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "AlarmClear",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_CLEAR",
       "Payload": "AlarmPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "RecipeDownload",
       "EventType": "Control",
       "Transaction": "TXN_RECIPE_DOWNLOAD",
       "Payload": "RecipePayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "TrackIn",
       "EventType": "Process",
       "Transaction": "TXN_TRACK_IN",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "TrackOut",
       "EventType": "Process",
       "Transaction": "TXN_TRACK_OUT",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     }
   ],
   "Alarms": [
@@ -71,19 +80,22 @@
       "AlarmType": "EquipmentAlarm",
       "Severity": "Critical",
       "Transaction": "TXN_ALARM_SET",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "AlarmType": "ProcessAlarm",
       "Severity": "Warning",
       "Transaction": "TXN_PROCESS_WARNING",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "AlarmType": "InterlockAlarm",
       "Severity": "Critical",
       "Transaction": "TXN_INTERLOCK_ALARM",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     }
   ],
   "Variables": [
@@ -92,98 +104,112 @@
       "Type": "String",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "LotID",
       "Type": "String",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "ParentLotID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "ChildLotIDs",
       "Type": "StringArray",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "RecipeRevision",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "CarrierID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "PortID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "StepName",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "RouteID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "AlarmID",
       "Type": "Integer",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "AlarmText",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "AlarmSeverity",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     }
   ],
   "Payloads": [

@@ -92,7 +92,7 @@ class SpecValidator:
     def _check_transition_triggers(
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
-        event_names = {e.Name for e in spec.Events} | {str(e.CEID) for e in spec.Events}
+        event_names = {e.EventName for e in spec.Events} | {str(e.CEID) for e in spec.Events}
         rcmd_names = {c.RCMD for c in spec.RemoteCommands}
         for i, t in enumerate(spec.StateTransitions):
             if t.TriggerEvent and t.TriggerEvent not in event_names:

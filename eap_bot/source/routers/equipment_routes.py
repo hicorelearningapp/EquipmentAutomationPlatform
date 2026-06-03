@@ -31,6 +31,8 @@ class EquipmentAPI:
         self.router.get("/GetVariable/{project_id}/{document_id}", tags=["documents"])(self.get_variable)
         self.router.delete("/DeleteDocument/{project_id}/{document_id}", tags=["documents"])(self.delete_document)
         self.router.post("/UpdateExtraction/{project_id}", tags=["documents"])(self.update_extraction)
+        self.router.post("/GenerateReports/{project_id}", tags=["documents"])(self.generate_reports)
+        self.router.put("/UpdateReports/{project_id}", tags=["documents"])(self.update_reports)
 
     async def upload_document(
         self,
@@ -66,7 +68,7 @@ class EquipmentAPI:
 
     def analyze_project(self, project_id: int):
         try:
-            metadata, aggregated = container.project_service.aggregate_project_data(project_id)
+            metadata, aggregated = container.project_service.aggregate_project_data(project_id, auto_analyze=True)
             return container.document_service._build_extraction_response(
                 project_id, "project_batch", aggregated
             )
@@ -131,8 +133,9 @@ class EquipmentAPI:
 
     def update_extraction(self, project_id: int, request: dict = Body(...)):
         from source.schemas.project import UpdateExtractionRequest
+        from source.schemas.project import UpdateExtractionRequest
         from source.schemas.secsgem import EquipmentSpec, StatusVariable, DataVariable, Event, Alarm, RemoteCommand, State, StateTransition
-        from source.schemas.report import ReportDefinition, EventReportLink
+        from source.schemas.report import ReportDefinition
         
         try:
             # Validate payload using new schema
@@ -183,7 +186,6 @@ class EquipmentAPI:
             spec_obj.States = [State(**s) for s in validated_req.States]
             spec_obj.StateTransitions = [StateTransition(**st) for st in validated_req.StateTransitions]
             spec_obj.Reports = [ReportDefinition(**r) for r in validated_req.Reports]
-            spec_obj.EventReportLinks = [EventReportLink(**erl) for erl in validated_req.EventReportLinks]
             
             self.storage.save_spec_json(json_path, spec_obj)
             return {"Status": "success", "Message": "Extraction updated successfully"}
@@ -194,3 +196,51 @@ class EquipmentAPI:
             raise HTTPException(404, str(exc)) from exc
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
+
+    def generate_reports(self, project_id: int):
+        from source.schemas.secsgem import EquipmentSpec
+        try:
+            self.storage.increment_project_version(project_id)
+            json_path = self.storage.spec_json_path(project_id, "project_batch")
+            try:
+                spec_json = self.storage.read_spec_json(project_id, "project_batch")
+                spec_obj = EquipmentSpec.model_validate_json(spec_json)
+            except Exception:
+                _, spec_obj = container.project_service.aggregate_project_data(project_id)
+            
+            reports = container.report_service.generate_synthetic_reports(spec_obj)
+            spec_obj.Reports = reports
+            self.storage.save_spec_json(json_path, spec_obj)
+            
+            return container.document_service._build_extraction_response(
+                project_id, "project_batch", spec_obj
+            )
+        except (InvalidSlugError, ProjectNotFoundError) as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc
+
+    def update_reports(self, project_id: int, request: dict = Body(...)):
+        from source.schemas.secsgem import EquipmentSpec
+        from source.schemas.report import ReportDefinition
+        
+        try:
+            reports_data = request.get("Reports", [])
+            reports = [ReportDefinition(**r) for r in reports_data]
+            
+            self.storage.increment_project_version(project_id)
+            json_path = self.storage.spec_json_path(project_id, "project_batch")
+            try:
+                spec_json = self.storage.read_spec_json(project_id, "project_batch")
+                spec_obj = EquipmentSpec.model_validate_json(spec_json)
+            except Exception:
+                _, spec_obj = container.project_service.aggregate_project_data(project_id)
+            
+            spec_obj.Reports = reports
+            self.storage.save_spec_json(json_path, spec_obj)
+            
+            return container.document_service._build_extraction_response(
+                project_id, "project_batch", spec_obj
+            )
+        except Exception as exc:
+            raise HTTPException(400, f"Error updating reports: {str(exc)}")

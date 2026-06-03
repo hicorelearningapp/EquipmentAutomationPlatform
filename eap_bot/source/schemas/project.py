@@ -24,6 +24,7 @@ class DocumentCategory(str, Enum):
     SML_SCRIPTS = "SML Scripts"
     SECS_GEM_SCRIPTS = "SECS GEM Scripts"
     EQUIPMENT_DATA = "Equipment Data"
+    MISCELLANEOUS = "Miscellaneous"
 
 
 class TestResultFileType(str, Enum):
@@ -113,7 +114,6 @@ class AggregatedSpec(BaseModel):
     States: list[Any] = Field(default_factory=list)
     StateTransitions: list[Any] = Field(default_factory=list)
     Reports: list[Any] = Field(default_factory=list)
-    EventReportLinks: list[Any] = Field(default_factory=list)
 
 class ProjectDetail(ProjectMetadata):
     Extractions: AggregatedSpec = Field(default_factory=AggregatedSpec)
@@ -200,4 +200,3 @@ class UpdateExtractionRequest(BaseModel):
     States: list[dict] = Field(default_factory=list)
     StateTransitions: list[dict] = Field(default_factory=list)
     Reports: list[dict] = Field(default_factory=list)
-    EventReportLinks: list[dict] = Field(default_factory=list)

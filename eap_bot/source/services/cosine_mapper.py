@@ -64,14 +64,14 @@ class CosineSimilarityMapper:
             equipment_entities.append({
                 "entity_id": str(e.CEID),
                 "entity_type": "event",
-                "name": e.Name,
+                "name": e.EventName,
                 "description": e.Description or "",
             })
         for a in spec.Alarms:
             equipment_entities.append({
                 "entity_id": str(a.AlarmID),
                 "entity_type": "alarm",
-                "name": a.Name,
+                "name": a.AlarmName,
                 "description": a.Description or "",
             })
 
@@ -121,10 +121,9 @@ class CosineSimilarityMapper:
                     continue
 
                 high_confidence_mappings.append(MappingEntry(
-                    EntityID=best_entity["entity_id"],
-                    EquipmentID=spec.ToolID,
+                    EquipmentField=best_entity["entity_id"],
                     EntityType=best_entity["entity_type"],
-                    TagID=tag.tag_id,
+                    MESField=tag.tag_id,
                     Transaction=tag.transaction,
                     Confidence=top_score,
                     Reasoning=f"High vector similarity match ({top_score:.2f})",

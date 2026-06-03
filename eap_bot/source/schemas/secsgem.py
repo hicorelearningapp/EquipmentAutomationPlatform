@@ -1,7 +1,7 @@
 from typing import Literal, Optional
 from pydantic import BaseModel, Field, model_validator
 
-from source.schemas.report import ReportDefinition, EventReportLink
+from source.schemas.report import ReportDefinition
 
 
 class StatusVariable(BaseModel):
@@ -35,21 +35,29 @@ class RemoteCommand(BaseModel):
 
 class Event(BaseModel):
     CEID: int
-    Name: str
+    EventName: str = Field(alias="Name")
     Description: Optional[str] = None
     LinkedVIDs: list[int] = Field(default_factory=list)
     ReportID: Optional[str] = None
     Report: bool = True
     Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class Alarm(BaseModel):
     AlarmID: int
-    Name: str
+    AlarmName: str = Field(alias="Name")
     Severity: str
     LinkedVID: Optional[int] = None
     Description: Optional[str] = None
     Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    
+    model_config = {
+        "populate_by_name": True
+    }
 
 
 class State(BaseModel):
@@ -74,8 +82,8 @@ class StateTransition(BaseModel):
 
 class EquipmentSpec(BaseModel):
     DocumentType: Optional[str] = None
-    ToolID: str
-    ToolType: str
+    ToolID: Optional[str] = None
+    ToolType: Optional[str] = None
     Model: Optional[str] = None
     Protocol: str = "SECS/GEM"
     StatusVariables: list[StatusVariable] = Field(default_factory=list)
@@ -86,7 +94,6 @@ class EquipmentSpec(BaseModel):
     States: list[State] = Field(default_factory=list)
     StateTransitions: list[StateTransition] = Field(default_factory=list)
     Reports: list[ReportDefinition] = Field(default_factory=list)
-    EventReportLinks: list[EventReportLink] = Field(default_factory=list)
 
 
 class ValidationIssue(BaseModel):

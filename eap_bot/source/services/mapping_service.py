@@ -40,12 +40,14 @@ class MappingService:
                 raw = self._llm.invoke(prompt).content
                 if isinstance(raw, list):
                     raw = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in raw)
+                print(f"DEBUG RAW PRIMARY LLM: {raw}")
                 llm_data = json.loads(raw)
             except Exception as e:
                 logger.warning("Primary mapping failed (%s) — retrying.", e)
                 raw = self._llm_retry.invoke(prompt).content
                 if isinstance(raw, list):
                     raw = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in raw)
+                print(f"DEBUG RAW FALLBACK LLM: {raw}")
                 llm_data = json.loads(raw)
 
             llm_data = self._sanitize(llm_data, spec, unresolved_tags)
@@ -61,7 +63,6 @@ class MappingService:
             combined_suggestions.append(ls)
 
         final_data = {
-            "EquipmentID": spec.ToolID,
             "Suggestions": combined_suggestions
         }
         
@@ -74,15 +75,14 @@ class MappingService:
     def _find_unmapped(
         self, spec: EquipmentSpec, suggestions: List[MappingEntry]
     ) -> List[UnmappedEntity]:
-        mapped_entity_ids = {s.EntityID for s in suggestions}
+        mapped_entity_ids = {s.EquipmentField for s in suggestions}
         unmapped = []
 
         for v in spec.StatusVariables:
             vid_str = str(v.SVID)
             if vid_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    EntityID=vid_str,
-                    EquipmentID=spec.ToolID,
+                    EquipmentField=vid_str,
                     EntityType="variable",
                     Name=v.Name,
                 ))
@@ -90,8 +90,7 @@ class MappingService:
             vid_str = str(v.DvID)
             if vid_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    EntityID=vid_str,
-                    EquipmentID=spec.ToolID,
+                    EquipmentField=vid_str,
                     EntityType="variable",
                     Name=v.Name,
                 ))
@@ -99,19 +98,18 @@ class MappingService:
             ceid_str = str(e.CEID)
             if ceid_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    EntityID=ceid_str,
-                    EquipmentID=spec.ToolID,
+                    EquipmentField=ceid_str,
                     EntityType="event",
-                    Name=e.Name,
+                    Name=e.EventName,
+                    
                 ))
         for a in spec.Alarms:
             alarm_id_str = str(a.AlarmID)
             if alarm_id_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    EntityID=alarm_id_str,
-                    EquipmentID=spec.ToolID,
+                    EquipmentField=alarm_id_str,
                     EntityType="alarm",
-                    Name=a.Name,
+                    Name=a.AlarmName,
                 ))
         return unmapped
 
@@ -119,37 +117,71 @@ class MappingService:
     def _sanitize(
         self, data: dict, spec: EquipmentSpec, target_tags: List[MESTag]
     ) -> dict:
-        valid_entity_ids: set[str] = set()
+        entity_id_lookup = {}
+        entity_name_lookup = {}
+        
         for v in spec.StatusVariables:
-            valid_entity_ids.add(str(v.SVID))
+            v_id = str(v.SVID)
+            v_name = v.Name
+            
+            entity_id_lookup[v_id] = v_id
+            if v_name: entity_id_lookup[v_name.lower()] = v_id
+            
+            entity_name_lookup[v_id] = v_name
+            if v_name: entity_name_lookup[v_name.lower()] = v_name
+            
         for v in spec.DataVariables:
-            valid_entity_ids.add(str(v.DvID))
+            v_id = str(v.DvID)
+            v_name = v.Name
+            
+            entity_id_lookup[v_id] = v_id
+            if v_name: entity_id_lookup[v_name.lower()] = v_id
+            
+            entity_name_lookup[v_id] = v_name
+            if v_name: entity_name_lookup[v_name.lower()] = v_name
+            
         for e in spec.Events:
-            valid_entity_ids.add(str(e.CEID))
+            e_id = str(e.CEID)
+            e_name = e.EventName
+            
+            entity_id_lookup[e_id] = e_id
+            if e_name: entity_id_lookup[e_name.lower()] = e_id
+            
+            entity_name_lookup[e_id] = e_name
+            if e_name: entity_name_lookup[e_name.lower()] = e_name
+            
         for a in spec.Alarms:
-            valid_entity_ids.add(str(a.AlarmID))
+            a_id = str(a.AlarmID)
+            a_name = a.AlarmName
+            
+            entity_id_lookup[a_id] = a_id
+            if a_name: entity_id_lookup[a_name.lower()] = a_id
+            
+            entity_name_lookup[a_id] = a_name
+            if a_name: entity_name_lookup[a_name.lower()] = a_name
 
         valid_tag_ids = {t.tag_id for t in target_tags}
-
-        # Build a lookup for transaction
         tag_transactions = {t.tag_id: t.transaction for t in target_tags}
 
         valid_suggestions = []
         for s in data.get("Suggestions", []):
+            eq_field_raw = str(s.get("EquipmentField", "")).lower()
+            if eq_field_raw in entity_id_lookup and eq_field_raw in entity_name_lookup:
+                s["EquipmentID"] = entity_id_lookup[eq_field_raw]
+                s["EquipmentField"] = entity_name_lookup[eq_field_raw] or entity_id_lookup[eq_field_raw]
+            else:
+                continue
+                
             if (
-                str(s.get("EntityID")) in valid_entity_ids
-                and s.get("TagID") in valid_tag_ids
-                and s.get("Confidence", 0) >= 0.4
+                s.get("MESField") in valid_tag_ids
+                and s.get("Confidence", 0) >= 0.1
             ):
-                tag_id = s.get("TagID")
-                # Inject transaction and equipment ID from target tags / spec
+                tag_id = s.get("MESField")
                 if tag_transactions.get(tag_id):
                     s["Transaction"] = tag_transactions[tag_id]
-                s["EquipmentID"] = spec.ToolID
                 valid_suggestions.append(s)
 
         data["Suggestions"] = valid_suggestions
-        data["EquipmentID"] = spec.ToolID
         return data
 
     def _build_prompt(self, unresolved_entities: List[dict], target_tags: List[MESTag], spec: EquipmentSpec) -> str:
@@ -176,12 +208,13 @@ TARGET MES TAGS:
 
 OUTPUT REQUIREMENT:
 Provide a list of suggested mappings in JSON format.
-Each mapping should include the `EntityID`, the `EntityType` (variable, event, or alarm), the `TagID`, a `Confidence` score (0.0 to 1.0), and a brief `Reasoning`.
+Each mapping should include the `EquipmentField` (instead of EntityID), the `EntityType` (variable, event, or alarm), the `MESField` (instead of TagID), a `Confidence` score (0.0 to 1.0), and a brief `Reasoning`.
 
-HARD RULES:
-1. Do not map entities if confidence is below 0.4.
-2. Ensure data types match (e.g., do not map a float variable to a string MES tag unless explicitly required).
-3. Do not invent or hallucinate IDs. Only use exact IDs provided in the lists above.
+GUIDELINES:
+1. Make best-effort, fuzzy matches between specialized equipment events/alarms and generic MES Tags (e.g. 'BeamIgnited' or 'ImplantStarted' -> 'LotStart' or 'TrackIn').
+2. Only leave an entity unmapped if it is completely irrelevant. Confidence can be as low as 0.1 for fuzzy matches.
+3. Relax data type matching if they are logically compatible.
+4. Do not invent or hallucinate IDs. Only use exact IDs provided in the lists above.
 
 JSON SCHEMA:
 {schema}

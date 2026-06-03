@@ -73,7 +73,7 @@ class ProjectAPI:
             return ProjectDetail(
                 **updated_metadata.model_dump(),
                 Extractions=clean_aggregated,
-                Mappings=mapping,
+                Mappings=mapping.Mappings,
                 SmlTemplate=SML_TEMPLATES,
             )
         except InvalidSlugError as exc:
@@ -286,11 +286,11 @@ class ProjectAPI:
                 for v in aggregated.DataVariables
             ],
             Events=[
-                {"CEID": e.CEID, "EventName": e.Name, "Description": e.Description or ""}
+                {"CEID": e.CEID, "EventName": e.EventName, "Description": e.Description or ""}
                 for e in aggregated.Events
             ],
             Alarms=[
-                {"AlarmID": a.AlarmID, "AlarmText": a.Name, "Severity": a.Severity}
+                {"AlarmID": a.AlarmID, "AlarmName": a.AlarmName, "Severity": a.Severity}
                 for a in aggregated.Alarms
             ],
             RemoteCommands=[
@@ -306,11 +306,7 @@ class ProjectAPI:
                 for tr in aggregated.StateTransitions
             ],
             Reports=[
-                {"RPTID": r.RPTID, "Name": r.Name, "LinkedVIDs": r.LinkedVIDs, "Reasoning": r.Reasoning or ""}
+                {"RPTID": r.RPTID, "Name": r.Name, "Items": r.Items, "LinkedEvents": r.LinkedEvents, "Reasoning": r.Reasoning or ""}
                 for r in aggregated.Reports
-            ],
-            EventReportLinks=[
-                {"CEID": lnk.CEID, "EventName": lnk.EventName, "RPTIDs": lnk.RPTIDs}
-                for lnk in aggregated.EventReportLinks
             ],
         )

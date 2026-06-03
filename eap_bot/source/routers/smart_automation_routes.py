@@ -34,7 +34,7 @@ class SmartAutomationAPI:
 
             spec_info = ""
             if spec:
-                spec_info = f"Status Variables: {[v.Name for v in spec.StatusVariables[:10]]}, Events: {[e.Name for e in spec.Events[:10]]}"
+                spec_info = f"Status Variables: {[v.Name for v in spec.StatusVariables[:10]]}, Events: {[e.EventName for e in spec.Events[:10]]}"
 
             prompt = (
                 f"Write a Python SECS/GEM automation script called '{body.key}' for tool '{metadata.ProjectName}'.\n"

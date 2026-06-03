@@ -9,61 +9,70 @@
       "EventType": "Process",
       "Transaction": "TXN_LOT_START",
       "Payload": "LotStartPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "LotEnd",
       "EventType": "Process",
       "Transaction": "TXN_LOT_END",
       "Payload": "LotEndPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "WaferStart",
       "EventType": "Process",
       "Transaction": "TXN_WAFER_START",
       "Payload": "WaferPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "WaferEnd",
       "EventType": "Process",
       "Transaction": "TXN_WAFER_END",
       "Payload": "WaferPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "AlarmSet",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_SET",
       "Payload": "AlarmPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "AlarmClear",
       "EventType": "Alarm",
       "Transaction": "TXN_ALARM_CLEAR",
       "Payload": "AlarmPayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "EquipmentStateChange",
       "EventType": "State",
       "Transaction": "TXN_STATE_CHANGE",
       "Payload": "StateChangePayload",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "TrackIn",
       "EventType": "Process",
       "Transaction": "TXN_TRACK_IN",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "EventName": "TrackOut",
       "EventType": "Process",
       "Transaction": "TXN_TRACK_OUT",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     }
   ],
   "Alarms": [
@@ -71,19 +80,22 @@
       "AlarmType": "EquipmentAlarm",
       "Severity": "Critical",
       "Transaction": "TXN_ALARM_SET",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "AlarmType": "ProcessAlarm",
       "Severity": "Warning",
       "Transaction": "TXN_PROCESS_WARNING",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "AlarmType": "CommunicationAlarm",
       "Severity": "Minor",
       "Transaction": "TXN_COMM_ALARM",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     }
   ],
   "Variables": [
@@ -92,98 +104,112 @@
       "Type": "String",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "LotID",
       "Type": "String",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "WaferID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "SlotNumber",
       "Type": "Integer",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "RecipeName",
       "Type": "String",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "RecipeVersion",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "CarrierID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "PortID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "OperatorID",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "EquipmentState",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "AlarmID",
       "Type": "Integer",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "AlarmText",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "AlarmSeverity",
       "Type": "String",
       "Required": false,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     },
     {
       "MESField": "EventTime",
       "Type": "DateTime",
       "Required": true,
       "Description": "",
-      "Enabled": true
+      "Enabled": true,
+      "EquipmentField": ""
     }
   ],
   "Payloads": [

@@ -12,6 +12,7 @@ from source.routers.codegen_routes import CodeGenAPI
 from source.routers.tool_characterization_routes import ToolCharacterizationAPI
 from source.routers.smart_automation_routes import SmartAutomationAPI
 from source.routers.mes_family_routes import mes_family_api
+from source.routers.system_routes import SystemAPI
 from source.services.storage_service import StorageService
 from source.services.mes_family_seed import seed_mes_families
 
@@ -85,6 +86,7 @@ automap_api = AutoMapAPI()
 codegen_api = CodeGenAPI()
 tool_char_api = ToolCharacterizationAPI()
 smart_auto_api = SmartAutomationAPI()
+system_api = SystemAPI()
 
 app.include_router(project_api.router)
 app.include_router(equipment_api.router)
@@ -93,6 +95,7 @@ app.include_router(automap_api.router)
 app.include_router(mes_family_api.router)
 app.include_router(tool_char_api.router)
 app.include_router(smart_auto_api.router)
+app.include_router(system_api.router)
 #app.include_router(codegen_api.router)
 
 

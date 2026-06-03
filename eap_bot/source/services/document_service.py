@@ -85,10 +85,9 @@ class DocumentService:
                 logger.info("Reports missing in completed spec for %s/%s, generating now...", project_id, document_id)
                 file_path = self._resolve_document_path(project_id, document)
                 text = self._container.parser.extract_text(str(file_path))
-                reports, links = self._container.report_service.generate(spec, text)
+                reports = self._container.report_service.extract_builtin_reports(text)
                 if reports:
                     spec.Reports = reports
-                    spec.EventReportLinks = links
                     json_path = self.storage.spec_json_path(project_id, document_id)
                     self.storage.save_spec_json(json_path, spec)
 
@@ -221,7 +220,6 @@ class DocumentService:
             "States": [],
             "StateTransitions": [],
             "Reports": [],
-            "EventReportLinks": [],
             "SmlTemplate": SML_TEMPLATES,
         }
 
@@ -249,11 +247,11 @@ class DocumentService:
                 for v in spec.DataVariables
             ],
             "Events": [
-                {"CEID": e.CEID, "EventName": e.Name, "Description": e.Description or ""}
+                {"CEID": e.CEID, "EventName": e.EventName, "Description": e.Description or ""}
                 for e in spec.Events
             ],
             "Alarms": [
-                {"AlarmID": a.AlarmID, "AlarmText": a.Name, "Severity": a.Severity}
+                {"AlarmID": a.AlarmID, "AlarmName": a.AlarmName, "Severity": a.Severity}
                 for a in spec.Alarms
             ],
             "RemoteCommands": [
@@ -269,12 +267,14 @@ class DocumentService:
                 for tr in spec.StateTransitions
             ],
             "Reports": [
-                {"RPTID": r.RPTID, "Name": r.Name, "LinkedVIDs": r.LinkedVIDs, "Reasoning": r.Reasoning or ""}
+                {
+                    "RPTID": r.RPTID, 
+                    "Name": r.Name, 
+                    "Reasoning": r.Reasoning or "",
+                    "Items": r.Items,
+                    "LinkedEvents": r.LinkedEvents
+                }
                 for r in spec.Reports
-            ],
-            "EventReportLinks": [
-                {"CEID": lnk.CEID, "EventName": lnk.EventName, "RPTIDs": lnk.RPTIDs}
-                for lnk in spec.EventReportLinks
             ],
             "SmlTemplate": SML_TEMPLATES,
         }
