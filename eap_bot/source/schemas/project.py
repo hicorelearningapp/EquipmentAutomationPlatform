@@ -200,3 +200,6 @@ class UpdateExtractionRequest(BaseModel):
     States: list[dict] = Field(default_factory=list)
     StateTransitions: list[dict] = Field(default_factory=list)
     Reports: list[dict] = Field(default_factory=list)
+
+class GenerateReportsRequest(BaseModel):
+    ceids: list[int] = Field(default_factory=list, description="List of CEIDs to generate reports for. If empty, generates for all events.")

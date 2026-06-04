@@ -1,22 +1,18 @@
 {
   "MESFamily": "FAB300",
-  "TemplateName": "TEST_AUTO_TEMPLATE_DO_NOT_USE",
-  "Version": "3.0",
   "Description": "Automated test template \u2014 safe to delete",
   "Events": [
     {
       "EventName": "TrackIn",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_IN",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "TrackOut",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_OUT",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     }
   ],
   "Alarms": [],

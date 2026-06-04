@@ -67,7 +67,7 @@ class ProjectService:
         if auto_analyze:
             # Analyse pending documents
             for doc in metadata.Documents:
-                if doc.Status != "completed":
+                if doc.Status == "uploaded":
                     logger.info("Auto-analysing document %s for project %s", doc.DocumentID, project_id)
                     try:
                         self._analyse_single_document(project_id, doc, metadata)
@@ -95,7 +95,6 @@ class ProjectService:
                 spec.ToolID = metadata.ProjectName
                 spec.ToolType = metadata.Tool.value or "Semiconductor Processing Equipment"
             spec.Reports = []
-            spec.EventReportLinks = []
         elif is_txt:
             tool_id = metadata.ProjectName
             tool_type = metadata.Tool.value or "Semiconductor Processing Equipment"

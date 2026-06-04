@@ -24,41 +24,37 @@ class SmartAutomationAPI:
 
     def generate_smart_automation_code(self, project_id: int, body: SmartCodeGenerateRequest):
         try:
-            metadata = self.storage.get_project(project_id)
-            spec = None
-            for doc in metadata.Documents:
-                if doc.Status == "completed":
-                    spec_json = self.storage.read_spec_json(project_id, doc.DocumentID)
-                    spec = EquipmentSpec.model_validate_json(spec_json)
-                    break
+            # Prefer the merged project_batch spec if it exists
+            batch_path = self.storage.spec_json_path(project_id, "project_batch")
+            if batch_path.exists():
+                spec = EquipmentSpec.model_validate_json(batch_path.read_text(encoding="utf-8"))
+            else:
+                metadata = self.storage.get_project(project_id)
+                spec = None
+                for doc in metadata.Documents:
+                    if doc.Status == "completed":
+                        spec_json = self.storage.read_spec_json(project_id, doc.DocumentID)
+                        spec = EquipmentSpec.model_validate_json(spec_json)
+                        break
+            
+            if not spec:
+                raise HTTPException(404, "No completed extracted equipment spec found for this project.")
 
-            spec_info = ""
-            if spec:
-                spec_info = f"Status Variables: {[v.Name for v in spec.StatusVariables[:10]]}, Events: {[e.EventName for e in spec.Events[:10]]}"
-
-            prompt = (
-                f"Write a Python SECS/GEM automation script called '{body.key}' for tool '{metadata.ProjectName}'.\n"
-                f"Use standard SECS/GEM libraries or mock communication.\n"
-                f"Instructions: {body.instructions or 'None'}\n"
-                f"Specification Info: {spec_info}\n"
-                f"Return only the Python code. No markdown code blocks, just python code."
-            )
-            model = container.llm_strategy.get_model()
-            response = model.invoke(prompt)
-            code_content = response.content
-
-            if code_content.startswith("```python"):
-                code_content = code_content[9:]
-            elif code_content.startswith("```"):
-                code_content = code_content[3:]
-            if code_content.endswith("```"):
-                code_content = code_content[:-3]
-            code_content = code_content.strip()
+            # Generate C# Constants using the new service
+            # Default to HiCore.EAPIntegration.EquipmentConstants but can be customized
+            code_content = container.smart_automation_service.generate_csharp_constants(spec)
 
             smart_code_dir = self.storage._project_dir(project_id) / self.storage.SMART_AUTO_CODE_DIR
             smart_code_dir.mkdir(parents=True, exist_ok=True)
 
-            dst_path = smart_code_dir / body.key
+            # Ensure the output filename is .cs since we are generating C#
+            file_key = body.key
+            if not file_key.endswith(".cs"):
+                file_key = file_key.replace(".py", ".cs")
+                if not file_key.endswith(".cs"):
+                    file_key += ".cs"
+
+            dst_path = smart_code_dir / file_key
             dst_path.write_text(code_content, encoding="utf-8")
 
             return {

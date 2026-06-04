@@ -58,11 +58,33 @@ class MappingAPI:
             approved_events = {m.MESField: m.EquipmentField for m in body.Mappings if m.EntityType == "event"}
             approved_alarms = {m.MESField: m.EquipmentField for m in body.Mappings if m.EntityType == "alarm"}
             
+            # Resolve Equipment Spec to get descriptions
+            spec_vars_desc = {}
+            spec_events_desc = {}
+            spec_alarms_desc = {}
+            try:
+                _, aggregated = container.project_service.aggregate_project_data(body.project_id)
+                spec = EquipmentSpec.model_validate(aggregated.model_dump())
+                for v in spec.DataVariables + spec.StatusVariables:
+                    vid = getattr(v, 'DvID', getattr(v, 'SVID', ''))
+                    spec_vars_desc[str(vid)] = v.Description
+                    spec_vars_desc[v.Name] = v.Description
+                for e in spec.Events:
+                    spec_events_desc[str(e.CEID)] = e.Description
+                    spec_events_desc[e.EventName] = e.Description
+                for a in spec.Alarms:
+                    spec_alarms_desc[str(a.AlarmID)] = a.Description
+                    spec_alarms_desc[a.Name] = a.Description
+            except Exception:
+                pass
+            
+            
             # Populate EquipmentField in raw template
             if "Variables" in raw_template:
                 for item in raw_template["Variables"]:
                     if item.get("MESField") in approved_vars:
                         item["EquipmentField"] = approved_vars[item["MESField"]]
+                        item["EquipmentDescription"] = spec_vars_desc.get(str(item["EquipmentField"]), "")
                         
             if "Events" in raw_template:
                 for item in raw_template["Events"]:
@@ -71,6 +93,7 @@ class MappingAPI:
                     event_name = item.get("EventName")
                     if event_name in approved_events:
                         item["EquipmentField"] = approved_events[event_name]
+                        item["EquipmentDescription"] = spec_events_desc.get(str(item["EquipmentField"]), "")
                         
             if "Alarms" in raw_template:
                 for item in raw_template["Alarms"]:
@@ -78,6 +101,7 @@ class MappingAPI:
                     alarm_type = item.get("AlarmType")
                     if alarm_type in approved_alarms:
                         item["EquipmentField"] = approved_alarms[alarm_type]
+                        item["EquipmentDescription"] = spec_alarms_desc.get(str(item["EquipmentField"]), "")
                         
             # Save the mapped template via storage service
             saved_path = self.storage.save_mes_mapping(body.project_id, body.family, body.template, raw_template)
@@ -125,9 +149,22 @@ class MappingAPI:
 
     def auto_map(self, body: AutoMapRequest):
         # 1. Resolve Equipment Spec
+        spec_vars_desc = {}
+        spec_events_desc = {}
+        spec_alarms_desc = {}
         try:
             metadata, aggregated = container.project_service.aggregate_project_data(body.project_id)
             spec = EquipmentSpec.model_validate(aggregated.model_dump())
+            for v in spec.DataVariables + spec.StatusVariables:
+                vid = getattr(v, 'DvID', getattr(v, 'SVID', ''))
+                spec_vars_desc[str(vid)] = v.Description
+                spec_vars_desc[v.Name] = v.Description
+            for e in spec.Events:
+                spec_events_desc[str(e.CEID)] = e.Description
+                spec_events_desc[e.EventName] = e.Description
+            for a in spec.Alarms:
+                spec_alarms_desc[str(a.AlarmID)] = a.Description
+                spec_alarms_desc[a.Name] = a.Description
         except Exception as exc:
             logger.error("Failed to load project extractions: %s", exc)
             raise HTTPException(404, f"Could not find extraction data for project {body.project_id}. {exc}")
@@ -149,29 +186,43 @@ class MappingAPI:
         try:
             with open(template_path, "r", encoding="utf-8") as f:
                 raw_tags = json.load(f)
-            target_tags = _extract_tags_from_template(raw_tags)
+            
+            # Use the new map_category parameter
+            map_category_val = body.map_category.value if body.map_category else None
+            target_tags = _extract_tags_from_template(raw_tags, map_category_val)
         except Exception as exc:
             logger.error("Failed to read/parse template %s: %s", template_path, exc)
             raise HTTPException(500, f"Error parsing template: {exc}")
-
-        # 3. Filter by Entity if specified
-        if body.entity:
-            section_map = {
-                "Variables": "Variables",
-                "Events": "Events",
-                "Alarms": "Alarms",
-            }
-            target_tags = [t for t in target_tags if t.tag_source == section_map[body.entity.value]]
 
         # 4. Get suggestions and save full template
         try:
             suggestions_response = container.mapping_service.suggest_mappings(spec, target_tags)
             
-            full_template = raw_tags
             family = body.family
             template_filename = body.template
             if not template_filename.lower().endswith(".json"):
                 template_filename = f"{template_filename}.json"
+
+            existing = self.storage.load_automap_result(body.project_id, family, template_filename)
+
+            if existing is not None and body.map_category is not None:
+                full_template = existing
+                cat_val = body.map_category.value
+                
+                # Reset only this section from raw template
+                full_template[cat_val] = raw_tags.get(cat_val, [])
+                
+                # Keep old suggestions not in this category
+                cat_type_map = {"Variables": "variable", "Events": "event", "Alarms": "alarm"}
+                old_suggestions = full_template.get("AutoMapping", {}).get("Suggestions", [])
+                old_unmapped = full_template.get("AutoMapping", {}).get("Unmapped", [])
+                
+                kept_suggestions = [s for s in old_suggestions if s.get("EntityType") != cat_type_map[cat_val]]
+                kept_unmapped = [u for u in old_unmapped if u.get("EntityType") != cat_type_map[cat_val]]
+            else:
+                full_template = raw_tags
+                kept_suggestions = []
+                kept_unmapped = []
                     
             # Build the AutoMapping block with entity-specific ID key names
             raw_auto = suggestions_response.model_dump()
@@ -193,6 +244,9 @@ class MappingAPI:
                     u["EquipmentAlarmID"] = eid
                 else:
                     u["EquipmentVariableID"] = eid
+            
+            raw_auto["Suggestions"] = kept_suggestions + raw_auto.get("Suggestions", [])
+            raw_auto["Unmapped"] = kept_unmapped + raw_auto.get("Unmapped", [])
             full_template["AutoMapping"] = raw_auto
             
             # Auto-fill EquipmentField directly inside the template
@@ -206,16 +260,19 @@ class MappingAPI:
                     if v.get("MESField") == mes_field:
                         v["EquipmentField"] = equipment_field
                         v["EquipmentVariableID"] = equipment_id
+                        v["EquipmentDescription"] = spec_vars_desc.get(str(equipment_field), "")
                         
                 for e in full_template.get("Events", []):
                     if e.get("EventName") == mes_field:
                         e["EquipmentField"] = equipment_field
                         e["EquipmentEventID"] = equipment_id
+                        e["EquipmentDescription"] = spec_events_desc.get(str(equipment_field), "")
                         
                 for a in full_template.get("Alarms", []):
                     if a.get("AlarmType") == mes_field:
                         a["EquipmentField"] = equipment_field
                         a["EquipmentAlarmID"] = equipment_id
+                        a["EquipmentDescription"] = spec_alarms_desc.get(str(equipment_field), "")
             
             if body.project_id is not None:
                 self.storage.save_automap_result(body.project_id, family, template_filename, full_template)

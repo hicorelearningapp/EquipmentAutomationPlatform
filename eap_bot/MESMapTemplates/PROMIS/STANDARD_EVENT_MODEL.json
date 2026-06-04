@@ -1,101 +1,90 @@
 {
   "MESFamily": "PROMIS",
-  "TemplateName": "STANDARD_EVENT_MODEL",
-  "Version": "1.0",
   "Description": "PROMIS MES integration template. PROMIS (Flexible Factory Integration System) uses a transaction-based message broker model with strong WIP traceability and genealogy tracking.",
   "Events": [
     {
       "EventName": "LotStart",
-      "EventType": "Process",
-      "Transaction": "TXN_LOT_START",
       "Payload": "LotStartPayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "LotEnd",
-      "EventType": "Process",
-      "Transaction": "TXN_LOT_END",
       "Payload": "LotEndPayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "LotSplit",
-      "EventType": "Process",
-      "Transaction": "TXN_LOT_SPLIT",
       "Payload": "LotSplitPayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "LotMerge",
-      "EventType": "Process",
-      "Transaction": "TXN_LOT_MERGE",
       "Payload": "LotMergePayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "AlarmSet",
-      "EventType": "Alarm",
-      "Transaction": "TXN_ALARM_SET",
       "Payload": "AlarmPayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "AlarmClear",
-      "EventType": "Alarm",
-      "Transaction": "TXN_ALARM_CLEAR",
       "Payload": "AlarmPayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "RecipeDownload",
-      "EventType": "Control",
-      "Transaction": "TXN_RECIPE_DOWNLOAD",
       "Payload": "RecipePayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "TrackIn",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_IN",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "TrackOut",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_OUT",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     }
   ],
   "Alarms": [
     {
       "AlarmType": "EquipmentAlarm",
       "Severity": "Critical",
-      "Transaction": "TXN_ALARM_SET",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "AlarmType": "ProcessAlarm",
       "Severity": "Warning",
-      "Transaction": "TXN_PROCESS_WARNING",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "AlarmType": "InterlockAlarm",
       "Severity": "Critical",
-      "Transaction": "TXN_INTERLOCK_ALARM",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     }
   ],
   "Variables": [
@@ -105,7 +94,8 @@
       "Required": true,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "LotID",
@@ -113,7 +103,8 @@
       "Required": true,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "ParentLotID",
@@ -121,7 +112,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "ChildLotIDs",
@@ -129,7 +121,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "RecipeName",
@@ -137,7 +130,8 @@
       "Required": true,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "RecipeRevision",
@@ -145,7 +139,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "CarrierID",
@@ -153,7 +148,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "PortID",
@@ -161,7 +157,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "StepName",
@@ -169,7 +166,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "RouteID",
@@ -177,7 +175,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "AlarmID",
@@ -185,7 +184,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "AlarmText",
@@ -193,7 +193,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "AlarmSeverity",
@@ -201,7 +202,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "EventTime",
@@ -209,7 +211,8 @@
       "Required": true,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     }
   ],
   "Payloads": [

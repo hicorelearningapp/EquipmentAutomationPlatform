@@ -217,18 +217,55 @@ class EquipmentExtractor:
         merged.StateTransitions = EquipmentExtractor._dedup_transitions(
             [tr for s in specs for tr in s.StateTransitions]
         )
+        
+        # Merge Reports
+        reports = []
+        for s in specs:
+            if hasattr(s, "Reports") and s.Reports:
+                reports.extend(s.Reports)
+        if reports:
+            merged.Reports = EquipmentExtractor._dedup_by_key(reports, key="RPTID")
 
         return merged
 
     @staticmethod
     def _dedup_by_key(items: list, key: str) -> list:
-        """Keep only the highest-confidence entry per unique key value."""
+        """Keep the highest-confidence entry per unique key value, merging list fields."""
         best: dict = {}
         for item in items:
             id_val = getattr(item, key)
-            confidence = getattr(item, "Confidence", 1.0)
-            if id_val not in best or confidence > getattr(best[id_val], "Confidence", 1.0):
-                best[id_val] = item
+            if id_val not in best:
+                best[id_val] = item.model_copy(deep=True) if hasattr(item, "model_copy") else item.copy()
+                continue
+
+            existing = best[id_val]
+            new_item = item
+            
+            conf_new = getattr(new_item, "Confidence", 1.0)
+            conf_ext = getattr(existing, "Confidence", 1.0)
+
+            if conf_new > conf_ext:
+                existing, new_item = new_item.model_copy(deep=True) if hasattr(new_item, "model_copy") else new_item.copy(), existing
+
+            if hasattr(existing, "model_fields"):
+                for field in existing.model_fields.keys():
+                    val_ext = getattr(existing, field)
+                    val_new = getattr(new_item, field)
+
+                    if isinstance(val_ext, list) and isinstance(val_new, list):
+                        merged_list = []
+                        for x in val_ext + val_new:
+                            if x not in merged_list:
+                                merged_list.append(x)
+                        setattr(existing, field, merged_list)
+                    elif isinstance(val_ext, str) and isinstance(val_new, str):
+                        if val_ext in ("-", "", "unknown", "none") and val_new not in ("-", "", "unknown", "none"):
+                            setattr(existing, field, val_new)
+                        elif field == "Description" and len(val_new) > len(val_ext) and val_new not in ("-", "", "unknown", "none"):
+                            setattr(existing, field, val_new)
+
+            best[id_val] = existing
+
         return list(best.values())
 
     @staticmethod
@@ -367,6 +404,7 @@ HARD RULES:
         "RemoteCommands": {"rcmd", "remote command", "command"},
         "States": {"state"},
         "StateTransitions": {"transition", "state machine"},
+        "Reports": {"report", "rptid", "reports"},
     }
 
     _SECTION_KEYWORDS: dict[str, set[str]] = {
@@ -397,6 +435,9 @@ HARD RULES:
             "from state", "to state", "fromstate", "tostate",
             "transition", "trigger",
         },
+        "Reports": {
+            "report id", "rptid", "rpt id", "report name",
+        },
     }
 
     _CSV_FILENAMES: dict[str, str] = {
@@ -407,6 +448,7 @@ HARD RULES:
         "RemoteCommands": "remote_commands.csv",
         "States": "states.csv",
         "StateTransitions": "state_transitions.csv",
+        "Reports": "reports.csv",
     }
 
     _TABLE_PROMPTS: dict[str, str] = {
@@ -493,6 +535,17 @@ Each object MUST have:
   "Manual": boolean (true only if no event/command trigger)
 Never set both TriggerEvent and TriggerCommand on the same entry.
 Return ONLY: {{"StateTransitions": [...]}}  No prose, no markdown fences.
+TABLE (CSV):
+{csv}""",
+
+        "Reports": """You are a SECS/GEM integration expert.
+The table below was extracted directly from a semiconductor equipment manual.
+The column names may differ from standard SECS/GEM field names — map them intelligently.
+Convert every data row into a JSON array of ReportDefinition objects.
+Each object MUST have:
+  "RPTID": string (or integer), "Name": string,
+  "Items": [integer] (parse comma-separated VID lists, empty list if absent)
+Return ONLY: {{"Reports": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",
     }
@@ -736,6 +789,9 @@ TABLE (CSV):
             elif section == "StateTransitions":
                 valid = [t for t in items if t.get("FromState") and t.get("ToState")]
                 spec.StateTransitions = [StateTransition.model_validate(t) for t in valid]
+            elif section == "Reports":
+                from source.schemas.secsgem import ReportDefinition
+                spec.Reports = [ReportDefinition.model_validate(i) for i in items]
         except Exception as exc:
             logger.warning("model_validate failed for %s table response: %s", section, exc)
             return None

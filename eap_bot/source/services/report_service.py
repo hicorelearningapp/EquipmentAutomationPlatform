@@ -74,6 +74,9 @@ Equipment has these Status Variables (SVs):
 Existing report hints extracted from the manual (may be empty):
 {hints}
 
+Target Events requiring reports (use their LinkedVIDs as items):
+{events}
+
 Rules:
 - Group related variables into logical reports (e.g. one report per process phase,
   one for alarms, one for recipe data).
@@ -191,8 +194,13 @@ class ReportService:
 
         hints_text = json.dumps(hints, indent=2) if hints else "[]"
 
+        events_text = "\n".join(
+            f"  CEID={e.CEID}  Name={e.EventName}  LinkedVIDs={e.LinkedVIDs}"
+            for e in spec.Events
+        ) or "  (none)"
+
         prompt = _STEP2_PROMPT.format(
-            dvs=dvs_text, svs=svs_text, hints=hints_text
+            dvs=dvs_text, svs=svs_text, hints=hints_text, events=events_text
         )
         try:
             raw = self._invoke(prompt)

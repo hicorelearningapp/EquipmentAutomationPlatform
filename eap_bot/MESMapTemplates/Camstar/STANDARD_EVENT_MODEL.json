@@ -2,17 +2,15 @@
   "Events": [
     {
       "EventName": "TrackIn",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_IN",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "TrackOut",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_OUT",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     }
   ],
   "Alarms": [],

@@ -76,10 +76,11 @@
   ],
   "Alarms": [
     {
-      "AlarmType": "EquipmentAlarm",
+      "AlarmType": "EquipmentAlarm", - "MesAlarm"
       "Severity": "Critical",
       "Transaction": "TXN_ALARM_SET",
       "Enabled": true,
+      "add descriptiopn"
       "EquipmentField": ""
     },
     {

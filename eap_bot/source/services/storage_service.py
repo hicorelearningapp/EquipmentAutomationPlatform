@@ -799,6 +799,14 @@ class StorageService:
         path.write_text(json.dumps(result, indent=2), encoding="utf-8")
         logger.info("Saved AutoMap result for project %s to %s", project_id, path)
 
+    def load_automap_result(self, project_id: int, family: str, template: str) -> dict | None:
+        """Load previously saved AutoMap result, or None if not found."""
+        path = self._project_dir(project_id) / self.MES_MAPPING_JSON_DIR / family / template
+        if path.exists():
+            import json
+            return json.loads(path.read_text(encoding="utf-8"))
+        return None
+
     def read_spec_json(self, project_id: int, document_id: str) -> str:
         self.get_document(project_id, document_id)
         path = self.spec_json_path(project_id, document_id)

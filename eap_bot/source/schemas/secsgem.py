@@ -1,5 +1,5 @@
-from typing import Literal, Optional
-from pydantic import BaseModel, Field, model_validator
+from typing import Literal, Optional, Any
+from pydantic import BaseModel, Field, model_validator, field_validator
 
 from source.schemas.report import ReportDefinition
 
@@ -8,17 +8,31 @@ class StatusVariable(BaseModel):
     SVID: int
     Name: str
     Description: Optional[str] = None
-    DataType: str
-    AccessType: str
-    Value: Optional[str] = None
+    DataType: str = "-"
+    AccessType: str = "-"
+    Value: Optional[str] = "-"
     Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+
+    @field_validator('Description', 'DataType', 'AccessType', 'Value', mode='before')
+    @classmethod
+    def replace_empty(cls, v: Any) -> Any:
+        if v is None or (isinstance(v, str) and str(v).strip().lower() in ("", "unknown", "n/a", "none")):
+            return "-"
+        return v
 
 
 class DataVariable(BaseModel):
     DvID: int
     Name: str
-    ValueType: str
-    Unit: Optional[str] = None
+    ValueType: str = "-"
+    Unit: Optional[str] = "-"
+
+    @field_validator('ValueType', 'Unit', mode='before')
+    @classmethod
+    def replace_empty(cls, v: Any) -> Any:
+        if v is None or (isinstance(v, str) and str(v).strip().lower() in ("", "unknown", "n/a", "none")):
+            return "-"
+        return v
 
 
 class RCMDParameter(BaseModel):
@@ -38,9 +52,16 @@ class Event(BaseModel):
     EventName: str = Field(alias="Name")
     Description: Optional[str] = None
     LinkedVIDs: list[int] = Field(default_factory=list)
-    ReportID: Optional[str] = None
+    ReportID: Optional[str] = "-"
     Report: bool = True
     Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    
+    @field_validator('Description', 'ReportID', mode='before')
+    @classmethod
+    def replace_empty(cls, v: Any) -> Any:
+        if v is None or (isinstance(v, str) and str(v).strip().lower() in ("", "unknown", "n/a", "none")):
+            return "-"
+        return v
     
     model_config = {
         "populate_by_name": True
@@ -50,10 +71,17 @@ class Event(BaseModel):
 class Alarm(BaseModel):
     AlarmID: int
     AlarmName: str = Field(alias="Name")
-    Severity: str
+    Severity: str = "-"
     LinkedVID: Optional[int] = None
-    Description: Optional[str] = None
+    Description: Optional[str] = "-"
     Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    
+    @field_validator('Severity', 'Description', mode='before')
+    @classmethod
+    def replace_empty(cls, v: Any) -> Any:
+        if v is None or (isinstance(v, str) and str(v).strip().lower() in ("", "unknown", "n/a", "none")):
+            return "-"
+        return v
     
     model_config = {
         "populate_by_name": True

@@ -57,7 +57,7 @@ from source.schemas.secsgem import EquipmentSpec
 
 from enum import Enum
 
-class AutoMapEntity(str, Enum):
+class AutoMapCategory(str, Enum):
     VARIABLES = "Variables"
     EVENTS = "Events"
     ALARMS = "Alarms"
@@ -66,5 +66,5 @@ class AutoMapRequest(BaseModel):
     project_id: int
     family: str
     template: str
-    entity: Optional[AutoMapEntity] = None
+    map_category: Optional[AutoMapCategory] = None
 

@@ -1,15 +1,16 @@
 {
-  "TemplateName": "NEW_MODEL",
-  "Version": "1.0",
-  "Description": "Camstar (now Opcenter) MES integration template. Camstar uses an object-oriented transaction model with container tracking, electronic traveler support, and quality data collection.",
+  "TemplateName": "NEW_MODEL", - remove
+  "Version": "1.0", - r4emove
+  "remove": "Camstar (now Opcenter) MES integration template. Camstar uses an object-oriented transaction model with container tracking, electronic traveler support, and quality data collection.",
   "Events": [
     {
       "EventName": "LotStart",
-      "EventType": "Process",
-      "Transaction": "TXN_LOT_START",
+      "EventType": "Process", - remove 
+      "Transaction": "TXN_LOT_START", - remove
       "Payload": "LotStartPayload",
       "Enabled": true,
       "EquipmentField": ""
+      "add equipment description"
     },
     {
       "EventName": "LotEnd",
@@ -88,6 +89,7 @@
       "Transaction": "TXN_PROCESS_WARNING",
       "Enabled": true,
       "EquipmentField": ""
+      "add descrioption"
     },
     {
       "AlarmType": "QualityAlarm",

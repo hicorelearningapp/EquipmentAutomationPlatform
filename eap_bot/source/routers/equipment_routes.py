@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile, Body
 from fastapi.responses import Response
 
 from source.managers.service_container import container
-from source.schemas.project import DocumentCategory
+from source.schemas.project import DocumentCategory, GenerateReportsRequest
 from source.services.storage_service import (
     DocumentExistsError,
     DocumentNotFoundError,
@@ -197,7 +197,7 @@ class EquipmentAPI:
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 
-    def generate_reports(self, project_id: int):
+    def generate_reports(self, project_id: int, request: GenerateReportsRequest = Body(default_factory=GenerateReportsRequest)):
         from source.schemas.secsgem import EquipmentSpec
         try:
             self.storage.increment_project_version(project_id)
@@ -208,8 +208,28 @@ class EquipmentAPI:
             except Exception:
                 _, spec_obj = container.project_service.aggregate_project_data(project_id)
             
-            reports = container.report_service.generate_synthetic_reports(spec_obj)
-            spec_obj.Reports = reports
+            if request.ceids:
+                target_events = [e for e in spec_obj.Events if e.CEID in request.ceids]
+                original_events = spec_obj.Events
+                spec_obj.Events = target_events
+                
+                new_reports = container.report_service.generate_synthetic_reports(spec_obj)
+                
+                spec_obj.Events = original_events
+                
+                # Merge logic
+                target_ceids_set = set(request.ceids)
+                kept_reports = []
+                for r in spec_obj.Reports:
+                    r.LinkedEvents = [ceid for ceid in r.LinkedEvents if ceid not in target_ceids_set]
+                    if r.LinkedEvents:
+                        kept_reports.append(r)
+                
+                spec_obj.Reports = kept_reports + new_reports
+            else:
+                reports = container.report_service.generate_synthetic_reports(spec_obj)
+                spec_obj.Reports = reports
+                
             self.storage.save_spec_json(json_path, spec_obj)
             
             return container.document_service._build_extraction_response(

@@ -1,70 +1,62 @@
 {
   "MESFamily": "FAB300",
-  "TemplateName": "STANDARD_EVENT_MODEL",
-  "Version": "1.0",
   "Description": "Generic MES integration template independent of equipment",
   "Events": [
     {
       "EventName": "LotStart",
-      "EventType": "Process",
-      "Transaction": "TXN_LOT_START",
       "Payload": "LotStartPayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "LotEnd",
-      "EventType": "Process",
-      "Transaction": "TXN_LOT_END",
       "Payload": "LotEndPayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "AlarmSet",
-      "EventType": "Alarm",
-      "Transaction": "TXN_ALARM_SET",
       "Payload": "AlarmPayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "AlarmClear",
-      "EventType": "Alarm",
-      "Transaction": "TXN_ALARM_CLEAR",
       "Payload": "AlarmPayload",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "TrackIn",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_IN",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "EventName": "TrackOut",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_OUT",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     }
   ],
   "Alarms": [
     {
       "AlarmType": "EquipmentAlarm",
       "Severity": "Critical",
-      "Transaction": "TXN_ALARM_SET",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "AlarmType": "ProcessAlarm",
       "Severity": "Warning",
-      "Transaction": "TXN_PROCESS_WARNING",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     }
   ],
   "Variables": [
@@ -74,7 +66,8 @@
       "Required": true,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "LotID",
@@ -82,7 +75,8 @@
       "Required": true,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "RecipeName",
@@ -90,7 +84,8 @@
       "Required": true,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "CarrierID",
@@ -98,7 +93,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "PortID",
@@ -106,7 +102,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "SlotNumber",
@@ -114,7 +111,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "AlarmID",
@@ -122,7 +120,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "AlarmText",
@@ -130,7 +129,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "AlarmSeverity",
@@ -138,7 +138,8 @@
       "Required": false,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     },
     {
       "MESField": "EventTime",
@@ -146,7 +147,8 @@
       "Required": true,
       "Description": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "EquipmentField": "",
+      "EquipmentDescription": ""
     }
   ],
   "Payloads": [

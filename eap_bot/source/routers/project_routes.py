@@ -276,6 +276,12 @@ class ProjectAPI:
     # ── Private helpers ───────────────────────────────────────────────────────
 
     def _build_clean_aggregated(self, aggregated: EquipmentSpec) -> AggregatedSpec:
+        # Build reverse lookup: CEID -> list of RPTIDs
+        ceid_to_reports = {}
+        for r in aggregated.Reports:
+            for ceid in r.LinkedEvents:
+                ceid_to_reports.setdefault(ceid, []).append(r.RPTID)
+
         return AggregatedSpec(
             StatusVariables=[
                 {"SVID": v.SVID, "Name": v.Name, "Description": v.Description or "", "DataType": v.DataType, "AccessType": v.AccessType}
@@ -286,7 +292,13 @@ class ProjectAPI:
                 for v in aggregated.DataVariables
             ],
             Events=[
-                {"CEID": e.CEID, "EventName": e.EventName, "Description": e.Description or ""}
+                {
+                    "CEID": e.CEID, 
+                    "EventName": e.EventName, 
+                    "Description": e.Description or "",
+                    "LinkedVIDs": e.LinkedVIDs,
+                    "LinkedReports": ceid_to_reports.get(e.CEID, [])
+                }
                 for e in aggregated.Events
             ],
             Alarms=[
