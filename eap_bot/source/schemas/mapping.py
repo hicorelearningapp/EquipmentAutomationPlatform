@@ -7,20 +7,18 @@ class MESTag(BaseModel):
     description: str = ""
     expected_type: str = ""
     expected_unit: str = ""
-    transaction: Optional[str] = None
 
 class MappingEntry(BaseModel):
-    EquipmentField: str
+    EquipmentFieldName: str
     EquipmentID: str = ""
     EntityType: str # variable, event, or alarm
     MESField: str
-    Transaction: Optional[str] = None
     Confidence: float
     Reasoning: str = ""
     Method: str = "llm"
 
 class UnmappedEntity(BaseModel):
-    EquipmentField: str
+    EquipmentFieldName: str
     EquipmentID: str = ""
     EntityType: str
     Name: str
@@ -55,16 +53,13 @@ from typing import Dict
 
 from source.schemas.secsgem import EquipmentSpec
 
-from enum import Enum
 
-class AutoMapCategory(str, Enum):
-    VARIABLES = "Variables"
-    EVENTS = "Events"
-    ALARMS = "Alarms"
 
-class AutoMapRequest(BaseModel):
-    project_id: int
-    family: str
-    template: str
-    map_category: Optional[AutoMapCategory] = None
+class AutoMapSectionRequest(BaseModel):
+    Events: list[dict] = Field(default_factory=list)
+    Variables: list[dict] = Field(default_factory=list)
+    Alarms: list[dict] = Field(default_factory=list)
 
+    model_config = {
+        "extra": "allow" # allow extra keys to be passed through
+    }

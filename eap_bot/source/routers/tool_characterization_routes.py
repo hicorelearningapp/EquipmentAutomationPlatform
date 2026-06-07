@@ -11,6 +11,7 @@ from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
 from source.schemas.test_script import GenerateTestScriptsRequest
 from source.schemas.project import DocumentCategory, TestResultFileType
+from source.schemas.sml_generation import SMLGenerationResponse
 from source.services.document_service import DocumentService
 from source.services.storage_service import StorageService, ProjectNotFoundError, DocumentExistsError
 from source.services.test_script_service import TestScriptService
@@ -28,6 +29,7 @@ class ToolCharacterizationAPI:
     def register_routes(self):
         self.router.post("/GenerateTestScripts/{project_id}")(self.generate_test_scripts)
         self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
+        self.router.post("/GenerateSMLScripts/{project_id}", response_model=SMLGenerationResponse)(self.generate_sml_scripts)
         # self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
         self.router.post("/UploadTestResult")(self.upload_test_result)
         self.router.get("/GetToolResults/{project_id}")(self.get_tool_results)
@@ -112,6 +114,15 @@ class ToolCharacterizationAPI:
             }
         except Exception as e:
             logger.error("Failed to update tool characterization script: %s", e)
+            raise HTTPException(500, str(e))
+
+    def generate_sml_scripts(self, project_id: int):
+        try:
+            return container.sml_generation_service.generate_scripts(project_id)
+        except FileNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except Exception as e:
+            logger.error("Failed to generate SML scripts: %s", e)
             raise HTTPException(500, str(e))
 
     # def generate_tool_char_report_summary(self, project_id: int):

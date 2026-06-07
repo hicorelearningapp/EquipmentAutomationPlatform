@@ -1,0 +1,123 @@
+test_name,file_name,method,url,status,duration_ms,expected,got,error_msg
+test_upload_document_nonexistent_project,test_documents_endpoints.py,POST,/UploadDocument/999999999,passed,11,404,404,
+test_analyze_project_nonexistent,test_documents_endpoints.py,GET,/AnalyzeProject/999999999,passed,4,404,404,
+test_get_variable_nonexistent_project,test_documents_endpoints.py,GET,/GetVariable/999999999/test_gem_manual,passed,4,404,404,
+test_update_extraction_nonexistent_project,test_documents_endpoints.py,POST,/UpdateExtraction/999999999,failed,3,-,-,"client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x0000028281410040>
+
+    def test_update_extraction_nonexistent_project(client, record_property):
+        url = f""/UpdateExtraction/{GHOST_PROJECT_ID}""
+        record_property(""method"", ""POST"")
+        record_property(""url"", url)
+    
+>       response = client.post(url, json=_MINIMAL_SPEC)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test\test_documents_endpoints.py:402: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\testclient.py:546: in post
+    return super().post(
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\httpx\_client.py:1144: in post
+    return self.request(
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\testclient.py:445: in request
+    return super().request(
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\httpx\_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\httpx\_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\testclient.py:348: in handle_request
+    raise exc
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\testclient.py:345: in handle_request
+    portal.call(self.app, scope, receive, send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\anyio\from_thread.py:334: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\concurrent\futures\_base.py:450: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\concurrent\futures\_base.py:395: in __get_result
+    raise self._exception
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\anyio\from_thread.py:259: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\fastapi\applications.py:1163: in __call__
+    await super().__call__(scope, receive, send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\applications.py:90: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\middleware\exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\fastapi\middleware\asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\routing.py:660: in __call__
+    await self.middleware_stack(scope, receive, send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\routing.py:680: in app
+    await route.handle(scope, receive, send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\routing.py:276: in handle
+    await self.app(scope, receive, send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\fastapi\routing.py:134: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    raise exc
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\fastapi\routing.py:120: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\fastapi\routing.py:674: in app
+    raw_response = await run_endpoint_function(
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\fastapi\routing.py:330: in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\starlette\concurrency.py:32: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\anyio\to_thread.py:63: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\anyio\_backends\_asyncio.py:2518: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\anyio\_backends\_asyncio.py:1002: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <source.routers.equipment_routes.EquipmentAPI object at 0x0000028281B85010>
+project_id = 999999999
+request = {'DataVariable': [], 'Protocol': 'SECS/GEM', 'StatusVariable': [], 'ToolID': 'TEST-TOOL-001', ...}
+
+    def update_extraction(self, project_id: int, request: dict = Body(...)):
+        from source.schemas.project import UpdateExtractionRequest
+        from source.schemas.project import UpdateExtractionRequest
+        from source.schemas.secsgem import EquipmentSpec, StatusVariable, DataVariable, Event, Alarm, RemoteCommand, State, StateTransition
+        from source.schemas.report import ReportDefinition
+    
+        try:
+            # Validate payload using new schema
+>           validated_req = UpdateExtractionRequest(**request)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           pydantic_core._pydantic_core.ValidationError: 2 validation errors for UpdateExtractionRequest
+E           ProjectID
+E             Field required [type=missing, input_value={'ToolID': 'TEST-TOOL-001...event_report_links': []}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.12/v/missing
+E           ExtractionID
+E             Field required [type=missing, input_value={'ToolID': 'TEST-TOOL-001...event_report_links': []}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.12/v/missing
+
+source\routers\equipment_routes.py:161: ValidationError"

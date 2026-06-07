@@ -4,8 +4,8 @@ from typing import Optional
 class ReportDefinition(BaseModel):
     RPTID: str
     Name: str
-    Items: list[int] = Field(default_factory=list)
-    LinkedEvents: list[int] = Field(default_factory=list)
+    LinkedVIDs: list[int] = Field(default_factory=list)
+    Type: str = "Built-in"
     Confidence: float = Field(default=0.7, ge=0.0, le=1.0)
     Reasoning: Optional[str] = None
 

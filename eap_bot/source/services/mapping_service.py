@@ -75,14 +75,14 @@ class MappingService:
     def _find_unmapped(
         self, spec: EquipmentSpec, suggestions: List[MappingEntry]
     ) -> List[UnmappedEntity]:
-        mapped_entity_ids = {s.EquipmentField for s in suggestions}
+        mapped_entity_ids = {s.EquipmentFieldName for s in suggestions}
         unmapped = []
 
         for v in spec.StatusVariables:
             vid_str = str(v.SVID)
             if vid_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    EquipmentField=vid_str,
+                    EquipmentFieldName=vid_str,
                     EntityType="variable",
                     Name=v.Name,
                 ))
@@ -90,7 +90,7 @@ class MappingService:
             vid_str = str(v.DvID)
             if vid_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    EquipmentField=vid_str,
+                    EquipmentFieldName=vid_str,
                     EntityType="variable",
                     Name=v.Name,
                 ))
@@ -98,7 +98,7 @@ class MappingService:
             ceid_str = str(e.CEID)
             if ceid_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    EquipmentField=ceid_str,
+                    EquipmentFieldName=ceid_str,
                     EntityType="event",
                     Name=e.EventName,
                     
@@ -107,7 +107,7 @@ class MappingService:
             alarm_id_str = str(a.AlarmID)
             if alarm_id_str not in mapped_entity_ids:
                 unmapped.append(UnmappedEntity(
-                    EquipmentField=alarm_id_str,
+                    EquipmentFieldName=alarm_id_str,
                     EntityType="alarm",
                     Name=a.AlarmName,
                 ))
@@ -161,14 +161,13 @@ class MappingService:
             if a_name: entity_name_lookup[a_name.lower()] = a_name
 
         valid_tag_ids = {t.tag_id for t in target_tags}
-        tag_transactions = {t.tag_id: t.transaction for t in target_tags}
 
         valid_suggestions = []
         for s in data.get("Suggestions", []):
-            eq_field_raw = str(s.get("EquipmentField", "")).lower()
+            eq_field_raw = str(s.get("EquipmentFieldName", "")).lower()
             if eq_field_raw in entity_id_lookup and eq_field_raw in entity_name_lookup:
                 s["EquipmentID"] = entity_id_lookup[eq_field_raw]
-                s["EquipmentField"] = entity_name_lookup[eq_field_raw] or entity_id_lookup[eq_field_raw]
+                s["EquipmentFieldName"] = entity_name_lookup[eq_field_raw] or entity_id_lookup[eq_field_raw]
             else:
                 continue
                 
@@ -177,8 +176,6 @@ class MappingService:
                 and s.get("Confidence", 0) >= 0.1
             ):
                 tag_id = s.get("MESField")
-                if tag_transactions.get(tag_id):
-                    s["Transaction"] = tag_transactions[tag_id]
                 valid_suggestions.append(s)
 
         data["Suggestions"] = valid_suggestions
@@ -208,7 +205,7 @@ TARGET MES TAGS:
 
 OUTPUT REQUIREMENT:
 Provide a list of suggested mappings in JSON format.
-Each mapping should include the `EquipmentField` (instead of EntityID), the `EntityType` (variable, event, or alarm), the `MESField` (instead of TagID), a `Confidence` score (0.0 to 1.0), and a brief `Reasoning`.
+Each mapping should include the `EquipmentFieldName` (instead of EntityID), the `EntityType` (variable, event, or alarm), the `MESField` (instead of TagID), a `Confidence` score (0.0 to 1.0), and a brief `Reasoning`.
 
 GUIDELINES:
 1. Make best-effort, fuzzy matches between specialized equipment events/alarms and generic MES Tags (e.g. 'BeamIgnited' or 'ImplantStarted' -> 'LotStart' or 'TrackIn').

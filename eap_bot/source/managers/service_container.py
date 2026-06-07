@@ -42,12 +42,16 @@ class ServiceContainer:
         # Import here to avoid circular imports at module load time
         from source.services.project_service import ProjectService
         from source.services.document_service import DocumentService
+        from source.services.sml_generation_service import SMLGenerationService
 
         self.project_service: ProjectService = ProjectService(
             storage=self.storage, container=self
         )
         self.document_service: DocumentService = DocumentService(
             storage=self.storage, container=self
+        )
+        self.sml_generation_service: SMLGenerationService = SMLGenerationService(
+            storage=self.storage
         )
 
         logger.info("ServiceContainer: all services ready.")

@@ -1,0 +1,2942 @@
+{
+  "DocumentType": "User Manuals",
+  "ToolID": "IMP-HE2001 Ion Implanter",
+  "ToolType": "ION_IMPLANTER",
+  "Model": null,
+  "Protocol": "SECS/GEM",
+  "StatusVariables": [
+    {
+      "SVID": 1159,
+      "Name": "MeasuredWaferTemperature",
+      "Description": "Current temperature of the wafer measured by the tool",
+      "DataType": "float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1051,
+      "Name": "ArcCurrent",
+      "Description": "Current flowing through the arc chamber",
+      "DataType": "float",
+      "AccessType": "R",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1052,
+      "Name": "ArcVoltage",
+      "Description": "Voltage applied to the arc chamber",
+      "DataType": "float",
+      "AccessType": "R",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1061,
+      "Name": "FilamentOperationalHours",
+      "Description": "Total operational hours of the tungsten filament",
+      "DataType": "integer",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1162,
+      "Name": "CoolantFlowRate",
+      "Description": "Backside helium coolant flow rate",
+      "DataType": "float",
+      "AccessType": "R",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1163,
+      "Name": "CoolantPressure",
+      "Description": "Backside helium coolant pressure",
+      "DataType": "float",
+      "AccessType": "R",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1001,
+      "Name": "SystemStatus",
+      "Description": "Overall status: IDLE, IMPLANTING, TUNING, FAULT, MAINTENANCE",
+      "DataType": "ASCII",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1002,
+      "Name": "ControlState",
+      "Description": "GEM control state: 1=OFF-LINE, 2=ATTEMPT ONLINE, 3=HOST, 4=EQUIPMENT, 5=ON-LINE",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1003,
+      "Name": "ProcessState",
+      "Description": "Current equipment process state from the state machine",
+      "DataType": "ASCII",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1004,
+      "Name": "PreviousProcessState",
+      "Description": "Previous process state (set at each transition)",
+      "DataType": "ASCII",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1005,
+      "Name": "EquipmentTime",
+      "Description": "Equipment real-time clock YYYYMMDDHHmmss",
+      "DataType": "ASCII",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1006,
+      "Name": "ActiveWaferCount",
+      "Description": "Equipment wafer count does not match host tracking",
+      "DataType": "U2",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1007,
+      "Name": "EMOStatus",
+      "Description": "-",
+      "DataType": "BOOLEAN",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1008,
+      "Name": "MaintenanceMode",
+      "Description": "TRUE = maintenance mode active, processing inhibited",
+      "DataType": "BOOLEAN",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1009,
+      "Name": "RadiationInterlock",
+      "Description": "TRUE = X-ray radiation level exceeds safe threshold",
+      "DataType": "BOOLEAN",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1010,
+      "Name": "DoorInterlock_Source",
+      "Description": "TRUE = ion source access panel is open",
+      "DataType": "BOOLEAN",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1011,
+      "Name": "DoorInterlock_Beamline",
+      "Description": "TRUE = beamline access panel is open",
+      "DataType": "BOOLEAN",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1012,
+      "Name": "DoorInterlock_EndStation",
+      "Description": "TRUE = end station access door is open",
+      "DataType": "BOOLEAN",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1013,
+      "Name": "PMCounter_Source",
+      "Description": "Ion source operating hours since last filament replacement",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1014,
+      "Name": "PMCounter_Beamline",
+      "Description": "Beamline operating hours since last PM",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1053,
+      "Name": "Source_ArcCurrentSetpoint",
+      "Description": "Active recipe arc current setpoint (R/W)",
+      "DataType": "Float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1054,
+      "Name": "Source_FilamentCurrent",
+      "Description": "Filament current to maintain arc",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1055,
+      "Name": "Source_FilamentVoltage",
+      "Description": "Filament heating voltage",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1056,
+      "Name": "Source_GasFlow",
+      "Description": "MFC actual flow rate for source gas",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1057,
+      "Name": "Source_GasFlowSetpoint",
+      "Description": "Source gas flow actual value",
+      "DataType": "Float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1058,
+      "Name": "Source_GasSpecies",
+      "Description": "Active source gas: BF3, PH3, AsH3, Ar, Xe",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1059,
+      "Name": "Source_ExtractionVoltage",
+      "Description": "Extraction electrode voltage",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1060,
+      "Name": "Source_ExtractionCurrent",
+      "Description": "Extraction beam current at source exit",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1062,
+      "Name": "Source_Status",
+      "Description": "Source state: OFF, WARMING_UP, PLASMA_ON, STABLE, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1063,
+      "Name": "Source_VaporiserTemp",
+      "Description": "Vaporiser temperature for solid source materials (e.g., Decaborane)",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1064,
+      "Name": "Source_ChamberPressure",
+      "Description": "Ion source chamber internal pressure",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1101,
+      "Name": "Beam_AnalyzerMagnetCurrent",
+      "Description": "Analyzer magnet coil current",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1102,
+      "Name": "Beam_AnalyzerMagnetSetpoint",
+      "Description": "Analyzer magnet current setpoint for selected species/energy",
+      "DataType": "Float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1103,
+      "Name": "Beam_ResolvedCurrent",
+      "Description": "Beam current at the resolving aperture Faraday cup",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1104,
+      "Name": "Beam_Energy",
+      "Description": "Actual measured beam energy",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1105,
+      "Name": "Beam_EnergySetpoint",
+      "Description": "Recipe-specified beam energy setpoint",
+      "DataType": "Float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1106,
+      "Name": "Beam_AccelVoltage",
+      "Description": "Acceleration column voltage",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1107,
+      "Name": "Beam_DecelVoltage",
+      "Description": "Deceleration electrode voltage (for energy contamination control)",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1108,
+      "Name": "Beam_ScanFreqX",
+      "Description": "X-axis electrostatic scan frequency",
+      "DataType": "Float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1109,
+      "Name": "Beam_ScanFreqY",
+      "Description": "Y-axis mechanical scan frequency",
+      "DataType": "Float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1110,
+      "Name": "Beam_ScanAmplitudeX",
+      "Description": "X-axis scan amplitude at wafer plane",
+      "DataType": "Float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1111,
+      "Name": "Beam_ScanAmplitudeY",
+      "Description": "Y-axis scan amplitude at wafer plane",
+      "DataType": "Float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1112,
+      "Name": "Beam_SpotSizeX",
+      "Description": "Beam spot width at wafer plane (X)",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1113,
+      "Name": "Beam_SpotSizeY",
+      "Description": "Beam spot height at wafer plane (Y)",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1114,
+      "Name": "Beam_Parallelism",
+      "Description": "Beam angle deviation from parallel (should be < 0.5\u00b0)",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1115,
+      "Name": "Beam_Status",
+      "Description": "Beamline state: OFF, TUNING, BEAM_ON, STABLE, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1151,
+      "Name": "EndStn_PlatenTilt",
+      "Description": "Wafer platen tilt angle (relative to beam)",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1152,
+      "Name": "EndStn_PlatenTiltSetpoint",
+      "Description": "Platen tilt angle actual value",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1153,
+      "Name": "EndStn_PlatenTwist",
+      "Description": "Platen twist angle setpoint",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1154,
+      "Name": "EndStn_PlatenTwistSetpoint",
+      "Description": "Platen twist angle actual value",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1155,
+      "Name": "EndStn_DoseCurrent",
+      "Description": "Instantaneous dose Faraday cup current",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1156,
+      "Name": "EndStn_DoseAccumulated",
+      "Description": "Accumulated dose delivered to current wafer",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1157,
+      "Name": "EndStn_DoseTarget",
+      "Description": "Dose tracking actual profile",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1158,
+      "Name": "EndStn_DoseUniformity",
+      "Description": "Real-time dose uniformity (1-sigma)",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1160,
+      "Name": "EndStn_WaferPresent",
+      "Description": "TRUE = wafer detected on platen",
+      "DataType": "Boolean",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1161,
+      "Name": "EndStn_WaferClamped",
+      "Description": "TRUE = electrostatic clamp engaged",
+      "DataType": "Boolean",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1164,
+      "Name": "EndStn_ImplantTime",
+      "Description": "Elapsed implant time for current wafer",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1165,
+      "Name": "EndStn_ProcessState",
+      "Description": "End station sub-state: IDLE, LOADING, ALIGNING, IMPLANTING, UNLOADING, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1201,
+      "Name": "WH_RobotStatus",
+      "Description": "Robot state: IDLE, TRANSFERRING, ALIGNING, FAULT, TEACHING",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1202,
+      "Name": "WH_RobotPosition",
+      "Description": "Robot position: HOME, LOADPORT1, LOADPORT2, LOADLOCK, PREALIGNER, ENDSTATION",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1203,
+      "Name": "WH_LoadPort1_Status",
+      "Description": "Port 1: EMPTY, FOUP_PRESENT, MAPPING, READY, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1204,
+      "Name": "WH_LoadPort2_Status",
+      "Description": "Port 2: EMPTY, FOUP_PRESENT, MAPPING, READY, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1205,
+      "Name": "WH_LoadLock_State",
+      "Description": "Load lock: VENTED, PUMPING, VACUUM, VENTING, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1206,
+      "Name": "WH_LoadLock_Pressure",
+      "Description": "Load lock chamber pressure",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1207,
+      "Name": "WH_PrealignAngle",
+      "Description": "Notch finder measured wafer orientation angle",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1208,
+      "Name": "WH_WaferInLoadLock",
+      "Description": "TRUE = wafer present in load lock",
+      "DataType": "Boolean",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1209,
+      "Name": "WH_FOUP1_WaferCount",
+      "Description": "Number of wafers detected in FOUP on port 1",
+      "DataType": "U1",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1210,
+      "Name": "WH_FOUP2_WaferCount",
+      "Description": "Number of wafers detected in FOUP on port 2",
+      "DataType": "U1",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1251,
+      "Name": "Vac_Beamline_Pressure",
+      "Description": "Beamline section vacuum pressure (ion gauge)",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1252,
+      "Name": "Vac_EndStation_Pressure",
+      "Description": "End station process chamber vacuum pressure",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1253,
+      "Name": "Vac_SourceChamber_Pressure",
+      "Description": "Ion source region vacuum pressure",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1254,
+      "Name": "Vac_TurboPump1_Speed",
+      "Description": "Beamline turbomolecular pump rotor speed",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1255,
+      "Name": "Vac_TurboPump1_Status",
+      "Description": "OFF, STARTING, RUNNING, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1256,
+      "Name": "Vac_TurboPump2_Speed",
+      "Description": "End station turbomolecular pump rotor speed",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1257,
+      "Name": "Vac_TurboPump2_Status",
+      "Description": "OFF, STARTING, RUNNING, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1258,
+      "Name": "Vac_CryoPump_Temp",
+      "Description": "Cryopump cold head temp > 18 K \u2014 performance degraded",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1259,
+      "Name": "Vac_CryoPump_Status",
+      "Description": "OFF, COOLDOWN, RUNNING, REGENERATING, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1260,
+      "Name": "Vac_RoughingPump_Status",
+      "Description": "Dry scroll pump: OFF, RUNNING, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1261,
+      "Name": "Vac_GateValve_BL",
+      "Description": "TRUE = beamline gate valve OPEN",
+      "DataType": "Boolean",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1262,
+      "Name": "Vac_GateValve_ES",
+      "Description": "TRUE = end station gate valve OPEN",
+      "DataType": "Boolean",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1301,
+      "Name": "HV_TerminalVoltage",
+      "Description": "Terminal high-voltage supply output",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1302,
+      "Name": "HV_TerminalCurrent",
+      "Description": "Terminal high-voltage supply current",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1303,
+      "Name": "HV_TerminalSetpoint",
+      "Description": "Terminal voltage setpoint",
+      "DataType": "Float",
+      "AccessType": "RW",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1304,
+      "Name": "HV_TerminalStatus",
+      "Description": "OFF, RAMPING, ON, FAULT",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1305,
+      "Name": "HV_SuppressionVoltage",
+      "Description": "Electron suppression electrode voltage",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1306,
+      "Name": "HV_ExtractionVoltage",
+      "Description": "Extraction electrode voltage (same as Source_ExtractionVoltage)",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1307,
+      "Name": "HV_InterlockStatus",
+      "Description": "TRUE = all HV interlocks satisfied (safe to energise)",
+      "DataType": "Boolean",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1308,
+      "Name": "PSU_24V_Status",
+      "Description": "TRUE = 24V instrument power supply OK",
+      "DataType": "Boolean",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1309,
+      "Name": "PSU_48V_Status",
+      "Description": "TRUE = 48V servo power supply OK",
+      "DataType": "Boolean",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 1310,
+      "Name": "PSU_MainAC_Status",
+      "Description": "TRUE = main 3-phase AC power within tolerance",
+      "DataType": "Boolean",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4001,
+      "Name": "Source_ArcFault",
+      "Description": "Arc current or voltage outside safe operating range \u2014 source off",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4002,
+      "Name": "Source_GasLeak",
+      "Description": "Toxic gas leak detected near ion source (AsH\u2083 or PH\u2083)",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4003,
+      "Name": "Beam_EnergyContamination",
+      "Description": "Energy contamination exceeds 1% \u2014 incorrect dopant depth",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4004,
+      "Name": "Beam_OverCurrent",
+      "Description": "Beam current exceeds safe limit for wafer damage",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4005,
+      "Name": "EndStn_DoseOverrun",
+      "Description": "Delivered dose exceeds target by > 5% \u2014 wafer damage risk",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4006,
+      "Name": "EndStn_WaferOverheat",
+      "Description": "Wafer temperature exceeds 120\u00b0C \u2014 photoresist degradation",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4007,
+      "Name": "EndStn_WaferDrop",
+      "Description": "Wafer detected off-platen during transfer",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4008,
+      "Name": "HV_ArcOver",
+      "Description": "HV arc-over detected in acceleration column \u2014 HV tripped",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4009,
+      "Name": "HV_InterlockFail",
+      "Description": "HV interlock not satisfied but beam requested",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4010,
+      "Name": "Vac_BeamlineLeak",
+      "Description": "Beamline pressure rise rate exceeds acceptable limit",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4011,
+      "Name": "Vac_EndStationLeak",
+      "Description": "End station pressure rise rate exceeds acceptable limit",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4012,
+      "Name": "Robot_CollisionFault",
+      "Description": "Robot collision or obstruction detected during transfer",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4013,
+      "Name": "Robot_WaferDrop",
+      "Description": "Wafer drop sensor activated during transfer",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4014,
+      "Name": "EMO_Activated",
+      "Description": "Emergency Master Off pressed \u2014 all systems halted",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4015,
+      "Name": "Radiation_Exceeded",
+      "Description": "X-ray radiation level exceeds personnel safety threshold",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 4016,
+      "Name": "PowerFault_MainAC",
+      "Description": "Main AC power phase loss or out of tolerance",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2052,
+      "Name": "DoseUniformity_Actual",
+      "Description": "Post-implant dose uniformity actual value",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2012,
+      "Name": "DoseUniformity_RecipeLimit",
+      "Description": "Post-implant dose uniformity recipe limit",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2061,
+      "Name": "AbortReason",
+      "Description": "-",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2054,
+      "Name": "ActualBeamCurrent_Avg",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2051,
+      "Name": "ActualDoseDelivered",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2053,
+      "Name": "ActualEnergy",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2055,
+      "Name": "ActualTilt",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2056,
+      "Name": "ActualTwist",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2062,
+      "Name": "BeamStability",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2063,
+      "Name": "DoseAccuracy",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2064,
+      "Name": "EnergyContamination",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2057,
+      "Name": "ImplantDuration",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2014,
+      "Name": "ImplantMode",
+      "Description": "-",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2003,
+      "Name": "LotID",
+      "Description": "-",
+      "DataType": "ASCII",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2065,
+      "Name": "ParticleCount",
+      "Description": "-",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2060,
+      "Name": "ProcessResult",
+      "Description": "-",
+      "DataType": "String",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2001,
+      "Name": "RecipeID",
+      "Description": "-",
+      "DataType": "ASCII",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2002,
+      "Name": "RecipeVersion",
+      "Description": "-",
+      "DataType": "ASCII",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2005,
+      "Name": "SlotNumber",
+      "Description": "-",
+      "DataType": "U4",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2011,
+      "Name": "TargetBeamCurrent",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2008,
+      "Name": "TargetDose",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2007,
+      "Name": "TargetEnergy",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2006,
+      "Name": "TargetSpecies",
+      "Description": "-",
+      "DataType": "ASCII",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2009,
+      "Name": "TargetTilt",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2010,
+      "Name": "TargetTwist",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2013,
+      "Name": "TargetWaferTemp_Max",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2004,
+      "Name": "WaferID",
+      "Description": "-",
+      "DataType": "ASCII",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2059,
+      "Name": "WaferTemp_Avg",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    },
+    {
+      "SVID": 2058,
+      "Name": "WaferTemp_Max",
+      "Description": "-",
+      "DataType": "Float",
+      "AccessType": "RO",
+      "Value": "-",
+      "Confidence": 1.0
+    }
+  ],
+  "DataVariables": [
+    {
+      "DvID": 2051,
+      "Name": "ActualDoseDelivered",
+      "ValueType": "float",
+      "Unit": "ions/cm\u00b2"
+    },
+    {
+      "DvID": 2008,
+      "Name": "RecipeTargetDose",
+      "ValueType": "float",
+      "Unit": "ions/cm\u00b2"
+    },
+    {
+      "DvID": 2062,
+      "Name": "BeamStability",
+      "ValueType": "float",
+      "Unit": "arbitrary units"
+    },
+    {
+      "DvID": 2001,
+      "Name": "RecipeID",
+      "ValueType": "string",
+      "Unit": "-"
+    },
+    {
+      "DvID": 2002,
+      "Name": "RecipeVersion",
+      "ValueType": "string",
+      "Unit": "-"
+    },
+    {
+      "DvID": 2003,
+      "Name": "LotID",
+      "ValueType": "string",
+      "Unit": "-"
+    },
+    {
+      "DvID": 2004,
+      "Name": "WaferID",
+      "ValueType": "string",
+      "Unit": "-"
+    },
+    {
+      "DvID": 2005,
+      "Name": "SlotNumber",
+      "ValueType": "integer",
+      "Unit": "-"
+    },
+    {
+      "DvID": 2006,
+      "Name": "TargetSpecies",
+      "ValueType": "string",
+      "Unit": "-"
+    },
+    {
+      "DvID": 2007,
+      "Name": "TargetEnergy",
+      "ValueType": "float",
+      "Unit": "keV"
+    },
+    {
+      "DvID": 2009,
+      "Name": "TargetTilt",
+      "ValueType": "float",
+      "Unit": "deg"
+    },
+    {
+      "DvID": 2010,
+      "Name": "TargetTwist",
+      "ValueType": "float",
+      "Unit": "deg"
+    },
+    {
+      "DvID": 2011,
+      "Name": "TargetBeamCurrent",
+      "ValueType": "float",
+      "Unit": "mA"
+    },
+    {
+      "DvID": 2012,
+      "Name": "TargetDoseUniformity",
+      "ValueType": "float",
+      "Unit": "%"
+    },
+    {
+      "DvID": 2013,
+      "Name": "TargetWaferTemp_Max",
+      "ValueType": "float",
+      "Unit": "\u00b0C"
+    },
+    {
+      "DvID": 2014,
+      "Name": "ImplantMode",
+      "ValueType": "string",
+      "Unit": "-"
+    },
+    {
+      "DvID": 2052,
+      "Name": "DoseUniformity_Measured",
+      "ValueType": "float",
+      "Unit": "%"
+    },
+    {
+      "DvID": 2053,
+      "Name": "ActualEnergy",
+      "ValueType": "float",
+      "Unit": "keV"
+    },
+    {
+      "DvID": 2054,
+      "Name": "ActualBeamCurrent_Avg",
+      "ValueType": "float",
+      "Unit": "mA"
+    },
+    {
+      "DvID": 2055,
+      "Name": "ActualTilt",
+      "ValueType": "float",
+      "Unit": "deg"
+    },
+    {
+      "DvID": 2056,
+      "Name": "ActualTwist",
+      "ValueType": "float",
+      "Unit": "deg"
+    },
+    {
+      "DvID": 2057,
+      "Name": "ImplantDuration",
+      "ValueType": "float",
+      "Unit": "sec"
+    },
+    {
+      "DvID": 2058,
+      "Name": "WaferTemp_Max",
+      "ValueType": "float",
+      "Unit": "\u00b0C"
+    },
+    {
+      "DvID": 2059,
+      "Name": "WaferTemp_Avg",
+      "ValueType": "float",
+      "Unit": "\u00b0C"
+    },
+    {
+      "DvID": 2060,
+      "Name": "ProcessResult",
+      "ValueType": "string",
+      "Unit": "-"
+    },
+    {
+      "DvID": 2061,
+      "Name": "AbortReason",
+      "ValueType": "string",
+      "Unit": "-"
+    },
+    {
+      "DvID": 2063,
+      "Name": "DoseAccuracy",
+      "ValueType": "float",
+      "Unit": "%"
+    },
+    {
+      "DvID": 2064,
+      "Name": "EnergyContamination",
+      "ValueType": "float",
+      "Unit": "%"
+    },
+    {
+      "DvID": 2065,
+      "Name": "ParticleCount",
+      "ValueType": "integer",
+      "Unit": "-"
+    }
+  ],
+  "Events": [
+    {
+      "CEID": 3003,
+      "EventName": "ImplantAbort",
+      "Description": "Tool aborts the implant process due to an error condition",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_3003",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3037,
+      "EventName": "AlarmSet",
+      "Description": "Tool sets an alarm condition",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_3037",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3001,
+      "EventName": "ImplantStart",
+      "Description": "Beam turned on and scanning wafer",
+      "LinkedVIDs": [
+        1151,
+        1155,
+        2001,
+        2004,
+        2007,
+        2008
+      ],
+      "LinkedReports": [
+        "RPT_001",
+        "RPT_005",
+        "RPT_013",
+        "RPT_014",
+        "RPT_015",
+        "RPT_024"
+      ],
+      "ReportID": "RPT_3001",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3002,
+      "EventName": "ImplantEnd",
+      "Description": "Target dose reached or process completed",
+      "LinkedVIDs": [
+        2051,
+        2052,
+        2053,
+        2054,
+        2060
+      ],
+      "LinkedReports": [
+        "RPT_003",
+        "RPT_004",
+        "RPT_006",
+        "RPT_014",
+        "RPT_020"
+      ],
+      "ReportID": "RPT_3002",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3004,
+      "EventName": "BeamTuneStart",
+      "Description": "Beam tuning/setup sequence initiated",
+      "LinkedVIDs": [
+        1051,
+        1101,
+        1104
+      ],
+      "LinkedReports": [
+        "RPT_007",
+        "RPT_008",
+        "RPT_010",
+        "RPT_012",
+        "RPT_022",
+        "RPT_023"
+      ],
+      "ReportID": "RPT_3004",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3005,
+      "EventName": "BeamTuneComplete",
+      "Description": "Beam stable and within specification",
+      "LinkedVIDs": [
+        1103,
+        1104,
+        1114,
+        1115
+      ],
+      "LinkedReports": [
+        "RPT_007",
+        "RPT_008",
+        "RPT_009",
+        "RPT_023"
+      ],
+      "ReportID": "RPT_3005",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3006,
+      "EventName": "BeamLost",
+      "Description": "Beam current dropped below minimum threshold",
+      "LinkedVIDs": [
+        1103,
+        1115
+      ],
+      "LinkedReports": [
+        "RPT_008",
+        "RPT_009",
+        "RPT_023"
+      ],
+      "ReportID": "RPT_3006",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3007,
+      "EventName": "SourceIgnition",
+      "Description": "Ion source plasma successfully ignited",
+      "LinkedVIDs": [
+        1051,
+        1052,
+        1062
+      ],
+      "LinkedReports": [
+        "RPT_007",
+        "RPT_010",
+        "RPT_011",
+        "RPT_012",
+        "RPT_022"
+      ],
+      "ReportID": "RPT_3007",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3008,
+      "EventName": "SourceExtinguish",
+      "Description": "Ion source plasma turned off",
+      "LinkedVIDs": [
+        1062
+      ],
+      "LinkedReports": [
+        "RPT_010",
+        "RPT_011",
+        "RPT_012"
+      ],
+      "ReportID": "RPT_3008",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3009,
+      "EventName": "SourceFault",
+      "Description": "Ion source fault detected",
+      "LinkedVIDs": [
+        1051,
+        1052,
+        1061,
+        1062
+      ],
+      "LinkedReports": [
+        "RPT_007",
+        "RPT_010",
+        "RPT_011",
+        "RPT_012",
+        "RPT_022"
+      ],
+      "ReportID": "RPT_3009",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3010,
+      "EventName": "WaferLoaded_EndStation",
+      "Description": "Wafer placed on end station platen",
+      "LinkedVIDs": [
+        1160,
+        1161,
+        2004
+      ],
+      "LinkedReports": [
+        "RPT_001",
+        "RPT_005",
+        "RPT_013",
+        "RPT_014",
+        "RPT_015",
+        "RPT_024"
+      ],
+      "ReportID": "RPT_3010",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3011,
+      "EventName": "WaferUnloaded_EndStation",
+      "Description": "Wafer removed from end station platen",
+      "LinkedVIDs": [
+        1160,
+        2004,
+        2060
+      ],
+      "LinkedReports": [
+        "RPT_001",
+        "RPT_004",
+        "RPT_005",
+        "RPT_006",
+        "RPT_013",
+        "RPT_014",
+        "RPT_015",
+        "RPT_020",
+        "RPT_024"
+      ],
+      "ReportID": "RPT_3011",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3012,
+      "EventName": "WaferPrealigned",
+      "Description": "Notch finder alignment completed",
+      "LinkedVIDs": [
+        1207,
+        2004
+      ],
+      "LinkedReports": [
+        "RPT_001",
+        "RPT_005",
+        "RPT_013",
+        "RPT_014",
+        "RPT_015"
+      ],
+      "ReportID": "RPT_3012",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3013,
+      "EventName": "FOUPLoaded_Port1",
+      "Description": "FOUP placed and mapped on Load Port 1",
+      "LinkedVIDs": [
+        1203,
+        1209
+      ],
+      "LinkedReports": [
+        "RPT_016",
+        "RPT_017"
+      ],
+      "ReportID": "RPT_3013",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3014,
+      "EventName": "FOUPUnloaded_Port1",
+      "Description": "FOUP removed from Load Port 1",
+      "LinkedVIDs": [
+        1203
+      ],
+      "LinkedReports": [
+        "RPT_016",
+        "RPT_017"
+      ],
+      "ReportID": "RPT_3014",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3015,
+      "EventName": "FOUPLoaded_Port2",
+      "Description": "FOUP placed and mapped on Load Port 2",
+      "LinkedVIDs": [
+        1204,
+        1210
+      ],
+      "LinkedReports": [
+        "RPT_018",
+        "RPT_019"
+      ],
+      "ReportID": "RPT_3015",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3016,
+      "EventName": "FOUPUnloaded_Port2",
+      "Description": "FOUP removed from Load Port 2",
+      "LinkedVIDs": [
+        1204
+      ],
+      "LinkedReports": [
+        "RPT_018",
+        "RPT_019"
+      ],
+      "ReportID": "RPT_3016",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3017,
+      "EventName": "LoadLockPumpDown",
+      "Description": "Load lock pump-down started",
+      "LinkedVIDs": [
+        1205,
+        1206
+      ],
+      "LinkedReports": [],
+      "ReportID": "RPT_3017",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3018,
+      "EventName": "LoadLockVacuumReached",
+      "Description": "Load lock reached transfer vacuum",
+      "LinkedVIDs": [
+        1205,
+        1206
+      ],
+      "LinkedReports": [],
+      "ReportID": "RPT_3018",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3019,
+      "EventName": "LoadLockVent",
+      "Description": "Load lock vent to atmosphere started",
+      "LinkedVIDs": [
+        1205,
+        1206
+      ],
+      "LinkedReports": [],
+      "ReportID": "RPT_3019",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3020,
+      "EventName": "LoadLockVented",
+      "Description": "Load lock at atmospheric pressure",
+      "LinkedVIDs": [
+        1205,
+        1206
+      ],
+      "LinkedReports": [],
+      "ReportID": "RPT_3020",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3021,
+      "EventName": "RobotFault",
+      "Description": "Wafer handler robot error",
+      "LinkedVIDs": [
+        1201,
+        1202
+      ],
+      "LinkedReports": [],
+      "ReportID": "RPT_3021",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3022,
+      "EventName": "SlotMapComplete_Port1",
+      "Description": "FOUP slot mapping completed on Port 1",
+      "LinkedVIDs": [
+        1203,
+        1209
+      ],
+      "LinkedReports": [
+        "RPT_016",
+        "RPT_017"
+      ],
+      "ReportID": "RPT_3022",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3023,
+      "EventName": "SlotMapComplete_Port2",
+      "Description": "FOUP slot mapping completed on Port 2",
+      "LinkedVIDs": [
+        1204,
+        1210
+      ],
+      "LinkedReports": [
+        "RPT_018",
+        "RPT_019"
+      ],
+      "ReportID": "RPT_3023",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3030,
+      "EventName": "ControlStateChange",
+      "Description": "GEM control state changed",
+      "LinkedVIDs": [
+        1002
+      ],
+      "LinkedReports": [
+        "RPT_021"
+      ],
+      "ReportID": "RPT_3030",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3031,
+      "EventName": "RecipeLoaded",
+      "Description": "New recipe loaded into active slot",
+      "LinkedVIDs": [
+        2001,
+        2002
+      ],
+      "LinkedReports": [
+        "RPT_001",
+        "RPT_005"
+      ],
+      "ReportID": "RPT_3031",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3032,
+      "EventName": "RecipeDeleted",
+      "Description": "Recipe deleted from controller",
+      "LinkedVIDs": [
+        2001
+      ],
+      "LinkedReports": [
+        "RPT_001",
+        "RPT_005"
+      ],
+      "ReportID": "RPT_3032",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3033,
+      "EventName": "MaintenanceModeEntered",
+      "Description": "Equipment entered maintenance mode",
+      "LinkedVIDs": [
+        1008
+      ],
+      "LinkedReports": [
+        "RPT_021"
+      ],
+      "ReportID": "RPT_3033",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3034,
+      "EventName": "MaintenanceModeExited",
+      "Description": "Equipment exited maintenance mode",
+      "LinkedVIDs": [
+        1008
+      ],
+      "LinkedReports": [
+        "RPT_021"
+      ],
+      "ReportID": "RPT_3034",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3035,
+      "EventName": "HV_Enabled",
+      "Description": "High voltage turned on",
+      "LinkedVIDs": [
+        1301,
+        1304
+      ],
+      "LinkedReports": [
+        "RPT_026"
+      ],
+      "ReportID": "RPT_3035",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3036,
+      "EventName": "HV_Disabled",
+      "Description": "High voltage turned off",
+      "LinkedVIDs": [
+        1304
+      ],
+      "LinkedReports": [
+        "RPT_026"
+      ],
+      "ReportID": "RPT_3036",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3038,
+      "EventName": "AlarmCleared",
+      "Description": "Any alarm was cleared",
+      "LinkedVIDs": [
+        1001
+      ],
+      "LinkedReports": [
+        "RPT_021"
+      ],
+      "ReportID": "RPT_3038",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3039,
+      "EventName": "EquipmentClockSync",
+      "Description": "Clock synchronized with host",
+      "LinkedVIDs": [
+        1005
+      ],
+      "LinkedReports": [],
+      "ReportID": "RPT_3039",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3040,
+      "EventName": "PMDue_Source",
+      "Description": "Source PM counter reached threshold",
+      "LinkedVIDs": [
+        1013
+      ],
+      "LinkedReports": [],
+      "ReportID": "RPT_3040",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3041,
+      "EventName": "PMDue_Beamline",
+      "Description": "Beamline PM counter reached threshold",
+      "LinkedVIDs": [
+        1014
+      ],
+      "LinkedReports": [],
+      "ReportID": "RPT_3041",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 1,
+      "EventName": "Establish Communications",
+      "Description": "Compliant",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_1",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 2,
+      "EventName": "Process Program Management",
+      "Description": "Compliant",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_2",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 3,
+      "EventName": "Equipment Self-Description",
+      "Description": "Compliant",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_3",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 4,
+      "EventName": "Control",
+      "Description": "Compliant",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_4",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 5,
+      "EventName": "Alarm Management",
+      "Description": "Compliant",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_5",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 6,
+      "EventName": "Event Notification",
+      "Description": "Compliant",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_6",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 7,
+      "EventName": "Online Identification",
+      "Description": "Compliant",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_7",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 8,
+      "EventName": "Error Messages",
+      "Description": "Compliant",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_8",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 9,
+      "EventName": "Variable Data Collection",
+      "Description": "Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_9",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 10,
+      "EventName": "Trace Data Collection",
+      "Description": "Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_10",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 11,
+      "EventName": "Limits Monitoring",
+      "Description": "Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_11",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 12,
+      "EventName": "Status Data Collection",
+      "Description": "Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_12",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 13,
+      "EventName": "Recipe Management Enhanced",
+      "Description": "Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_13",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 14,
+      "EventName": "Spooling",
+      "Description": "Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_14",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 15,
+      "EventName": "Clock",
+      "Description": "Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_15",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 16,
+      "EventName": "Equipment Terminal Services",
+      "Description": "Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_16",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 17,
+      "EventName": "Message Acknowledgement Spooling",
+      "Description": "Not Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_17",
+      "Report": true,
+      "Confidence": 1.0
+    },
+    {
+      "CEID": 18,
+      "EventName": "Dynamic Event Configuration",
+      "Description": "Implemented",
+      "LinkedVIDs": [],
+      "LinkedReports": [],
+      "ReportID": "RPT_18",
+      "Report": true,
+      "Confidence": 1.0
+    }
+  ],
+  "Alarms": [
+    {
+      "AlarmID": 4001,
+      "AlarmName": "Source_ArcFault",
+      "Severity": "critical",
+      "LinkedVID": null,
+      "Description": "Arc fault detected in the source chamber",
+      "Confidence": 1.0
+    },
+    {
+      "AlarmID": 4002,
+      "AlarmName": "Source_GasLeak",
+      "Severity": "critical",
+      "LinkedVID": null,
+      "Description": "Toxic gas leak detected in the gas box",
+      "Confidence": 1.0
+    },
+    {
+      "AlarmID": 4005,
+      "AlarmName": "EndStn_DoseOverrun",
+      "Severity": "critical",
+      "LinkedVID": null,
+      "Description": "Dose delivered exceeds recipe target",
+      "Confidence": 1.0
+    },
+    {
+      "AlarmID": 4006,
+      "AlarmName": "EndStn_WaferOverheat",
+      "Severity": "critical",
+      "LinkedVID": 1159,
+      "Description": "Wafer temperature exceeds safe threshold",
+      "Confidence": 1.0
+    },
+    {
+      "AlarmID": 1,
+      "AlarmName": "HCACK",
+      "Severity": "critical",
+      "LinkedVID": null,
+      "Description": "Invalid command or cannot perform now",
+      "Confidence": 1.0
+    },
+    {
+      "AlarmID": 2,
+      "AlarmName": "HCACK",
+      "Severity": "warning",
+      "LinkedVID": null,
+      "Description": "At least 1 parameter invalid",
+      "Confidence": 1.0
+    },
+    {
+      "AlarmID": 3,
+      "AlarmName": "HCACK",
+      "Severity": "warning",
+      "LinkedVID": null,
+      "Description": "Rejected due to safety",
+      "Confidence": 1.0
+    },
+    {
+      "AlarmID": 4,
+      "AlarmName": "CPACK",
+      "Severity": "critical",
+      "LinkedVID": null,
+      "Description": "Name not recognised",
+      "Confidence": 1.0
+    },
+    {
+      "AlarmID": 5,
+      "AlarmName": "CPACK",
+      "Severity": "warning",
+      "LinkedVID": null,
+      "Description": "Illegal value",
+      "Confidence": 1.0
+    }
+  ],
+  "RemoteCommands": [
+    {
+      "RCMD": "RESET_FAULT",
+      "Description": "Clears the current fault state and returns the tool to IDLE state",
+      "Parameters": [],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "START_IMPLANT",
+      "Description": "Begin implant run on specified wafer with loaded recipe",
+      "Parameters": [
+        {
+          "Name": "RECIPE_ID",
+          "Type": "string"
+        },
+        {
+          "Name": "WAFER_ID",
+          "Type": "string"
+        },
+        {
+          "Name": "SLOT_NUMBER",
+          "Type": "integer"
+        },
+        {
+          "Name": "LOAD_PORT",
+          "Type": "integer"
+        }
+      ],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "ABORT_IMPLANT",
+      "Description": "Immediately abort active implant, shut beam off",
+      "Parameters": [],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "PAUSE_IMPLANT",
+      "Description": "Pause implant; beam shutter closes, dose accumulation halted",
+      "Parameters": [],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "RESUME_IMPLANT",
+      "Description": "Resume paused implant",
+      "Parameters": [],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "TUNE_BEAM",
+      "Description": "Initiate beam tuning sequence for current recipe species/energy",
+      "Parameters": [
+        {
+          "Name": "SPECIES",
+          "Type": "string"
+        },
+        {
+          "Name": "ENERGY_KEV",
+          "Type": "float"
+        }
+      ],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "SOURCE_ON",
+      "Description": "Ignite ion source with specified gas species",
+      "Parameters": [
+        {
+          "Name": "GAS_SPECIES",
+          "Type": "string"
+        }
+      ],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "SOURCE_OFF",
+      "Description": "Shut down ion source plasma",
+      "Parameters": [],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "HV_ON",
+      "Description": "Enable high-voltage acceleration",
+      "Parameters": [
+        {
+          "Name": "TERMINAL_KV",
+          "Type": "float"
+        }
+      ],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "HV_OFF",
+      "Description": "Disable high-voltage acceleration",
+      "Parameters": [],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "LOAD_RECIPE",
+      "Description": "Load recipe from library to active slot",
+      "Parameters": [
+        {
+          "Name": "RECIPE_ID",
+          "Type": "string"
+        }
+      ],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "DELETE_RECIPE",
+      "Description": "Delete recipe from controller storage",
+      "Parameters": [
+        {
+          "Name": "RECIPE_ID",
+          "Type": "string"
+        }
+      ],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "ENTER_MAINTENANCE",
+      "Description": "Enter maintenance mode; inhibit all processing",
+      "Parameters": [],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "EXIT_MAINTENANCE",
+      "Description": "Exit maintenance mode; return to normal operation",
+      "Parameters": [],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "SET_CLOCK",
+      "Description": "Sync equipment clock with host",
+      "Parameters": [
+        {
+          "Name": "TIMESTAMP",
+          "Type": "string"
+        }
+      ],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "RESET_PM_COUNTER",
+      "Description": "Reset PM counter for specified subsystem",
+      "Parameters": [
+        {
+          "Name": "SUBSYSTEM_ID",
+          "Type": "string"
+        }
+      ],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "PUMP_DOWN_LOADLOCK",
+      "Description": "Pump down the load lock to transfer vacuum",
+      "Parameters": [],
+      "Confidence": 1.0
+    },
+    {
+      "RCMD": "VENT_LOADLOCK",
+      "Description": "Vent load lock to atmosphere",
+      "Parameters": [],
+      "Confidence": 1.0
+    }
+  ],
+  "States": [
+    {
+      "StateID": "IDLE",
+      "Name": "IDLE",
+      "Description": "Tool is idle and ready for operation"
+    },
+    {
+      "StateID": "FAULT",
+      "Name": "FAULT",
+      "Description": "Tool is in a fault state due to an error condition"
+    },
+    {
+      "StateID": "SETTING_UP",
+      "Name": "SETTING_UP",
+      "Description": "Recipe loaded, beam tuning in progress, source warming up"
+    },
+    {
+      "StateID": "BEAM_READY",
+      "Name": "BEAM_READY",
+      "Description": "Source on, beam tuned and stable, ready to accept wafer"
+    },
+    {
+      "StateID": "LOADING",
+      "Name": "LOADING",
+      "Description": "Wafer being transferred from load lock to platen"
+    },
+    {
+      "StateID": "ALIGNING",
+      "Name": "ALIGNING",
+      "Description": "Platen moving to recipe tilt/twist angles"
+    },
+    {
+      "StateID": "IMPLANTING",
+      "Name": "IMPLANTING",
+      "Description": "Beam on, scanning wafer, dose accumulating"
+    },
+    {
+      "StateID": "UNLOADING",
+      "Name": "UNLOADING",
+      "Description": "Wafer being transferred from platen back to load lock"
+    },
+    {
+      "StateID": "COMPLETED",
+      "Name": "COMPLETED",
+      "Description": "Wafer implant complete, results available, wafer ready for unload"
+    },
+    {
+      "StateID": "MAINTENANCE",
+      "Name": "MAINTENANCE",
+      "Description": "Maintenance mode active; all processing inhibited"
+    }
+  ],
+  "StateTransitions": [
+    {
+      "FromState": "IDLE",
+      "ToState": "FAULT",
+      "TriggerEvent": "ImplantAbort",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "FAULT",
+      "ToState": "IDLE",
+      "TriggerEvent": null,
+      "TriggerCommand": "RESET_FAULT",
+      "Manual": false
+    },
+    {
+      "FromState": "IDLE",
+      "ToState": "SETTING_UP",
+      "TriggerEvent": null,
+      "TriggerCommand": "START_IMPLANT",
+      "Manual": true
+    },
+    {
+      "FromState": "SETTING_UP",
+      "ToState": "BEAM_READY",
+      "TriggerEvent": "BeamTuneComplete",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "BEAM_READY",
+      "ToState": "LOADING",
+      "TriggerEvent": "Wafer handler begins transfer to end station",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "LOADING",
+      "ToState": "ALIGNING",
+      "TriggerEvent": "WaferLoaded_EndStation",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "ALIGNING",
+      "ToState": "IMPLANTING",
+      "TriggerEvent": "Tilt/twist at setpoint, clamp engaged, beam shutter opens",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "IMPLANTING",
+      "ToState": "COMPLETED",
+      "TriggerEvent": "ImplantEnd",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "COMPLETED",
+      "ToState": "UNLOADING",
+      "TriggerEvent": "Robot begins wafer removal from platen",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "UNLOADING",
+      "ToState": "BEAM_READY",
+      "TriggerEvent": "WaferUnloaded_EndStation",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "UNLOADING",
+      "ToState": "IDLE",
+      "TriggerEvent": "WaferUnloaded & no more wafers in lot; source/HV shut down",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "IMPLANTING",
+      "ToState": "FAULT",
+      "TriggerEvent": "Any critical alarm (4001\u20134016)",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "SETTING_UP",
+      "ToState": "FAULT",
+      "TriggerEvent": "Source ignition failure or HV arc-over",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "BEAM_READY",
+      "ToState": "FAULT",
+      "TriggerEvent": "Beam lost or vacuum fault",
+      "TriggerCommand": null,
+      "Manual": false
+    },
+    {
+      "FromState": "ANY",
+      "ToState": "MAINTENANCE",
+      "TriggerEvent": null,
+      "TriggerCommand": "ENTER_MAINTENANCE",
+      "Manual": true
+    },
+    {
+      "FromState": "MAINTENANCE",
+      "ToState": "IDLE",
+      "TriggerEvent": null,
+      "TriggerCommand": "EXIT_MAINTENANCE",
+      "Manual": true
+    }
+  ],
+  "Reports": [
+    {
+      "RPTID": "RPT_001",
+      "Name": "ImplantRecipeParameters",
+      "Items": [
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008
+      ],
+      "Confidence": 0.95,
+      "Reasoning": "Grouping all recipe-related parameters (ID, version, lot, wafer, slot, species, energy, dose) for traceability.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_002",
+      "Name": "ImplantTargetParameters",
+      "Items": [
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014
+      ],
+      "Confidence": 0.95,
+      "Reasoning": "Grouping target parameters (tilt, twist, beam current, dose uniformity, wafer temp, implant mode) for process setup.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_003",
+      "Name": "ImplantActualResults",
+      "Items": [
+        2051,
+        2052,
+        2053,
+        2054,
+        2055,
+        2056,
+        2057,
+        2058,
+        2059
+      ],
+      "Confidence": 0.95,
+      "Reasoning": "Grouping actual implant results (dose, uniformity, energy, beam current, tilt, twist, duration, wafer temp) for post-process analysis.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_004",
+      "Name": "ImplantQualityMetrics",
+      "Items": [
+        2060,
+        2061,
+        2062,
+        2063,
+        2064,
+        2065
+      ],
+      "Confidence": 0.9,
+      "Reasoning": "Grouping quality metrics (process result, abort reason, beam stability, dose accuracy, energy contamination, particle count) for yield analysis.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_005",
+      "Name": "ImplantStartContext",
+      "Items": [
+        1151,
+        1155,
+        2001,
+        2004,
+        2007,
+        2008
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3001 (ImplantStart). Includes platen tilt, dose current, recipe ID, wafer ID, target energy, and target dose.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_006",
+      "Name": "ImplantEndResults",
+      "Items": [
+        2051,
+        2052,
+        2053,
+        2054,
+        2060
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3002 (ImplantEnd). Includes actual dose, uniformity, energy, beam current, and process result.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_007",
+      "Name": "BeamTuneStartContext",
+      "Items": [
+        1051,
+        1101,
+        1104
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3004 (BeamTuneStart). Includes arc current, analyzer magnet current, and beam energy.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_008",
+      "Name": "BeamTuneCompleteResults",
+      "Items": [
+        1103,
+        1104,
+        1114,
+        1115
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3005 (BeamTuneComplete). Includes resolved current, beam energy, parallelism, and beam status.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_009",
+      "Name": "BeamLostContext",
+      "Items": [
+        1103,
+        1115
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3006 (BeamLost). Includes resolved current and beam status.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_010",
+      "Name": "SourceIgnitionContext",
+      "Items": [
+        1051,
+        1052,
+        1062
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3007 (SourceIgnition). Includes arc current, arc voltage, and source status.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_011",
+      "Name": "SourceExtinguishContext",
+      "Items": [
+        1062
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3008 (SourceExtinguish). Includes source status.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_012",
+      "Name": "SourceFaultContext",
+      "Items": [
+        1051,
+        1052,
+        1061,
+        1062
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3009 (SourceFault). Includes arc current, arc voltage, source status, and source operational data.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_013",
+      "Name": "WaferLoadedEndStationContext",
+      "Items": [
+        1160,
+        1161,
+        2004
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3010 (WaferLoaded_EndStation). Includes wafer present, wafer clamped, and wafer ID.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_014",
+      "Name": "WaferUnloadedEndStationContext",
+      "Items": [
+        1160,
+        2004,
+        2060
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3011 (WaferUnloaded_EndStation). Includes wafer present, wafer ID, and process result.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_015",
+      "Name": "WaferPrealignedContext",
+      "Items": [
+        1207,
+        2004
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3012 (WaferPrealigned). Includes prealign angle and wafer ID.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_016",
+      "Name": "FOUPLoadedPort1Context",
+      "Items": [
+        1203,
+        1209
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3013 (FOUPLoaded_Port1). Includes load port status and wafer count.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_017",
+      "Name": "FOUPUnloadedPort1Context",
+      "Items": [
+        1203
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3014 (FOUPUnloaded_Port1). Includes load port status.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_018",
+      "Name": "FOUPLoadedPort2Context",
+      "Items": [
+        1204,
+        1210
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3015 (FOUPLoaded_Port2). Includes load port status and wafer count.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_019",
+      "Name": "FOUPUnloadedPort2Context",
+      "Items": [
+        1204
+      ],
+      "Confidence": 0.98,
+      "Reasoning": "Directly linked to CEID=3016 (FOUPUnloaded_Port2). Includes load port status.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_020",
+      "Name": "ImplantAbortContext",
+      "Items": [
+        2060,
+        2061,
+        2051,
+        2057
+      ],
+      "Confidence": 0.9,
+      "Reasoning": "Grouping process result, abort reason, actual dose, and implant duration for CEID=3003 (ImplantAbort).",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_021",
+      "Name": "SystemStatusOverview",
+      "Items": [
+        1001,
+        1002,
+        1003,
+        1007,
+        1008,
+        1009
+      ],
+      "Confidence": 0.9,
+      "Reasoning": "Grouping system status, control state, process state, EMO status, maintenance mode, and radiation interlock for monitoring.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_022",
+      "Name": "SourceParameters",
+      "Items": [
+        1051,
+        1052,
+        1053,
+        1054,
+        1055,
+        1056,
+        1057,
+        1058,
+        1059,
+        1060
+      ],
+      "Confidence": 0.9,
+      "Reasoning": "Grouping all source-related parameters (arc current, voltage, setpoints, gas flow, species, extraction voltage/current) for diagnostics.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_023",
+      "Name": "BeamParameters",
+      "Items": [
+        1101,
+        1102,
+        1103,
+        1104,
+        1105,
+        1106,
+        1107,
+        1108,
+        1109,
+        1110,
+        1111,
+        1112,
+        1113,
+        1114,
+        1115
+      ],
+      "Confidence": 0.9,
+      "Reasoning": "Grouping all beam-related parameters (magnet current, energy, scan freq/amplitude, spot size, parallelism, status) for diagnostics.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_024",
+      "Name": "EndStationParameters",
+      "Items": [
+        1151,
+        1152,
+        1153,
+        1154,
+        1155,
+        1156,
+        1157,
+        1158,
+        1160,
+        1161,
+        1164,
+        1165
+      ],
+      "Confidence": 0.9,
+      "Reasoning": "Grouping all end station parameters (platen tilt/twist, dose current/accumulated/target, wafer present/clamped, implant time, process state).",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_025",
+      "Name": "VacuumSystemParameters",
+      "Items": [
+        1251,
+        1252,
+        1253,
+        1254,
+        1255,
+        1256,
+        1257,
+        1258,
+        1259,
+        1260,
+        1261,
+        1262
+      ],
+      "Confidence": 0.9,
+      "Reasoning": "Grouping all vacuum system parameters (pressures, pump speeds/statuses, gate valves) for diagnostics.",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_026",
+      "Name": "HighVoltageParameters",
+      "Items": [
+        1301,
+        1302,
+        1303,
+        1304,
+        1305,
+        1306,
+        1307
+      ],
+      "Confidence": 0.9,
+      "Reasoning": "Grouping all high voltage parameters (terminal voltage/current/setpoint, suppression/extraction voltage, interlock status).",
+      "Type": "Generated"
+    },
+    {
+      "RPTID": "RPT_027",
+      "Name": "AlarmStatus",
+      "Items": [
+        4001,
+        4002,
+        4003,
+        4004,
+        4005,
+        4006,
+        4007,
+        4008,
+        4009,
+        4010,
+        4011,
+        4012,
+        4013,
+        4014,
+        4015,
+        4016
+      ],
+      "Confidence": 0.95,
+      "Reasoning": "Grouping all alarm-related status variables for fault monitoring.",
+      "Type": "Generated"
+    }
+  ]
+}

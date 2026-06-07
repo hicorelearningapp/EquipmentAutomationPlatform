@@ -45,12 +45,13 @@ Return ONLY a JSON object with a "Hints" key containing an array of report defin
 Each element in the array must have:
   "RPTID"      : string  — the report identifier (e.g. "RPT_001" or as named in the doc)
   "Name"       : string  — a short descriptive name
-  "Items"      : [int]   — list of DVID/SVID integers associated with this report
+  "LinkedVIDs" : [int]   — list of DVID/SVID integers associated with this report
+  "Type"       : string  — must always be "Built-in"
 
 Example format:
 {{
   "Hints": [
-    {{ "RPTID": "RPT_1", "Name": "...", "Items": [101, 102] }}
+    {{ "RPTID": "RPT_1", "Name": "...", "LinkedVIDs": [101, 102], "Type": "Built-in" }}
   ]
 }}
 
@@ -82,7 +83,10 @@ Rules:
   one for alarms, one for recipe data).
 - Prefer reusing RPTID values from the hints if they exist; otherwise generate
   sequential IDs like "RPT_001", "RPT_002", etc.
+- If you are reusing a report from the hints, preserve its "Type" field (usually "Built-in").
+- For any brand new reports you create, set their "Type" field to "Generated".
 - Each report should have 2-6 linked variable IDs where possible.
+- IMPORTANT: The generated reports must include MORE linked variables than what the CEIDs strictly require. Do not just blindly copy the event's LinkedVIDs. Enrich the reports with additional relevant context variables (such as overall equipment status, process state, control state, or critical alarm states) from the provided DVs and SVs.
 - Set "Confidence" between 0.0 and 1.0 based on how certain you are.
 - Optionally include a short "Reasoning" string explaining the grouping.
 
@@ -90,38 +94,14 @@ Return ONLY a JSON object with a "Reports" key containing the array of reports.
 Each element must have:
   "RPTID"      : string
   "Name"       : string
-  "Items"      : [int]
+  "LinkedVIDs" : [int]
+  "Type"       : string  ("Built-in" or "Generated")
   "Confidence" : float
   "Reasoning"  : string  (optional)
 
 Do not include any explanation or markdown.
 """
 
-_STEP3_PROMPT = """You are a SECS/GEM integration expert.
-
-Your task: link Collection Events (CEIDs) to Report IDs (RPTIDs).
-
-Collection Events:
-{events}
-
-Available Reports:
-{reports}
-
-Rules:
-- Every event that has "report": true should be linked to at least one report.
-- Choose the report(s) whose variable content is most relevant to that event
-  (e.g. a process-start event should link to a report containing process parameters).
-- An event may link to multiple reports; a report may be linked from multiple events.
-- Do NOT invent new RPTIDs — only use the ones listed under Available Reports.
-
-Return ONLY a JSON object with a "Links" key containing the array of links.
-Each element must have:
-  "CEID"      : int    — the CEID integer
-  "EventName" : string — the event name
-  "RPTIDs"    : [str]  — list of RPTID strings linked to this event
-
-Do not include any explanation or markdown.
-"""
 
 
 class ReportService:
@@ -149,21 +129,6 @@ class ReportService:
             hints = [r.model_dump() for r in spec.Reports]
             
         reports = self._step2_synthesise_reports(spec, hints)
-        links = self._step3_link_events(spec, reports)
-        
-        # Merge links into reports
-        rpt_to_events = {}
-        for link in links:
-            ceid = link.get("CEID")
-            for rpt_id in link.get("RPTIDs", []):
-                if rpt_id not in rpt_to_events:
-                    rpt_to_events[rpt_id] = []
-                if ceid not in rpt_to_events[rpt_id]:
-                    rpt_to_events[rpt_id].append(ceid)
-                    
-        for r in reports:
-            r.LinkedEvents = rpt_to_events.get(r.RPTID, [])
-            
         return reports
 
     def _step1_extract_hints(self, pdf_text: str) -> list[dict]:
@@ -208,6 +173,7 @@ class ReportService:
             reports = []
             for item in items:
                 try:
+                    item["Type"] = "Generated"
                     reports.append(ReportDefinition.model_validate(item))
                 except Exception as exc:
                     logger.warning("Skipping invalid report item %s: %s", item, exc)
@@ -215,44 +181,6 @@ class ReportService:
             return reports
         except Exception as exc:
             logger.error("ReportService step 2 failed: %s", exc)
-            return []
-
-    def _step3_link_events(
-        self, spec: EquipmentSpec, reports: list[ReportDefinition]
-    ) -> list[dict]:
-        if not reports:
-            return []
-
-        events_text = "\n".join(
-            f"  CEID={e.CEID}  Name={e.EventName}  Report={e.Report}"
-            + (f"  LinkedVIDs={e.LinkedVIDs}" if e.LinkedVIDs else "")
-            for e in spec.Events
-        ) or "  (none)"
-
-        reports_text = "\n".join(
-            f"  RPTID={r.RPTID}  Name={r.Name}  Items={r.Items}"
-            for r in reports
-        )
-
-        prompt = _STEP3_PROMPT.format(events=events_text, reports=reports_text)
-        try:
-            raw = self._invoke(prompt)
-            items = self._parse_list(raw, step=3)
-            links = []
-            valid_rptids = {r.RPTID for r in reports}
-            for item in items:
-                try:
-                    # item is a dict like {"CEID": 123, "RPTIDs": ["RPT1"]}
-                    valid_links = [r for r in item.get("RPTIDs", []) if r in valid_rptids]
-                    if valid_links:
-                        item["RPTIDs"] = valid_links
-                        links.append(item)
-                except Exception as exc:
-                    logger.warning("Skipping invalid link item %s: %s", item, exc)
-            logger.info("ReportService step 3: generated %d event-report links", len(links))
-            return links
-        except Exception as exc:
-            logger.error("ReportService step 3 failed: %s", exc)
             return []
 
     # ── Helpers ───────────────────────────────────────────────────────────────
@@ -286,7 +214,7 @@ class ReportService:
             ) from exc
         # If it's a dict, find the first key that contains a list (e.g. "Reports", "Links", "Hints")
         if isinstance(result, dict):
-            for key in ["Reports", "Links", "Hints", "Data", "Items"]:
+            for key in ["Reports", "Links", "Hints", "Data", "LinkedVIDs"]:
                 if key in result and isinstance(result[key], list):
                     return result[key]
             # Fallback: take the first value that is a list

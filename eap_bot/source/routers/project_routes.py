@@ -41,6 +41,7 @@ class ProjectAPI:
         self.router.get("/LoadProject/{project_id}", response_model=ProjectDetail, response_model_by_alias=False)(self.load_project)
         self.router.put("/UpdateProject/{project_id}", response_model=ProjectOut, response_model_by_alias=False)(self.update_project)
         self.router.delete("/DeleteProject/{project_id}")(self.delete_project)
+        self.router.post("/ReAnalyzeProject/{project_id}", response_model=ProjectDetail, response_model_by_alias=False)(self.reanalyze_project)
         self.router.get("/GetKnowledgeCategory/{project_id}", response_model=list[str])(self.get_knowledge_category)
         self.router.post("/Ask/{project_id}", responses={500: {"description": "Internal Server Error"}})(self.ask_project)
         self.router.get("/GetProjectDetails/{project_id}", response_model=ProjectDetailsResponse, response_model_by_alias=False)(self.get_project_details)
@@ -63,7 +64,12 @@ class ProjectAPI:
 
     def load_project(self, project_id: int):
         try:
-            metadata, aggregated = container.project_service.aggregate_project_data(project_id)
+            batch_path = self.storage.spec_json_path(project_id, "project_batch")
+            if batch_path.exists():
+                from source.schemas.secsgem import EquipmentSpec
+                aggregated = EquipmentSpec.model_validate_json(batch_path.read_text(encoding="utf-8"))
+            else:
+                _, aggregated = container.project_service.aggregate_project_data(project_id)
 
             clean_aggregated = self._build_clean_aggregated(aggregated)
             mapping = self.storage.get_mapping(project_id)
@@ -104,6 +110,39 @@ class ProjectAPI:
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
         return {"ProjectName": project.ProjectName, "ProjectID": project.ProjectID, "Status": "deleted"}
+
+    def reanalyze_project(self, project_id: int):
+        try:
+            metadata = self.storage.get_project(project_id)
+            batch_path = self.storage.spec_json_path(project_id, "project_batch")
+            if batch_path.exists():
+                batch_path.unlink()
+
+            for doc in metadata.Documents:
+                if doc.Status in ["completed", "failed"]:
+                    doc.Status = "uploaded"
+            
+            self.storage.update_project_metadata(project_id, metadata)
+            
+            _, aggregated = container.project_service.aggregate_project_data(project_id, auto_analyze=True)
+            self.storage.save_spec_json(batch_path, aggregated)
+            
+            clean_aggregated = self._build_clean_aggregated(aggregated)
+            mapping = self.storage.get_mapping(project_id)
+            updated_metadata = self.storage.get_project(project_id)
+
+            return ProjectDetail(
+                **updated_metadata.model_dump(),
+                Extractions=clean_aggregated,
+                Mappings=mapping.Mappings,
+                SmlTemplate=SML_TEMPLATES,
+            )
+        except InvalidSlugError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except ProjectNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc
 
     def get_project_details(self, project_id: int):
         try:
@@ -276,12 +315,6 @@ class ProjectAPI:
     # ── Private helpers ───────────────────────────────────────────────────────
 
     def _build_clean_aggregated(self, aggregated: EquipmentSpec) -> AggregatedSpec:
-        # Build reverse lookup: CEID -> list of RPTIDs
-        ceid_to_reports = {}
-        for r in aggregated.Reports:
-            for ceid in r.LinkedEvents:
-                ceid_to_reports.setdefault(ceid, []).append(r.RPTID)
-
         return AggregatedSpec(
             StatusVariables=[
                 {"SVID": v.SVID, "Name": v.Name, "Description": v.Description or "", "DataType": v.DataType, "AccessType": v.AccessType}
@@ -297,7 +330,7 @@ class ProjectAPI:
                     "EventName": e.EventName, 
                     "Description": e.Description or "",
                     "LinkedVIDs": e.LinkedVIDs,
-                    "LinkedReports": ceid_to_reports.get(e.CEID, [])
+                    "LinkedReports": e.LinkedReports if hasattr(e, 'LinkedReports') and e.LinkedReports else []
                 }
                 for e in aggregated.Events
             ],
@@ -318,7 +351,7 @@ class ProjectAPI:
                 for tr in aggregated.StateTransitions
             ],
             Reports=[
-                {"RPTID": r.RPTID, "Name": r.Name, "Items": r.Items, "LinkedEvents": r.LinkedEvents, "Reasoning": r.Reasoning or ""}
+                {"RPTID": r.RPTID, "Name": r.Name, "LinkedVIDs": r.LinkedVIDs, "Reasoning": r.Reasoning or "", "Type": r.Type, "Confidence": r.Confidence}
                 for r in aggregated.Reports
             ],
         )

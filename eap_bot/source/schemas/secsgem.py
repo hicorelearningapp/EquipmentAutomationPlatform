@@ -52,11 +52,10 @@ class Event(BaseModel):
     EventName: str = Field(alias="Name")
     Description: Optional[str] = None
     LinkedVIDs: list[int] = Field(default_factory=list)
-    ReportID: Optional[str] = "-"
-    Report: bool = True
+    LinkedReports: list[str] = Field(default_factory=list)
     Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
     
-    @field_validator('Description', 'ReportID', mode='before')
+    @field_validator('Description', mode='before')
     @classmethod
     def replace_empty(cls, v: Any) -> Any:
         if v is None or (isinstance(v, str) and str(v).strip().lower() in ("", "unknown", "n/a", "none")):

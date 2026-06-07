@@ -1,6 +1,34 @@
 ┌─────────────┬────────┬────────────────────────────────────────────────────┬────────────────────────────────┐
 │ Status      │ Method │ Endpoint                                           │ Result                         │
 ├─────────────┼────────┼────────────────────────────────────────────────────┼────────────────────────────────┤
-│ 🟢 [PASS]   │ GET    │ /LoadProject/17                                    │ Expected 200, Got 200          │
+│ 🔴 [FAIL]   │ POST   │ /AddProject                                        │ Expected 201, Got 404          │
 └─────────────┴────────┴────────────────────────────────────────────────────┴────────────────────────────────┘
-now i need to get a break for
+
+
+=== FAILURE DETAILS ===
+
+--- test_project_details_flow ---
+client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x0000028281413B60>
+
+    def test_project_details_flow(client: TestClient, record_property):
+        # 1. Add Project with Code and Description
+        record_property("method", "POST")
+        record_property("url", "/AddProject")
+    
+        payload = {
+            "ProjectName": "TestDetailsProj",
+            "VendorName": "TestVendorName",
+            "ProjectCode": "TD-PROJ-01",
+            "ProjectDescription": "A test project for verification of project details",
+            "Tool": "CVD"
+        }
+    
+        response = client.post("/AddProject", json=payload)
+        record_property("expected", 201)
+        record_property("got", response.status_code)
+>       assert response.status_code == 201
+E       assert 404 == 201
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+test\test_project_endpoints.py:20: AssertionError

@@ -1,224 +1,239 @@
 {
-  "TemplateName": "NEW_MODEL", - remove
-  "Version": "1.0", - r4emove
-  "remove": "Camstar (now Opcenter) MES integration template. Camstar uses an object-oriented transaction model with container tracking, electronic traveler support, and quality data collection.",
   "Events": [
     {
-      "EventName": "LotStart",
-      "EventType": "Process", - remove 
-      "Transaction": "TXN_LOT_START", - remove
-      "Payload": "LotStartPayload",
+      "MESEventName": "LotStart",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Lot Start",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": ""
-      "add equipment description"
+      "PayloadName": "LotStartPayload"
     },
     {
-      "EventName": "LotEnd",
-      "EventType": "Process",
-      "Transaction": "TXN_LOT_END",
-      "Payload": "LotEndPayload",
+      "MESEventName": "LotEnd",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Lot End",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": "LotEndPayload"
     },
     {
-      "EventName": "ContainerMove",
-      "EventType": "WIP",
-      "Transaction": "TXN_CONTAINER_MOVE",
-      "Payload": "ContainerPayload",
+      "MESEventName": "ContainerMove",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Container Move",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": "ContainerPayload"
     },
     {
-      "EventName": "DataCollectionStart",
-      "EventType": "Quality",
-      "Transaction": "TXN_DC_START",
-      "Payload": "DataCollectionPayload",
+      "MESEventName": "DataCollectionStart",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Data Collection Start",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": "DataCollectionPayload"
     },
     {
-      "EventName": "DataCollectionEnd",
-      "EventType": "Quality",
-      "Transaction": "TXN_DC_END",
-      "Payload": "DataCollectionPayload",
+      "MESEventName": "DataCollectionEnd",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Data Collection End",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": "DataCollectionPayload"
     },
     {
-      "EventName": "AlarmSet",
-      "EventType": "Alarm",
-      "Transaction": "TXN_ALARM_SET",
-      "Payload": "AlarmPayload",
+      "MESEventName": "AlarmSet",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Alarm Set",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": "AlarmPayload"
     },
     {
-      "EventName": "AlarmClear",
-      "EventType": "Alarm",
-      "Transaction": "TXN_ALARM_CLEAR",
-      "Payload": "AlarmPayload",
+      "MESEventName": "AlarmClear",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Alarm Clear",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": "AlarmPayload"
     },
     {
-      "EventName": "TrackIn",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_IN",
+      "MESEventName": "TrackIn",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Track In",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": ""
     },
     {
-      "EventName": "TrackOut",
-      "EventType": "Process",
-      "Transaction": "TXN_TRACK_OUT",
+      "MESEventName": "TrackOut",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Track Out",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": ""
     }
   ],
   "Alarms": [
     {
-      "AlarmType": "EquipmentAlarm",
+      "MESAlarmName": "EquipmentAlarm",
+      "EquipmentAlarmName": "",
+      "ALID": "",
+      "MESDescription": "Standard MES object for Equipment Alarm",
+      "EquipmentDescription": "",
       "Severity": "Critical",
-      "Transaction": "TXN_ALARM_SET",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": "AlarmPayload"
     },
     {
-      "AlarmType": "ProcessAlarm",
+      "MESAlarmName": "ProcessAlarm",
+      "EquipmentAlarmName": "",
+      "ALID": "",
+      "MESDescription": "Standard MES object for Process Alarm",
+      "EquipmentDescription": "",
       "Severity": "Warning",
-      "Transaction": "TXN_PROCESS_WARNING",
       "Enabled": true,
-      "EquipmentField": ""
-      "add descrioption"
+      "PayloadName": "AlarmPayload"
     },
     {
-      "AlarmType": "QualityAlarm",
+      "MESAlarmName": "QualityAlarm",
+      "EquipmentAlarmName": "",
+      "ALID": "",
+      "MESDescription": "Standard MES object for Quality Alarm",
+      "EquipmentDescription": "",
       "Severity": "Minor",
-      "Transaction": "TXN_QUALITY_ALARM",
       "Enabled": true,
-      "EquipmentField": ""
+      "PayloadName": "AlarmPayload"
     }
   ],
   "Variables": [
     {
-      "MESField": "EquipmentID",
-      "EquipmentField": "",
-      "Type": "String",
-      "Required": true,
-      "Description": "",
+      "MESVariableName": "EquipmentID",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Equipment I D",
+      "EquipmentDescription": "",
       "Enabled": true
     },
     {
-      "MESField": "LotID",
-      "Type": "String",
-      "Required": true,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "LotID",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Lot I D",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "ContainerName",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "ContainerName",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Container Name",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "ContainerType",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "ContainerType",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Container Type",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "RecipeName",
-      "Type": "String",
-      "Required": true,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "RecipeName",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Recipe Name",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "OperationName",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "OperationName",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Operation Name",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "WorkflowName",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "WorkflowName",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Workflow Name",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "ProductName",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "ProductName",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Product Name",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "DataCollectionName",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "DataCollectionName",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Data Collection Name",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "MeasuredValue",
-      "Type": "Float",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "MeasuredValue",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Measured Value",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "MeasurementUnit",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "MeasurementUnit",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Measurement Unit",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "AlarmID",
-      "Type": "Integer",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "AlarmID",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Alarm I D",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "AlarmText",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "AlarmText",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Alarm Text",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "AlarmSeverity",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "AlarmSeverity",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Alarm Severity",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "EventTime",
-      "Type": "DateTime",
-      "Required": true,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": ""
+      "MESVariableName": "EventTime",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Event Time",
+      "EquipmentDescription": "",
+      "Enabled": true
     }
   ],
   "Payloads": [
@@ -233,7 +248,8 @@
         "WorkflowName",
         "ProductName",
         "EventTime"
-      ]
+      ],
+      "MESDescription": "Standard MES object for Lot Start Payload"
     },
     {
       "PayloadName": "LotEndPayload",
@@ -243,7 +259,8 @@
         "RecipeName",
         "OperationName",
         "EventTime"
-      ]
+      ],
+      "MESDescription": "Standard MES object for Lot End Payload"
     },
     {
       "PayloadName": "ContainerPayload",
@@ -253,7 +270,8 @@
         "ContainerType",
         "LotID",
         "EventTime"
-      ]
+      ],
+      "MESDescription": "Standard MES object for Container Payload"
     },
     {
       "PayloadName": "DataCollectionPayload",
@@ -264,7 +282,8 @@
         "MeasuredValue",
         "MeasurementUnit",
         "EventTime"
-      ]
+      ],
+      "MESDescription": "Standard MES object for Data Collection Payload"
     },
     {
       "PayloadName": "AlarmPayload",
@@ -274,7 +293,8 @@
         "AlarmText",
         "AlarmSeverity",
         "EventTime"
-      ]
+      ],
+      "MESDescription": "Standard MES object for Alarm Payload"
     }
   ],
   "Transactions": [
@@ -284,7 +304,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 30,
-      "RetryCount": 3
+      "RetryCount": 3,
+      "MESDescription": ""
     },
     {
       "Transaction": "TXN_LOT_END",
@@ -292,7 +313,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 30,
-      "RetryCount": 3
+      "RetryCount": 3,
+      "MESDescription": ""
     },
     {
       "Transaction": "TXN_CONTAINER_MOVE",
@@ -300,7 +322,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": false,
       "Timeout": 15,
-      "RetryCount": 2
+      "RetryCount": 2,
+      "MESDescription": ""
     },
     {
       "Transaction": "TXN_DC_START",
@@ -308,7 +331,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": false,
       "Timeout": 10,
-      "RetryCount": 1
+      "RetryCount": 1,
+      "MESDescription": ""
     },
     {
       "Transaction": "TXN_DC_END",
@@ -316,7 +340,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 20,
-      "RetryCount": 2
+      "RetryCount": 2,
+      "MESDescription": ""
     },
     {
       "Transaction": "TXN_ALARM_SET",
@@ -324,7 +349,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 15,
-      "RetryCount": 2
+      "RetryCount": 2,
+      "MESDescription": ""
     },
     {
       "Transaction": "TXN_ALARM_CLEAR",
@@ -332,7 +358,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 15,
-      "RetryCount": 2
+      "RetryCount": 2,
+      "MESDescription": ""
     }
   ],
   "ValidationRules": [

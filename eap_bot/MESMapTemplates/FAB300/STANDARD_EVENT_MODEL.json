@@ -3,152 +3,162 @@
   "Description": "Generic MES integration template independent of equipment",
   "Events": [
     {
-      "EventName": "LotStart",
-      "Payload": "LotStartPayload",
+      "MESEventName": "LotStart",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Lot Start",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": "LotStartPayload"
     },
     {
-      "EventName": "LotEnd",
-      "Payload": "LotEndPayload",
+      "MESEventName": "LotEnd",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Lot End",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": "LotEndPayload"
     },
     {
-      "EventName": "AlarmSet",
-      "Payload": "AlarmPayload",
+      "MESEventName": "AlarmSet",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Alarm Set",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": "AlarmPayload"
     },
     {
-      "EventName": "AlarmClear",
-      "Payload": "AlarmPayload",
+      "MESEventName": "AlarmClear",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Alarm Clear",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": "AlarmPayload"
     },
     {
-      "EventName": "TrackIn",
+      "MESEventName": "TrackIn",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Track In",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": ""
     },
     {
-      "EventName": "TrackOut",
+      "MESEventName": "TrackOut",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Track Out",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": ""
     }
   ],
   "Alarms": [
     {
-      "AlarmType": "EquipmentAlarm",
+      "MESAlarmName": "EquipmentAlarm",
+      "EquipmentAlarmName": "",
+      "ALID": "",
+      "MESDescription": "Standard MES object for Equipment Alarm",
+      "EquipmentDescription": "",
       "Severity": "Critical",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": "AlarmPayload"
     },
     {
-      "AlarmType": "ProcessAlarm",
+      "MESAlarmName": "ProcessAlarm",
+      "EquipmentAlarmName": "",
+      "ALID": "",
+      "MESDescription": "Standard MES object for Process Alarm",
+      "EquipmentDescription": "",
       "Severity": "Warning",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": "AlarmPayload"
     }
   ],
   "Variables": [
     {
-      "MESField": "EquipmentID",
-      "Type": "String",
-      "Required": true,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "EquipmentID",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Equipment I D",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "LotID",
-      "Type": "String",
-      "Required": true,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "LotID",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Lot I D",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "RecipeName",
-      "Type": "String",
-      "Required": true,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "RecipeName",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Recipe Name",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "CarrierID",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "CarrierID",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Carrier I D",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "PortID",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "PortID",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Port I D",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "SlotNumber",
-      "Type": "Integer",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "SlotNumber",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Slot Number",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "AlarmID",
-      "Type": "Integer",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "AlarmID",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Alarm I D",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "AlarmText",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "AlarmText",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Alarm Text",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "AlarmSeverity",
-      "Type": "String",
-      "Required": false,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "AlarmSeverity",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Alarm Severity",
+      "EquipmentDescription": "",
+      "Enabled": true
     },
     {
-      "MESField": "EventTime",
-      "Type": "DateTime",
-      "Required": true,
-      "Description": "",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "MESVariableName": "EventTime",
+      "EquipmentVariableName": "",
+      "VID": "",
+      "MESDescription": "Standard MES object for Event Time",
+      "EquipmentDescription": "",
+      "Enabled": true
     }
   ],
   "Payloads": [
@@ -161,7 +171,8 @@
         "CarrierID",
         "PortID",
         "EventTime"
-      ]
+      ],
+      "MESDescription": "Standard MES object for Lot Start Payload"
     },
     {
       "PayloadName": "LotEndPayload",
@@ -170,7 +181,8 @@
         "LotID",
         "RecipeName",
         "EventTime"
-      ]
+      ],
+      "MESDescription": "Standard MES object for Lot End Payload"
     },
     {
       "PayloadName": "AlarmPayload",
@@ -180,7 +192,8 @@
         "AlarmText",
         "AlarmSeverity",
         "EventTime"
-      ]
+      ],
+      "MESDescription": "Standard MES object for Alarm Payload"
     }
   ],
   "Transactions": [
@@ -190,7 +203,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 30,
-      "RetryCount": 3
+      "RetryCount": 3,
+      "MESDescription": ""
     },
     {
       "Transaction": "TXN_LOT_END",
@@ -198,7 +212,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 30,
-      "RetryCount": 3
+      "RetryCount": 3,
+      "MESDescription": ""
     },
     {
       "Transaction": "TXN_ALARM_SET",
@@ -206,7 +221,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 15,
-      "RetryCount": 2
+      "RetryCount": 2,
+      "MESDescription": ""
     },
     {
       "Transaction": "TXN_ALARM_CLEAR",
@@ -214,7 +230,8 @@
       "Direction": "EquipmentToMES",
       "AckRequired": true,
       "Timeout": 15,
-      "RetryCount": 2
+      "RetryCount": 2,
+      "MESDescription": ""
     }
   ],
   "ValidationRules": [

@@ -1,25 +1,17 @@
 {
   "MESFamily": "FAB300",
+  "TemplateName": "TEST_AUTO_TEMPLATE_DO_NOT_USE",
+  "Version": "3.0",
   "Description": "Automated test template \u2014 safe to delete",
-  "Events": [
-    {
-      "EventName": "TrackIn",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
-    },
-    {
-      "EventName": "TrackOut",
-      "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
-    }
-  ],
+  "Events": [],
   "Alarms": [],
   "Variables": [],
   "Payloads": [],
   "Transactions": [],
   "ValidationRules": [],
+  "AutoMapping": {
+    "Enabled": true
+  },
   "Logging": {
     "Enabled": true
   }

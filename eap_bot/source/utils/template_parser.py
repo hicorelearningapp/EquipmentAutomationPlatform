@@ -9,35 +9,33 @@ def _extract_tags_from_template(data: Dict[str, Any], entity_filter: str = None)
     # Variables section
     if entity_filter is None or entity_filter == "Variables":
         for v in data.get("Variables", []):
-            field_name = v.get("MESField", "")
-            description = v.get("Description", "")
+            field_name = v.get("MESVariableName", "")
+            description = v.get("MESDescription", "")
             if field_name:
                 tags.append(MESTag(
                     tag_id=field_name,
                     name=field_name,
                     description=description,
-                    expected_type=v.get("Type", ""),
+                    expected_type="",
                 ))
     # Events section
     if entity_filter is None or entity_filter == "Events":
         for e in data.get("Events", []):
-            event_name = e.get("EventName", "")
+            event_name = e.get("MESEventName", "")
             if event_name:
                 tags.append(MESTag(
                     tag_id=event_name,
                     name=event_name,
-                    description=e.get("EventType", ""),
-                    transaction=e.get("Transaction", None)
+                    description=e.get("MESDescription", "")
                 ))
     # Alarms section
     if entity_filter is None or entity_filter == "Alarms":
         for a in data.get("Alarms", []):
-            alarm_type = a.get("AlarmType", "")
-            if alarm_type:
+            alarm_name = a.get("MESAlarmName", "")
+            if alarm_name:
                 tags.append(MESTag(
-                    tag_id=alarm_type,
-                    name=alarm_type,
-                    description=a.get("Severity", ""),
-                    transaction=a.get("Transaction", None)
+                    tag_id=alarm_name,
+                    name=alarm_name,
+                    description=a.get("MESDescription", "")
                 ))
     return tags

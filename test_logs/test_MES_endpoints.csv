@@ -1,0 +1,94 @@
+test_name,file_name,method,url,status,duration_ms,expected,got,error_msg
+test_get_mes_families,test_MES_endpoints.py,GET,/GetMesFamilies,passed,8,200,200,
+test_update_mes_families_add_new,test_MES_endpoints.py,POST,/UpdateMesFamilies,passed,11,200,200,
+test_update_mes_families_duplicate_name,test_MES_endpoints.py,POST,/UpdateMesFamilies,passed,4,400,400,
+test_update_mes_families_duplicate_id,test_MES_endpoints.py,POST,/UpdateMesFamilies,passed,3,400,400,
+test_update_mes_families_remove_temp,test_MES_endpoints.py,POST,/UpdateMesFamilies,passed,5,200,200,
+test_get_mes_templates_known_family,test_MES_endpoints.py,GET,/GetMesTemplates/FAB300,passed,5,200,200,
+test_get_mes_templates_unknown_family,test_MES_endpoints.py,GET,/GetMesTemplates/NonExistentFamily_XYZZY,passed,4,404,404,
+test_get_mes_templates_known_empty,test_MES_endpoints.py,GET,/GetMesTemplates/Custom MES,passed,2,200,200,
+test_get_mes_template_info_valid,test_MES_endpoints.py,GET,/GetMesTemplateInfo/FAB300/STANDARD_EVENT_MODEL.json,failed,4,200,200,"client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x00000282802917A0>
+
+    def test_get_mes_template_info_valid(client, record_property):
+        url = f""/GetMesTemplateInfo/{TARGET_FAMILY}/STANDARD_EVENT_MODEL.json""
+        record_property(""method"", ""GET"")
+        record_property(""url"", url)
+    
+        response = client.get(url)
+        record_property(""expected"", 200)
+        record_property(""got"", response.status_code)
+        assert response.status_code == 200
+    
+        expected_keys = {""Events"", ""Alarms"", ""Variables"", ""Payloads"", ""Transactions"", ""ValidationRules"", ""AutoMapping"", ""Logging""}
+        body = response.json()
+        missing = expected_keys - body.keys()
+>       assert not missing
+E       AssertionError: assert not {'AutoMapping'}
+
+test\test_MES_endpoints.py:188: AssertionError"
+test_get_mes_template_info_nonexistent,test_MES_endpoints.py,GET,/GetMesTemplateInfo/FAB300/ghost_XYZZY.json,passed,3,404,404,
+test_get_mes_template_info_nonexistent_family,test_MES_endpoints.py,GET,/GetMesTemplateInfo/FakeFamily_XYZZY/STANDARD_EVENT_MODEL,passed,3,404,404,
+test_get_mes_template_info_no_ext,test_MES_endpoints.py,GET,/GetMesTemplateInfo/FAB300/STANDARD_EVENT_MODEL,failed,3,200,200,"client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x00000282814054E0>
+
+    def test_get_mes_template_info_no_ext(client, record_property):
+        url = f""/GetMesTemplateInfo/{TARGET_FAMILY}/STANDARD_EVENT_MODEL""
+        record_property(""method"", ""GET"")
+        record_property(""url"", url)
+    
+        response = client.get(url)
+        record_property(""expected"", 200)
+        record_property(""got"", response.status_code)
+        assert response.status_code == 200
+        expected_keys = {""Events"", ""Alarms"", ""Variables"", ""Payloads"", ""Transactions"", ""ValidationRules"", ""AutoMapping"", ""Logging""}
+        body = response.json()
+        missing = expected_keys - body.keys()
+>       assert not missing
+E       AssertionError: assert not {'AutoMapping'}
+
+test\test_MES_endpoints.py:222: AssertionError"
+test_add_mes_template_valid,test_MES_endpoints.py,POST,/AddMesTemplateInfo/FAB300,passed,5,200,409,
+test_add_mes_template_duplicate,test_MES_endpoints.py,POST,/AddMesTemplateInfo/FAB300,passed,7,409,409,
+test_add_mes_template_invalid_ext,test_MES_endpoints.py,POST,/AddMesTemplateInfo/FAB300,passed,2,400,400,
+test_add_mes_template_invalid_json,test_MES_endpoints.py,POST,/AddMesTemplateInfo/FAB300,passed,3,400,400,
+test_add_mes_template_mismatched_family,test_MES_endpoints.py,POST,/AddMesTemplateInfo/FAB300,failed,3,422,409,"client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x00000282814071C0>
+
+    def test_add_mes_template_mismatched_family(client, record_property):
+        url = f""/AddMesTemplateInfo/{TARGET_FAMILY}""
+        record_property(""method"", ""POST"")
+        record_property(""url"", url)
+    
+        wrong_payload = _template_payload(""PROMIS"", TEST_TEMPLATE_NAME)
+        response = _upload_template(client, TARGET_FAMILY, f""{TEST_TEMPLATE_NAME}_mismatch.json"", wrong_payload)
+        record_property(""expected"", 422)
+        record_property(""got"", response.status_code)
+>       assert response.status_code == 422
+E       assert 409 == 422
+E        +  where 409 = <Response [409 Conflict]>.status_code
+
+test\test_MES_endpoints.py:287: AssertionError"
+test_add_mes_template_nonexistent_family,test_MES_endpoints.py,POST,/AddMesTemplateInfo/FakeFamily_XYZZY,passed,3,404,404,
+test_update_mes_template_valid,test_MES_endpoints.py,PUT,/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE,passed,6,200,200,
+test_update_mes_template_mismatch,test_MES_endpoints.py,PUT,/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE,failed,4,422,200,"client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x0000028281474040>
+
+    def test_update_mes_template_mismatch(client, record_property):
+        url = f""/UpdateMesTemplateInfo/{TARGET_FAMILY}/{TEST_TEMPLATE_NAME}""
+        record_property(""method"", ""PUT"")
+        record_property(""url"", url)
+    
+        mismatch_payload = _template_payload(""PROMIS"", TEST_TEMPLATE_NAME)
+        response = _update_template(client, TARGET_FAMILY, TEST_TEMPLATE_NAME, mismatch_payload)
+        record_property(""expected"", 422)
+        record_property(""got"", response.status_code)
+>       assert response.status_code == 422
+E       assert 200 == 422
+E        +  where 200 = <Response [200 OK]>.status_code
+
+test\test_MES_endpoints.py:331: AssertionError"
+test_update_mes_template_explicit_version,test_MES_endpoints.py,PUT,/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE,passed,4,200,200,
+test_update_mes_template_nonexistent,test_MES_endpoints.py,PUT,/UpdateMesTemplateInfo/FAB300/ghost_template_XYZZY,passed,3,404,404,
+test_update_mes_template_invalid_ext,test_MES_endpoints.py,PUT,/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE,passed,5,400,400,
+test_update_mes_template_invalid_json,test_MES_endpoints.py,PUT,/UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLATE_DO_NOT_USE,passed,3,400,400,

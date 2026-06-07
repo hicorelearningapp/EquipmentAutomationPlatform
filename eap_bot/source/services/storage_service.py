@@ -127,7 +127,6 @@ class StorageService:
             FileSize=file_size,
             Pages=pages,
             UploadDate=self.now(),
-            UploadedBy="",
             Status="uploaded",
         )
 
@@ -753,7 +752,6 @@ class StorageService:
             FileSize=file_size,
             Pages=pages,
             UploadDate=self.now(),
-            UploadedBy="",
             Status="completed",
         )
 
@@ -857,7 +855,7 @@ class StorageService:
             ),
             (
                 "events.csv",
-                ["CEID", "Name", "Description", "LinkedVIDs", "ReportID", "Confidence"],
+                ["CEID", "Name", "Description", "LinkedVIDs", "LinkedReports", "Confidence"],
                 spec.Events,
                 "CEID",
             ),

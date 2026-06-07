@@ -1,16 +1,22 @@
 {
   "Events": [
     {
-      "EventName": "TrackIn",
+      "MESEventName": "TrackIn",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Track In",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": ""
     },
     {
-      "EventName": "TrackOut",
+      "MESEventName": "TrackOut",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Track Out",
+      "EquipmentDescription": "",
       "Enabled": true,
-      "EquipmentField": "",
-      "EquipmentDescription": ""
+      "PayloadName": ""
     }
   ],
   "Alarms": [],

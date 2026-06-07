@@ -233,11 +233,6 @@ class DocumentService:
         overall_confidence = (
             sum(all_confidences) / len(all_confidences) if all_confidences else 0.0
         )
-        ceid_to_reports = {}
-        for r in spec.Reports:
-            for ceid in r.LinkedEvents:
-                ceid_to_reports.setdefault(ceid, []).append(r.RPTID)
-
         return {
             "ProjectID": project_id,
             "ExtractionID": document_id,
@@ -257,7 +252,7 @@ class DocumentService:
                     "EventName": e.EventName, 
                     "Description": e.Description or "",
                     "LinkedVIDs": e.LinkedVIDs,
-                    "LinkedReports": ceid_to_reports.get(e.CEID, [])
+                    "LinkedReports": e.LinkedReports
                 }
                 for e in spec.Events
             ],
@@ -282,8 +277,9 @@ class DocumentService:
                     "RPTID": r.RPTID, 
                     "Name": r.Name, 
                     "Reasoning": r.Reasoning or "",
-                    "Items": r.Items,
-                    "LinkedEvents": r.LinkedEvents
+                    "LinkedVIDs": r.LinkedVIDs,
+                    "Type": r.Type,
+                    "Confidence": r.Confidence
                 }
                 for r in spec.Reports
             ],

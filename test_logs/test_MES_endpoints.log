@@ -9,20 +9,104 @@
 │ 🟢 [PASS]   │ GET    │ /GetMesTemplates/FAB300                            │ Expected 200, Got 200          │
 │ 🟢 [PASS]   │ GET    │ /GetMesTemplates/NonExistentFamily_XYZZY           │ Expected 404, Got 404          │
 │ 🟢 [PASS]   │ GET    │ /GetMesTemplates/Custom MES                        │ Expected 200, Got 200          │
-│ 🟢 [PASS]   │ GET    │ /GetMesTemplateInfo/FAB300/STANDARD_EVENT_MODEL... │ Expected 200, Got 200          │
+│ 🔴 [FAIL]   │ GET    │ /GetMesTemplateInfo/FAB300/STANDARD_EVENT_MODEL... │ Expected 200, Got 200          │
 │ 🟢 [PASS]   │ GET    │ /GetMesTemplateInfo/FAB300/ghost_XYZZY.json        │ Expected 404, Got 404          │
 │ 🟢 [PASS]   │ GET    │ /GetMesTemplateInfo/FakeFamily_XYZZY/STANDARD_E... │ Expected 404, Got 404          │
-│ 🟢 [PASS]   │ GET    │ /GetMesTemplateInfo/FAB300/STANDARD_EVENT_MODEL    │ Expected 200, Got 200          │
+│ 🔴 [FAIL]   │ GET    │ /GetMesTemplateInfo/FAB300/STANDARD_EVENT_MODEL    │ Expected 200, Got 200          │
 │ 🟢 [PASS]   │ POST   │ /AddMesTemplateInfo/FAB300                         │ Expected 200, Got 409          │
 │ 🟢 [PASS]   │ POST   │ /AddMesTemplateInfo/FAB300                         │ Expected 409, Got 409          │
 │ 🟢 [PASS]   │ POST   │ /AddMesTemplateInfo/FAB300                         │ Expected 400, Got 400          │
 │ 🟢 [PASS]   │ POST   │ /AddMesTemplateInfo/FAB300                         │ Expected 400, Got 400          │
-│ 🟢 [PASS]   │ POST   │ /AddMesTemplateInfo/FAB300                         │ Expected 422, Got 422          │
+│ 🔴 [FAIL]   │ POST   │ /AddMesTemplateInfo/FAB300                         │ Expected 422, Got 409          │
 │ 🟢 [PASS]   │ POST   │ /AddMesTemplateInfo/FakeFamily_XYZZY               │ Expected 404, Got 404          │
 │ 🟢 [PASS]   │ PUT    │ /UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLAT... │ Expected 200, Got 200          │
-│ 🟢 [PASS]   │ PUT    │ /UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLAT... │ Expected 422, Got 422          │
+│ 🔴 [FAIL]   │ PUT    │ /UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLAT... │ Expected 422, Got 200          │
 │ 🟢 [PASS]   │ PUT    │ /UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLAT... │ Expected 200, Got 200          │
 │ 🟢 [PASS]   │ PUT    │ /UpdateMesTemplateInfo/FAB300/ghost_template_XYZZY │ Expected 404, Got 404          │
 │ 🟢 [PASS]   │ PUT    │ /UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLAT... │ Expected 400, Got 400          │
 │ 🟢 [PASS]   │ PUT    │ /UpdateMesTemplateInfo/FAB300/TEST_AUTO_TEMPLAT... │ Expected 400, Got 400          │
 └─────────────┴────────┴────────────────────────────────────────────────────┴────────────────────────────────┘
+
+
+=== FAILURE DETAILS ===
+
+--- test_get_mes_template_info_valid ---
+client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x00000282802917A0>
+
+    def test_get_mes_template_info_valid(client, record_property):
+        url = f"/GetMesTemplateInfo/{TARGET_FAMILY}/STANDARD_EVENT_MODEL.json"
+        record_property("method", "GET")
+        record_property("url", url)
+    
+        response = client.get(url)
+        record_property("expected", 200)
+        record_property("got", response.status_code)
+        assert response.status_code == 200
+    
+        expected_keys = {"Events", "Alarms", "Variables", "Payloads", "Transactions", "ValidationRules", "AutoMapping", "Logging"}
+        body = response.json()
+        missing = expected_keys - body.keys()
+>       assert not missing
+E       AssertionError: assert not {'AutoMapping'}
+
+test\test_MES_endpoints.py:188: AssertionError
+
+--- test_get_mes_template_info_no_ext ---
+client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x00000282814054E0>
+
+    def test_get_mes_template_info_no_ext(client, record_property):
+        url = f"/GetMesTemplateInfo/{TARGET_FAMILY}/STANDARD_EVENT_MODEL"
+        record_property("method", "GET")
+        record_property("url", url)
+    
+        response = client.get(url)
+        record_property("expected", 200)
+        record_property("got", response.status_code)
+        assert response.status_code == 200
+        expected_keys = {"Events", "Alarms", "Variables", "Payloads", "Transactions", "ValidationRules", "AutoMapping", "Logging"}
+        body = response.json()
+        missing = expected_keys - body.keys()
+>       assert not missing
+E       AssertionError: assert not {'AutoMapping'}
+
+test\test_MES_endpoints.py:222: AssertionError
+
+--- test_add_mes_template_mismatched_family ---
+client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x00000282814071C0>
+
+    def test_add_mes_template_mismatched_family(client, record_property):
+        url = f"/AddMesTemplateInfo/{TARGET_FAMILY}"
+        record_property("method", "POST")
+        record_property("url", url)
+    
+        wrong_payload = _template_payload("PROMIS", TEST_TEMPLATE_NAME)
+        response = _upload_template(client, TARGET_FAMILY, f"{TEST_TEMPLATE_NAME}_mismatch.json", wrong_payload)
+        record_property("expected", 422)
+        record_property("got", response.status_code)
+>       assert response.status_code == 422
+E       assert 409 == 422
+E        +  where 409 = <Response [409 Conflict]>.status_code
+
+test\test_MES_endpoints.py:287: AssertionError
+
+--- test_update_mes_template_mismatch ---
+client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
+record_property = <function record_property.<locals>.append_property at 0x0000028281474040>
+
+    def test_update_mes_template_mismatch(client, record_property):
+        url = f"/UpdateMesTemplateInfo/{TARGET_FAMILY}/{TEST_TEMPLATE_NAME}"
+        record_property("method", "PUT")
+        record_property("url", url)
+    
+        mismatch_payload = _template_payload("PROMIS", TEST_TEMPLATE_NAME)
+        response = _update_template(client, TARGET_FAMILY, TEST_TEMPLATE_NAME, mismatch_payload)
+        record_property("expected", 422)
+        record_property("got", response.status_code)
+>       assert response.status_code == 422
+E       assert 200 == 422
+E        +  where 200 = <Response [200 OK]>.status_code
+
+test\test_MES_endpoints.py:331: AssertionError

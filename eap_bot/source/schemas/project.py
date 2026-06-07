@@ -70,9 +70,6 @@ class DocumentMetadata(BaseModel):
     FileSize: float = Field(default=0.0, alias="file_size")
     Pages: int = Field(default=0, alias="pages")
     UploadDate: datetime = Field(alias="upload_date")
-    UploadedBy: str = Field(default="", alias="uploaded_by")
-    ProjectCode: str = Field(default="", alias="project_code")
-    ProjectDescription: Optional[str] = Field(default="", alias="project_description")
     Status: str = Field(default="completed", alias="status")
 
     model_config = {
@@ -165,6 +162,8 @@ class FrontendStatusVariable(BaseModel):
     Description: Optional[str] = ""
     DataType: str
     AccessType: str
+    Value: Optional[str] = ""
+    Confidence: float = 0.0
 
 class FrontendDataVariable(BaseModel):
     DvID: int
@@ -176,16 +175,23 @@ class FrontendEvent(BaseModel):
     CEID: int
     EventName: str
     Description: Optional[str] = ""
+    LinkedVIDs: list[int] = Field(default_factory=list)
+    LinkedReports: list[str] = Field(default_factory=list)
+    Confidence: float = 0.0
 
 class FrontendAlarm(BaseModel):
     AlarmID: int
     AlarmText: str
     Severity: str
+    LinkedVID: Optional[int] = None
+    Description: Optional[str] = ""
+    Confidence: float = 0.0
 
 class FrontendRemoteCommand(BaseModel):
     RCMD: str
     Description: Optional[str] = ""
     Parameters: list[dict] = Field(default_factory=list)
+    Confidence: float = 0.0
 
 class UpdateExtractionRequest(BaseModel):
     ProjectID: int

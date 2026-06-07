@@ -68,10 +68,29 @@ class EquipmentAPI:
 
     def analyze_project(self, project_id: int):
         try:
-            metadata, aggregated = container.project_service.aggregate_project_data(project_id, auto_analyze=True)
-            return container.document_service._build_extraction_response(
-                project_id, "project_batch", aggregated
-            )
+            from source.schemas.secsgem import EquipmentSpec
+            metadata = self.storage.get_project(project_id)
+            has_pending = any(doc.Status == "uploaded" for doc in metadata.Documents)
+
+            if has_pending:
+                metadata, aggregated = container.project_service.aggregate_project_data(project_id, auto_analyze=True)
+                self.storage.save_spec_json(self.storage.spec_json_path(project_id, "project_batch"), aggregated)
+                return container.document_service._build_extraction_response(
+                    project_id, "project_batch", aggregated
+                )
+            else:
+                try:
+                    spec_json = self.storage.read_spec_json(project_id, "project_batch")
+                    spec_obj = EquipmentSpec.model_validate_json(spec_json)
+                    return container.document_service._build_extraction_response(
+                        project_id, "project_batch", spec_obj
+                    )
+                except Exception:
+                    metadata, aggregated = container.project_service.aggregate_project_data(project_id, auto_analyze=True)
+                    self.storage.save_spec_json(self.storage.spec_json_path(project_id, "project_batch"), aggregated)
+                    return container.document_service._build_extraction_response(
+                        project_id, "project_batch", aggregated
+                    )
         except (InvalidSlugError, ProjectNotFoundError) as exc:
             raise HTTPException(404, str(exc)) from exc
         except StorageError as exc:
@@ -155,7 +174,8 @@ class EquipmentAPI:
             spec_obj.StatusVariables = [
                 StatusVariable(
                     SVID=sv.SVID, Name=sv.Name, Description=sv.Description,
-                    DataType=sv.DataType, AccessType=sv.AccessType
+                    DataType=sv.DataType, AccessType=sv.AccessType,
+                    Value=sv.Value, Confidence=sv.Confidence
                 ) for sv in validated_req.StatusVariables
             ]
             
@@ -167,19 +187,24 @@ class EquipmentAPI:
             
             spec_obj.Events = [
                 Event(
-                    CEID=e.CEID, Name=e.EventName, Description=e.Description
+                    CEID=e.CEID, Name=e.EventName, Description=e.Description,
+                    LinkedVIDs=e.LinkedVIDs, LinkedReports=e.LinkedReports,
+                    Confidence=e.Confidence
                 ) for e in validated_req.Events
             ]
             
             spec_obj.Alarms = [
                 Alarm(
-                    AlarmID=a.AlarmID, Name=a.AlarmText, Severity=a.Severity
+                    AlarmID=a.AlarmID, Name=a.AlarmText, Severity=a.Severity,
+                    LinkedVID=a.LinkedVID, Description=a.Description,
+                    Confidence=a.Confidence
                 ) for a in validated_req.Alarms
             ]
             
             spec_obj.RemoteCommands = [
                 RemoteCommand(
-                    RCMD=rc.RCMD, Description=rc.Description, Parameters=rc.Parameters
+                    RCMD=rc.RCMD, Description=rc.Description, Parameters=rc.Parameters,
+                    Confidence=rc.Confidence
                 ) for rc in validated_req.RemoteCommands
             ]
             
@@ -217,18 +242,57 @@ class EquipmentAPI:
                 
                 spec_obj.Events = original_events
                 
-                # Merge logic
-                target_ceids_set = set(request.ceids)
-                kept_reports = []
-                for r in spec_obj.Reports:
-                    r.LinkedEvents = [ceid for ceid in r.LinkedEvents if ceid not in target_ceids_set]
-                    if r.LinkedEvents:
-                        kept_reports.append(r)
+                # Merge logic: just keep all existing reports that don't have clashing RPTIDs
+                new_rptids = {r.RPTID for r in new_reports}
+                kept_reports = [r for r in spec_obj.Reports if r.RPTID not in new_rptids]
                 
                 spec_obj.Reports = kept_reports + new_reports
             else:
                 reports = container.report_service.generate_synthetic_reports(spec_obj)
                 spec_obj.Reports = reports
+                
+            # Deterministically re-link events to reports based on LinkedVIDs overlap
+            for event in spec_obj.Events:
+                if not event.LinkedVIDs:
+                    event.LinkedReports = []
+                    continue
+                
+                uncovered = set(event.LinkedVIDs)
+                chosen_rptids = set()
+                
+                # Greedy set cover to minimize redundant variables
+                while uncovered:
+                    best_report = None
+                    best_cover_count = 0
+                    best_extra_count = float('inf')
+                    
+                    for report in spec_obj.Reports:
+                        if report.RPTID in chosen_rptids:
+                            continue
+                            
+                        rpt_vids = set(report.LinkedVIDs)
+                        covered = uncovered.intersection(rpt_vids)
+                        extra = rpt_vids - set(event.LinkedVIDs)
+                        
+                        cover_count = len(covered)
+                        extra_count = len(extra)
+                        
+                        if cover_count > best_cover_count:
+                            best_cover_count = cover_count
+                            best_extra_count = extra_count
+                            best_report = report
+                        elif cover_count == best_cover_count and cover_count > 0:
+                            if extra_count < best_extra_count:
+                                best_extra_count = extra_count
+                                best_report = report
+                                
+                    if best_report is None:
+                        break
+                        
+                    chosen_rptids.add(best_report.RPTID)
+                    uncovered -= set(best_report.LinkedVIDs)
+                    
+                event.LinkedReports = sorted(list(chosen_rptids))
                 
             self.storage.save_spec_json(json_path, spec_obj)
             

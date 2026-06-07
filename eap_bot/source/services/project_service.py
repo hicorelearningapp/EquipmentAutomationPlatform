@@ -70,7 +70,7 @@ class ProjectService:
                 if doc.Status == "uploaded":
                     logger.info("Auto-analysing document %s for project %s", doc.DocumentID, project_id)
                     try:
-                        self._analyse_single_document(project_id, doc, metadata)
+                        self._container.document_service.analyze_document(project_id, doc.DocumentID)
                     except Exception as e:
                         logger.error("Failed to auto-analyse %s: %s", doc.DocumentID, e)
                         self.storage.mark_failed(project_id, doc.DocumentID)
@@ -82,75 +82,6 @@ class ProjectService:
         aggregated = self._build_aggregated_spec(project_id, metadata)
 
         return metadata, aggregated
-
-    def _analyse_single_document(self, project_id: int, doc: Any, metadata: Any) -> None:
-        is_excel = doc.FileName.lower().endswith(".xlsx")
-        is_txt = doc.FileName.lower().endswith(".txt")
-        file_path = self._resolve_document_path(project_id, doc)
-        doc_text: str = ""
-
-        if is_excel:
-            spec = self._container.extractor.extract_excel(file_path)
-            if not spec.ToolID:
-                spec.ToolID = metadata.ProjectName
-                spec.ToolType = metadata.Tool.value or "Semiconductor Processing Equipment"
-            spec.Reports = []
-        elif is_txt:
-            tool_id = metadata.ProjectName
-            tool_type = metadata.Tool.value or "Semiconductor Processing Equipment"
-            spec = EquipmentSpec(
-                DocumentType=DocumentCategory.SML_SCRIPTS.value,
-                ToolID=tool_id,
-                ToolType=tool_type,
-            )
-            spec.Reports = []
-        else:
-            doc_text = self._container.parser.extract_text(str(file_path))
-            if not doc_text.strip():
-                logger.warning("Empty text from %s", doc.DocumentID)
-                return
-
-            tables_dir = self.storage.extracted_tables_path(project_id)
-            tables_store_path = self.storage.vectorstore_path_for_category(project_id, "tables")
-            spec = self._container.extractor.extract(
-                doc_text,
-                pdf_path=file_path,
-                tables_dir=tables_dir,
-                tables_store_path=tables_store_path,
-            )
-
-            try:
-                reports = self._container.report_service.extract_builtin_reports(doc_text)
-                spec.Reports = reports
-            except Exception as exc:
-                logger.error("Report extraction failed for %s (non-fatal): %s", doc.DocumentID, exc)
-                spec.Reports = []
-
-        json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
-        self.storage.save_spec_json(json_path, spec)
-
-        if doc_text:
-            category_slug = self.storage._doc_category_to_slug(doc.DocumentType)
-            category_store_path = self.storage.vectorstore_path_for_category(
-                project_id, category_slug
-            )
-            vector_store = VectorStoreManager(category_store_path)
-            vector_store.add_document(
-                doc_text,
-                metadata={
-                    "project_id": project_id,
-                    "document_id": doc.DocumentID,
-                    "document_category": category_slug,
-                    "tool_id": spec.ToolID,
-                },
-            )
-
-        self.storage.complete_extraction(
-            project_id=project_id,
-            document_id=doc.DocumentID,
-            spec=spec,
-        )
-        self.storage.save_extracted_tables(project_id, spec)
 
     def _build_aggregated_spec(self, project_id: int, metadata: Any) -> AggregatedSpec:
         aggregated = EquipmentSpec(

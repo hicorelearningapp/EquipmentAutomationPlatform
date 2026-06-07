@@ -334,7 +334,7 @@ EXPECTED JSON FORMAT:
       "Name": "string",
       "Description": "string",
       "LinkedVIDs": [123],
-      "ReportID": "string",
+      "LinkedReports": ["string"],
       "Confidence": 0.0 to 1.0 (double)
     }}
   ],
@@ -376,7 +376,7 @@ CONFIDENCE RUBRIC (set the `Confidence` field per-entity):
 - <0.5 = guessed from weak context
 
 HARD RULES:
-- For every Event, you MUST extract the ReportID and the LinkedVIDs (Variables) associated with that report. If the document does not specify a ReportID, you MUST suggest a logical one (e.g. "RPT_{{CEID}}"). Do not leave it null.
+- For every Event, you MUST extract the LinkedVIDs (Variables) associated with that event.
 - Populate `LinkedVIDs` from any "Linked VIDs" column or comma-separated VID list following an event description.
 - Populate `StateTransitions` from text matching `<State> -> <State> (Triggered by <event/command>)` patterns.
   - `FromState` and `ToState` are REQUIRED, must be non-null state names matching entries in `States`.
@@ -385,6 +385,7 @@ HARD RULES:
   - If the transition is described as "manual" with no event/command, set `Manual: true` and leave both trigger fields null.
   - Never set both `TriggerEvent` and `TriggerCommand`.
 - `Severity` MUST be lowercase: `critical`, `warning`, or `info`.
+- CRITICAL: DO NOT hallucinate standard GEM capabilities (e.g., "Establish Communications", "Spooling", "Alarm Management") as Events or Alarms. ONLY extract entities that are explicitly defined with specific IDs in the document.
 - If a section is absent from the document, return an empty list. Do NOT invent IDs, names, or fields.
 - Output a single JSON object that validates against the schema above. Nothing else.
 
@@ -481,11 +482,11 @@ TABLE (CSV):
 The table below was extracted directly from a semiconductor equipment manual.
 The column names may differ from standard SECS/GEM field names — map them intelligently.
 Convert every data row into a JSON array of Collection Event objects.
+CRITICAL: If a row does not contain an explicit numeric ID (CEID), IGNORE IT completely. Do NOT invent IDs for standard capabilities.
 Each object MUST have:
   "CEID": integer, "Name": string, "Description": string (empty if absent),
   "LinkedVIDs": [integer] (parse comma-separated VID lists, empty list if absent),
-  "ReportID": string (suggest RPT_{{CEID}} if not present),
-  "Report": true,
+  "LinkedReports": ["string"] (parse explicit report IDs if mentioned, else empty),
   "Confidence": float (1.0 if CEID+Name present else 0.7)
 Return ONLY: {{"Events": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
@@ -495,6 +496,7 @@ TABLE (CSV):
 The table below was extracted directly from a semiconductor equipment manual.
 The column names may differ from standard SECS/GEM field names — map them intelligently.
 Convert every data row into a JSON array of Alarm objects.
+CRITICAL: If a row does not contain an explicit numeric ID (AlarmID), IGNORE IT completely. Do NOT invent IDs.
 Each object MUST have:
   "AlarmID": integer, "Name": string,
   "Severity": exactly one of "critical"|"warning"|"info" (lowercase),
@@ -544,7 +546,7 @@ The column names may differ from standard SECS/GEM field names — map them inte
 Convert every data row into a JSON array of ReportDefinition objects.
 Each object MUST have:
   "RPTID": string (or integer), "Name": string,
-  "Items": [integer] (parse comma-separated VID lists, empty list if absent)
+  "LinkedVIDs": [integer] (parse comma-separated VID lists, empty list if absent)
 Return ONLY: {{"Reports": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",

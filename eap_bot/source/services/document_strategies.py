@@ -70,13 +70,11 @@ class PdfProcessingStrategy(DocumentProcessingStrategy):
         )
 
         try:
-            reports, links = container.report_service.generate(spec, doc_text)
+            reports = container.report_service.generate_synthetic_reports(spec)
             spec.Reports = reports
-            spec.EventReportLinks = links
         except Exception as exc:
             logger.error("Report generation failed for %s/%s (non-fatal): %s", project_id, document_id, exc)
             spec.Reports = []
-            spec.EventReportLinks = []
 
         if hasattr(document, "DocumentType") and document.DocumentType:
             doc_type_val = document.DocumentType.value if hasattr(document.DocumentType, "value") else str(document.DocumentType)
@@ -110,7 +108,6 @@ class ExcelProcessingStrategy(DocumentProcessingStrategy):
             spec.ToolID = project_meta.ProjectName
             spec.ToolType = project_meta.Tool.value or "Semiconductor Processing Equipment"
         spec.Reports = []
-        spec.EventReportLinks = []
 
         if hasattr(document, "DocumentType") and document.DocumentType:
             doc_type_val = document.DocumentType.value if hasattr(document.DocumentType, "value") else str(document.DocumentType)
@@ -145,7 +142,6 @@ class TextProcessingStrategy(DocumentProcessingStrategy):
             ToolType=project_meta.Tool.value or "Semiconductor Processing Equipment",
         )
         spec.Reports = []
-        spec.EventReportLinks = []
         return spec, []
 
     def post_upload(

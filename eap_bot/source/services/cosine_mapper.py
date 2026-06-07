@@ -121,10 +121,9 @@ class CosineSimilarityMapper:
                     continue
 
                 high_confidence_mappings.append(MappingEntry(
-                    EquipmentField=best_entity["entity_id"],
+                    EquipmentFieldName=best_entity["entity_id"],
                     EntityType=best_entity["entity_type"],
                     MESField=tag.tag_id,
-                    Transaction=tag.transaction,
                     Confidence=top_score,
                     Reasoning=f"High vector similarity match ({top_score:.2f})",
                     Method="vector"

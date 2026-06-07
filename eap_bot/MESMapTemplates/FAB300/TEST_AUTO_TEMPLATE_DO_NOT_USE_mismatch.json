@@ -1,0 +1,16 @@
+{
+  "MESFamily": "FAB300",
+  "Description": "Automated test template \u2014 safe to delete",
+  "Events": [],
+  "Alarms": [],
+  "Variables": [],
+  "Payloads": [],
+  "Transactions": [],
+  "ValidationRules": [],
+  "AutoMapping": {
+    "Enabled": true
+  },
+  "Logging": {
+    "Enabled": true
+  }
+}

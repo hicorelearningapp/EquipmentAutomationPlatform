@@ -36,59 +36,25 @@ class QAService:
         document_id: str, 
         storage_service: Any
     ) -> tuple[str, str, list[str]]:
-        """Return (answer_text, source, context_chunks) using Agentic Sequential Fallback."""
+        """Return (answer_text, source, context_chunks) using the requested category context."""
         q = query.strip()
         
-        # 1. Gather initial context from the primary vector store (if provided)
+        # 1. Gather context from the primary vector store (if provided)
         text_chunks = []
         table_chunks = []
-        used_stores = set()
         
         if self._vector_store:
             text_chunks, table_chunks = self._fetch_context(
                 q, spec, project_id, document_id, storage_service, self._vector_store, self._vector_filters
             )
-            # Mark the initial store's directory as used so we don't query it again
-            used_stores.add(str(self._vector_store.vector_dir))
 
         text_context_str = "\n\n---\n\n".join(text_chunks)
         table_context_str = "\n".join(table_chunks)
-        
-        # 2. Evaluate if we have enough context
-        evaluation = self._evaluate_context(q, text_context_str, table_context_str)
-        
-        # 3. Agentic Fallback: If not enough context, search other categories
-        if not evaluation.get("can_answer", False):
-            logger.info("Agent decided initial context is insufficient. Missing: %s. Initiating fallback search...", evaluation.get("missing_info"))
-            fallback_query = evaluation.get("missing_info") or q
-            
-            # Find all available vector stores in the project
-            project_dir = storage_service._project_dir(project_id)
-            vs_dir = project_dir / storage_service.VECTORSTORE_DIR
-            
-            if vs_dir.exists():
-                for cat_dir in vs_dir.iterdir():
-                    if cat_dir.is_dir() and str(cat_dir) not in used_stores and (cat_dir / "index.faiss").exists():
-                        logger.info("Fallback searching category store: %s", cat_dir.name)
-                        fallback_vs = VectorStoreManager(cat_dir)
-                        # We do not restrict by document_id in fallback, we want project-wide knowledge
-                        fb_text, fb_table = self._fetch_context(
-                            fallback_query, spec, project_id, document_id, storage_service, fallback_vs, {"project_id": project_id}
-                        )
-                        if fb_text:
-                            text_chunks.extend([f"[Fallback Context: {cat_dir.name}]\n{c}" for c in fb_text])
-                        if fb_table:
-                            table_chunks.extend(fb_table)
-                            
-            # Rebuild context strings for final answer if fallback added chunks
-            text_context_str = "\n\n---\n\n".join(text_chunks)
-            table_context_str = "\n".join(table_chunks)
-
         all_chunks = text_chunks + table_chunks
 
-        # 4. Generate final answer
+        # 2. Generate final answer
         if not text_chunks and not table_chunks:
-            return "No relevant context found in the project documentation.", "rag", []
+            return "No relevant context found in the requested category.", "rag", []
 
         prompt = (
             "You are an expert equipment engineer. Answer the user's question using ONLY the provided contexts below. "
@@ -101,29 +67,6 @@ class QAService:
             f"QUESTION: {q}"
         )
         return self._llm.invoke(prompt).content, "rag", all_chunks
-
-    def _evaluate_context(self, query: str, text_context: str, table_context: str) -> dict:
-        """Use a fast LLM call to evaluate if the context is sufficient to answer the query."""
-        if not text_context and not table_context:
-            return {"can_answer": False, "missing_info": query}
-            
-        prompt = (
-            "You are a context evaluator. Your job is to determine if the provided context is sufficient to fully answer the user's question.\n"
-            "Respond ONLY with a valid JSON object matching this schema:\n"
-            "{\"can_answer\": boolean, \"missing_info\": \"string describing what specific information is missing, or null if can_answer is true\"}\n\n"
-            "[CONTEXT]\n"
-            f"{text_context}\n{table_context}\n\n"
-            f"[QUESTION]\n{query}"
-        )
-        try:
-            raw = self._llm_json.invoke(prompt).content
-            if isinstance(raw, list):
-                raw = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in raw)
-            data = json.loads(raw)
-            return data
-        except Exception as e:
-            logger.warning("Agentic context evaluation failed: %s. Defaulting to True to attempt generation.", e)
-            return {"can_answer": True}
 
     def _fetch_context(
         self, 

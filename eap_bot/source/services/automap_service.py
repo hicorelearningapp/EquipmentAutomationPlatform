@@ -93,7 +93,7 @@ def _extract_tagged_sections(template: dict) -> List[dict]:
             "expected_unit": "",
         })
     for a in template.get("Alarms", []):
-        atype = a.get("AlarmType", "")
+        atype = a.get("AlarmName", "")
         if not atype:
             continue
         out.append({
