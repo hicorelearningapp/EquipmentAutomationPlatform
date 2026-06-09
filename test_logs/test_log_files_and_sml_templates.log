@@ -1,0 +1,8 @@
+┌─────────────┬────────┬────────────────────────────────────────────────────┬────────────────────────────────┐
+│ Status      │ Method │ Endpoint                                           │ Result                         │
+├─────────────┼────────┼────────────────────────────────────────────────────┼────────────────────────────────┤
+│ 🟢 [PASS]   │ UNKNOWN │ test_document_category_coerces_log_files           │ Expected -, Got -              │
+│ 🟢 [PASS]   │ UNKNOWN │ test_txt_strategy_uses_category_to_distinguish_... │ Expected -, Got -              │
+│ 🟢 [PASS]   │ UNKNOWN │ test_list_user_sml_scripts_excludes_system_temp... │ Expected -, Got -              │
+│ 🟢 [PASS]   │ UNKNOWN │ test_build_sml_templates_includes_user_script_b... │ Expected -, Got -              │
+└─────────────┴────────┴────────────────────────────────────────────────────┴────────────────────────────────┘

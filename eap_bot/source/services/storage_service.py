@@ -491,6 +491,7 @@ class StorageService:
             "user_manuals",
             "troubleshooting_guidance",
             "variable_files",
+            "log_files",
             "sml_scripts",
             "tables",
         ]
@@ -504,6 +505,20 @@ class StorageService:
         if legacy_path.exists() and (legacy_path / "index.faiss").exists():
             result["legacy"] = legacy_path
         return result
+
+    def list_user_sml_scripts(self, project_id: int) -> list[tuple[str, Path]]:
+        """
+        Return user SML .txt files in ToolCharacterization, excluding protected templates.
+        """
+        system_templates = {"general_gem_testing.txt", "tool_characterisation_testing.txt"}
+        tool_char_dir = self._project_dir(project_id) / self.TOOL_CHAR_DIR
+        if not tool_char_dir.exists():
+            return []
+        return [
+            (f.name, f)
+            for f in sorted(tool_char_dir.iterdir())
+            if f.is_file() and f.suffix == ".txt" and f.name not in system_templates
+        ]
 
     @staticmethod
     def _doc_category_to_slug(document_category) -> str:

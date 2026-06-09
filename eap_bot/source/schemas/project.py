@@ -19,11 +19,9 @@ class DocumentCategory(str, Enum):
     TROUBLESHOOTING_GUIDANCE = "Troubleshooting Guidance"
     GEM_MANUAL = "GEM Manual"
     VARIABLE_FILES = "Variable Files"
-    COMMUNICATION_LOGS = "Communication Logs"
+    LOG_FILES = "Log Files"
     ALARM_FILES = "Alarm Files"
     SML_SCRIPTS = "SML Scripts"
-    SECS_GEM_SCRIPTS = "SECS GEM Scripts"
-    EQUIPMENT_DATA = "Equipment Data"
     MISCELLANEOUS = "Miscellaneous"
 
 
@@ -60,9 +58,10 @@ class DocumentMetadata(BaseModel):
             mapping = {
                 "user manual": DocumentCategory.USER_MANUALS,
                 "variable file": DocumentCategory.VARIABLE_FILES,
+                "log file": DocumentCategory.LOG_FILES,
+                "log files": DocumentCategory.LOG_FILES,
                 "alarm file": DocumentCategory.ALARM_FILES,
                 "sml script": DocumentCategory.SML_SCRIPTS,
-                "secs gem script": DocumentCategory.SECS_GEM_SCRIPTS,
             }
             return mapping.get(v.strip().lower(), v)
         return v
@@ -175,13 +174,13 @@ class FrontendEvent(BaseModel):
     CEID: int
     EventName: str
     Description: Optional[str] = ""
-    LinkedVIDs: list[int] = Field(default_factory=list)
+    # LinkedVIDs: list[int] = Field(default_factory=list)
     LinkedReports: list[str] = Field(default_factory=list)
     Confidence: float = 0.0
 
 class FrontendAlarm(BaseModel):
     AlarmID: int
-    AlarmText: str
+    AlarmName: str
     Severity: str
     LinkedVID: Optional[int] = None
     Description: Optional[str] = ""
@@ -209,3 +208,6 @@ class UpdateExtractionRequest(BaseModel):
 
 class GenerateReportsRequest(BaseModel):
     ceids: list[int] = Field(default_factory=list, description="List of CEIDs to generate reports for. If empty, generates for all events.")
+
+class AddReportsRequest(BaseModel):
+    report_ids: list[str] = Field(..., description="List of RPTID strings selected from GenerateReports suggestions to persist to the backend.")

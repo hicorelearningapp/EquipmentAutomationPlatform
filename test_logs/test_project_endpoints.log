@@ -8,8 +8,8 @@
 === FAILURE DETAILS ===
 
 --- test_project_details_flow ---
-client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
-record_property = <function record_property.<locals>.append_property at 0x0000028281413B60>
+client = <starlette.testclient.TestClient object at 0x000001FD1D3ECAD0>
+record_property = <function record_property.<locals>.append_property at 0x000001FD1D426400>
 
     def test_project_details_flow(client: TestClient, record_property):
         # 1. Add Project with Code and Description

@@ -11,8 +11,8 @@
 === FAILURE DETAILS ===
 
 --- test_update_extraction_nonexistent_project ---
-client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
-record_property = <function record_property.<locals>.append_property at 0x0000028281410040>
+client = <starlette.testclient.TestClient object at 0x000001FD1D3ECAD0>
+record_property = <function record_property.<locals>.append_property at 0x000001FD1D6EE350>
 
     def test_update_extraction_nonexistent_project(client, record_property):
         url = f"/UpdateExtraction/{GHOST_PROJECT_ID}"
@@ -107,7 +107,7 @@ C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\anyio\_backends\
              ^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <source.routers.equipment_routes.EquipmentAPI object at 0x0000028281B85010>
+self = <source.routers.equipment_routes.EquipmentAPI object at 0x000001FD1EE89010>
 project_id = 999999999
 request = {'DataVariable': [], 'Protocol': 'SECS/GEM', 'StatusVariable': [], 'ToolID': 'TEST-TOOL-001', ...}
 

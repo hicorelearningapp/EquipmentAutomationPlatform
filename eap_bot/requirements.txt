@@ -21,3 +21,4 @@ langchain-mistralai
 pdfplumber
 openpyxl
 pymupdf
+reportlab

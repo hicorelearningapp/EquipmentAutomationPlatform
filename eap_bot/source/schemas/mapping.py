@@ -43,6 +43,10 @@ class SaveMappingRequest(BaseModel):
     template: str
     Mappings: List[MappingEntry] = Field(default_factory=list)
 
+class MappingUpdateRequest(BaseModel):
+    MESTags: List[MESTag] = Field(default_factory=list)
+
+
 
 class MESMappingRequest(BaseModel):
     family: str

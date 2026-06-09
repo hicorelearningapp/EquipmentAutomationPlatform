@@ -1,11 +1,55 @@
 [
   {
+    "test_name": "test_document_category_coerces_log_files",
+    "file_name": "test_log_files_and_sml_templates.py",
+    "method": "UNKNOWN",
+    "url": "test_document_category_coerces_log_files",
+    "status": "passed",
+    "duration_ms": 0,
+    "expected": "-",
+    "got": "-",
+    "error_msg": null
+  },
+  {
+    "test_name": "test_txt_strategy_uses_category_to_distinguish_logs_from_sml",
+    "file_name": "test_log_files_and_sml_templates.py",
+    "method": "UNKNOWN",
+    "url": "test_txt_strategy_uses_category_to_distinguish_logs_from_sml",
+    "status": "passed",
+    "duration_ms": 0,
+    "expected": "-",
+    "got": "-",
+    "error_msg": null
+  },
+  {
+    "test_name": "test_list_user_sml_scripts_excludes_system_templates",
+    "file_name": "test_log_files_and_sml_templates.py",
+    "method": "UNKNOWN",
+    "url": "test_list_user_sml_scripts_excludes_system_templates",
+    "status": "passed",
+    "duration_ms": 15,
+    "expected": "-",
+    "got": "-",
+    "error_msg": null
+  },
+  {
+    "test_name": "test_build_sml_templates_includes_user_script_by_filename",
+    "file_name": "test_log_files_and_sml_templates.py",
+    "method": "UNKNOWN",
+    "url": "test_build_sml_templates_includes_user_script_by_filename",
+    "status": "passed",
+    "duration_ms": 8,
+    "expected": "-",
+    "got": "-",
+    "error_msg": null
+  },
+  {
     "test_name": "test_reanalyze_project_endpoint",
     "file_name": "test_reanalyze.py",
     "method": "POST",
-    "url": "/ReAnalyzeProject/23",
+    "url": "/ReAnalyzeProject/25",
     "status": "passed",
-    "duration_ms": 66,
+    "duration_ms": 54,
     "expected": 200,
     "got": 200,
     "error_msg": null

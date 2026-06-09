@@ -41,15 +41,8 @@ class EquipmentExtractor:
     # Public API
     # ------------------------------------------------------------------
 
-    def extract(self, pdf_text: str, pdf_path: Union[str, Path, None] = None, tables_dir: Union[str, Path, None] = None, tables_store_path: Union[str, Path, None] = None) -> EquipmentSpec:
-        # Step 1: Extract and save raw tables from PDF
-        section_csvs: dict[str, str] = {}  # section -> CSV string
-        if pdf_path is not None:
-            section_csvs = self._extract_and_save_tables(
-                Path(pdf_path),
-                Path(tables_dir) if tables_dir else None,
-                Path(tables_store_path) if tables_store_path else None,
-            )
+    def extract(self, pdf_text: str, section_csvs: dict[str, str] = None) -> EquipmentSpec:
+        section_csvs = section_csvs or {}
 
         # Step 2: Text chunks (always run — gives LLM overall document context)
         chunks = self._chunk_text(pdf_text)
@@ -635,7 +628,7 @@ TABLE (CSV):
         )
         return merged
 
-    def _extract_and_save_tables(
+    def extract_and_save_tables(
         self,
         pdf_path: Path,
         tables_dir: Union[Path, None],

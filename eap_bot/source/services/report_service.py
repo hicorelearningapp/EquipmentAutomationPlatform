@@ -83,8 +83,8 @@ Rules:
   one for alarms, one for recipe data).
 - Prefer reusing RPTID values from the hints if they exist; otherwise generate
   sequential IDs like "RPT_001", "RPT_002", etc.
-- If you are reusing a report from the hints, preserve its "Type" field (usually "Built-in").
-- For any brand new reports you create, set their "Type" field to "Generated".
+- If you are reusing a report from the hints, preserve its "Type" field (which is "Built-in").
+- For any brand new reports you create that are derived from the document, set their "Type" field to "Built-in".
 - Each report should have 2-6 linked variable IDs where possible.
 - IMPORTANT: The generated reports must include MORE linked variables than what the CEIDs strictly require. Do not just blindly copy the event's LinkedVIDs. Enrich the reports with additional relevant context variables (such as overall equipment status, process state, control state, or critical alarm states) from the provided DVs and SVs.
 - Set "Confidence" between 0.0 and 1.0 based on how certain you are.
@@ -95,7 +95,7 @@ Each element must have:
   "RPTID"      : string
   "Name"       : string
   "LinkedVIDs" : [int]
-  "Type"       : string  ("Built-in" or "Generated")
+  "Type"       : string  ("Built-in" or "Custom")
   "Confidence" : float
   "Reasoning"  : string  (optional)
 
@@ -173,7 +173,7 @@ class ReportService:
             reports = []
             for item in items:
                 try:
-                    item["Type"] = "Generated"
+                    item["Type"] = "Built-in"
                     reports.append(ReportDefinition.model_validate(item))
                 except Exception as exc:
                     logger.warning("Skipping invalid report item %s: %s", item, exc)

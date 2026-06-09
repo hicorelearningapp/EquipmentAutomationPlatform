@@ -8,8 +8,8 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = Field("")
     GOOGLE_API_KEY: str = Field("")
 
-    LLM_PROVIDER: str = Field("mistral")  # 'groq', 'gemini', or 'ollama'
-    LLM_MODEL_NAME: str = Field("gemini-3.1-flash-lite")
+    LLM_PROVIDER: str = Field("groq")  # 'groq', 'gemini', or 'ollama'
+    LLM_MODEL_NAME: str = Field("llama-3.1-70b-versatile")
     OLLAMA_BASE_URL: str = Field("http://localhost:11434")
 
     # Fallback LLMs (used when primary hits rate limits / 429 / quota errors)
@@ -28,8 +28,8 @@ class Settings(BaseSettings):
     CHUNK_OVERLAP: int = Field(200)
     MAX_UPLOAD_SIZE: int = Field(50 * 1024 * 1024)
 
-    EXTRACTOR_CHUNK_TOKENS: int = Field(3000)
-    EXTRACTOR_CHUNK_OVERLAP_TOKENS: int = Field(200)
-    EXTRACTOR_MAX_PARALLEL: int = Field(2)
+    EXTRACTOR_CHUNK_TOKENS: int = Field(8000)
+    EXTRACTOR_CHUNK_OVERLAP_TOKENS: int = Field(0)
+    EXTRACTOR_MAX_PARALLEL: int = Field(8)
 
 settings = Settings()

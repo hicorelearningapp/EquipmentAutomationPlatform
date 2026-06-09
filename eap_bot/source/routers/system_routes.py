@@ -72,19 +72,20 @@ class SystemAPI:
                     query_params.append(param_info)
                     
             def _resolve_schema(schema_node):
-                if not schema_node:
+                if not schema_node or not isinstance(schema_node, dict):
                     return "unknown"
                 
                 if "$ref" in schema_node:
                     ref_path = schema_node["$ref"].split("/")[-1]
-                    components = schema.get("components", {}).get("schemas", {})
-                    if ref_path in components:
-                        return _resolve_schema(components[ref_path])
+                    components = schema.get("components", {}) or {}
+                    schemas = components.get("schemas", {}) or {}
+                    if ref_path in schemas:
+                        return _resolve_schema(schemas[ref_path])
                     return "unknown"
 
                 if "anyOf" in schema_node:
                     for option in schema_node["anyOf"]:
-                        if option.get("type") != "null":
+                        if isinstance(option, dict) and option.get("type") != "null":
                             return _resolve_schema(option)
 
                 node_type = schema_node.get("type", "object")

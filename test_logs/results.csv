@@ -1,2 +1,6 @@
 test_name,file_name,method,url,status,duration_ms,expected,got,error_msg
-test_reanalyze_project_endpoint,test_reanalyze.py,POST,/ReAnalyzeProject/23,passed,66,200,200,
+test_document_category_coerces_log_files,test_log_files_and_sml_templates.py,UNKNOWN,test_document_category_coerces_log_files,passed,0,-,-,
+test_txt_strategy_uses_category_to_distinguish_logs_from_sml,test_log_files_and_sml_templates.py,UNKNOWN,test_txt_strategy_uses_category_to_distinguish_logs_from_sml,passed,0,-,-,
+test_list_user_sml_scripts_excludes_system_templates,test_log_files_and_sml_templates.py,UNKNOWN,test_list_user_sml_scripts_excludes_system_templates,passed,15,-,-,
+test_build_sml_templates_includes_user_script_by_filename,test_log_files_and_sml_templates.py,UNKNOWN,test_build_sml_templates_includes_user_script_by_filename,passed,8,-,-,
+test_reanalyze_project_endpoint,test_reanalyze.py,POST,/ReAnalyzeProject/25,passed,54,200,200,

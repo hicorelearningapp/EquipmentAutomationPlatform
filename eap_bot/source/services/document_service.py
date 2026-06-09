@@ -30,25 +30,40 @@ class DocumentService:
 
     # ── Upload ────────────────────────────────────────────────────────────────
 
-    def upload_document(self, project_id: int, filename: str, contents: bytes, doc_category: DocumentCategory) -> dict:
+    def upload_document(self, project_id: int, filename: str, contents: bytes) -> dict:
+        ext = Path(filename).suffix.lower()
+        if ext not in {".pdf", ".xlsx", ".txt"}:
+            raise ValueError("Only .pdf, .xlsx, and .txt files are accepted")
+
         if len(contents) > settings.MAX_UPLOAD_SIZE:
             raise ValueError("File exceeds MAX_UPLOAD_SIZE")
 
         file_size = float(len(contents))
 
-        from source.services.document_strategies import DocumentProcessorFactory
-        # The factory will raise a ValueError if the file extension is not supported
-        strategy = DocumentProcessorFactory.get_strategy(filename)
-        pages = strategy.get_pages(contents)
-
-        ext = Path(filename).suffix.lower()
+        if ext == ".pdf":
+            pages = len(PdfReader(io.BytesIO(contents)).pages)
+            doc_category = DocumentCategory.USER_MANUALS
+        elif ext == ".xlsx":
+            import openpyxl
+            wb = openpyxl.load_workbook(io.BytesIO(contents), read_only=True)
+            pages = len(wb.sheetnames)
+            wb.close()
+            doc_category = DocumentCategory.VARIABLE_FILES
+        else:
+            pages = 1
+            doc_category = DocumentCategory.SML_SCRIPTS
 
         document_id, file_path, _ = self.storage.prepare_document_paths(
-            project_id, filename, extension=ext, doc_category=doc_category
+            project_id, filename, extension=ext
         )
         self.storage.save_pdf(file_path, contents)
 
-        strategy.post_upload(project_id, filename, contents, self.storage)
+        if ext == ".txt":
+            tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
+            tool_char_dir.mkdir(parents=True, exist_ok=True)
+            dst_path = tool_char_dir / filename
+            dst_path.write_bytes(contents)
+            logger.info("Copied SML script %s to %s", filename, dst_path)
 
         document = self.storage.register_document(
             project_id=project_id,
@@ -62,7 +77,7 @@ class DocumentService:
         return {
             "Status": "uploaded",
             "DocumentID": document_id,
-            "DocumentType": document.DocumentType.value if hasattr(document.DocumentType, "value") else document.DocumentType,
+            "DocumentType": "Pending AI Classification",
             "FileName": document.FileName,
             "Pages": document.Pages,
             "FileSize": document.FileSize,
@@ -79,50 +94,72 @@ class DocumentService:
             spec_json = self.storage.read_spec_json(project_id, document_id)
             spec = EquipmentSpec.model_validate_json(spec_json)
 
-            from source.services.document_strategies import DocumentProcessorFactory, PdfProcessingStrategy
-            strategy = DocumentProcessorFactory.get_strategy(document.FileName)
-            if not spec.Reports and isinstance(strategy, PdfProcessingStrategy):
+            is_excel = document.FileName.lower().endswith(".xlsx")
+            is_txt = document.FileName.lower().endswith(".txt")
+            if not spec.Reports and not is_excel and not is_txt:
                 logger.info("Reports missing in completed spec for %s/%s, generating now...", project_id, document_id)
                 file_path = self._resolve_document_path(project_id, document)
                 text = self._container.parser.extract_text(str(file_path))
-                reports = self._container.report_service.extract_builtin_reports(text)
+                reports, links = self._container.report_service.generate(spec, text)
                 if reports:
                     spec.Reports = reports
+                    spec.EventReportLinks = links
                     json_path = self.storage.spec_json_path(project_id, document_id)
                     self.storage.save_spec_json(json_path, spec)
 
             return self._build_extraction_response(project_id, document_id, spec)
 
+        is_excel = document.FileName.lower().endswith(".xlsx")
+        is_txt = document.FileName.lower().endswith(".txt")
+
         try:
             file_path = self._resolve_document_path(project_id, document)
-            from source.services.document_strategies import DocumentProcessorFactory
-            strategy = DocumentProcessorFactory.get_strategy(document.FileName)
+            doc_text: str = ""
 
-            spec, pages = strategy.analyze(
-                project_id=project_id,
-                document_id=document_id,
-                document=document,
-                file_path=file_path,
-                storage=self.storage,
-                container=self._container,
-            )
+            if is_excel:
+                spec = self._container.extractor.extract_excel(file_path)
+                if not spec.ToolID:
+                    project_meta = self.storage.get_project(project_id)
+                    spec.ToolID = project_meta.ProjectName
+                    spec.ToolType = project_meta.Tool.value or "Semiconductor Processing Equipment"
+                spec.Reports = []
+                spec.EventReportLinks = []
+            elif is_txt:
+                project_meta = self.storage.get_project(project_id)
+                spec = EquipmentSpec(
+                    DocumentType=DocumentCategory.SML_SCRIPTS.value,
+                    ToolID=project_meta.ProjectName,
+                    ToolType=project_meta.Tool.value or "Semiconductor Processing Equipment",
+                )
+                spec.Reports = []
+                spec.EventReportLinks = []
+            else:
+                doc_text = self._container.parser.extract_text(str(file_path))
+                if not doc_text.strip():
+                    raise ValueError("Could not extract any text from the PDF")
+
+                tables_dir = self.storage.extracted_tables_path(project_id)
+                spec = self._container.extractor.extract(doc_text, pdf_path=file_path, tables_dir=tables_dir)
+
+                try:
+                    reports, links = self._container.report_service.generate(spec, doc_text)
+                    spec.Reports = reports
+                    spec.EventReportLinks = links
+                except Exception as exc:
+                    logger.error("Report generation failed for %s/%s (non-fatal): %s", project_id, document_id, exc)
+                    spec.Reports = []
+                    spec.EventReportLinks = []
 
             json_path = self.storage.spec_json_path(project_id, document_id)
             self.storage.save_spec_json(json_path, spec)
 
-            if pages:
-                category_slug = self.storage._doc_category_to_slug(document.DocumentType)
-                category_store_path = self.storage.vectorstore_path_for_category(
-                    project_id, category_slug
-                )
-                vector_store = VectorStoreManager(category_store_path)
-                vector_store.add_pages(
-                    pages,
-                    base_metadata={
+            if doc_text:
+                vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
+                vector_store.add_document(
+                    doc_text,
+                    metadata={
                         "project_id": project_id,
                         "document_id": document_id,
-                        "document_name": document.FileName,
-                        "document_category": category_slug,
                         "tool_id": spec.ToolID,
                     },
                 )
@@ -133,16 +170,6 @@ class DocumentService:
                 spec=spec,
             )
             self.storage.save_extracted_tables(project_id, spec)
-
-            # Invalidate entity embeddings cache when spec changes
-            cache_path = self.storage.spec_json_path(project_id, "project_batch").parent / "entity_embeddings.npz"
-            if cache_path.exists():
-                try:
-                    cache_path.unlink()
-                    logger.info("Invalidated entity embeddings cache at %s", cache_path)
-                except Exception as e:
-                    logger.warning("Failed to delete entity embeddings cache: %s", e)
-
         except Exception as e:
             logger.error("Analysis failed for %s/%s: %s", project_id, document_id, str(e))
             self.storage.mark_failed(project_id, document_id)
@@ -220,6 +247,7 @@ class DocumentService:
             "States": [],
             "StateTransitions": [],
             "Reports": [],
+            "EventReportLinks": [],
             "SmlTemplate": SML_TEMPLATES,
         }
 
@@ -247,17 +275,12 @@ class DocumentService:
                 for v in spec.DataVariables
             ],
             "Events": [
-                {
-                    "CEID": e.CEID, 
-                    "EventName": e.EventName, 
-                    "Description": e.Description or "",
-                    "LinkedVIDs": e.LinkedVIDs,
-                    "LinkedReports": e.LinkedReports
-                }
+                # CHANGE e.Name to e.EventName
+                {"CEID": e.CEID, "EventName": e.EventName, "Description": e.Description or ""}
                 for e in spec.Events
             ],
             "Alarms": [
-                {"AlarmID": a.AlarmID, "AlarmName": a.AlarmName, "Severity": a.Severity}
+                {"AlarmID": a.AlarmID, "AlarmText": a.Name, "Severity": a.Severity}
                 for a in spec.Alarms
             ],
             "RemoteCommands": [
@@ -273,15 +296,12 @@ class DocumentService:
                 for tr in spec.StateTransitions
             ],
             "Reports": [
-                {
-                    "RPTID": r.RPTID, 
-                    "Name": r.Name, 
-                    "Reasoning": r.Reasoning or "",
-                    "LinkedVIDs": r.LinkedVIDs,
-                    "Type": r.Type,
-                    "Confidence": r.Confidence
-                }
+                {"RPTID": r.RPTID, "Name": r.Name, "LinkedVIDs": r.LinkedVIDs, "Reasoning": r.Reasoning or ""}
                 for r in spec.Reports
+            ],
+            "EventReportLinks": [
+                {"CEID": lnk.CEID, "EventName": lnk.EventName, "RPTIDs": lnk.RPTIDs}
+                for lnk in spec.EventReportLinks
             ],
             "SmlTemplate": SML_TEMPLATES,
         }

@@ -1,9 +1,9 @@
 test_name,file_name,method,url,status,duration_ms,expected,got,error_msg
-test_upload_document_nonexistent_project,test_documents_endpoints.py,POST,/UploadDocument/999999999,passed,11,404,404,
+test_upload_document_nonexistent_project,test_documents_endpoints.py,POST,/UploadDocument/999999999,passed,32,404,404,
 test_analyze_project_nonexistent,test_documents_endpoints.py,GET,/AnalyzeProject/999999999,passed,4,404,404,
-test_get_variable_nonexistent_project,test_documents_endpoints.py,GET,/GetVariable/999999999/test_gem_manual,passed,4,404,404,
-test_update_extraction_nonexistent_project,test_documents_endpoints.py,POST,/UpdateExtraction/999999999,failed,3,-,-,"client = <starlette.testclient.TestClient object at 0x00000282801DCEC0>
-record_property = <function record_property.<locals>.append_property at 0x0000028281410040>
+test_get_variable_nonexistent_project,test_documents_endpoints.py,GET,/GetVariable/999999999/test_gem_manual,passed,3,404,404,
+test_update_extraction_nonexistent_project,test_documents_endpoints.py,POST,/UpdateExtraction/999999999,failed,2,-,-,"client = <starlette.testclient.TestClient object at 0x000001FD1D3ECAD0>
+record_property = <function record_property.<locals>.append_property at 0x000001FD1D6EE350>
 
     def test_update_extraction_nonexistent_project(client, record_property):
         url = f""/UpdateExtraction/{GHOST_PROJECT_ID}""
@@ -98,7 +98,7 @@ C:\Users\Jennica\AppData\Roaming\Python\Python314\site-packages\anyio\_backends\
              ^^^^^^^^^^^^^^^^^^^^^^^^
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
-self = <source.routers.equipment_routes.EquipmentAPI object at 0x0000028281B85010>
+self = <source.routers.equipment_routes.EquipmentAPI object at 0x000001FD1EE89010>
 project_id = 999999999
 request = {'DataVariable': [], 'Protocol': 'SECS/GEM', 'StatusVariable': [], 'ToolID': 'TEST-TOOL-001', ...}
 
