@@ -174,7 +174,7 @@ class FrontendEvent(BaseModel):
     CEID: int
     EventName: str
     Description: Optional[str] = ""
-    # LinkedVIDs: list[int] = Field(default_factory=list)
+    LinkedVIDs: list[int] = Field(default_factory=list)
     LinkedReports: list[str] = Field(default_factory=list)
     Confidence: float = 0.0
 
@@ -208,6 +208,3 @@ class UpdateExtractionRequest(BaseModel):
 
 class GenerateReportsRequest(BaseModel):
     ceids: list[int] = Field(default_factory=list, description="List of CEIDs to generate reports for. If empty, generates for all events.")
-
-class AddReportsRequest(BaseModel):
-    report_ids: list[str] = Field(..., description="List of RPTID strings selected from GenerateReports suggestions to persist to the backend.")

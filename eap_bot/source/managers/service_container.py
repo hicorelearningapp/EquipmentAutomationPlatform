@@ -1,10 +1,12 @@
 import logging
 
+from source.services.automap_service import AutoMapService
 from source.services.equipment_extractor import EquipmentExtractor
 from source.services.mapping_service import MappingService
 from source.services.qa_service import QAService
 from source.services.report_service import ReportService
 from source.services.storage_service import StorageService
+from source.services.smart_automation_service import SmartAutomationService
 from source.utils.embedder import VectorStoreManager
 from source.utils.llm_factory import LLMFactory, LLMStrategy
 from source.utils.pdf_reader import DocumentParser, DocumentParserFactory
@@ -31,16 +33,25 @@ class ServiceContainer:
         self.report_service: ReportService = ReportService(
             llm_strategy=self.llm_strategy
         )
+        self.automap_service: AutoMapService = AutoMapService(
+            storage=self.storage,
+            llm_strategy=self.llm_strategy,
+        )
+        self.smart_automation_service: SmartAutomationService = SmartAutomationService()
 
         # Import here to avoid circular imports at module load time
         from source.services.project_service import ProjectService
         from source.services.document_service import DocumentService
+        from source.services.sml_generation_service import SMLGenerationService
 
         self.project_service: ProjectService = ProjectService(
             storage=self.storage, container=self
         )
         self.document_service: DocumentService = DocumentService(
             storage=self.storage, container=self
+        )
+        self.sml_generation_service: SMLGenerationService = SMLGenerationService(
+            storage=self.storage
         )
 
         logger.info("ServiceContainer: all services ready.")

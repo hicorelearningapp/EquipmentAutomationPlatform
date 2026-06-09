@@ -3,9 +3,8 @@ from pathlib import Path
 from typing import Any
 
 from source.schemas.mapping import MESTag
-from source.schemas.project import AggregatedSpec, DocumentCategory, ProjectDetail
+from source.schemas.project import AggregatedSpec, ProjectDetail, ProjectDetailsResponse, SystemSummaryResponse
 from source.schemas.secsgem import EquipmentSpec
-from source.services.sml_template import SML_TEMPLATES
 from source.services.storage_service import (
     DocumentNotFoundError,
     InvalidSlugError,
@@ -27,7 +26,7 @@ class ProjectService:
 
     # ── Batch analysis + aggregation ─────────────────────────────────────────
 
-    def aggregate_project_data(self, project_id: int) -> tuple[Any, AggregatedSpec]:
+    def aggregate_project_data(self, project_id: int, auto_analyze: bool = False) -> tuple[Any, AggregatedSpec]:
         """
         1. Analyse any pending documents.
         2. Aggregate + deduplicate all completed specs.
@@ -36,99 +35,44 @@ class ProjectService:
         self.storage.increment_project_version(project_id)
         self.storage.write_sml_template(project_id)
 
-        # Copy default script templates into the project directory
+        metadata = self.storage.get_project(project_id)
+
         try:
             from source.services.sml_template import SCRIPTS_DIR
             tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
             tool_char_dir.mkdir(parents=True, exist_ok=True)
 
             for script_name in ["general_gem_testing.txt", "tool_characterisation_testing.txt"]:
+                dst_path = tool_char_dir / script_name
+                if dst_path.exists():
+                    logger.debug("System template %s already exists, skipping", script_name)
+                    continue
+
                 src_path = SCRIPTS_DIR / script_name
                 if src_path.exists():
-                    content = src_path.read_text(encoding="utf-8")
-                    dst_path = tool_char_dir / script_name
-                    dst_path.write_text(content, encoding="utf-8")
-                    logger.info("Saved script %s to %s", script_name, dst_path)
+                    dst_path.write_text(src_path.read_text(encoding="utf-8"), encoding="utf-8")
+                    logger.info("Seeded system template %s to %s", script_name, dst_path)
         except Exception as e:
-            logger.error("Failed to copy script templates for project %s: %s", project_id, e)
+            logger.error("Failed to seed script templates for project %s: %s", project_id, e)
 
-        metadata = self.storage.get_project(project_id)
+        if auto_analyze:
+            # Analyse pending documents
+            for doc in metadata.Documents:
+                if doc.Status == "uploaded":
+                    logger.info("Auto-analysing document %s for project %s", doc.DocumentID, project_id)
+                    try:
+                        self._container.document_service.analyze_document(project_id, doc.DocumentID)
+                    except Exception as e:
+                        logger.error("Failed to auto-analyse %s: %s", doc.DocumentID, e)
+                        self.storage.mark_failed(project_id, doc.DocumentID)
 
-        # Analyse pending documents
-        for doc in metadata.Documents:
-            if doc.Status != "completed":
-                logger.info("Auto-analysing document %s for project %s", doc.DocumentID, project_id)
-                try:
-                    self._analyse_single_document(project_id, doc, metadata)
-                except Exception as e:
-                    logger.error("Failed to auto-analyse %s: %s", doc.DocumentID, e)
-                    self.storage.mark_failed(project_id, doc.DocumentID)
-
-        # Reload metadata after analysis
-        metadata = self.storage.get_project(project_id)
+            # Reload metadata after analysis
+            metadata = self.storage.get_project(project_id)
 
         # Build aggregated spec
         aggregated = self._build_aggregated_spec(project_id, metadata)
 
         return metadata, aggregated
-
-    def _analyse_single_document(self, project_id: int, doc: Any, metadata: Any) -> None:
-        is_excel = doc.FileName.lower().endswith(".xlsx")
-        is_txt = doc.FileName.lower().endswith(".txt")
-        file_path = self._resolve_document_path(project_id, doc)
-        doc_text: str = ""
-
-        if is_excel:
-            spec = self._container.extractor.extract_excel(file_path)
-            if not spec.ToolID:
-                spec.ToolID = metadata.ProjectName
-                spec.ToolType = metadata.Tool.value or "Semiconductor Processing Equipment"
-            spec.Reports = []
-        elif is_txt:
-            tool_id = metadata.ProjectName
-            tool_type = metadata.Tool.value or "Semiconductor Processing Equipment"
-            spec = EquipmentSpec(
-                DocumentType=DocumentCategory.SML_SCRIPTS.value,
-                ToolID=tool_id,
-                ToolType=tool_type,
-            )
-            spec.Reports = []
-        else:
-            doc_text = self._container.parser.extract_text(str(file_path))
-            if not doc_text.strip():
-                logger.warning("Empty text from %s", doc.DocumentID)
-                return
-
-            tables_dir = self.storage.extracted_tables_path(project_id)
-            spec = self._container.extractor.extract(doc_text, pdf_path=file_path, tables_dir=tables_dir)
-
-            try:
-                reports = self._container.report_service.generate_synthetic_reports(spec)
-                spec.Reports = reports
-            except Exception as exc:
-                logger.error("Report generation failed for %s (non-fatal): %s", doc.DocumentID, exc)
-                spec.Reports = []
-
-        json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
-        self.storage.save_spec_json(json_path, spec)
-
-        if doc_text:
-            vector_store = VectorStoreManager(self.storage.vectorstore_path(project_id))
-            vector_store.add_document(
-                doc_text,
-                metadata={
-                    "project_id": project_id,
-                    "document_id": doc.DocumentID,
-                    "tool_id": spec.ToolID,
-                },
-            )
-
-        self.storage.complete_extraction(
-            project_id=project_id,
-            document_id=doc.DocumentID,
-            spec=spec,
-        )
-        self.storage.save_extracted_tables(project_id, spec)
 
     def _build_aggregated_spec(self, project_id: int, metadata: Any) -> AggregatedSpec:
         aggregated = EquipmentSpec(
@@ -148,7 +92,7 @@ class ProjectService:
                     if not spec.Reports and not is_excel and not is_txt:
                         file_path = self._resolve_document_path(project_id, doc)
                         text = self._container.parser.extract_text(str(file_path))
-                        reports = self._container.report_service.generate_synthetic_reports(spec)
+                        reports = self._container.report_service.extract_builtin_reports(text)
                         if reports:
                             spec.Reports = reports
                             json_path = self.storage.spec_json_path(project_id, doc.DocumentID)
@@ -201,11 +145,11 @@ class ProjectService:
         if not template_path.exists():
             raise FileNotFoundError(f"MES template not found at {template_path}")
 
-        from source.schemas.mapping import MESTag
+        from source.utils.template_parser import _extract_tags_from_template
         import json
         with open(template_path, "r", encoding="utf-8") as f:
             raw_tags = json.load(f)
-        target_tags = [MESTag.model_validate(t) for t in raw_tags]
+        target_tags = _extract_tags_from_template(raw_tags)
 
         return self._container.mapping_service.suggest_mappings(spec, target_tags)
 
@@ -245,3 +189,97 @@ class ProjectService:
                 seen.add(key)
                 result.append(t)
         return result
+
+    # ── Project Details & Summary ─────────────────────────────────────────────
+
+    def get_project_details(self, project_id: int) -> ProjectDetailsResponse:
+        metadata = self.storage.get_project(project_id)
+
+        documents = metadata.Documents or []
+        number_of_documents = len(documents)
+
+        # Count files in ToolCharacterization folder
+        tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
+        number_of_sml_scripts = 0
+        if tool_char_dir.is_dir():
+            number_of_sml_scripts = len([
+                f for f in tool_char_dir.iterdir()
+                if f.is_file()
+            ])
+
+        total_svs = 0
+        total_dvs = 0
+        total_rcmds = 0
+        total_reports = 0
+        total_alarms = 0
+        total_events = 0
+
+        for doc in documents:
+            if doc.Status != "completed":
+                continue
+
+            try:
+                spec_json = self.storage.read_spec_json(
+                    project_id,
+                    doc.DocumentID
+                )
+                spec = EquipmentSpec.model_validate_json(spec_json)
+
+                total_svs += len(spec.StatusVariables) if spec.StatusVariables else 0
+                total_dvs += len(spec.DataVariables) if spec.DataVariables else 0
+                total_rcmds += len(spec.RemoteCommands) if spec.RemoteCommands else 0
+                total_reports += len(spec.Reports) if spec.Reports else 0
+                total_alarms += len(spec.Alarms) if spec.Alarms else 0
+                total_events += len(spec.Events) if spec.Events else 0
+
+            except Exception:
+                continue
+
+        return ProjectDetailsResponse(
+            Id=metadata.ProjectID,
+            ProjectName=metadata.ProjectName,
+            ProjectCode=metadata.ProjectCode,
+            ProjectDescription=metadata.ProjectDescription,
+            VendorName=metadata.VendorName if metadata.VendorName else None,
+            Tool=(
+                metadata.Tool.value
+                if hasattr(metadata.Tool, "value") else (metadata.Tool if metadata.Tool else None)
+            ),
+            ProjectVersion=getattr(metadata, "ProjectVersion", None),
+            CreatedAt=metadata.CreatedAt,
+            DocumentCount=number_of_documents,
+            SVCount=total_svs,
+            DVCount=total_dvs,
+            RCCount=total_rcmds,
+            SmlScriptCount=number_of_sml_scripts,
+            ReportCount=total_reports,
+            AlarmCount=total_alarms,
+            EventCount=total_events,
+        )
+
+    def get_system_summary(self) -> SystemSummaryResponse:
+        projects = self.storage.list_projects()
+        total_sml = 0
+        total_tools = 0
+        total_scripts_tested = 0
+        
+        for project in projects:
+            tool_char_dir = self.storage._project_dir(project.ProjectID) / self.storage.TOOL_CHAR_DIR
+            if tool_char_dir.is_dir():
+                total_sml += len([f for f in tool_char_dir.iterdir() if f.is_file()])
+            
+            results_dir = self.storage._project_dir(project.ProjectID) / self.storage.RESULTS_DIR
+            if results_dir.is_dir():
+                total_scripts_tested += len(list(results_dir.rglob("*.txt")))
+            
+            try:
+                total_tools += self.storage.count_connected_equipments(project.ProjectID)
+            except Exception:
+                pass
+                
+        return SystemSummaryResponse(
+            TotalProjects=len(projects),
+            TotalSmlScripts=total_sml,
+            TotalConnectedTools=total_tools,
+            TotalScriptsTested=total_scripts_tested,
+        )
