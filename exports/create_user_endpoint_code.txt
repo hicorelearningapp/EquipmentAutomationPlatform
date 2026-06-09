@@ -1,3 +1,7 @@
+================================================================================
+--- FILE PATH: routers\equipment_routes.py ---
+================================================================================
+
 import logging
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
@@ -13,11 +17,6 @@ from source.services.storage_service import (
     StorageError,
     StorageService,
 )
-import io
-from fastapi.responses import StreamingResponse
-from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, PatternFill
-
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +36,6 @@ class EquipmentAPI:
         self.router.post("/UpdateExtraction/{project_id}", tags=["documents"])(self.update_extraction)
         self.router.post("/GenerateReports/{project_id}", tags=["documents"])(self.generate_reports)
         self.router.post("/AddReports/{project_id}", tags=["documents"])(self.add_reports)
-        self.router.get("/DownloadReports/{project_id}", tags=["documents"])(self.download_reports)
 
     async def upload_document(self, project_id: int, file: UploadFile = File(...)):
         if not file.filename:
@@ -189,103 +187,4 @@ class EquipmentAPI:
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 
-    def download_reports(self, project_id: int):
 
-        try:
-            # Load project_batch first; fall back to merging individual docs
-            spec = None
-            try:
-                spec_json = self.storage.read_spec_json(project_id, "project_batch")
-                spec = EquipmentSpec.model_validate_json(spec_json)
-            except Exception:
-                pass
-
-            if spec is None:
-                metadata = self.storage.get_project(project_id)
-                spec = EquipmentSpec(ToolID="", ToolType="")
-                for doc in metadata.Documents:
-                    if doc.Status == "completed":
-                        try:
-                            doc_spec = EquipmentSpec.model_validate_json(
-                                self.storage.read_spec_json(project_id, doc.DocumentID)
-                            )
-                            spec.Reports.extend(doc_spec.Reports)
-                            spec.Events.extend(doc_spec.Events)
-                        except Exception:
-                            pass
-
-            if not spec.Reports:
-                raise HTTPException(404, f"No reports found for project {project_id}. Run /AddReports first.")
-
-            wb = Workbook()
-
-            # ── Styles ────────────────────────────────────────────────────────────
-            hdr_font  = Font(name="Arial", bold=True, color="FFFFFF")
-            hdr_fill  = PatternFill("solid", start_color="1F4E79")
-            hdr_align = Alignment(horizontal="center", vertical="center")
-            row_font  = Font(name="Arial", size=10)
-
-            def style_header(ws, headers, col_widths):
-                for col, (h, w) in enumerate(zip(headers, col_widths), 1):
-                    c = ws.cell(row=1, column=col, value=h)
-                    c.font  = hdr_font
-                    c.fill  = hdr_fill
-                    c.alignment = hdr_align
-                    ws.column_dimensions[c.column_letter].width = w
-                ws.row_dimensions[1].height = 18
-
-            # ── Sheet 1: Reports ──────────────────────────────────────────────────
-            ws1 = wb.active
-            ws1.title = "Reports"
-            style_header(
-                ws1,
-                ["RPTID", "Name", "Type", "Linked VIDs", "Confidence", "Reasoning"],
-                [14,       32,     12,     38,             12,           52],
-            )
-            for i, r in enumerate(spec.Reports, 2):
-                ws1.cell(i, 1, r.RPTID).font = row_font
-                ws1.cell(i, 2, r.Name).font  = row_font
-                ws1.cell(i, 3, getattr(r, "Type", "Built-in")).font = row_font
-                ws1.cell(i, 4, ", ".join(str(v) for v in r.LinkedVIDs)).font = row_font
-                ws1.cell(i, 5, round(r.Confidence, 2)).font = row_font
-                ws1.cell(i, 6, r.Reasoning or "").font = row_font
-
-            ws1.freeze_panes = "A2"
-            ws1.auto_filter.ref = f"A1:F{len(spec.Reports) + 1}"
-
-            # ── Sheet 2: Event–Report Links ───────────────────────────────────────
-            ws2 = wb.create_sheet("Event-Report Links")
-            style_header(
-                ws2,
-                ["CEID", "Event Name", "Linked RPTIDs"],
-                [10,      34,           42],
-            )
-            row = 2
-            for e in spec.Events:
-                if e.LinkedReports:
-                    ws2.cell(row, 1, e.CEID).font = row_font
-                    ws2.cell(row, 2, e.EventName).font = row_font
-                    ws2.cell(row, 3, ", ".join(e.LinkedReports)).font = row_font
-                    row += 1
-
-            ws2.freeze_panes = "A2"
-
-            # ── Stream back ───────────────────────────────────────────────────────
-            buf = io.BytesIO()
-            wb.save(buf)
-            buf.seek(0)
-
-            return StreamingResponse(
-                buf,
-                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                headers={
-                    "Content-Disposition": f"attachment; filename=project_{project_id}_reports.xlsx"
-                },
-            )
-
-        except HTTPException:
-            raise
-        except (InvalidSlugError, ProjectNotFoundError, DocumentNotFoundError) as exc:
-            raise HTTPException(404, str(exc)) from exc
-        except StorageError as exc:
-            raise HTTPException(500, str(exc)) from exc

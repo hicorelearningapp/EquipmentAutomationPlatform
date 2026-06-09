@@ -83,11 +83,8 @@ Rules:
   one for alarms, one for recipe data).
 - Prefer reusing RPTID values from the hints if they exist; otherwise generate
   sequential IDs like "RPT_001", "RPT_002", etc.
-- Create one report per target event listed above (name aligned with the event).
-- Set "Type" to "Built-in" only for reports that reuse manual hints or map
-  directly to a target event (by name or CEID-based RPTID such as E9701).
-- Set "Type" to "Custom" for any additional enrichment/monitoring reports you
-  invent beyond the manual hints and per-event reports (e.g. RPT_006 RecipeData).
+- If you are reusing a report from the hints, preserve its "Type" field (which is "Built-in").
+- For any brand new reports you create that are derived from the document, set their "Type" field to "Built-in".
 - Each report should have 2-6 linked variable IDs where possible.
 - IMPORTANT: The generated reports must include MORE linked variables than what the CEIDs strictly require. Do not just blindly copy the event's LinkedVIDs. Enrich the reports with additional relevant context variables (such as overall equipment status, process state, control state, or critical alarm states) from the provided DVs and SVs.
 - Set "Confidence" between 0.0 and 1.0 based on how certain you are.
@@ -176,7 +173,7 @@ class ReportService:
             reports = []
             for item in items:
                 try:
-                    item["Type"] = self._resolve_report_type(item, hints, spec)
+                    item["Type"] = "Built-in"
                     reports.append(ReportDefinition.model_validate(item))
                 except Exception as exc:
                     logger.warning("Skipping invalid report item %s: %s", item, exc)
@@ -185,29 +182,6 @@ class ReportService:
         except Exception as exc:
             logger.error("ReportService step 2 failed: %s", exc)
             return []
-
-    @staticmethod
-    def _resolve_report_type(
-        item: dict, hints: list[dict], spec: EquipmentSpec
-    ) -> str:
-        """Built-in = from manual hints or tied to a collection event; else Custom."""
-        hint_ids = {h["RPTID"] for h in hints if h.get("RPTID")}
-        event_names = {e.EventName.strip().lower() for e in spec.Events}
-        event_ceids = {e.CEID for e in spec.Events}
-
-        rptid = item.get("RPTID", "")
-        name = item.get("Name", "").strip().lower()
-
-        if rptid in hint_ids:
-            return "Built-in"
-        if name in event_names:
-            return "Built-in"
-        for ceid in event_ceids:
-            ceid_str = str(ceid)
-            if rptid in (f"E{ceid_str}", f"RPT_E{ceid_str}", f"RPT_{ceid_str}"):
-                return "Built-in"
-
-        return "Custom"
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -256,5 +230,3 @@ class ReportService:
                 f"ReportService step {step}: expected JSON array or object-wrapped array, got {type(result).__name__}"
             )
         return result
-
-        

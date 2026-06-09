@@ -12,6 +12,8 @@ from source.schemas.project import (
     ProjectMetadata,
     ProjectOut,
     ProjectUpdate,
+    ProjectDetailsResponse,
+    SystemSummaryResponse,
 )
 from source.schemas.secsgem import EquipmentSpec
 from source.services.sml_template import SML_TEMPLATES
@@ -42,6 +44,8 @@ class ProjectAPI:
         self.router.delete("/DeleteProject/{project_id}")(self.delete_project)
         self.router.get("/GetKnowledgeCategory/{project_id}")(self.get_knowledge_category)
         self.router.post("/Ask/{project_id}")(self.ask_project)
+        self.router.get("/GetProjectDetails/{project_id}", response_model=ProjectDetailsResponse, response_model_by_alias=False)(self.get_project_details)
+        self.router.get("/GetSystemSummary", response_model=SystemSummaryResponse, response_model_by_alias=False)(self.get_system_summary)
 
     def create_project(self, body: ProjectCreate):
         try:
@@ -85,6 +89,8 @@ class ProjectAPI:
             return self.storage.update_project_metadata(project_id, body)
         except ProjectNotFoundError as exc:
             raise HTTPException(404, str(exc)) from exc
+        except ProjectExistsError as exc:
+            raise HTTPException(409, str(exc)) from exc
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 
@@ -99,6 +105,22 @@ class ProjectAPI:
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
         return {"ProjectName": project.ProjectName, "ProjectID": project.ProjectID, "Status": "deleted"}
+
+    def get_project_details(self, project_id: int):
+        try:
+            return container.project_details_service.get_project_details(project_id)
+        except InvalidSlugError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except ProjectNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc
+
+    def get_system_summary(self):
+        try:
+            return container.project_details_service.get_system_summary()
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc
 
     def ask_project(self, project_id: int, request: AskRequest):
         try:
@@ -155,11 +177,11 @@ class ProjectAPI:
                 for v in aggregated.DataVariables
             ],
             Events=[
-                {"CEID": e.CEID, "EventName": e.EventName, "Description": e.Description or ""}
+                {"CEID": e.CEID, "EventName": e.Name, "Description": e.Description or ""}
                 for e in aggregated.Events
             ],
             Alarms=[
-                {"AlarmID": a.AlarmID, "AlarmText": a.AlarmName, "Severity": a.Severity}
+                {"AlarmID": a.AlarmID, "AlarmText": a.Name, "Severity": a.Severity}
                 for a in aggregated.Alarms
             ],
             RemoteCommands=[
@@ -177,5 +199,9 @@ class ProjectAPI:
             Reports=[
                 {"RPTID": r.RPTID, "Name": r.Name, "LinkedVIDs": r.LinkedVIDs, "Reasoning": r.Reasoning or ""}
                 for r in aggregated.Reports
+            ],
+            EventReportLinks=[
+                {"CEID": lnk.CEID, "EventName": lnk.EventName, "RPTIDs": lnk.RPTIDs}
+                for lnk in aggregated.EventReportLinks
             ],
         )
