@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Optional, Any
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
+import numpy as np
 
 from source.managers.service_container import container
 from source.schemas.mapping import (
@@ -14,6 +15,9 @@ from source.schemas.mapping import (
 from source.schemas.secsgem import EquipmentSpec, StatusVariable, Event, Alarm
 from source.services.storage_service import StorageService, StorageError, ProjectNotFoundError
 from source.utils.template_parser import _extract_tags_from_template
+from source.services.automap_rules import is_compatible
+from source.services.entity_embeddings import build_or_load
+from source.utils.embedder import VectorStoreManager
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +27,212 @@ def _safe_int(val: str) -> int:
         return int(val)
     except ValueError:
         return abs(hash(val)) % 10000000
+
+
+MAPPING_SECTIONS = ("Variables", "Events", "Alarms")
+SECTION_TO_ENTITY_TYPE = {
+    "Variables": "variable",
+    "Events": "event",
+    "Alarms": "alarm",
+}
+
+
+def _is_equipment_field(key: str) -> bool:
+    k = key.lower()
+    if k.startswith("mes"):
+        return False
+    if "equipment" in k:
+        return True
+    if any(x in k for x in ("vid", "ceid", "alid")):
+        return True
+    return False
+
+
+def _needs_mapping(entry: dict) -> bool:
+    equip_keys = [k for k in entry if _is_equipment_field(k)]
+    if not equip_keys:
+        return False
+    # Skip if ANY equipment field already has a value
+    if any(str(entry.get(k, "")).strip() for k in equip_keys):
+        return False
+    # Needs mapping if at least one equipment field is explicitly empty
+    return any(isinstance(entry.get(k), str) and entry[k] == "" for k in equip_keys)
+
+
+def _get_mes_tag_name(entry: dict, section: str) -> str:
+    # Priority 1: MES-prefixed keys (FactoryWorks)
+    for key, val in entry.items():
+        if key.lower().startswith("mes") and "description" not in key.lower():
+            if isinstance(val, str) and val.strip():
+                return val.strip()
+    # Priority 2: section-specific fallbacks (Camstar NEW_MODEL)
+    fallbacks = {
+        "Variables": ("mesfield", "variablename"),
+        "Events": ("eventname",),
+        "Alarms": ("alarmtype", "alarmname"),
+    }
+    for key, val in entry.items():
+        if key.lower() in fallbacks.get(section, ()) and isinstance(val, str) and val.strip():
+            return val.strip()
+    return ""
+
+
+def _get_mes_description(entry: dict) -> str:
+    for key, val in entry.items():
+        if "description" in key.lower() and isinstance(val, str):
+            return val
+    return ""
+
+
+def _tag_text_for_embedding(tag_name: str, description: str) -> str:
+    parts = [tag_name]
+    if description:
+        parts.append(f"— {description}")
+    return " ".join(parts)
+
+
+def _fill_entry(entry: dict, entity_id: str, entity_name: str, entity_description: str) -> None:
+    for key in entry:
+        if not isinstance(entry[key], str) or entry[key] != "":
+            continue
+        if not _is_equipment_field(key):
+            continue
+        k = key.lower()
+        if any(x in k for x in ("vid", "ceid", "alid", "id")):
+            entry[key] = entity_id
+        elif "name" in k:
+            entry[key] = entity_name
+        elif "description" in k:
+            entry[key] = entity_description
+        elif "equipment" in k:
+            entry[key] = entity_id
+
+
+def _entity_details(spec: EquipmentSpec, entity_id: str, entity_type: str) -> tuple[str, str, str]:
+    """Returns (id, name, description) or ("", "", "") if not found."""
+    eid_str = str(entity_id).strip().lower()
+    if entity_type == "variable":
+        for v in spec.DataVariables + spec.StatusVariables:
+            vid = getattr(v, 'DvID', getattr(v, 'SVID', ''))
+            if str(vid).strip().lower() == eid_str or v.Name.lower() == eid_str:
+                return (str(vid), v.Name, getattr(v, 'Description', '-'))
+    elif entity_type == "event":
+        for e in spec.Events:
+            ceid = e.CEID
+            if str(ceid).strip().lower() == eid_str or e.EventName.lower() == eid_str:
+                return (str(ceid), e.EventName, getattr(e, 'Description', '-'))
+    elif entity_type == "alarm":
+        for a in spec.Alarms:
+            alid = a.AlarmID
+            aname = getattr(a, 'AlarmName', getattr(a, 'Name', ''))
+            if str(alid).strip().lower() == eid_str or aname.lower() == eid_str:
+                return (str(alid), aname, getattr(a, 'Description', '-'))
+    return ("", "", "")
+
+
+def _build_batch_prompt(unresolved_by_section: dict, spec: EquipmentSpec) -> str:
+    entities = []
+    for v in spec.StatusVariables:
+        entities.append({
+            "entity_id": str(v.SVID),
+            "entity_type": "variable",
+            "name": v.Name,
+            "description": getattr(v, 'Description', '-') or '-'
+        })
+    for v in spec.DataVariables:
+        entities.append({
+            "entity_id": str(v.DvID),
+            "entity_type": "variable",
+            "name": v.Name,
+            "description": "-"
+        })
+    for e in spec.Events:
+        entities.append({
+            "entity_id": str(e.CEID),
+            "entity_type": "event",
+            "name": e.EventName,
+            "description": getattr(e, 'Description', '-') or '-'
+        })
+    for a in spec.Alarms:
+        aname = getattr(a, 'AlarmName', getattr(a, 'Name', ''))
+        entities.append({
+            "entity_id": str(a.AlarmID),
+            "entity_type": "alarm",
+            "name": aname,
+            "description": getattr(a, 'Description', '-') or '-'
+        })
+
+    return f"""You are a semiconductor automation expert. Your task is to map Equipment Entities (Variables, Events, Alarms) to target MES Tags.
+
+EQUIPMENT ENTITIES:
+{json.dumps(entities, indent=2)}
+
+UNRESOLVED MES TAGS BY SECTION:
+{json.dumps(unresolved_by_section, indent=2)}
+
+Please provide a JSON object with mappings for each section (Variables, Events, Alarms).
+Use the following JSON schema:
+{{
+  "Variables": [
+    {{
+      "mes_tag": "MESVariableName",
+      "entity_id": "SVID/DvID",
+      "entity_name": "VariableName",
+      "confidence": 0.9,
+      "reasoning": "..."
+    }}
+  ],
+  "Events": [
+    {{
+      "mes_tag": "MESEventName",
+      "entity_id": "CEID",
+      "entity_name": "EventName",
+      "confidence": 0.85,
+      "reasoning": "..."
+    }}
+  ],
+  "Alarms": [
+    {{
+      "mes_tag": "MESAlarmName",
+      "entity_id": "AlarmID",
+      "entity_name": "AlarmName",
+      "confidence": 0.95,
+      "reasoning": "..."
+    }}
+  ]
+}}
+
+GUIDELINES:
+1. Make best-effort, fuzzy matches.
+2. Only map to compatible types (Variables mapping to variables, Events to events, Alarms to alarms).
+3. Do not invent or hallucinate IDs. Only use entity_id values that exist in the EQUIPMENT ENTITIES list.
+4. If a tag cannot be mapped, do not include it in the response lists, or set entity_id to null.
+5. Only output the JSON object. No markdown formatting, no code block fences, no prose.
+"""
+
+
+def _parse_batch_llm_response(raw: str) -> dict:
+    text = raw.strip()
+    if text.startswith("```"):
+        lines = text.split("\n")
+        json_lines = []
+        in_block = False
+        for line in lines:
+            if line.startswith("```"):
+                if in_block:
+                    break
+                else:
+                    in_block = True
+                    continue
+            if in_block:
+                json_lines.append(line)
+        if json_lines:
+            text = "\n".join(json_lines)
+    try:
+        return json.loads(text)
+    except Exception as exc:
+        logger.warning("Failed to parse LLM JSON: %s. Raw: %s", exc, raw)
+        return {}
 
 
 class MappingAPI:
@@ -144,20 +354,17 @@ class MappingAPI:
     #         raise HTTPException(500, f"Error generating mapping suggestions: {exc}") from exc
 
     def auto_map(self, project_id: int, body: dict) -> dict:
-        # We accept raw dict so extra sections pass through untouched
         from source.schemas.mapping import AutoMapSectionRequest
-        from source.utils.template_parser import _extract_tags_from_template
 
-        # Validate just the sections we care about
         try:
             req = AutoMapSectionRequest.model_validate(body)
         except Exception as exc:
             raise HTTPException(422, f"Invalid request body format: {exc}")
 
+        family = body.get("family", "")
+        template = body.get("template", "")
+
         # 1. Resolve Equipment Spec
-        spec_vars_desc = {}
-        spec_events_desc = {}
-        spec_alarms_desc = {}
         try:
             try:
                 spec_json = container.project_service.storage.read_spec_json(project_id, "project_batch")
@@ -165,68 +372,178 @@ class MappingAPI:
             except Exception:
                 metadata, aggregated = container.project_service.aggregate_project_data(project_id)
                 spec = EquipmentSpec.model_validate(aggregated.model_dump())
-                
-            for v in spec.DataVariables + spec.StatusVariables:
-                vid = getattr(v, 'DvID', getattr(v, 'SVID', ''))
-                desc = getattr(v, 'Description', '-')
-                spec_vars_desc[str(vid)] = desc
-                spec_vars_desc[v.Name] = desc
-            for e in spec.Events:
-                spec_events_desc[str(e.CEID)] = e.Description
-                spec_events_desc[e.EventName] = e.Description
-            for a in spec.Alarms:
-                spec_alarms_desc[str(a.AlarmID)] = a.Description
-                spec_alarms_desc[a.AlarmName] = a.Description
         except Exception as exc:
-            logger.error("Failed to load project extractions: %s", exc)
+            logger.error("Failed to load project extractions for project %s: %s", project_id, exc)
             raise HTTPException(404, f"Could not find extraction data for project {project_id}. {exc}")
 
-        # 2. Resolve MES Tags
-        try:
-            target_tags = _extract_tags_from_template(body)
-        except Exception as exc:
-            logger.error("Failed to parse sections: %s", exc)
-            raise HTTPException(400, f"Error parsing sections: {exc}")
+        # 2. Build / load entity embeddings
+        cache_path = self.storage.spec_json_path(project_id, "project_batch").parent / "entity_embeddings.npz"
+        entities = build_or_load(spec, cache_path)
 
-        if not target_tags:
-            return body  # Nothing to map
+        # 3. Create a clean deepish copy of body mapping sections to mutate
+        result = dict(body)
+        for section in MAPPING_SECTIONS:
+            if section in result:
+                result[section] = [dict(item) for item in result[section]]
 
-        # 4. Get suggestions
-        try:
-            suggestions_response = container.mapping_service.suggest_mappings(spec, target_tags)
-            
-            # Map of MESField -> Suggestion for easy lookup
-            sugg_map = {}
-            for sugg in suggestions_response.Suggestions:
-                # the tag is the mes_field
-                sugg_map[sugg.MESField] = sugg
-                
-            # 5. Fill out the response sections
-            result = dict(body)
-            
-            # Helper to update lists in place
-            def update_list(section_key, match_key, eq_key, id_key, desc_dict):
-                items = result.get(section_key, [])
-                for item in items:
-                    val = item.get(match_key)
-                    # If this item has already been mapped, skip LLM suggestion but still populate description
-                    existing_eq = item.get(eq_key)
-                    if existing_eq:
-                        item["EquipmentDescription"] = desc_dict.get(str(existing_eq), "")
+        # 4. Extract unresolved entries needing mapping
+        unresolved_list = []
+        unresolved_by_section = {
+            "Variables": [],
+            "Events": [],
+            "Alarms": []
+        }
+
+        for section in MAPPING_SECTIONS:
+            items = result.get(section, [])
+            for i, entry in enumerate(items):
+                if not _needs_mapping(entry):
+                    # Populate description for already mapped entries
+                    equip_keys = [k for k in entry if _is_equipment_field(k)]
+                    filled_val = None
+                    for k in equip_keys:
+                        val = str(entry.get(k, "")).strip()
+                        if val:
+                            filled_val = val
+                            break
+                    if filled_val:
+                        _, _, entity_desc = _entity_details(spec, filled_val, SECTION_TO_ENTITY_TYPE[section])
+                        for k in entry:
+                            if "description" in k.lower() and not k.lower().startswith("mes"):
+                                entry[k] = entity_desc
+                    continue
+
+                tag_name = _get_mes_tag_name(entry, section)
+                if not tag_name:
+                    logger.warning("Empty MES tag name in section %s entry: %s", section, entry)
+                    continue
+
+                desc = _get_mes_description(entry)
+                unresolved_by_section[section].append({
+                    "tag_name": tag_name,
+                    "description": desc
+                })
+                unresolved_list.append({
+                    "section": section,
+                    "index": i,
+                    "tag_name": tag_name,
+                    "description": desc,
+                    "entry": entry
+                })
+
+        # 5. Local Vector Similarity Pass
+        still_unresolved = []
+        if unresolved_list:
+            tag_texts = [_tag_text_for_embedding(item["tag_name"], item["description"]) for item in unresolved_list]
+            embedder = VectorStoreManager.get_embeddings()
+            tag_vecs = np.asarray(embedder.embed_documents(tag_texts), dtype=np.float32)
+            norms = np.linalg.norm(tag_vecs, axis=1, keepdims=True)
+            norms[norms == 0] = 1.0
+            tag_vecs = tag_vecs / norms
+
+            if entities.vectors.size and tag_vecs.size:
+                scores = tag_vecs @ entities.vectors.T
+            else:
+                scores = np.zeros((len(unresolved_list), 0), dtype=np.float32)
+
+            for ti, item in enumerate(unresolved_list):
+                row = scores[ti] if scores.shape[1] > 0 else np.zeros((0,), dtype=np.float32)
+                order = np.argsort(-row) if row.size else np.array([], dtype=int)
+
+                compatible = []
+                expected_type = item["entry"].get("Type") or item["entry"].get("ValueType") or ""
+                tag_dict = {
+                    "tag_source": item["section"],
+                    "expected_type": expected_type
+                }
+                for idx in order:
+                    entity_dict = entities.rows[idx].to_dict()
+                    if is_compatible(tag_dict, entity_dict):
+                        compatible.append((int(idx), float(row[idx])))
+                    if len(compatible) >= 5: # TOP_K = 5
+                        break
+
+                if compatible:
+                    top_idx, top_score = compatible[0]
+                    second_score = compatible[1][1] if len(compatible) > 1 else 0.0
+                    gap = top_score - second_score
+                    top_entity = entities.rows[top_idx]
+
+                    if top_score >= 0.80 and gap >= 0.10:
+                        _fill_entry(item["entry"], top_entity.entity_id, top_entity.name, top_entity.description)
+                        logger.info("AutoMap vector auto-accept for tag %s: ID=%s Name=%s Score=%f", 
+                                    item["tag_name"], top_entity.entity_id, top_entity.name, top_score)
+                    else:
+                        still_unresolved.append(item)
+                else:
+                    still_unresolved.append(item)
+
+        # 6. Single Batch LLM Fallback Pass
+        if still_unresolved:
+            unresolved_by_section_llm = {
+                "Variables": [],
+                "Events": [],
+                "Alarms": []
+            }
+            for item in still_unresolved:
+                unresolved_by_section_llm[item["section"]].append({
+                    "mes_tag": item["tag_name"],
+                    "description": item["description"]
+                })
+            # Remove empty sections
+            unresolved_by_section_llm = {k: v for k, v in unresolved_by_section_llm.items() if v}
+
+            prompt = _build_batch_prompt(unresolved_by_section_llm, spec)
+            try:
+                llm = container.mapping_service._llm
+                raw = llm.invoke(prompt).content
+                if isinstance(raw, list):
+                    raw = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in raw)
+                llm_data = _parse_batch_llm_response(raw)
+            except Exception as e:
+                logger.warning("Primary batch LLM mapping failed: %s. Retrying with fallback model.", e)
+                try:
+                    llm_retry = container.mapping_service._llm_retry
+                    raw = llm_retry.invoke(prompt).content
+                    if isinstance(raw, list):
+                        raw = "".join(part.get("text", "") if isinstance(part, dict) else str(part) for part in raw)
+                    llm_data = _parse_batch_llm_response(raw)
+                except Exception as retry_exc:
+                    logger.error("Fallback batch LLM mapping failed: %s", retry_exc)
+                    llm_data = {}
+
+            # Apply LLM recommendations
+            for section, suggestions in llm_data.items():
+                if section not in MAPPING_SECTIONS:
+                    continue
+                for sugg in suggestions:
+                    mes_tag = sugg.get("mes_tag")
+                    entity_id = sugg.get("entity_id")
+                    confidence = sugg.get("confidence", 0.0)
+                    if not mes_tag or not entity_id or confidence < 0.30:
                         continue
-                        
-                    if val in sugg_map:
-                        sugg = sugg_map[val]
-                        item[eq_key] = sugg.EquipmentFieldName
-                        item["EquipmentDescription"] = desc_dict.get(str(sugg.EquipmentFieldName), "")
-                        item[id_key] = sugg.EquipmentID
-            
-            update_list("Variables", "MESVariableName", "EquipmentVariableName", "VID", spec_vars_desc)
-            update_list("Events", "MESEventName", "EquipmentEventName", "CEID", spec_events_desc)
-            update_list("Alarms", "MESAlarmName", "EquipmentAlarmName", "ALID", spec_alarms_desc)
-            
-            return result
-            
-        except Exception as exc:
-            logger.error("AutoMap Section failed: %s", exc)
-            raise HTTPException(500, f"Error generating section mappings: {exc}") from exc
+
+                    entity_type = SECTION_TO_ENTITY_TYPE[section]
+                    eid, ename, edesc = _entity_details(spec, str(entity_id), entity_type)
+                    if not eid:
+                        logger.warning("LLM mapping ID not found in spec: %s (Type: %s)", entity_id, entity_type)
+                        continue
+
+                    # Apply to matching unresolved item
+                    for item in still_unresolved:
+                        if item["section"] == section and item["tag_name"] == mes_tag:
+                            _fill_entry(item["entry"], eid, ename, edesc)
+                            logger.info("AutoMap LLM mapped tag %s: ID=%s Name=%s Score=%f", 
+                                        mes_tag, eid, ename, confidence)
+                            break
+
+        # 7. Persist result
+        if family and template:
+            template_name = template if template.lower().endswith(".json") else f"{template}.json"
+            try:
+                self.storage.save_automap_result(project_id, family, template_name, result)
+            except Exception as exc:
+                logger.error("Failed to save automap result: %s", exc)
+                raise HTTPException(500, f"Failed to save automap result: {exc}")
+
+        return result

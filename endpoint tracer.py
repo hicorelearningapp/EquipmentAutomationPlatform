@@ -178,8 +178,8 @@ if __name__ == "__main__":
 
     try:
         trace_results = tracer.trace_endpoint(
-            entry_file="source/routers/equipment_routes.py",
-            endpoint_func_name="generate_reports",
+            entry_file="source/routers/mapping_routes.py",
+            endpoint_func_name="auto_map",
         )
 
         print(
@@ -195,7 +195,7 @@ if __name__ == "__main__":
             output_dir=r"E:\Github\EquipmentAutomationPlatforms\exports",
         )
 
-        txt_location = compiler.compile_to_text("extraction_endpoint_code.txt")
+        txt_location = compiler.compile_to_text("automapping_endpoint_code.txt")
         print(f"\nCompiled successfully into single text file at: {txt_location}")
 
     except FileNotFoundError as e:
