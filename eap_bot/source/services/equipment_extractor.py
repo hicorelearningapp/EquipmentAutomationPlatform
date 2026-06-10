@@ -41,54 +41,92 @@ class EquipmentExtractor:
     # Public API
     # ------------------------------------------------------------------
 
-    def extract(self, pdf_text: str, section_csvs: dict[str, str] = None) -> EquipmentSpec:
+    def extract(
+        self,
+        pdf_text: str,
+        section_csvs: dict[str, str] = None,
+        *,
+        first_chunk_only: bool = False,
+    ) -> EquipmentSpec:
+        """Extract a SECS/GEM spec from document text + optional pre-classified table CSVs.
+
+        first_chunk_only=True forces only the first text chunk to the LLM regardless
+        of table coverage — useful if you want to force fast mode externally.
+        Normally you leave it False and the method decides automatically.
+        """
         section_csvs = section_csvs or {}
 
-        # Step 2: Text chunks (always run — gives LLM overall document context)
+        # ── Phase 1: Tables ───────────────────────────────────────────────────
+        # Try one combined LLM call for all sections.
+        # Falls back to the original one-call-per-section loop on failure.
+        table_spec: EquipmentSpec | None = None
+        if section_csvs:
+            table_spec = self._extract_all_tables_combined(section_csvs)
+            if table_spec is None:
+                logger.info("Per-section table extraction fallback.")
+                per_section: list[EquipmentSpec] = []
+                for section, csv_str in section_csvs.items():
+                    partial = self._extract_from_csv(section, csv_str)
+                    if partial:
+                        per_section.append(partial)
+                if per_section:
+                    table_spec = self._merge_specs(per_section)
+
+        # ── Phase 2: Text chunks ──────────────────────────────────────────────
+        # "Good coverage" = tables produced SVs + Events + Alarms.
+        # When true, only send the first chunk for ToolID / prose entities /
+        # state machine text.  The remaining N-1 chunks are skipped.
+        # When false (sparse/no tables) the full chunk pass runs as before.
+        has_good_table_coverage = (
+            table_spec is not None
+            and len(table_spec.StatusVariables) > 0
+            and len(table_spec.Events) > 0
+            and len(table_spec.Alarms) > 0
+        )
+
         chunks = self._chunk_text(pdf_text)
 
-        if len(chunks) == 1:
+        if first_chunk_only or has_good_table_coverage:
+            logger.info(
+                "Table coverage OK (%d SVs / %d Events / %d Alarms) — "
+                "text pass: first chunk only (doc has %d chunks total).",
+                len(table_spec.StatusVariables) if table_spec else 0,
+                len(table_spec.Events) if table_spec else 0,
+                len(table_spec.Alarms) if table_spec else 0,
+                len(chunks),
+            )
             chunk_spec = self._extract_chunk(chunks[0], chunk_num=1, total_chunks=1)
         else:
-            workers = min(self._max_parallel, len(chunks))
-            logger.info(
-                "Document split into %d chunks; extracting up to %d in parallel.",
-                len(chunks), workers,
-            )
-            partial_specs: list[EquipmentSpec] = [None] * len(chunks)  # type: ignore[list-item]
-            with ThreadPoolExecutor(max_workers=workers) as executor:
-                futures = {
-                    executor.submit(self._extract_chunk, chunk, i + 1, len(chunks)): i
-                    for i, chunk in enumerate(chunks)
-                }
-                for future in futures:
-                    idx = futures[future]
-                    partial_specs[idx] = future.result()
-            chunk_spec = self._merge_specs(partial_specs)
+            if len(chunks) == 1:
+                chunk_spec = self._extract_chunk(chunks[0], chunk_num=1, total_chunks=1)
+            else:
+                workers = min(self._max_parallel, len(chunks))
+                logger.info(
+                    "Sparse/no table coverage — full text pass: %d chunks, %d workers.",
+                    len(chunks), workers,
+                )
+                partial_specs: list[EquipmentSpec] = [None] * len(chunks)  # type: ignore[list-item]
+                with ThreadPoolExecutor(max_workers=workers) as executor:
+                    futures = {
+                        executor.submit(self._extract_chunk, chunk, i + 1, len(chunks)): i
+                        for i, chunk in enumerate(chunks)
+                    }
+                    for future in futures:
+                        idx = futures[future]
+                        partial_specs[idx] = future.result()
+                chunk_spec = self._merge_specs(partial_specs)
 
-        # Step 3: If we have classified table CSVs, extract each section precisely
-        # and merge on top of the chunk-based spec (table results win on conflict)
-        if section_csvs:
-            table_partials: list[EquipmentSpec] = [chunk_spec]
-            for section, csv_str in section_csvs.items():
-                partial = self._extract_from_csv(section, csv_str)
-                if partial:
-                    table_partials.append(partial)
-            merged = self._merge_specs(table_partials)
-        else:
-            merged = chunk_spec
+        # ── Phase 3: Merge — tables win on conflict ───────────────────────────
+        merged = self._merge_specs([chunk_spec, table_spec]) if table_spec else chunk_spec
 
         logger.info(
-            "Final spec: %d SVs, %d DVs, %d Events, %d Alarms, %d RCMDs",
-            len(merged.StatusVariables),
-            len(merged.DataVariables),
-            len(merged.Events),
-            len(merged.Alarms),
-            len(merged.RemoteCommands),
+            "Final spec: %d SVs, %d DVs, %d Events, %d Alarms, %d RCMDs "
+            "[tables=%s, first_chunk_only=%s]",
+            len(merged.StatusVariables), len(merged.DataVariables),
+            len(merged.Events), len(merged.Alarms), len(merged.RemoteCommands),
+            has_good_table_coverage, first_chunk_only,
         )
-        return merged
-
-    # ------------------------------------------------------------------
+        return merged    # ------------------------------------------------------------------
     # Chunking (Split)
     # ------------------------------------------------------------------
 
@@ -389,6 +427,45 @@ HARD RULES:
     # ------------------------------------------------------------------
     # Table Extraction (PDF → raw CSV → LLM)
     # ------------------------------------------------------------------
+    _COMBINED_TABLE_PROMPT =   """You are a SECS/GEM integration expert.
+The tables below were extracted from a semiconductor equipment manual.
+Each table is labelled with its SECS/GEM section type.
+Extract every row from every table and return a SINGLE JSON object.
+
+RULES:
+- StatusVariables  : {{ "SVID": int, "Name": str, "Description": str, "DataType": str, "AccessType": str, "Value": str, "Confidence": float }}
+- DataVariables    : {{ "DvID": int, "Name": str, "ValueType": "float|integer|string|boolean", "Unit": str }}
+- Events           : {{ "CEID": int, "Name": str, "Description": str, "LinkedVIDs": [int], "LinkedReports": ["str"], "Confidence": float }}
+                     SKIP any row without a numeric CEID. Parse comma-separated VID lists into LinkedVIDs.
+- Alarms           : {{ "AlarmID": int, "Name": str, "Severity": "critical|warning|info", "LinkedVID": int|null, "Description": str, "Confidence": float }}
+                     SKIP any row without a numeric AlarmID. Severity MUST be lowercase.
+- RemoteCommands   : {{ "RCMD": str, "Description": str, "Parameters": [{{"Name": str, "Type": str}}], "Confidence": float }}
+- States           : {{ "StateID": str, "Name": str, "Description": str }}
+- StateTransitions : {{ "FromState": str (REQUIRED), "ToState": str (REQUIRED), "TriggerEvent": str|null, "TriggerCommand": str|null, "Manual": bool }}
+                     Never set both TriggerEvent and TriggerCommand on the same entry.
+- Reports          : {{ "RPTID": str, "Name": str, "LinkedVIDs": [int] }}
+
+Return ONLY this JSON structure (include only sections that have tables):
+{{
+  "StatusVariables": [...],
+  "DataVariables": [...],
+  "Events": [...],
+  "Alarms": [...],
+  "RemoteCommands": [...],
+  "States": [...],
+  "StateTransitions": [...],
+  "Reports": [...]
+}}
+
+No prose, no markdown fences.
+
+{tables}
+"""
+
+    # Char budget for the combined table call.
+    # 56k chars ≈ 14k tokens — conservative enough to fit any typical GEM ICD.
+    # Raise this if your LLM context allows and your tables are large.
+    _COMBINED_TABLE_CHAR_LIMIT = 56_000
 
     _SHEET_NAME_KEYWORDS: dict[str, set[str]] = {
         "StatusVariables": {"svid", "sv", "status variable", "status_var", "status"},
@@ -544,6 +621,102 @@ Return ONLY: {{"Reports": [...]}}  No prose, no markdown fences.
 TABLE (CSV):
 {csv}""",
     }
+    def _extract_all_tables_combined(
+        self, section_csvs: dict[str, str]
+    ) -> "EquipmentSpec | None":
+        """Try to extract ALL classified table sections in one LLM call.
+
+        Returns a partial EquipmentSpec on success, or None when the caller
+        should fall back to per-section calls.  Fails gracefully on token
+        overflow, JSON parse error, or any exception.
+        """
+        if not section_csvs:
+            return None
+
+        table_blocks = []
+        for section, csv_str in section_csvs.items():
+            table_blocks.append(f"--- TABLE: {section} ---\n{csv_str}")
+        tables_text = "\n\n".join(table_blocks)
+
+        prompt = self._COMBINED_TABLE_PROMPT.format(tables=tables_text)
+
+        if len(prompt) > self._COMBINED_TABLE_CHAR_LIMIT:
+            logger.info(
+                "Combined table prompt is %d chars (limit %d) — falling back to per-table.",
+                len(prompt), self._COMBINED_TABLE_CHAR_LIMIT,
+            )
+            return None
+
+        for attempt, llm in enumerate((self._llm, self._llm_retry), start=1):
+            try:
+                raw = llm.invoke(prompt).content
+                if isinstance(raw, list):
+                    raw = "".join(
+                        p.get("text", "") if isinstance(p, dict) else str(p) for p in raw
+                    )
+                return self._parse_combined_table_response(raw)
+            except Exception as exc:
+                logger.warning("Combined table attempt %d failed: %s", attempt, exc)
+
+        logger.warning("Combined table extraction failed after retry — using per-table fallback.")
+        return None
+
+    def _parse_combined_table_response(self, raw: str) -> "EquipmentSpec | None":
+        """Parse the LLM JSON from a combined table call into a partial EquipmentSpec."""
+        cleaned = raw.strip()
+        if cleaned.startswith("```"):
+            lines = cleaned.splitlines()
+            cleaned = "\n".join(
+                line for line in lines if not line.strip().startswith("```")
+            ).strip()
+
+        try:
+            data = json.loads(cleaned)
+        except json.JSONDecodeError as exc:
+            logger.warning("Combined table response is not valid JSON: %s", exc)
+            return None
+
+        spec = EquipmentSpec(ToolID="", ToolType="")
+        section_map = {
+            "StatusVariables":  ("StatusVariables",  StatusVariable),
+            "DataVariables":    ("DataVariables",     DataVariable),
+            "Events":           ("Events",            Event),
+            "Alarms":           ("Alarms",            Alarm),
+            "RemoteCommands":   ("RemoteCommands",    RemoteCommand),
+            "States":           ("States",            State),
+            "StateTransitions": ("StateTransitions",  StateTransition),
+        }
+        for key, (attr, model) in section_map.items():
+            items = data.get(key) or []
+            if not items:
+                continue
+            parsed = []
+            for item in items:
+                try:
+                    if key == "StateTransitions" and not (item.get("FromState") and item.get("ToState")):
+                        continue
+                    parsed.append(model.model_validate(item))
+                except Exception as exc:
+                    logger.warning("Skipping invalid %s item %s: %s", key, item, exc)
+            setattr(spec, attr, parsed)
+
+        report_items = data.get("Reports") or []
+        if report_items:
+            from source.schemas.report import ReportDefinition
+            reports = []
+            for item in report_items:
+                try:
+                    reports.append(ReportDefinition.model_validate(item))
+                except Exception as exc:
+                    logger.warning("Skipping invalid Report item: %s", exc)
+            spec.Reports = reports
+
+        logger.info(
+            "Combined table parse: %d SVs, %d DVs, %d Events, %d Alarms, %d RCMDs",
+            len(spec.StatusVariables), len(spec.DataVariables),
+            len(spec.Events), len(spec.Alarms), len(spec.RemoteCommands),
+        )
+        return spec
 
     def _classify_table(self, rows: list[list[str]]) -> str | None:
         """Return the section name that best matches the table header, or None."""

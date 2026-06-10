@@ -195,7 +195,7 @@ if __name__ == "__main__":
             output_dir=r"E:\Github\EquipmentAutomationPlatforms\exports",
         )
 
-        txt_location = compiler.compile_to_text("equipment_endpoint_code.txt")
+        txt_location = compiler.compile_to_text("extraction_endpoint_code.txt")
         print(f"\nCompiled successfully into single text file at: {txt_location}")
 
     except FileNotFoundError as e:
