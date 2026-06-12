@@ -35,7 +35,7 @@ class VariableMapping(BaseModel):
 
 class ProjectMapping(BaseModel):
     ProjectID: int
-    Mappings: List[VariableMapping] = Field(default_factory=list)
+    Mappings: dict[str, dict[str, dict[str, List[VariableMapping]]]] = Field(default_factory=dict)
 
 class SaveMappingRequest(BaseModel):
     project_id: Optional[int] = None

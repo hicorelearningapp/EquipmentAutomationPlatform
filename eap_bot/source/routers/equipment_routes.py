@@ -33,6 +33,7 @@ class EquipmentAPI:
         self.router.post("/UpdateExtraction/{project_id}", tags=["documents"])(self.update_extraction)
         self.router.post("/GenerateReports/{project_id}", tags=["documents"])(self.generate_reports)
         self.router.put("/UpdateReports/{project_id}", tags=["documents"])(self.update_reports)
+        self.router.get("/GetQuestions/{project_id}/{document_id}", tags=["documents"])(self.get_questions)
 
     async def upload_document(
         self,
@@ -118,6 +119,25 @@ class EquipmentAPI:
         except ValueError as exc:
             raise HTTPException(400, str(exc)) from exc
         except (InvalidSlugError, ProjectNotFoundError, DocumentNotFoundError) as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except StorageError as exc:
+            raise HTTPException(500, str(exc)) from exc
+
+    def get_questions(self, project_id: int, document_id: str):
+        try:
+            document = self.storage.get_document(project_id, document_id)
+            questions_data = self.storage.get_questions(project_id)
+            
+            doc_questions = questions_data.get(document.FileName, [])
+            
+            if not doc_questions:
+                doc_questions = container.document_service.generate_predefined_questions(project_id, document_id)
+                
+            return {"Questions": doc_questions}
+            
+        except InvalidSlugError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except (ProjectNotFoundError, DocumentNotFoundError) as exc:
             raise HTTPException(404, str(exc)) from exc
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc

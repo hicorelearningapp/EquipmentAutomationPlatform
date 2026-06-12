@@ -994,6 +994,24 @@ class StorageService:
             / f"{document_id}.json"
         )
 
+    def questions_json_path(self, project_id: int) -> Path:
+        return self._project_dir(project_id) / "Questions" / "questions.json"
+
+    def get_questions(self, project_id: int) -> dict[str, list[dict[str, str]]]:
+        path = self.questions_json_path(project_id)
+        if not path.exists():
+            return {}
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            logger.error("Failed to read questions JSON: %s", exc)
+            return {}
+
+    def save_questions(self, project_id: int, questions_data: dict[str, list[dict[str, str]]]) -> None:
+        path = self.questions_json_path(project_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(questions_data, indent=2), encoding="utf-8")
+
     def mes_tag_path(self, project_id: int, document_id: str) -> Path:
         self._validate_id(document_id)
         return (

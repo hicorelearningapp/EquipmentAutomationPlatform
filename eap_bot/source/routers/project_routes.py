@@ -75,12 +75,14 @@ class ProjectAPI:
             mapping = self.storage.get_mapping(project_id)
             self.storage.write_sml_template(project_id)
             updated_metadata = self.storage.get_project(project_id)
+            questions = self.storage.get_questions(project_id)
 
             return ProjectDetail(
                 **updated_metadata.model_dump(),
                 Extractions=clean_aggregated,
                 Mappings=mapping.Mappings,
                 SmlTemplate=build_sml_templates(project_id, self.storage),
+                Questions=questions,
             )
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
@@ -130,12 +132,14 @@ class ProjectAPI:
             clean_aggregated = self._build_clean_aggregated(aggregated)
             mapping = self.storage.get_mapping(project_id)
             updated_metadata = self.storage.get_project(project_id)
+            questions = self.storage.get_questions(project_id)
 
             return ProjectDetail(
                 **updated_metadata.model_dump(),
                 Extractions=clean_aggregated,
                 Mappings=mapping.Mappings,
                 SmlTemplate=build_sml_templates(project_id, self.storage),
+                Questions=questions,
             )
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
@@ -219,9 +223,13 @@ class ProjectAPI:
                 legacy_base = self.storage._project_dir(project_id) / self.storage.VECTORSTORE_DIR
                 has_legacy = legacy_base.exists() and (legacy_base / "index.faiss").exists()
 
-                if not store_path.exists() or not any(store_path.iterdir()):
-                    if has_legacy:
-                        store_path = legacy_base
+                if not store_path.exists() and not has_legacy:
+                    if slug == "tables":
+                        raise HTTPException(
+                            404,
+                            f"No extracted tables available for this project. "
+                            f"Make sure to extract tables from documents.",
+                        )
                     else:
                         raise HTTPException(
                             404,

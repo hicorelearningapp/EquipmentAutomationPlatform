@@ -26,6 +26,25 @@ from source.utils.llm_factory import LLMStrategy
 logger = logging.getLogger(__name__)
 
 
+PREDEFINED_QUESTIONS = [
+    "What is the tool type or model of this equipment?",
+    "What protocol version of SECS/GEM does this equipment support?",
+    "Are there any status variables (SVs) defined for monitoring process parameters?",
+    "What are the primary data variables (DVs) related to processing?",
+    "List any critical events (CEIDs) triggered during a lot start or lot end.",
+    "Which alarms are defined for safety or equipment fault conditions?",
+    "What remote commands (RCMDs) are supported to control the equipment?",
+    "Are there any states or state transition definitions mentioned?",
+    "What is the default communication state on power-up?",
+    "Describe the process state machine transitions.",
+    "Is spooling supported, and how is it configured?",
+    "What reports are predefined in this specification?",
+    "What data variables are linked to the process completion event?",
+    "Detail the parameter requirements for the remote command START.",
+    "Are there any specific alarm IDs (ALIDs) linked to mass filter or beam drift?"
+]
+
+
 class EquipmentExtractor:
     _ENCODER_NAME = "cl100k_base"
 
@@ -48,12 +67,6 @@ class EquipmentExtractor:
         *,
         first_chunk_only: bool = False,
     ) -> EquipmentSpec:
-        """Extract a SECS/GEM spec from document text + optional pre-classified table CSVs.
-
-        first_chunk_only=True forces only the first text chunk to the LLM regardless
-        of table coverage — useful if you want to force fast mode externally.
-        Normally you leave it False and the method decides automatically.
-        """
         section_csvs = section_csvs or {}
 
         # ── Phase 1: Tables ───────────────────────────────────────────────────
@@ -126,7 +139,8 @@ class EquipmentExtractor:
             len(merged.Events), len(merged.Alarms), len(merged.RemoteCommands),
             has_good_table_coverage, first_chunk_only,
         )
-        return merged    # ------------------------------------------------------------------
+        return merged    
+    # ------------------------------------------------------------------
     # Chunking (Split)
     # ------------------------------------------------------------------
 

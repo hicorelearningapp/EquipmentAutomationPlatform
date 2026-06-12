@@ -546,4 +546,74 @@ class MappingAPI:
                 logger.error("Failed to save automap result: %s", exc)
                 raise HTTPException(500, f"Failed to save automap result: {exc}")
 
+        # Update mes_mapping.json so they appear in /LoadProject
+        try:
+            from source.schemas.mapping import ProjectMapping, VariableMapping
+            mapping = self.storage.get_mapping(project_id)
+            
+            # Ensure mappings dictionary structure exists
+            if not isinstance(mapping.Mappings, dict):
+                mapping.Mappings = {}
+                
+            fam = family or "DefaultFamily"
+            tpl = template or "DefaultTemplate.json"
+            if not tpl.lower().endswith(".json"):
+                tpl = f"{tpl}.json"
+                
+            if fam not in mapping.Mappings:
+                mapping.Mappings[fam] = {}
+            if tpl not in mapping.Mappings[fam]:
+                mapping.Mappings[fam][tpl] = {
+                    "Variables": [],
+                    "Events": [],
+                    "Alarms": []
+                }
+                
+            vars_list = []
+            events_list = []
+            alarms_list = []
+
+            for entry in result.get("Variables", []):
+                mes_tag = _get_mes_tag_name(entry, "Variables")
+                vid = str(entry.get("VID") or entry.get("EquipmentVariableName") or "").strip()
+                if mes_tag and vid:
+                    vars_list.append(VariableMapping(
+                        MESTag=mes_tag,
+                        SVID=vid,
+                        CEID="",
+                        Description=entry.get("EquipmentDescription", "")
+                    ))
+
+            for entry in result.get("Events", []):
+                mes_tag = _get_mes_tag_name(entry, "Events")
+                ceid = str(entry.get("CEID") or entry.get("EquipmentEventName") or "").strip()
+                if mes_tag and ceid:
+                    events_list.append(VariableMapping(
+                        MESTag=mes_tag,
+                        SVID="",
+                        CEID=ceid,
+                        Description=entry.get("EquipmentDescription", "")
+                    ))
+
+            for entry in result.get("Alarms", []):
+                mes_tag = _get_mes_tag_name(entry, "Alarms")
+                alid = str(entry.get("ALID") or entry.get("EquipmentAlarmName") or "").strip()
+                if mes_tag and alid:
+                    alarms_list.append(VariableMapping(
+                        MESTag=mes_tag,
+                        SVID=alid,
+                        CEID="",
+                        Description=entry.get("EquipmentDescription", "")
+                    ))
+
+            mapping.Mappings[fam][tpl] = {
+                "Variables": vars_list,
+                "Events": events_list,
+                "Alarms": alarms_list
+            }
+            self.storage.save_mapping(project_id, mapping)
+            logger.info("Updated nested mes_mapping.json for project %s", project_id)
+        except Exception as exc:
+            logger.warning("Failed to update mapping file for project %s: %s", project_id, exc)
+
         return result
