@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 from source.managers.service_container import container
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import SmartCodeGenerateRequest, SmartCodeUpdateRequest
-from source.services.storage_service import StorageService
+
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class SmartAutomationAPI:
     def __init__(self):
         self.router = APIRouter(tags=["smart automation"])
-        self.storage = StorageService()
+        self.storage = container.storage
         self.register_routes()
 
     def register_routes(self):

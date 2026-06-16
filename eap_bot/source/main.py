@@ -13,7 +13,7 @@ from source.routers.tool_characterization_routes import ToolCharacterizationAPI
 from source.routers.smart_automation_routes import SmartAutomationAPI
 from source.routers.mes_family_routes import mes_family_api
 from source.routers.system_routes import SystemAPI
-from source.services.storage_service import StorageService
+from source.managers.service_container import container
 from source.services.mes_family_seed import seed_mes_families
 
 logging.basicConfig(
@@ -101,7 +101,7 @@ app.include_router(system_api.router)
 
 @app.on_event("startup")
 def validate_storage_root() -> None:
-    storage = StorageService()
+    storage = container.storage
     logger.info("Using EAP_STORAGE_ROOT=%s", storage.root)
     seed_mes_families()
 

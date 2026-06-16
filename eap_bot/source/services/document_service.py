@@ -123,8 +123,6 @@ class DocumentService:
             )
             self.storage.save_extracted_tables(project_id, spec)
 
-            # --- Predefined Q&A Generation ---
-            self.generate_predefined_questions(project_id, document_id, spec)
             # ---------------------------------
 
             # Invalidate entity embeddings cache when spec changes
@@ -143,29 +141,29 @@ class DocumentService:
 
         return self._build_extraction_response(project_id, document_id, spec)
 
-    def generate_predefined_questions(self, project_id: int, document_id: str, spec: EquipmentSpec = None) -> list[dict]:
+    def generate_predefined_questions(self, project_id: int, spec: EquipmentSpec) -> list[dict]:
         try:
             from source.services.equipment_extractor import PREDEFINED_QUESTIONS
             from source.utils.embedder import VectorStoreManager
             from concurrent.futures import ThreadPoolExecutor
 
-            document = self.storage.get_document(project_id, document_id)
-            if spec is None:
-                spec_json = self.storage.read_spec_json(project_id, document_id)
-                spec = EquipmentSpec.model_validate_json(spec_json)
-
-            logger.info("Generating answers for predefined questions for %s/%s", project_id, document_id)
+            logger.info("Generating answers for predefined questions for project %s", project_id)
+            
+            # Use project-level vector store
             vector_store_path = self.storage.vectorstore_path(project_id)
             vstore = VectorStoreManager(vector_store_path)
+            
+            # QA Service without document_id filter (searches entire project vectorstore)
             qa_service = self._container.create_qa_service(
                 vector_store=vstore,
-                vector_filters={"document_id": document_id}
+                vector_filters=None
             )
 
             qa_results = []
             with ThreadPoolExecutor(max_workers=settings.EXTRACTOR_MAX_PARALLEL) as pool:
+                # Pass None for document_id since it's project-wide
                 futures = {
-                    pool.submit(qa_service.answer, q, spec, project_id, document_id, self.storage): q
+                    pool.submit(qa_service.answer, q, spec, project_id, None, self.storage): q
                     for q in PREDEFINED_QUESTIONS
                 }
                 future_map = {q: f for f, q in futures.items()}
@@ -186,14 +184,13 @@ class DocumentService:
                             "Source": "error"
                         })
 
-            questions_data = self.storage.get_questions(project_id)
-            questions_data[document.FileName] = qa_results
-            self.storage.save_questions(project_id, questions_data)
+            # Save as flat list
+            self.storage.save_questions(project_id, qa_results)
             
             return qa_results
 
         except Exception as e:
-            logger.error("Predefined Q&A generation failed for %s/%s: %s", project_id, document_id, e)
+            logger.error("Predefined Q&A generation failed for project %s: %s", project_id, e)
             return []
 
     # ── Variable Retrieval ────────────────────────────────────────────────────

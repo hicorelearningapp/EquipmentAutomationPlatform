@@ -22,7 +22,6 @@ from source.services.storage_service import (
     ProjectExistsError,
     ProjectNotFoundError,
     StorageError,
-    StorageService,
 )
 from source.utils.embedder import VectorStoreManager
 
@@ -32,7 +31,7 @@ logger = logging.getLogger(__name__)
 class ProjectAPI:
     def __init__(self):
         self.router = APIRouter(tags=["projects"])
-        self.storage = StorageService()
+        self.storage = container.storage
         self.register_routes()
 
     def register_routes(self):

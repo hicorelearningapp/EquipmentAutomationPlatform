@@ -997,17 +997,27 @@ class StorageService:
     def questions_json_path(self, project_id: int) -> Path:
         return self._project_dir(project_id) / "Questions" / "questions.json"
 
-    def get_questions(self, project_id: int) -> dict[str, list[dict[str, str]]]:
+    def get_questions(self, project_id: int) -> list[dict[str, str]]:
         path = self.questions_json_path(project_id)
         if not path.exists():
-            return {}
+            return []
         try:
-            return json.loads(path.read_text(encoding="utf-8"))
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                # Legacy format: dict mapping filename to list of QA dicts
+                flat_list = []
+                for qa_list in data.values():
+                    if isinstance(qa_list, list):
+                        flat_list.extend(qa_list)
+                return flat_list
+            elif isinstance(data, list):
+                return data
+            return []
         except Exception as exc:
             logger.error("Failed to read questions JSON: %s", exc)
-            return {}
+            return []
 
-    def save_questions(self, project_id: int, questions_data: dict[str, list[dict[str, str]]]) -> None:
+    def save_questions(self, project_id: int, questions_data: list[dict[str, str]]) -> None:
         path = self.questions_json_path(project_id)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(questions_data, indent=2), encoding="utf-8")

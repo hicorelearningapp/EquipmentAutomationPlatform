@@ -136,11 +136,12 @@ def build_or_load(spec: EquipmentSpec, cache_path: Path) -> EntityEmbeddings:
 
     if cache_path.exists():
         try:
-            data = np.load(cache_path, allow_pickle=True)
-            if str(data["fingerprint"]) == fp:
-                cached_rows = [EntityRow(**r) for r in data["rows"].tolist()]
-                logger.info("EntityEmbeddings: cache hit (%d rows) %s", len(cached_rows), cache_path)
-                return EntityEmbeddings(cached_rows, data["vectors"], fp)
+            with np.load(cache_path, allow_pickle=True) as data:
+                if str(data["fingerprint"]) == fp:
+                    cached_rows = [EntityRow(**r) for r in data["rows"].tolist()]
+                    vectors = np.array(data["vectors"], copy=True)
+                    logger.info("EntityEmbeddings: cache hit (%d rows) %s", len(cached_rows), cache_path)
+                    return EntityEmbeddings(cached_rows, vectors, fp)
             logger.info("EntityEmbeddings: cache stale, re-embedding")
         except Exception as exc:
             logger.warning("EntityEmbeddings: cache unreadable (%s), re-embedding", exc)

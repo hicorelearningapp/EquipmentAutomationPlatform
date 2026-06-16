@@ -13,7 +13,7 @@ from source.schemas.mapping import (
     SaveMappingRequest
 )
 from source.schemas.secsgem import EquipmentSpec, StatusVariable, Event, Alarm
-from source.services.storage_service import StorageService, StorageError, ProjectNotFoundError
+from source.services.storage_service import StorageError, ProjectNotFoundError
 from source.utils.template_parser import _extract_tags_from_template
 from source.services.automap_rules import is_compatible
 from source.services.entity_embeddings import build_or_load
@@ -49,6 +49,11 @@ def _is_equipment_field(key: str) -> bool:
 
 
 def _needs_mapping(entry: dict) -> bool:
+    # If there is an empty PayloadName field, we need to map it
+    for key, val in entry.items():
+        if key.lower() == "payloadname" and isinstance(val, str) and val.strip() == "":
+            return True
+
     equip_keys = [k for k in entry if _is_equipment_field(k)]
     if not equip_keys:
         return False
@@ -111,6 +116,11 @@ def _fill_entry(entry: dict, entity_id: str, entity_name: str, entity_descriptio
 def _entity_details(spec: EquipmentSpec, entity_id: str, entity_type: str) -> tuple[str, str, str]:
     """Returns (id, name, description) or ("", "", "") if not found."""
     eid_str = str(entity_id).strip().lower()
+    for prefix in ("svid_", "dvid_", "ceid_", "alid_"):
+        if eid_str.startswith(prefix):
+            eid_str = eid_str[len(prefix):]
+            break
+
     if entity_type == "variable":
         for v in spec.DataVariables + spec.StatusVariables:
             vid = getattr(v, 'DvID', getattr(v, 'SVID', ''))
@@ -129,8 +139,7 @@ def _entity_details(spec: EquipmentSpec, entity_id: str, entity_type: str) -> tu
                 return (str(alid), aname, getattr(a, 'Description', '-'))
     return ("", "", "")
 
-
-def _build_batch_prompt(unresolved_by_section: dict, spec: EquipmentSpec) -> str:
+def _build_batch_prompt(unresolved_by_section: dict, spec: EquipmentSpec, payload_names: list[str]) -> str:
     entities = []
     for v in spec.StatusVariables:
         entities.append({
@@ -163,6 +172,9 @@ def _build_batch_prompt(unresolved_by_section: dict, spec: EquipmentSpec) -> str
         })
 
     return f"""You are a semiconductor automation expert. Your task is to map Equipment Entities (Variables, Events, Alarms) to target MES Tags.
+   
+AVAILABLE MES PAYLOAD NAMES:
+{json.dumps(payload_names, indent=2)}
 
 EQUIPMENT ENTITIES:
 {json.dumps(entities, indent=2)}
@@ -187,6 +199,7 @@ Use the following JSON schema:
       "mes_tag": "MESEventName",
       "entity_id": "CEID",
       "entity_name": "EventName",
+      "payload_name": "SelectedPayloadNameFromAvailableList",
       "confidence": 0.85,
       "reasoning": "..."
     }}
@@ -196,6 +209,7 @@ Use the following JSON schema:
       "mes_tag": "MESAlarmName",
       "entity_id": "AlarmID",
       "entity_name": "AlarmName",
+      "payload_name": "SelectedPayloadNameFromAvailableList",
       "confidence": 0.95,
       "reasoning": "..."
     }}
@@ -206,9 +220,11 @@ GUIDELINES:
 1. Make best-effort, fuzzy matches.
 2. Only map to compatible types (Variables mapping to variables, Events to events, Alarms to alarms).
 3. Do not invent or hallucinate IDs. Only use entity_id values that exist in the EQUIPMENT ENTITIES list.
-4. If a tag cannot be mapped, do not include it in the response lists, or set entity_id to null.
-5. Only output the JSON object. No markdown formatting, no code block fences, no prose.
-"""
+   * EXCEPTION: If the UNRESOLVED MES TAG already has a "provided_entity_id" that is not empty, you MUST use that exact "provided_entity_id" in your response for "entity_id", even if it is not in the EQUIPMENT ENTITIES list.
+4. If a tag cannot be mapped and has no "provided_entity_id", do not include it in the response lists, or set entity_id to null.
+5. For each mapped Event and Alarm, select the best matching payload name from the AVAILABLE MES PAYLOAD NAMES list and set it in the "payload_name" field. If no payload fits, set it to "" or null.
+6. Only output the JSON object. No markdown formatting, no code block fences, no prose.
+7. PayloadName MUST be filled and only with the best matching payload name from the AVAILABLE MES PAYLOAD NAMES list. """""
 
 
 def _parse_batch_llm_response(raw: str) -> dict:
@@ -238,7 +254,7 @@ def _parse_batch_llm_response(raw: str) -> dict:
 class MappingAPI:
     def __init__(self):
         self.router = APIRouter(tags=["mapping"])
-        self.storage = StorageService()
+        self.storage = container.storage
         self.register_routes()
 
     def register_routes(self):
@@ -366,10 +382,11 @@ class MappingAPI:
 
         # 1. Resolve Equipment Spec
         try:
-            try:
-                spec_json = container.project_service.storage.read_spec_json(project_id, "project_batch")
+            spec_path = self.storage.spec_json_path(project_id, "project_batch")
+            if spec_path.exists():
+                spec_json = spec_path.read_text(encoding="utf-8")
                 spec = EquipmentSpec.model_validate_json(spec_json)
-            except Exception:
+            else:
                 metadata, aggregated = container.project_service.aggregate_project_data(project_id)
                 spec = EquipmentSpec.model_validate(aggregated.model_dump())
         except Exception as exc:
@@ -380,11 +397,51 @@ class MappingAPI:
         cache_path = self.storage.spec_json_path(project_id, "project_batch").parent / "entity_embeddings.npz"
         entities = build_or_load(spec, cache_path)
 
-        # 3. Create a clean deepish copy of body mapping sections to mutate
-        result = dict(body)
+        # 3. Load existing mapped template and merge with incoming body
+        import copy
+        template_name = template if template.lower().endswith(".json") else f"{template}.json" if template else ""
+        existing_template = None
+        if family and template_name:
+            existing_template = self.storage.load_automap_result(project_id, family, template_name)
+
+        result = copy.deepcopy(existing_template) if existing_template else {}
+        
+        # Merge top-level properties from body (like family, template, etc.)
+        for k, v in body.items():
+            if k not in MAPPING_SECTIONS:
+                result[k] = v
+
+        # Merge sections
         for section in MAPPING_SECTIONS:
-            if section in result:
-                result[section] = [dict(item) for item in result[section]]
+            if section not in result:
+                result[section] = []
+                
+            incoming_items = body.get(section, [])
+            existing_items = result[section]
+            
+            # Index existing by MES Tag Name
+            existing_by_tag = {}
+            for i, item in enumerate(existing_items):
+                tag = _get_mes_tag_name(item, section)
+                if tag:
+                    existing_by_tag[tag] = i
+                    
+            for item in incoming_items:
+                incoming_item_copy = dict(item)
+                tag_name = _get_mes_tag_name(incoming_item_copy, section)
+                if not tag_name:
+                    existing_items.append(incoming_item_copy)
+                    continue
+                    
+                if tag_name in existing_by_tag:
+                    # Update existing item
+                    idx = existing_by_tag[tag_name]
+                    # Overwrite fields from incoming
+                    for key, val in incoming_item_copy.items():
+                        existing_items[idx][key] = val
+                else:
+                    existing_items.append(incoming_item_copy)
+                    existing_by_tag[tag_name] = len(existing_items) - 1
 
         # 4. Extract unresolved entries needing mapping
         unresolved_list = []
@@ -473,6 +530,17 @@ class MappingAPI:
                         _fill_entry(item["entry"], top_entity.entity_id, top_entity.name, top_entity.description)
                         logger.info("AutoMap vector auto-accept for tag %s: ID=%s Name=%s Score=%f", 
                                     item["tag_name"], top_entity.entity_id, top_entity.name, top_score)
+                        
+                        # Even if vector similarity auto-accepted equipment fields, we still need LLM payload mapping
+                        # if the payload name is empty for events/alarms
+                        has_empty_payload = False
+                        if item["section"] in ("Events", "Alarms"):
+                            for k, v in item["entry"].items():
+                                if k.lower() == "payloadname" and isinstance(v, str) and v.strip() == "":
+                                    has_empty_payload = True
+                                    break
+                        if has_empty_payload:
+                            still_unresolved.append(item)
                     else:
                         still_unresolved.append(item)
                 else:
@@ -480,20 +548,47 @@ class MappingAPI:
 
         # 6. Single Batch LLM Fallback Pass
         if still_unresolved:
+            # Resolve available payload names from the raw MES template file
+            payload_names = []
+            if family and template:
+                template_name_for_payloads = template if template.lower().endswith(".json") else f"{template}.json"
+                template_path = Path("MESMapTemplates") / family / template_name_for_payloads
+                if template_path.exists():
+                    try:
+                        with open(template_path, "r", encoding="utf-8") as f:
+                            tpl_data = json.load(f)
+                        payloads = tpl_data.get("Payloads", [])
+                        for p in payloads:
+                            pname = p.get("PayloadName")
+                            if pname:
+                                payload_names.append(pname)
+                    except Exception as e:
+                        logger.warning("Failed to load payloads from template path %s: %s", template_path, e)
+
             unresolved_by_section_llm = {
                 "Variables": [],
                 "Events": [],
                 "Alarms": []
             }
             for item in still_unresolved:
+                provided_entity_id = ""
+                equip_keys = [k for k in item["entry"] if _is_equipment_field(k)]
+                for k in equip_keys:
+                    if any(x in k.lower() for x in ("vid", "ceid", "alid", "id")) and "name" not in k.lower():
+                        val = str(item["entry"].get(k, "")).strip()
+                        if val:
+                            provided_entity_id = val
+                            break
+
                 unresolved_by_section_llm[item["section"]].append({
                     "mes_tag": item["tag_name"],
-                    "description": item["description"]
+                    "description": item["description"],
+                    "provided_entity_id": provided_entity_id
                 })
             # Remove empty sections
             unresolved_by_section_llm = {k: v for k, v in unresolved_by_section_llm.items() if v}
 
-            prompt = _build_batch_prompt(unresolved_by_section_llm, spec)
+            prompt = _build_batch_prompt(unresolved_by_section_llm, spec, payload_names)
             try:
                 llm = container.mapping_service._llm
                 raw = llm.invoke(prompt).content
@@ -518,23 +613,39 @@ class MappingAPI:
                     continue
                 for sugg in suggestions:
                     mes_tag = sugg.get("mes_tag")
-                    entity_id = sugg.get("entity_id")
-                    confidence = sugg.get("confidence", 0.0)
-                    if not mes_tag or not entity_id or confidence < 0.30:
+                    if not mes_tag:
                         continue
 
-                    entity_type = SECTION_TO_ENTITY_TYPE[section]
-                    eid, ename, edesc = _entity_details(spec, str(entity_id), entity_type)
-                    if not eid:
-                        logger.warning("LLM mapping ID not found in spec: %s (Type: %s)", entity_id, entity_type)
+                    entity_id = sugg.get("entity_id")
+                    payload_name = sugg.get("payload_name")
+                    confidence = sugg.get("confidence", 0.0)
+
+                    if not entity_id and not payload_name:
                         continue
+                    if confidence < 0.30 and not payload_name:
+                        continue
+
+                    eid, ename, edesc = "", "", ""
+                    if entity_id:
+                        entity_type = SECTION_TO_ENTITY_TYPE[section]
+                        eid, ename, edesc = _entity_details(spec, str(entity_id), entity_type)
+                        if not eid:
+                            logger.warning("LLM mapping ID not found in spec: %s (Type: %s)", entity_id, entity_type)
 
                     # Apply to matching unresolved item
                     for item in still_unresolved:
                         if item["section"] == section and item["tag_name"] == mes_tag:
-                            _fill_entry(item["entry"], eid, ename, edesc)
-                            logger.info("AutoMap LLM mapped tag %s: ID=%s Name=%s Score=%f", 
-                                        mes_tag, eid, ename, confidence)
+                            if eid and confidence >= 0.30:
+                                _fill_entry(item["entry"], eid, ename, edesc)
+                            
+                            # Set PayloadName for Events and Alarms if returned by LLM
+                            if payload_name and section in ("Events", "Alarms"):
+                                for k in item["entry"]:
+                                    if k.lower() == "payloadname":
+                                        item["entry"][k] = payload_name
+                                        
+                            logger.info("AutoMap LLM mapped tag %s: ID=%s Name=%s Score=%f Payload=%s", 
+                                        mes_tag, eid or entity_id, ename, confidence, payload_name or "None")
                             break
 
         # 7. Persist result
@@ -548,7 +659,7 @@ class MappingAPI:
 
         # Update mes_mapping.json so they appear in /LoadProject
         try:
-            from source.schemas.mapping import ProjectMapping, VariableMapping
+            from source.schemas.mapping import ProjectMapping
             mapping = self.storage.get_mapping(project_id)
             
             # Ensure mappings dictionary structure exists
@@ -562,54 +673,11 @@ class MappingAPI:
                 
             if fam not in mapping.Mappings:
                 mapping.Mappings[fam] = {}
-            if tpl not in mapping.Mappings[fam]:
-                mapping.Mappings[fam][tpl] = {
-                    "Variables": [],
-                    "Events": [],
-                    "Alarms": []
-                }
                 
-            vars_list = []
-            events_list = []
-            alarms_list = []
-
-            for entry in result.get("Variables", []):
-                mes_tag = _get_mes_tag_name(entry, "Variables")
-                vid = str(entry.get("VID") or entry.get("EquipmentVariableName") or "").strip()
-                if mes_tag and vid:
-                    vars_list.append(VariableMapping(
-                        MESTag=mes_tag,
-                        SVID=vid,
-                        CEID="",
-                        Description=entry.get("EquipmentDescription", "")
-                    ))
-
-            for entry in result.get("Events", []):
-                mes_tag = _get_mes_tag_name(entry, "Events")
-                ceid = str(entry.get("CEID") or entry.get("EquipmentEventName") or "").strip()
-                if mes_tag and ceid:
-                    events_list.append(VariableMapping(
-                        MESTag=mes_tag,
-                        SVID="",
-                        CEID=ceid,
-                        Description=entry.get("EquipmentDescription", "")
-                    ))
-
-            for entry in result.get("Alarms", []):
-                mes_tag = _get_mes_tag_name(entry, "Alarms")
-                alid = str(entry.get("ALID") or entry.get("EquipmentAlarmName") or "").strip()
-                if mes_tag and alid:
-                    alarms_list.append(VariableMapping(
-                        MESTag=mes_tag,
-                        SVID=alid,
-                        CEID="",
-                        Description=entry.get("EquipmentDescription", "")
-                    ))
-
             mapping.Mappings[fam][tpl] = {
-                "Variables": vars_list,
-                "Events": events_list,
-                "Alarms": alarms_list
+                "Variables": result.get("Variables", []),
+                "Events": result.get("Events", []),
+                "Alarms": result.get("Alarms", [])
             }
             self.storage.save_mapping(project_id, mapping)
             logger.info("Updated nested mes_mapping.json for project %s", project_id)

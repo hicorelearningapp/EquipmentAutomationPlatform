@@ -115,7 +115,7 @@ class ProjectDetail(ProjectMetadata):
     Extractions: AggregatedSpec = Field(default_factory=AggregatedSpec)
     Mappings: dict[str, Any] = Field(default_factory=dict)
     SmlTemplate: Any = Field(default_factory=dict)
-    Questions: dict[str, list[dict[str, str]]] = Field(default_factory=dict)
+    Questions: list[dict[str, str]] = Field(default_factory=list)
 
 
 class ProjectUpdate(BaseModel):

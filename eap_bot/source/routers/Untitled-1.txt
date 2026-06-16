@@ -1,0 +1,6 @@
+EquipmentAPI --> ServiceContainer ------------------> DocumentService --> DocumentProcessorFactory
+                                                     /       |        \
+                                                    V        V         V
+                                         EquipemntSpec,  Settings    StorageService, 
+                                         VariableCategory            DocumentNotFoundError, 
+                                         

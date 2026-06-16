@@ -11,7 +11,6 @@ from source.services.storage_service import (
     InvalidSlugError,
     ProjectNotFoundError,
     StorageError,
-    StorageService,
 )
 
 logger = logging.getLogger(__name__)
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 class EquipmentAPI:
     def __init__(self):
         self.router = APIRouter()
-        self.storage = StorageService()
+        self.storage = container.storage
         self.register_routes()
 
     def register_routes(self):
@@ -33,7 +32,7 @@ class EquipmentAPI:
         self.router.post("/UpdateExtraction/{project_id}", tags=["documents"])(self.update_extraction)
         self.router.post("/GenerateReports/{project_id}", tags=["documents"])(self.generate_reports)
         self.router.put("/UpdateReports/{project_id}", tags=["documents"])(self.update_reports)
-        self.router.get("/GetQuestions/{project_id}/{document_id}", tags=["documents"])(self.get_questions)
+        self.router.get("/GetQuestions/{project_id}", tags=["documents"])(self.get_questions)
 
     async def upload_document(
         self,
@@ -76,6 +75,7 @@ class EquipmentAPI:
             if has_pending:
                 metadata, aggregated = container.project_service.aggregate_project_data(project_id, auto_analyze=True)
                 self.storage.save_spec_json(self.storage.spec_json_path(project_id, "project_batch"), aggregated)
+                container.document_service.generate_predefined_questions(project_id, aggregated)
                 return container.document_service._build_extraction_response(
                     project_id, "project_batch", aggregated
                 )
@@ -83,12 +83,16 @@ class EquipmentAPI:
                 try:
                     spec_json = self.storage.read_spec_json(project_id, "project_batch")
                     spec_obj = EquipmentSpec.model_validate_json(spec_json)
+                    questions = self.storage.get_questions(project_id)
+                    if not questions:
+                        container.document_service.generate_predefined_questions(project_id, spec_obj)
                     return container.document_service._build_extraction_response(
                         project_id, "project_batch", spec_obj
                     )
                 except Exception:
                     metadata, aggregated = container.project_service.aggregate_project_data(project_id, auto_analyze=True)
                     self.storage.save_spec_json(self.storage.spec_json_path(project_id, "project_batch"), aggregated)
+                    container.document_service.generate_predefined_questions(project_id, aggregated)
                     return container.document_service._build_extraction_response(
                         project_id, "project_batch", aggregated
                     )
@@ -123,23 +127,23 @@ class EquipmentAPI:
         except StorageError as exc:
             raise HTTPException(500, str(exc)) from exc
 
-    def get_questions(self, project_id: int, document_id: str):
+    def get_questions(self, project_id: int):
         try:
-            document = self.storage.get_document(project_id, document_id)
-            questions_data = self.storage.get_questions(project_id)
+            questions = self.storage.get_questions(project_id)
             
-            doc_questions = questions_data.get(document.FileName, [])
-            
-            if not doc_questions:
-                doc_questions = container.document_service.generate_predefined_questions(project_id, document_id)
+            if not questions:
+                from source.schemas.secsgem import EquipmentSpec
+                spec_json = self.storage.read_spec_json(project_id, "project_batch")
+                spec_obj = EquipmentSpec.model_validate_json(spec_json)
+                questions = container.document_service.generate_predefined_questions(project_id, spec_obj)
                 
-            return {"Questions": doc_questions}
+            return {"Questions": questions}
             
         except InvalidSlugError as exc:
             raise HTTPException(400, str(exc)) from exc
-        except (ProjectNotFoundError, DocumentNotFoundError) as exc:
+        except ProjectNotFoundError as exc:
             raise HTTPException(404, str(exc)) from exc
-        except StorageError as exc:
+        except Exception as exc:
             raise HTTPException(500, str(exc)) from exc
 
     def delete_document(self, project_id: int, document_id: str):

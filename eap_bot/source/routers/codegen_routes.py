@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from source.schemas.codegen import CodeUpdateRequest, ResultUpdateRequest
-from source.services.storage_service import StorageService, StorageError, ProjectNotFoundError
+from source.services.storage_service import StorageError, ProjectNotFoundError
+from source.managers.service_container import container
 
 class CodeGenAPI:
     def __init__(self):
         self.router = APIRouter(tags=["codegen"])
-        self.storage = StorageService()
+        self.storage = container.storage
         self.register_routes()
 
     def register_routes(self):

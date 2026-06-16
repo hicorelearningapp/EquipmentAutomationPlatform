@@ -1,0 +1,319 @@
+# EAP Bot Class Diagram and Architecture
+
+This document provides a class diagram and an architectural walkthrough of the `eap_bot` application. It highlights the relationships, dependencies, design patterns, and components defined in the codebase.
+
+## Architecture Overview
+
+The system is designed as a modular pipeline for extracting, validating, and mapping **SECS/GEM** specifications from documents (PDFs, Excel spreadsheets, Text files, and logs) to **Manufacturing Execution System (MES)** tags.
+
+- **FastAPI Router Interface**: Receives incoming requests for managing projects, uploading manuals, extracting schemas, and mapping.
+- **Service Container**: Acts as the central dependency injection container (`ServiceContainer`), instantiating and holding references to all stateless services.
+- **Strategy Pattern for LLMs & Processing**:
+  - `LLMStrategy` defines the interface to interact with model APIs (Groq, Gemini, Ollama, Mistral) with automatic fallback handlers.
+  - `DocumentProcessingStrategy` decouples the ingestion of different file types (.pdf, .xlsx, .txt, logs).
+- **RAG & Search Services**: Utilizes `FAISS` vector store via the `VectorStoreManager` to index text and table sections for semantic query matching and QA.
+- **Storage Layer**: A centralized `StorageService` that handles structured project JSON files, logs, reports, and binary uploads on disk.
+
+---
+
+## Class Diagram
+
+The class diagram below visualizes the primary classes, interfaces, attributes, and methods in the codebase, along with their relationships:
+
+```mermaid
+classDiagram
+    %% Core Containers & Services
+    class ServiceContainer {
+        +LLMStrategy llm_strategy
+        +StorageService storage
+        +DocumentParser parser
+        +SpecValidator validator
+        +EquipmentExtractor extractor
+        +MappingService mapping_service
+        +ReportService report_service
+        +AutoMapService automap_service
+        +SmartAutomationService smart_automation_service
+        +ProjectService project_service
+        +DocumentService document_service
+        +SMLGenerationService sml_generation_service
+        +__init__()
+        +create_qa_service(VectorStoreManager vector_store, dict vector_filters) QAService
+    }
+
+    class StorageService {
+        +Path root
+        +__init__(str | Path storage_root)
+        +create_project(ProjectCreate project_create) ProjectOut
+        +get_project(int project_id) ProjectMetadata
+        +register_document(int project_id, str document_id, str document_type, str filename, float file_size, int pages) DocumentMetadata
+        +complete_extraction(int project_id, str document_id, EquipmentSpec spec) DocumentMetadata
+        +save_spec_json(Path json_path, EquipmentSpec spec)
+        +save_automap_result(int project_id, str family, str template, AutoMapResponse response)
+    }
+
+    class DocumentService {
+        +StorageService storage
+        +ServiceContainer _container
+        +__init__(StorageService storage, ServiceContainer container)
+        +upload_document(int project_id, str filename, bytes contents, DocumentCategory doc_category) dict
+        +analyze_document(int project_id, str document_id) dict
+        +get_variables(int project_id, str document_id, str categories) dict
+    }
+
+    class ProjectService {
+        +StorageService storage
+        +ServiceContainer _container
+        +__init__(StorageService storage, ServiceContainer container)
+        +aggregate_project_data(int project_id, bool auto_analyze) tuple
+        +get_mes_mapping(int project_id, Any body) Any
+        +get_project_details(int project_id) ProjectDetailsResponse
+    }
+
+    %% Document Parsers and Strategies
+    class DocumentParser {
+        <<abstract>>
+        +extract_text(str | BinaryIO source)* str
+        +extract_pages(str | BinaryIO source)* list
+    }
+    class PyMuPDFParser {
+        +extract_text(str | BinaryIO source) str
+        +extract_pages(str | BinaryIO source) list
+    }
+    class PyPDFParser {
+        +extract_text(str | BinaryIO source) str
+        +extract_pages(str | BinaryIO source) list
+    }
+    class DocumentParserFactory {
+        +create()$ DocumentParser
+    }
+
+    DocumentParser <|-- PyMuPDFParser
+    DocumentParser <|-- PyPDFParser
+    DocumentParserFactory ..> DocumentParser : Creates
+
+    class DocumentProcessingStrategy {
+        <<abstract>>
+        +get_pages(bytes contents)* int
+        +analyze(int project_id, str document_id, Any document, Path file_path, StorageService storage, ServiceContainer container)* Tuple
+        +post_upload(int project_id, str document_id, Any document, Path file_path, StorageService storage, ServiceContainer container)
+    }
+    class PdfProcessingStrategy {
+        +get_pages(bytes contents) int
+        +post_upload(...)
+        +analyze(...) Tuple
+    }
+    class ExcelProcessingStrategy {
+        +get_pages(bytes contents) int
+        +analyze(...) Tuple
+    }
+    class TextProcessingStrategy {
+        +get_pages(bytes contents) int
+        +analyze(...) Tuple
+        +post_upload(...)
+    }
+    class LogFileProcessingStrategy {
+        +get_pages(bytes contents) int
+        +analyze(...) Tuple
+        +post_upload(...)
+    }
+    class DocumentProcessorFactory {
+        +get_strategy(str filename, DocumentCategory doc_category)$ DocumentProcessingStrategy
+    }
+
+    DocumentProcessingStrategy <|-- PdfProcessingStrategy
+    DocumentProcessingStrategy <|-- ExcelProcessingStrategy
+    DocumentProcessingStrategy <|-- TextProcessingStrategy
+    DocumentProcessingStrategy <|-- LogFileProcessingStrategy
+    DocumentProcessorFactory ..> DocumentProcessingStrategy : Creates
+
+    %% LLM Componentry
+    class LLMStrategy {
+        <<abstract>>
+        +get_model(float temperature, bool require_json)* BaseChatModel
+    }
+    class GroqStrategy {
+        +get_model(float temperature, bool require_json) BaseChatModel
+    }
+    class OllamaStrategy {
+        +get_model(float temperature, bool require_json) BaseChatModel
+    }
+    class GeminiStrategy {
+        +get_model(float temperature, bool require_json) BaseChatModel
+    }
+    class MistralStrategy {
+        +get_model(float temperature, bool require_json) BaseChatModel
+    }
+    class MultiFallbackLLMStrategy {
+        -LLMStrategy _primary
+        -list _fallbacks
+        +__init__(LLMStrategy primary, list fallbacks)
+        +get_model(float temperature, bool require_json) RobustFallbackWrapper
+    }
+    class RobustFallbackWrapper {
+        +list models
+        +__init__(list models)
+        +invoke(*args, **kwargs) Any
+    }
+    class LLMFactory {
+        +create_strategy()$ LLMStrategy
+    }
+
+    LLMStrategy <|-- GroqStrategy
+    LLMStrategy <|-- OllamaStrategy
+    LLMStrategy <|-- GeminiStrategy
+    LLMStrategy <|-- MistralStrategy
+    LLMStrategy <|-- MultiFallbackLLMStrategy
+    LLMFactory ..> LLMStrategy : Creates
+    MultiFallbackLLMStrategy --> LLMStrategy : References
+    RobustFallbackWrapper <.. MultiFallbackLLMStrategy : Instantiates
+
+    %% Extractor & Validator
+    class EquipmentExtractor {
+        -BaseChatModel _llm
+        -BaseChatModel _llm_retry
+        -Encoding _encoder
+        -int _chunk_tokens
+        +__init__(LLMStrategy llm_strategy)
+        +extract(str pdf_text, dict section_csvs, bool first_chunk_only) EquipmentSpec
+        +extract_excel(str | Path excel_path) EquipmentSpec
+    }
+
+    class SpecValidator {
+        +validate(EquipmentSpec spec) ValidationReport
+        -check_duplicate_ids(EquipmentSpec spec, list issues)
+        -check_linked_vids(EquipmentSpec spec, list issues)
+        -check_transition_states(EquipmentSpec spec, list issues)
+    }
+
+    %% Mapping & Reranking
+    class MappingService {
+        -BaseChatModel _llm
+        -BaseChatModel _llm_retry
+        +__init__(LLMStrategy llm_strategy)
+        +suggest_mappings(EquipmentSpec spec, List target_tags) MappingSuggestionResponse
+    }
+
+    class AutoMapService {
+        +StorageService storage
+        +RerankService _rerank
+        +__init__(StorageService storage, LLMStrategy llm_strategy)
+        +run(int project_id, str family, str template) AutoMapResponse
+    }
+
+    class RerankService {
+        -BaseChatModel _llm
+        +__init__(LLMStrategy llm_strategy)
+        +rerank(dict tag, List candidates) RerankResult
+    }
+
+    AutoMapService --> RerankService : Uses
+
+    %% RAG/Embeddings Manager
+    class VectorStoreManager {
+        +Path vector_dir
+        +FAISS _faiss_cache
+        +HuggingFaceEmbeddings _embeddings
+        +__init__(Path | str vector_dir)
+        +get_embeddings()$ HuggingFaceEmbeddings
+        +add_document(str text, dict metadata) bool
+        +add_pages(list pages, dict base_metadata) bool
+        +search(str query, int k) list
+        +search_with_filters(str query, dict filters, int k) list
+        +remove_document(str document_id) int
+    }
+
+    %% Relationships and composition from ServiceContainer
+    ServiceContainer *-- LLMStrategy : has
+    ServiceContainer *-- StorageService : has
+    ServiceContainer *-- DocumentParser : has
+    ServiceContainer *-- SpecValidator : has
+    ServiceContainer *-- EquipmentExtractor : has
+    ServiceContainer *-- MappingService : has
+    ServiceContainer *-- AutoMapService : has
+    ServiceContainer *-- ProjectService : has
+    ServiceContainer *-- DocumentService : has
+    
+    DocumentService --> StorageService : references
+    ProjectService --> StorageService : references
+    AutoMapService --> StorageService : references
+```
+
+---
+
+## Component Roles & Interactions
+
+### 1. Document Upload & Parsing Flow
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Router as routers.project_routes
+    participant DocSvc as DocumentService
+    participant ParserFactory as DocumentParserFactory
+    participant StratFactory as DocumentProcessorFactory
+    participant Storage as StorageService
+
+    Client->>Router: POST /projects/{id}/documents
+    Router->>DocSvc: upload_document(project_id, filename, contents, category)
+    DocSvc->>StratFactory: get_strategy(filename, category)
+    StratFactory-->>DocSvc: PdfProcessingStrategy
+    DocSvc->>Storage: prepare_document_paths(project_id, filename, ext, category)
+    Storage-->>DocSvc: (doc_id, file_path, spec_path)
+    DocSvc->>Storage: save_pdf(file_path, contents)
+    DocSvc->>ParserFactory: create()
+    ParserFactory-->>DocSvc: PyMuPDFParser
+    DocSvc->>Storage: register_document(...)
+    Note over DocSvc, Storage: Document status set to "uploaded"
+    DocSvc-->>Client: Upload Status Response
+```
+
+### 2. Analysis & Extraction Flow
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Router as routers.project_routes
+    participant DocSvc as DocumentService
+    participant Extractor as EquipmentExtractor
+    participant LLM as LLM Factory & Strategy
+    participant Storage as StorageService
+
+    Client->>Router: POST /projects/{id}/documents/{doc_id}/analyze
+    Router->>DocSvc: analyze_document(project_id, document_id)
+    DocSvc->>Storage: get_document(project_id, document_id)
+    DocSvc->>Extractor: extract(pdf_text, section_csvs)
+    Extractor->>LLM: get_model(temperature=0, json=True)
+    LLM-->>Extractor: ChatGroq (or Gemini, Ollama)
+    Extractor->>LLM: invoke(prompt)
+    LLM-->>Extractor: Extracted Spec JSON
+    Extractor-->>DocSvc: EquipmentSpec Pydantic Object
+    DocSvc->>Storage: save_spec_json(json_path, spec)
+    DocSvc->>Storage: complete_extraction(project_id, doc_id, spec)
+    Note over DocSvc, Storage: Document status set to "completed"
+    DocSvc-->>Client: Extraction Result Spec
+```
+
+### 3. MES Tag Mapping Flow
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AutoMapSvc as AutoMapService
+    participant RerankSvc as RerankService
+    participant LLM as BaseChatModel
+    participant VectorStore as VectorStoreManager
+    participant Storage as StorageService
+
+    Client->>AutoMapSvc: run(project_id, family, template)
+    AutoMapSvc->>Storage: Load EquipmentSpec & Template JSON
+    AutoMapSvc->>VectorStore: Embed Tag Descriptions & Cosine Similarity
+    VectorStore-->>AutoMapSvc: Top K Candidate Mappings
+    Note over AutoMapSvc: Filter candidates by hard compatibility rules
+    alt Cosine Score is high and gap is large
+        Note over AutoMapSvc: Auto-accept suggestion (Method: vector)
+    else Cosine Score is ambiguous (middle band)
+        AutoMapSvc->>RerankSvc: rerank(tag, candidates)
+        RerankSvc->>LLM: invoke(rerank_prompt)
+        LLM-->>RerankSvc: Best matching candidate & confidence
+        RerankSvc-->>AutoMapSvc: RerankResult
+    end
+    AutoMapSvc->>Storage: save_automap_result(...)
+    AutoMapSvc-->>Client: AutoMapResponse
+```

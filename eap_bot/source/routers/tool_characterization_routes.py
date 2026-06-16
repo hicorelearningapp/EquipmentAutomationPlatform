@@ -13,7 +13,7 @@ from source.schemas.test_script import GenerateTestScriptsRequest
 from source.schemas.project import DocumentCategory, TestResultFileType
 from source.schemas.sml_generation import SMLGenerationResponse
 from source.services.document_service import DocumentService
-from source.services.storage_service import StorageService, ProjectNotFoundError, DocumentExistsError
+from source.services.storage_service import ProjectNotFoundError, DocumentExistsError
 from source.services.test_script_service import TestScriptService
 
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class ToolCharacterizationAPI:
     def __init__(self):
         self.router = APIRouter(tags=["tool characterizations"])
-        self.storage = StorageService()
+        self.storage = container.storage
         self.test_script_service = TestScriptService()
         self.register_routes()
 
