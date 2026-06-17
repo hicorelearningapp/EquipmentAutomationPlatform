@@ -62,3 +62,42 @@ def test_auto_map_project_not_found(client: TestClient, record_property):
     record_property("expected", 404)
     record_property("got", response.status_code)
     assert response.status_code == 404
+
+def test_auto_map_filtered_response(client: TestClient):
+    """Test AutoMap response contains only the items mentioned in the input body."""
+    # Create project first
+    p = client.post("/CreateProject", json={"ProjectName": "FilterTestProj", "VendorName": "V", "ProjectCode": "FT1"})
+    pid = p.json().get("ProjectID")
+    
+    try:
+        payload = {
+            "family": "Camstar",
+            "template": "STANDARD_EVENT_MODEL_NEW.json",
+            "Events": [
+                {
+                    "MESEventName": "LotStart",
+                    "EquipmentEventName": "",
+                    "CEID": "",
+                    "MESDescription": "Standard MES object for Lot Start",
+                    "EquipmentDescription": "",
+                    "Enabled": True,
+                    "PayloadName": ""
+                }
+            ],
+            "Variables": [],
+            "Alarms": []
+        }
+        
+        response = client.post(f"/AutoMap?project_id={pid}", json=payload)
+        assert response.status_code == 200
+        res_json = response.json()
+        
+        # Verify that only the single Event in the input is returned, and empty list for others
+        assert len(res_json.get("Events", [])) == 1
+        assert len(res_json.get("Variables", [])) == 0
+        assert len(res_json.get("Alarms", [])) == 0
+        assert res_json["Events"][0]["MESEventName"] == "LotStart"
+        
+    finally:
+        client.delete(f"/DeleteProject/{pid}")
+

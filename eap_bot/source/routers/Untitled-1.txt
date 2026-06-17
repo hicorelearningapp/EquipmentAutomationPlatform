@@ -4,3 +4,406 @@ EquipmentAPI --> ServiceContainer ------------------> DocumentService --> Docume
                                          EquipemntSpec,  Settings    StorageService, 
                                          VariableCategory            DocumentNotFoundError, 
                                          
+
+POST
+/AutoMap
+Auto Map
+
+Parameters
+Cancel
+Reset
+Name	Description
+project_id *
+integer
+(query)
+1
+Request body
+
+application/json
+Edit Value
+Schema
+{
+  "family": "Critical Manufacturing",
+  "template": "NEW_MODEL.json",
+
+  "Events": [
+    {
+      "MESEventName": "LotStart",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Lot Start",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "LotStartPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "LotEnd",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Lot End",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "LotEndPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "MaterialIn",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Material In",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "MaterialPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "MaterialOut",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Material Out",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "MaterialPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "ParametricDataReported",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Parametric Data Reported",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "ParametricPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "AlarmSet",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Alarm Set",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "AlarmPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "AlarmClear",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Alarm Clear",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "AlarmPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "SchedulerRequest",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Scheduler Request",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "SchedulerPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "TrackIn",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Track In",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "TrackOut",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Track Out",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "",
+      "CEID": ""
+    }
+  ]
+}
+Execute
+Clear
+Responses
+Curl
+
+curl -X 'POST' \
+  'http://151.185.41.194:8012/AutoMap?project_id=1' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "family": "Critical Manufacturing",
+  "template": "NEW_MODEL.json",
+
+  "Events": [
+    {
+      "MESEventName": "LotStart",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Lot Start",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "LotStartPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "LotEnd",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Lot End",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "LotEndPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "MaterialIn",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Material In",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "MaterialPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "MaterialOut",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Material Out",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "MaterialPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "ParametricDataReported",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Parametric Data Reported",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "ParametricPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "AlarmSet",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Alarm Set",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "AlarmPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "AlarmClear",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Alarm Clear",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "AlarmPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "SchedulerRequest",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Scheduler Request",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "SchedulerPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "TrackIn",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Track In",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "TrackOut",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Track Out",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "",
+      "CEID": ""
+    }
+  ]
+}'
+Request URL
+http://151.185.41.194:8012/AutoMap?project_id=1
+Server response
+Code	Details
+200	
+Response body
+Download
+{
+  "family": "Critical Manufacturing",
+  "template": "NEW_MODEL.json",
+  "Variables": [
+    {
+      "MESVariableName": "EquipmentID",
+      "EquipmentVariableName": "SystemStatus",
+      "VID": "1001",
+      "MESDescription": "Standard MES object for Equipment ID",
+      "EquipmentDescription": "Overall equipment status string: IDLE, PROCESSING, FAULT, MAINTENANCE",
+      "Enabled": true
+    }
+  ],
+  "Events": [
+    {
+      "MESEventName": "LotStart",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Lot Start",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "LotStartPayload",
+      "EquipmentEventID": null
+    },
+    {
+      "MESEventName": "MaterialOut",
+      "EquipmentEventName": "",
+      "CEID": "",
+      "MESDescription": "Standard MES object for Material Out",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "MaterialPayload",
+      "EquipmentEventID": null
+    },
+    {
+      "MESEventName": "LotEnd",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Lot End",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "LotEndPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "MaterialIn",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Material In",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "MaterialPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "ParametricDataReported",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Parametric Data Reported",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "ParametricPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "AlarmSet",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Alarm Set",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "AlarmPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "AlarmClear",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Alarm Clear",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "AlarmPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "SchedulerRequest",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Scheduler Request",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "SchedulerPayload",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "TrackIn",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Track In",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "",
+      "CEID": ""
+    },
+    {
+      "MESEventName": "TrackOut",
+      "EquipmentEventName": "",
+      "EquipmentEventID": null,
+      "MESDescription": "Standard MES object for Track Out",
+      "EquipmentDescription": "",
+      "Enabled": true,
+      "PayloadName": "",
+      "CEID": ""
+    }
+  ],
+  "Alarms": [
+    {
+      "MESAlarmName": "EquipmentAlarm",
+      "EquipmentAlarmName": "OverPressure",
+      "ALID": "4001",
+      "MESDescription": "Standard MES object for Equipment Alarm",
+      "EquipmentDescription": "",
+      "Severity": "Critical",
+      "Enabled": true,
+      "PayloadName": "AlarmPayload"
+    }
+  ]
+}
+Response headers
+ content-length: 2724 
+ content-type: application/json 
+ date: Wed,17 Jun 2026 06:48:12 GMT 
+ server: uvicorn 
+Responses
+Code	Description	Links
+200	
+Successful Response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "additionalProp1": {}
+}
+No links
+422	
+Validation Error
+
+Media type
+
+is the output unfilled because it didn't find any variables in the extraction json of that project (1) that match to it? can you please check? if yes, please give add some matching variables to project 1
+now if by descriptions the variables match, THEN NO NEED TO CHANGE. i just want to find out why i am getting unfilled jsons as output

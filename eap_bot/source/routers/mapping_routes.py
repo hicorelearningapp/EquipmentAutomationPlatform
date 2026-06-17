@@ -58,10 +58,18 @@ def _needs_mapping(entry: dict) -> bool:
     if not equip_keys:
         return False
     # Skip if ANY equipment field already has a value
-    if any(str(entry.get(k, "")).strip() for k in equip_keys):
+    def is_filled(v):
+        if v is None:
+            return False
+        return bool(str(v).strip())
+
+    if any(is_filled(entry.get(k)) for k in equip_keys):
         return False
-    # Needs mapping if at least one equipment field is explicitly empty
-    return any(isinstance(entry.get(k), str) and entry[k] == "" for k in equip_keys)
+    # Needs mapping if at least one equipment field is explicitly empty or null
+    def is_empty(v):
+        return v is None or (isinstance(v, str) and v.strip() == "")
+
+    return any(is_empty(entry.get(k)) for k in equip_keys)
 
 
 def _get_mes_tag_name(entry: dict, section: str) -> str:
@@ -98,7 +106,8 @@ def _tag_text_for_embedding(tag_name: str, description: str) -> str:
 
 def _fill_entry(entry: dict, entity_id: str, entity_name: str, entity_description: str) -> None:
     for key in entry:
-        if not isinstance(entry[key], str) or entry[key] != "":
+        val = entry[key]
+        if val is not None and (not isinstance(val, str) or val != ""):
             continue
         if not _is_equipment_field(key):
             continue
@@ -684,4 +693,33 @@ class MappingAPI:
         except Exception as exc:
             logger.warning("Failed to update mapping file for project %s: %s", project_id, exc)
 
-        return result
+        # 8. Filter response to only return items from the input body
+        response_data = {
+            "family": family,
+            "template": template
+        }
+        for k, v in body.items():
+            if k not in MAPPING_SECTIONS and k not in ("family", "template"):
+                response_data[k] = v
+
+        for section in MAPPING_SECTIONS:
+            response_data[section] = []
+            incoming_items = body.get(section, [])
+            existing_items = result.get(section, [])
+            
+            # Index fully updated items by tag name
+            updated_by_tag = {}
+            for item in existing_items:
+                tag = _get_mes_tag_name(item, section)
+                if tag:
+                    updated_by_tag[tag] = item
+            
+            for item in incoming_items:
+                tag_name = _get_mes_tag_name(item, section)
+                if tag_name and tag_name in updated_by_tag:
+                    response_data[section].append(updated_by_tag[tag_name])
+                else:
+                    response_data[section].append(item)
+
+        return response_data
+
