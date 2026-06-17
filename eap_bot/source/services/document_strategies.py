@@ -140,6 +140,14 @@ class PdfProcessingStrategy(DocumentProcessingStrategy):
             logger.error("Report generation failed for %s/%s (non-fatal): %s", project_id, document_id, exc)
             spec.Reports = []
 
+        # Extract verbatim SML message samples into ToolCharacterization/base_script.txt.
+        try:
+            sml_text = container.extractor.extract_sml_scripts(doc_text)
+            if sml_text:
+                storage.upsert_base_script(project_id, document.FileName, sml_text)
+        except Exception as exc:
+            logger.error("SML script extraction failed for %s/%s (non-fatal): %s", project_id, document_id, exc)
+
         if hasattr(document, "DocumentType") and document.DocumentType:
             doc_type_val = document.DocumentType.value if hasattr(document.DocumentType, "value") else str(document.DocumentType)
             spec.DocumentType = doc_type_val

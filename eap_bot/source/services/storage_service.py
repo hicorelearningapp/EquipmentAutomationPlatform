@@ -744,6 +744,45 @@ class StorageService:
         json_path.parent.mkdir(parents=True, exist_ok=True)
         json_path.write_text(spec.model_dump_json(indent=4), encoding="utf-8")
 
+    def base_script_path(self, project_id: int) -> Path:
+        """Path to the consolidated extracted-SML file in ToolCharacterization."""
+        return self._project_dir(project_id) / self.TOOL_CHAR_DIR / "base_script.txt"
+
+    # Header marking each document's section within base_script.txt.
+    _BASE_SCRIPT_HEADER_RE = re.compile(r"^// === (?P<name>.*?) ===\s*$")
+
+    def upsert_base_script(self, project_id: int, document_name: str, sml_text: str) -> None:
+        """Insert or replace this document's SML section in base_script.txt.
+
+        Sections are delimited by a ``// === <document_name> ===`` header so
+        re-analysis replaces the document's block rather than duplicating it.
+        """
+        path = self.base_script_path(project_id)
+        self._assert_inside_root(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Parse existing file into {document_name: section_body} (dict preserves order).
+        sections: dict[str, list[str]] = {}
+        if path.exists():
+            current_name: str | None = None
+            for line in path.read_text(encoding="utf-8").splitlines():
+                match = self._BASE_SCRIPT_HEADER_RE.match(line)
+                if match:
+                    current_name = match.group("name")
+                    sections.setdefault(current_name, [])
+                elif current_name is not None:
+                    sections[current_name].append(line)
+
+        sections[document_name] = sml_text.strip().splitlines()
+
+        parts: list[str] = []
+        for name, body in sections.items():
+            parts.append(f"// === {name} ===")
+            parts.append("\n".join(body).strip())
+            parts.append("")  # blank line between sections
+        path.write_text("\n".join(parts).rstrip() + "\n", encoding="utf-8")
+        logger.info("Updated base_script.txt section for '%s' at %s", document_name, path)
+
     def add_document_metadata(
         self,
         project_id: int,

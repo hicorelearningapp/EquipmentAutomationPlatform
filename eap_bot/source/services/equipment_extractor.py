@@ -2,6 +2,7 @@ import csv
 import io
 import json
 import logging
+import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Union
@@ -24,6 +25,11 @@ from source.schemas.secsgem import (
 from source.utils.llm_factory import LLMStrategy
 
 logger = logging.getLogger(__name__)
+
+# An SML/SECS-II message code block begins with a bracketed stream/function
+# header like "<S2F41 W". The leading "<" distinguishes real SML samples from the
+# many bare "S2F41 ..." mentions that appear in surrounding prose and tables.
+_SML_HEADER_RE = re.compile(r"^<\s*S\d+F\d+", re.IGNORECASE)
 
 
 PREDEFINED_QUESTIONS = [
@@ -153,7 +159,7 @@ class EquipmentExtractor:
 
         chunks: list[str] = []
         start = 0
-        stride = self._chunk_tokens - self._chunk_overlap_tokens
+        stride = max(1, self._chunk_tokens - self._chunk_overlap_tokens)
 
         while start < len(tokens):
             end = start + self._chunk_tokens
@@ -164,6 +170,99 @@ class EquipmentExtractor:
             start += stride
 
         return chunks
+
+    # ------------------------------------------------------------------
+    # SML Script Extraction (deterministic, no LLM)
+    # ------------------------------------------------------------------
+
+    # Safety cap so a malformed/unterminated block can't run away to EOF.
+    _SML_MAX_BLOCK_LINES = 400
+
+    @staticmethod
+    def _is_sml_terminator(stripped: str) -> bool:
+        """True for a line that is solely the SML "." block terminator
+        (optionally followed by a comment), matching TestScriptService."""
+        return stripped == "." or (
+            stripped.startswith(".")
+            and (len(stripped) == 1 or stripped[1:].strip().startswith(("//", "#")))
+        )
+
+    def extract_sml_scripts(self, pdf_text: str) -> str:
+        """Extract verbatim SML/SECS-II message blocks from the document text.
+
+        This is a pure text parse — no LLM. SML samples in the manuals are
+        self-delimiting: each begins with a bracketed header (e.g. "<S2F41 W")
+        and ends either when its bracket nesting closes or at a lone "."
+        terminator line. Each extracted block is normalised to end with a single
+        "." so the output is directly consumable by
+        ``TestScriptService.parse_sml_to_tests``. Returns the concatenated
+        blocks, or an empty string when none are found.
+        """
+        if not pdf_text or not pdf_text.strip():
+            return ""
+
+        blocks = self._parse_sml_blocks(pdf_text)
+        if not blocks:
+            return ""
+
+        logger.info("SML parse produced %d block(s).", len(blocks))
+        return "\n\n".join(blocks)
+
+    def _parse_sml_blocks(self, text: str) -> list[str]:
+        """Deterministically pull every SML message block out of ``text``.
+
+        A block starts at a bracketed ``<SxFy`` header line and runs until either
+        bracket depth returns to zero (the message wrapper closed) or a lone "."
+        terminator is reached — whichever comes first. Bare ``SxFy`` mentions in
+        prose are ignored because they are not bracketed. Blocks are deduped on
+        their normalised text, preserving document order.
+        """
+        lines = text.splitlines()
+        n = len(lines)
+        blocks: list[str] = []
+        seen: set[str] = set()
+
+        i = 0
+        while i < n:
+            if not _SML_HEADER_RE.match(lines[i].strip()):
+                i += 1
+                continue
+
+            buf: list[str] = []
+            depth = 0
+            terminated = False
+            j = i
+            while j < n and (j - i) <= self._SML_MAX_BLOCK_LINES:
+                line = lines[j]
+                stripped = line.strip()
+                buf.append(line)
+                depth += line.count("<") - line.count(">")
+                j += 1
+                if self._is_sml_terminator(stripped):
+                    terminated = True
+                    break
+                if depth <= 0:
+                    terminated = True
+                    break
+
+            if terminated:
+                # Drop trailing blank / "." lines, then normalise to one terminator.
+                while buf and (not buf[-1].strip() or self._is_sml_terminator(buf[-1].strip())):
+                    buf.pop()
+                block = "\n".join(buf).rstrip()
+                if block:
+                    key = re.sub(r"\s+", " ", block).strip()
+                    if key not in seen:
+                        seen.add(key)
+                        blocks.append(block + "\n.")
+                # Skip any grouped terminator / blank lines following the block.
+                i = j
+                while i < n and (not lines[i].strip() or self._is_sml_terminator(lines[i].strip())):
+                    i += 1
+            else:
+                i += 1
+
+        return blocks
 
     # ------------------------------------------------------------------
     # Per-Chunk Extraction (Map)
