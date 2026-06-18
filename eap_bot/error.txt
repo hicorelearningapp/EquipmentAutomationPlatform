@@ -9,44 +9,26 @@ Traceback (most recent call last):
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
     )
     ^
-  File "E:\Github\EquipmentAutomationPlatforms\eap_bot\source\services\document_strategies.py", line 144, in analyze
-    spec = container.extractor.extract_stage_1(
-        pdf_text=doc_text,
-        section_csvs=section_csvs,
-        context_chunks=context_chunks
+  File "E:\Github\EquipmentAutomationPlatforms\eap_bot\source\services\document_strategies.py", line 151, in analyze
+    spec = container.extractor.extract_stage_2(
+        spec=spec,
+        pdf_text=doc_text
     )
-  File "E:\Github\EquipmentAutomationPlatforms\eap_bot\source\services\equipment_extractor.py", line 104, in extract_stage_1
-    summary = SummarySpec.model_validate(summary_data) if summary_data else None
-              ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
-  File "E:\Github\EquipmentAutomationPlatforms\venv\Lib\site-packages\pydantic\main.py", line 732, in model_validate
-    return cls.__pydantic_validator__.validate_python(
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
-        obj,
-        ^^^^
-    ...<5 lines>...
-        by_name=by_name,
-        ^^^^^^^^^^^^^^^^
-    )
-    ^
-pydantic_core._pydantic_core.ValidationError: 7 validation errors for SummarySpec
-StreamFunctions.0.Stream
-  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.13/v/string_type
-StreamFunctions.0.Function
-  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.13/v/string_type
-StreamFunctions.0.Description
-  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.13/v/string_type
-CommunicationStates.0.State
-  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.13/v/string_type
-CommunicationStates.0.Description
-  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.13/v/string_type
-ControlStates.0.State
-  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.13/v/string_type
-ControlStates.0.Description
-  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
-    For further information visit https://errors.pydantic.dev/2.13/v/string_type
+  File "E:\Github\EquipmentAutomationPlatforms\eap_bot\source\services\equipment_extractor.py", line 196, in extract_stage_2
+    partial_specs[idx] = future.result()
+                         ~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\concurrent\futures\_base.py", line 443, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\concurrent\futures\_base.py", line 395, in __get_result
+    raise self._exception
+  File "C:\Python314\Lib\concurrent\futures\thread.py", line 86, in run
+    result = ctx.run(self.task)
+  File "C:\Python314\Lib\concurrent\futures\thread.py", line 73, in run
+    return fn(*args, **kwargs)
+  File "E:\Github\EquipmentAutomationPlatforms\eap_bot\source\services\equipment_extractor.py", line 335, in _extract_chunk
+    prompt = self._build_prompt(preamble + chunk)
+  File "E:\Github\EquipmentAutomationPlatforms\eap_bot\source\services\equipment_extractor.py", line 555, in _build_prompt
+    "StandardsSupported": [{ "Standard": "string", "Version": "string" }],
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Invalid format specifier ' "string", "Version": "string" ' for object of type 'str'

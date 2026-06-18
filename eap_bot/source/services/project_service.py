@@ -175,12 +175,13 @@ class ProjectService:
     def generate_project_pdf(self, project_id: int, spec: EquipmentSpec) -> None:
         """Helper to generate the PDF report for a given spec."""
         try:
+            metadata = self.storage.get_project(project_id)
             from source.services.report_generator import ReportGenerator
             report_gen = ReportGenerator()
             report_dir = self.storage._project_dir(project_id) / "SummaryReport"
             report_dir.mkdir(parents=True, exist_ok=True)
             report_path = report_dir / "Summary_Report.pdf"
-            report_gen.generate_report(spec, report_path)
+            report_gen.generate_report(spec, report_path, project_metadata=metadata)
             logger.info(f"Successfully generated Project Summary Report for project {project_id}")
         except Exception as e:
             logger.error("Failed to generate Project Summary Report: %s", e)

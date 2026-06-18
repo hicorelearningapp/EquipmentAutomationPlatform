@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Any
+from typing import Literal, Optional, Any, Union
 from pydantic import BaseModel, Field, model_validator, field_validator
 
 from source.schemas.report import ReportDefinition
@@ -131,13 +131,17 @@ class SupportedStandard(BaseModel):
     Standard: str
     Version: Optional[str] = None
 
+class GEMComplianceItem(BaseModel):
+    Feature: Optional[str] = None
+    Implemented: Optional[str] = None
+
 class SummarySpec(BaseModel):
     EquipmentName: Optional[str] = None
     WaferSize: Optional[str] = None
     SoftwareRevision: Optional[str] = None
     ToolID: Optional[str] = None
     StandardsSupported: Optional[list[SupportedStandard]] = Field(default_factory=list)
-    GEMCompliance: Optional[list[str]] = Field(default_factory=list)
+    GEMCompliance: Optional[list[Union[GEMComplianceItem, str]]] = Field(default_factory=list)
     HSMSConfiguration: Optional[HSMSConfig] = None
     StreamFunctions: Optional[list[StreamFunction]] = Field(default_factory=list)
     CommunicationStates: Optional[list[CommunicationState]] = Field(default_factory=list)

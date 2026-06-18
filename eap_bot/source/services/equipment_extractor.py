@@ -553,7 +553,7 @@ EXPECTED JSON FORMAT:
     "SoftwareRevision": "string",
     "ToolID": "string - Extract from 'Project ID' if specified, else tool/machine ID",
     "StandardsSupported": [{{ "Standard": "string", "Version": "string" }}],
-    "GEMCompliance": ["string"],
+    "GEMCompliance": [{{"Feature": "string", "Implemented": "string (Yes/No/Partial)"}}],
     "HSMSConfiguration": {{
       "DeviceID": "string",
       "IPAddress": "string",
@@ -561,7 +561,7 @@ EXPECTED JSON FORMAT:
       "BaudRate": "string",
       "Timeout": "string"
     }},
-    "StreamFunctions": [{{ "Stream": 1, "Function": 1, "Description": "string" }}],
+    "StreamFunctions": [{{ "Stream": 1, "Function": 1, "Description": "string" }}](like host to equipment messages, these streams can also be referred to as messages adn stuff),
     "CommunicationStates": [{{ "State": "string", "Description": "string" }}],
     "ControlStates": [{{ "State": "string", "Description": "string" }}]
   }},

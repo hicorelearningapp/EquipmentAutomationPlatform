@@ -83,7 +83,7 @@ class ReportGenerator:
         elements.append(table)
         elements.append(Spacer(1, 10))
 
-    def generate_report(self, spec: EquipmentSpec, output_path: Path) -> None:
+    def generate_report(self, spec: EquipmentSpec, output_path: Path, project_metadata: Any = None) -> None:
         doc = SimpleDocTemplate(
             str(output_path),
             pagesize=letter,
@@ -102,11 +102,22 @@ class ReportGenerator:
         # 1. Equipment Information
         self._add_heading('1. Equipment Information', elements)
         self._add_paragraph("Collect and document the basic equipment details:", elements)
+        p_id = str(project_metadata.ProjectID) if project_metadata else ""
+        p_name = project_metadata.ProjectName if project_metadata else ""
+        p_tool = project_metadata.Tool if project_metadata else ""
+        p_vendor = project_metadata.VendorName if project_metadata else ""
+
         equip_rows = [
+            ["Project ID", p_id],
+            ["Project Name", p_name],
             ["Equipment Name", summary.EquipmentName if summary else spec.ToolType or ""],
+            ["Vendor Name", p_vendor],
+            ["Tool Type", p_tool],
+            ["Protocol", spec.Protocol or "SECS/GEM"],
+            ["Model", spec.Model or ""],
             ["200mm/300mm", summary.WaferSize if summary else ""],
             ["Software Revision", summary.SoftwareRevision if summary else ""],
-            ["Tool ID", summary.ToolID if summary else spec.ToolID or ""]
+            ["Tool ID (Equipment)", summary.ToolID if summary else spec.ToolID or ""]
         ]
         self._add_table(["Item", "Description"], equip_rows, elements)
 
@@ -122,9 +133,15 @@ class ReportGenerator:
         # 3. GEM Compliance Statement Table
         self._add_heading('3. GEM Compliance Statement Table', elements)
         self._add_paragraph("Provide a detailed GEM compliance statement including:", elements)
+        gem_rows = []
         if summary and summary.GEMCompliance:
             for item in summary.GEMCompliance:
-                self._add_paragraph(item, elements, bullet=True)
+                if hasattr(item, "Feature"):
+                    gem_rows.append([item.Feature or "", item.Implemented or ""])
+                else:
+                    # Fallback if old data format
+                    gem_rows.append([str(item), ""])
+            self._add_table(["Feature", "Implemented"], gem_rows, elements)
         else:
             for item in ["Communication Capabilities", "Control Capabilities", "Data Collection Features", "Alarm Management"]:
                 self._add_paragraph(item, elements, bullet=True)
