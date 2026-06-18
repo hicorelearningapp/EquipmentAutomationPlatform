@@ -107,12 +107,49 @@ class StateTransition(BaseModel):
         return self
 
 
+class HSMSConfig(BaseModel):
+    DeviceID: Optional[str] = None
+    IPAddress: Optional[str] = None
+    PortNumber: Optional[str] = None
+    BaudRate: Optional[str] = None
+    Timeout: Optional[str] = None
+
+class CommunicationState(BaseModel):
+    State: str
+    Description: str
+
+class ControlState(BaseModel):
+    State: str
+    Description: str
+
+class SupportedStandard(BaseModel):
+    Standard: str
+    Version: Optional[str] = None
+
+class StreamFunction(BaseModel):
+    Stream: str
+    Function: str
+    Description: str
+
+class SummarySpec(BaseModel):
+    EquipmentName: Optional[str] = None
+    WaferSize: Optional[str] = None
+    SoftwareRevision: Optional[str] = None
+    ToolID: Optional[str] = None
+    StandardsSupported: list[SupportedStandard] = Field(default_factory=list)
+    GEMCompliance: list[str] = Field(default_factory=list)
+    HSMSConfiguration: Optional[HSMSConfig] = None
+    StreamFunctions: list[StreamFunction] = Field(default_factory=list)
+    CommunicationStates: list[CommunicationState] = Field(default_factory=list)
+    ControlStates: list[ControlState] = Field(default_factory=list)
+
 class EquipmentSpec(BaseModel):
     DocumentType: Optional[str] = None
     ToolID: Optional[str] = None
     ToolType: Optional[str] = None
     Model: Optional[str] = None
     Protocol: str = "SECS/GEM"
+    Summary: Optional[SummarySpec] = None
     StatusVariables: list[StatusVariable] = Field(default_factory=list)
     DataVariables: list[DataVariable] = Field(default_factory=list)
     Events: list[Event] = Field(default_factory=list)

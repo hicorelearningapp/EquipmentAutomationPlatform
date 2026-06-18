@@ -135,6 +135,9 @@ class DocumentService:
                     logger.warning("Failed to delete entity embeddings cache: %s", e)
 
         except Exception as e:
+            import traceback
+            with open("error.txt", "w") as f:
+                f.write(traceback.format_exc())
             logger.error("Analysis failed for %s/%s: %s", project_id, document_id, str(e))
             self.storage.mark_failed(project_id, document_id)
             return self._build_failed_response(project_id, document_id)

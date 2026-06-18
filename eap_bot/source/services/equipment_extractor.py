@@ -66,86 +66,139 @@ class EquipmentExtractor:
     # Public API
     # ------------------------------------------------------------------
 
-    def extract(
+    def extract_stage_1(
         self,
         pdf_text: str,
-        section_csvs: dict[str, str] = None,
-        *,
-        first_chunk_only: bool = False,
+        section_csvs: dict[str, str],
+        context_chunks: list[str] | None = None
     ) -> EquipmentSpec:
-        section_csvs = section_csvs or {}
+        """Stage 1: Extract Summary info and map standard SECS/GEM table columns via LLM, then build tables programmatically."""
+        context_text = "\n\n".join(context_chunks) if context_chunks else pdf_text[:4000]
+        
+        table_dir_lines = []
+        for section, csv_str in section_csvs.items():
+            lines = csv_str.strip().split('\n')
+            if lines:
+                table_dir_lines.append(f"Table: {section}\nHeaders: {lines[0]}")
+        
+        table_directory = "\n\n".join(table_dir_lines)
+        prompt = self._STAGE_1_PROMPT.format(context=context_text, table_directory=table_directory)
+        
+        response_obj = self._llm.invoke(prompt).content
+        response_text = response_obj if isinstance(response_obj, str) else "".join(p.get("text", "") if isinstance(p, dict) else str(p) for p in response_obj)
+        import json
+        import csv
+        import io
+        from source.schemas.secsgem import SummarySpec, EquipmentSpec, StatusVariable, Event, Alarm, RemoteCommand, DataVariable, State, StateTransition
+        from source.schemas.report import ReportDefinition
 
-        # ── Phase 1: Tables ───────────────────────────────────────────────────
-        # Try one combined LLM call for all sections.
-        # Falls back to the original one-call-per-section loop on failure.
-        table_spec: EquipmentSpec | None = None
-        if section_csvs:
-            table_spec = self._extract_all_tables_combined(section_csvs)
-            if table_spec is None:
-                logger.info("Per-section table extraction fallback.")
-                per_section: list[EquipmentSpec] = []
-                for section, csv_str in section_csvs.items():
-                    partial = self._extract_from_csv(section, csv_str)
-                    if partial:
-                        per_section.append(partial)
-                if per_section:
-                    table_spec = self._merge_specs(per_section)
+        try:
+            # Clean possible markdown formatting
+            cleaned = response_text.replace("```json", "").replace("```", "").strip()
+            data = json.loads(cleaned)
+        except Exception as e:
+            logger.error("Failed to parse Stage 1 JSON: %s", e)
+            data = {"Summary": {}, "ColumnMappings": {}}
 
-        # ── Phase 2: Text chunks ──────────────────────────────────────────────
-        # "Good coverage" = tables produced SVs + Events + Alarms.
-        # When true, only send the first chunk for ToolID / prose entities /
-        # state machine text.  The remaining N-1 chunks are skipped.
-        # When false (sparse/no tables) the full chunk pass runs as before.
-        has_good_table_coverage = (
-            table_spec is not None
-            and len(table_spec.StatusVariables) > 0
-            and len(table_spec.Events) > 0
-            and len(table_spec.Alarms) > 0
-        )
+        summary_data = data.get("Summary", {})
+        summary = SummarySpec.model_validate(summary_data) if summary_data else None
+        spec = EquipmentSpec(Summary=summary)
+        if summary and summary.ToolID:
+            spec.ToolID = summary.ToolID
 
+        mappings = data.get("ColumnMappings", {})
+        
+        def build_entities(section_name, entity_class, list_attr):
+            category_mappings = mappings.get(section_name)
+            if not category_mappings:
+                return
+            if isinstance(category_mappings, dict):
+                # Fallback for old schema if LLM hallucinated
+                category_mappings = [{"TableKey": section_name, "Mapping": category_mappings}]
+                
+            entities = getattr(spec, list_attr, [])
+            for item in category_mappings:
+                table_key = item.get("TableKey")
+                mapping = item.get("Mapping")
+                if not table_key or not mapping or table_key not in section_csvs:
+                    continue
+                
+                csv_str = section_csvs[table_key]
+                reader = csv.DictReader(io.StringIO(csv_str))
+                for row in reader:
+                    obj_data = {}
+                    for target_key, raw_col in mapping.items():
+                        if raw_col in row:
+                            obj_data[target_key] = row[raw_col]
+                    if obj_data:
+                        # Robust sanitization for Pydantic
+                        for list_field in ["LinkedVIDs", "LinkedReports", "Parameters"]:
+                            if list_field in obj_data and isinstance(obj_data[list_field], str):
+                                val = obj_data[list_field].strip()
+                                # handle multiline or comma separated
+                                val = val.replace("\n", "").replace("\r", "")
+                                obj_data[list_field] = [x.strip() for x in val.split(",") if x.strip()]
+                        
+                        if entity_class.__name__ == "State" and "Name" not in obj_data and "StateID" in obj_data:
+                            obj_data["Name"] = str(obj_data["StateID"])
+                        if entity_class.__name__ == "Alarm":
+                            if "Name" not in obj_data and "AlarmID" in obj_data:
+                                obj_data["Name"] = f"Alarm {obj_data['AlarmID']}"
+                            # Fix non-integer AlarmIDs
+                            if "AlarmID" in obj_data and isinstance(obj_data["AlarmID"], str) and not str(obj_data["AlarmID"]).isdigit():
+                                if "Name" not in obj_data:
+                                    obj_data["Name"] = obj_data["AlarmID"]
+                                obj_data["AlarmID"] = abs(hash(obj_data["AlarmID"])) % 1000000
+                        if entity_class.__name__ == "Event" and "Name" not in obj_data and "CEID" in obj_data:
+                            obj_data["Name"] = f"Event {obj_data['CEID']}"
+                        if entity_class.__name__ == "RemoteCommand":
+                            if "Name" not in obj_data and "RCMD" in obj_data:
+                                obj_data["Name"] = str(obj_data["RCMD"])
+                            if "Parameters" in obj_data and isinstance(obj_data["Parameters"], list):
+                                if len(obj_data["Parameters"]) > 0 and isinstance(obj_data["Parameters"][0], str):
+                                    obj_data["Parameters"] = [{"Name": p, "Type": "UNKNOWN"} for p in obj_data["Parameters"]]
+                            
+                        try:
+                            entities.append(entity_class.model_validate(obj_data))
+                        except Exception as e:
+                            logger.warning(f"Skipping row in {table_key}: {e}")
+            setattr(spec, list_attr, entities)
+
+        build_entities("StatusVariables", StatusVariable, "StatusVariables")
+        build_entities("DataVariables", DataVariable, "DataVariables")
+        build_entities("Events", Event, "Events")
+        build_entities("Alarms", Alarm, "Alarms")
+        build_entities("RemoteCommands", RemoteCommand, "RemoteCommands")
+        build_entities("States", State, "States")
+        build_entities("StateTransitions", StateTransition, "StateTransitions")
+        build_entities("Reports", ReportDefinition, "Reports")
+        
+        return spec
+
+    def extract_stage_2(
+        self,
+        spec: EquipmentSpec,
+        pdf_text: str
+    ) -> EquipmentSpec:
+        """Stage 2: Chunk map-reduce deep Q&A."""
         chunks = self._chunk_text(pdf_text)
-
-        if first_chunk_only or has_good_table_coverage:
-            logger.info(
-                "Table coverage OK (%d SVs / %d Events / %d Alarms) — "
-                "text pass: first chunk only (doc has %d chunks total).",
-                len(table_spec.StatusVariables) if table_spec else 0,
-                len(table_spec.Events) if table_spec else 0,
-                len(table_spec.Alarms) if table_spec else 0,
-                len(chunks),
-            )
-            chunk_spec = self._extract_chunk(chunks[0], chunk_num=1, total_chunks=1)
-        else:
-            if len(chunks) == 1:
-                chunk_spec = self._extract_chunk(chunks[0], chunk_num=1, total_chunks=1)
-            else:
-                workers = min(self._max_parallel, len(chunks))
-                logger.info(
-                    "Sparse/no table coverage — full text pass: %d chunks, %d workers.",
-                    len(chunks), workers,
-                )
-                partial_specs: list[EquipmentSpec] = [None] * len(chunks)  # type: ignore[list-item]
-                with ThreadPoolExecutor(max_workers=workers) as executor:
-                    futures = {
-                        executor.submit(self._extract_chunk, chunk, i + 1, len(chunks)): i
-                        for i, chunk in enumerate(chunks)
-                    }
-                    for future in futures:
-                        idx = futures[future]
-                        partial_specs[idx] = future.result()
-                chunk_spec = self._merge_specs(partial_specs)
-
-        # ── Phase 3: Merge — tables win on conflict ───────────────────────────
-        merged = self._merge_specs([chunk_spec, table_spec]) if table_spec else chunk_spec
-
-        logger.info(
-            "Final spec: %d SVs, %d DVs, %d Events, %d Alarms, %d RCMDs "
-            "[tables=%s, first_chunk_only=%s]",
-            len(merged.StatusVariables), len(merged.DataVariables),
-            len(merged.Events), len(merged.Alarms), len(merged.RemoteCommands),
-            has_good_table_coverage, first_chunk_only,
-        )
-        return merged    
+        workers = min(self._max_parallel, len(chunks))
+        
+        from concurrent.futures import ThreadPoolExecutor
+        partial_specs: list[EquipmentSpec] = [None] * len(chunks)  # type: ignore[list-item]
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = {
+                executor.submit(self._extract_chunk, chunk, i + 1, len(chunks)): i
+                for i, chunk in enumerate(chunks)
+            }
+            for future in futures:
+                idx = futures[future]
+                partial_specs[idx] = future.result()
+                
+        chunk_spec = self._merge_specs(partial_specs)
+        merged = self._merge_specs([chunk_spec, spec])
+        return merged
+    
     # ------------------------------------------------------------------
     # Chunking (Split)
     # ------------------------------------------------------------------
@@ -369,6 +422,35 @@ class EquipmentExtractor:
                 reports.extend(s.Reports)
         if reports:
             merged.Reports = EquipmentExtractor._dedup_by_key(reports, key="RPTID")
+            
+        # Merge Summary
+        for spec in specs:
+            if spec.Summary:
+                if not merged.Summary:
+                    merged.Summary = spec.Summary.model_copy(deep=True) if hasattr(spec.Summary, "model_copy") else spec.Summary.copy()
+                else:
+                    if not merged.Summary.EquipmentName and spec.Summary.EquipmentName:
+                        merged.Summary.EquipmentName = spec.Summary.EquipmentName
+                    if not merged.Summary.WaferSize and spec.Summary.WaferSize:
+                        merged.Summary.WaferSize = spec.Summary.WaferSize
+                    if not merged.Summary.SoftwareRevision and spec.Summary.SoftwareRevision:
+                        merged.Summary.SoftwareRevision = spec.Summary.SoftwareRevision
+                    if not merged.Summary.ToolID and spec.Summary.ToolID:
+                        merged.Summary.ToolID = spec.Summary.ToolID
+                    
+                    # Merge arrays in summary
+                    if spec.Summary.StandardsSupported:
+                        merged.Summary.StandardsSupported.extend(spec.Summary.StandardsSupported)
+                    if spec.Summary.GEMCompliance:
+                        merged.Summary.GEMCompliance.extend(spec.Summary.GEMCompliance)
+                    if not merged.Summary.HSMSConfiguration and spec.Summary.HSMSConfiguration:
+                        merged.Summary.HSMSConfiguration = spec.Summary.HSMSConfiguration
+                    if spec.Summary.StreamFunctions:
+                        merged.Summary.StreamFunctions.extend(spec.Summary.StreamFunctions)
+                    if spec.Summary.CommunicationStates:
+                        merged.Summary.CommunicationStates.extend(spec.Summary.CommunicationStates)
+                    if spec.Summary.ControlStates:
+                        merged.Summary.ControlStates.extend(spec.Summary.ControlStates)
 
         return merged
 
@@ -452,6 +534,24 @@ EXPECTED JSON FORMAT:
   "ToolType": "string",
   "Model": "string (optional)",
   "Protocol": "SECS/GEM",
+  "Summary": {{
+    "EquipmentName": "string - Extract from 'Project Name' if specified, else generic name",
+    "WaferSize": "string",
+    "SoftwareRevision": "string",
+    "ToolID": "string - Extract from 'Project ID' if specified, else tool/machine ID",
+    "StandardsSupported": [{{ "Standard": "string", "Version": "string" }}],
+    "GEMCompliance": ["string"],
+    "HSMSConfiguration": {{
+      "DeviceID": "string",
+      "IPAddress": "string",
+      "PortNumber": "string",
+      "BaudRate": "string",
+      "Timeout": "string"
+    }},
+    "StreamFunctions": [{{ "Stream": 1, "Function": 1, "Description": "string" }}],
+    "CommunicationStates": [{{ "State": "string", "Description": "string" }}],
+    "ControlStates": [{{ "State": "string", "Description": "string" }}]
+  }},
   "StatusVariables":[
     {{
       "SVID": 123,
@@ -520,6 +620,7 @@ CONFIDENCE RUBRIC (set the `Confidence` field per-entity):
 - <0.5 = guessed from weak context
 
 HARD RULES:
+- If the document explicitly provides "Project ID" and "Project Name", map them to `Summary.ToolID` and `Summary.EquipmentName` respectively.
 - For every Event, you MUST extract the LinkedVIDs (Variables) associated with that event.
 - Populate `LinkedVIDs` from any "Linked VIDs" column or comma-separated VID list following an event description.
 - Populate `StateTransitions` from text matching `<State> -> <State> (Triggered by <event/command>)` patterns.
@@ -635,6 +736,57 @@ No prose, no markdown fences.
         "Reports": "reports.csv",
     }
 
+    _STAGE_1_PROMPT: str = """You are an expert semiconductor equipment integration engineer.
+We have extracted tables from an equipment manual.
+
+CONTEXT OVERVIEW (for basic info like ToolID, Name, Software Version):
+{context}
+
+TABLE DIRECTORY:
+The following tables were extracted. For each table, we provide its Section Name and its Column Headers.
+{table_directory}
+
+YOUR TASK:
+1. Extract the "Summary" information (Equipment Name, Standards, HSMS Config, etc.) using the Context Overview and by identifying which dynamic tables contain the required information.
+2. For the standard SECS/GEM tables, map the raw column headers to our standard schema keys.
+Our Standard Schema Keys:
+- StatusVariables: SVID, Name, Description, DataType, AccessType, Value
+- DataVariables: DvID, Name, ValueType, Unit
+- Events: CEID, Name, Description, LinkedVIDs, LinkedReports
+- Alarms: AlarmID, Name, Severity, LinkedVID, Description
+- RemoteCommands: RCMD, Description, Parameters
+- States: StateID, Name, Description
+- StateTransitions: FromState, ToState, TriggerEvent, TriggerCommand
+- Reports: RPTID, Name, LinkedVIDs
+
+Return ONLY valid JSON matching the following structure:
+{{
+    "Summary": {{
+        "EquipmentName": "string",
+        "WaferSize": "string",
+        "SoftwareRevision": "string",
+        "ToolID": "string",
+        "StandardsSupported": [{{"Standard": "string", "Version": "string"}}],
+        "GEMCompliance": ["string"],
+        "HSMSConfiguration": {{"DeviceID": "string", "IPAddress": "string", "PortNumber": "string", "BaudRate": "string", "Timeout": "string"}},
+        "StreamFunctions": [{{"Stream": "string", "Function": "string", "Description": "string"}}],
+        "CommunicationStates": [{{"State": "string", "Description": "string"}}],
+        "ControlStates": [{{"State": "string", "Description": "string"}}]
+    }},
+    "ColumnMappings": {{
+        "StatusVariables": [{{"TableKey": "exact name from TABLE DIRECTORY", "Mapping": {{"SVID": "raw column name", ...}}}}],
+        "Events": [{{"TableKey": "exact name from TABLE DIRECTORY", "Mapping": {{"CEID": "raw column name", ...}}}}],
+        "Alarms": [{{"TableKey": "exact name from TABLE DIRECTORY", "Mapping": {{"AlarmID": "raw column name", ...}}}}],
+        "DataVariables": [{{"TableKey": "exact name from TABLE DIRECTORY", "Mapping": {{"DvID": "raw column name", ...}}}}],
+        "RemoteCommands": [{{"TableKey": "exact name from TABLE DIRECTORY", "Mapping": {{"RCMD": "raw column name", ...}}}}],
+        "States": [{{"TableKey": "exact name from TABLE DIRECTORY", "Mapping": {{"StateID": "raw column name", ...}}}}],
+        "StateTransitions": [{{"TableKey": "exact name from TABLE DIRECTORY", "Mapping": {{"FromState": "raw column name", ...}}}}],
+        "Reports": [{{"TableKey": "exact name from TABLE DIRECTORY", "Mapping": {{"RPTID": "raw column name", ...}}}}]
+    }}
+}}
+No prose, no markdown fences.
+"""
+
     _TABLE_PROMPTS: dict[str, str] = {
         "StatusVariables": """You are a SECS/GEM integration expert.
 The table below was extracted directly from a semiconductor equipment manual.
@@ -746,9 +898,20 @@ TABLE (CSV):
         if not section_csvs:
             return None
 
+        # Only send standard SECS/GEM tables to the LLM
+        standard_sections = {
+            "StatusVariables", "DataVariables", "Events", "Alarms", 
+            "RemoteCommands", "States", "StateTransitions", "Reports"
+        }
+        
         table_blocks = []
         for section, csv_str in section_csvs.items():
-            table_blocks.append(f"--- TABLE: {section} ---\n{csv_str}")
+            if section in standard_sections:
+                table_blocks.append(f"--- TABLE: {section} ---\n{csv_str}")
+        
+        if not table_blocks:
+            return None
+            
         tables_text = "\n\n".join(table_blocks)
 
         prompt = self._COMBINED_TABLE_PROMPT.format(tables=tables_text)
@@ -931,8 +1094,11 @@ TABLE (CSV):
 
         try:
             with pdfplumber.open(pdf_path) as pdf:
-                for page in pdf.pages:
-                    for raw_table in (page.extract_tables() or []):
+                table_index = 0
+                for page_num, page in enumerate(pdf.pages, 1):
+                    for table in page.find_tables():
+                        table_index += 1
+                        raw_table = table.extract()
                         cleaned = [
                             [str(cell).strip() if cell is not None else "" for cell in row]
                             for row in raw_table
@@ -940,13 +1106,47 @@ TABLE (CSV):
                         ]
                         if len(cleaned) < 2:
                             continue
+                        
                         section = self._classify_table(cleaned)
-                        if section:
-                            if section not in section_rows:
-                                section_rows[section] = cleaned
-                            else:
-                                # Append data rows only (skip duplicate header)
+                        if not section:
+                            # Attempt to find heading above table
+                            x0, top, x1, bottom = table.bbox
+                            crop_top = max(0, top - 100) # Look back up to 100 points
+                            heading = ""
+                            if crop_top < top:
+                                heading_bbox = (0, crop_top, page.width, top)
+                                heading_crop = page.within_bbox(heading_bbox)
+                                text = heading_crop.extract_text()
+                                if text:
+                                    # Get last non-empty line
+                                    lines = [line.strip() for line in text.split('\n') if line.strip()]
+                                    if lines:
+                                        heading = lines[-1]
+                            
+                            if heading:
+                                # Sanitize heading
+                                import re
+                                section = re.sub(r'[^A-Za-z0-9_]', '_', heading)
+                                section = re.sub(r'_+', '_', section).strip('_')
+                                
+                            if not section:
+                                section = f"Unclassified_Page{page_num}_Table{table_index}"
+
+                        if section not in section_rows:
+                            section_rows[section] = cleaned
+                        else:
+                            # Compare headers to ensure we don't mix different tables
+                            existing_header = section_rows[section][0]
+                            new_header = cleaned[0]
+                            if len(existing_header) == len(new_header) and existing_header == new_header:
+                                # Safe to append (likely a multi-page table)
                                 section_rows[section].extend(cleaned[1:])
+                            else:
+                                # Headers don't match! It's a completely different table.
+                                idx = 2
+                                while f"{section}_{idx}" in section_rows:
+                                    idx += 1
+                                section_rows[f"{section}_{idx}"] = cleaned
         except Exception as exc:
             logger.error("pdfplumber failed on %s: %s", pdf_path.name, exc)
             return {}
@@ -969,7 +1169,8 @@ TABLE (CSV):
             if tables_dir is not None:
                 raw_tables_dir = tables_dir / "RawTables"
                 raw_tables_dir.mkdir(parents=True, exist_ok=True)
-                csv_path = raw_tables_dir / self._CSV_FILENAMES[section]
+                filename = self._CSV_FILENAMES.get(section, f"{section}.csv")
+                csv_path = raw_tables_dir / filename
                 # Append new data rows to existing file, or create fresh
                 if csv_path.exists():
                     existing_lines = csv_path.read_text(encoding="utf-8").splitlines()

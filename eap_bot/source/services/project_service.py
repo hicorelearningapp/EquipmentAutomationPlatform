@@ -86,6 +86,43 @@ class ProjectService:
                 try:
                     spec_json = self.storage.read_spec_json(project_id, doc.DocumentID)
                     spec = EquipmentSpec.model_validate_json(spec_json)
+                    
+                    # Merge top-level metadata if extracted (prioritize extracted over generic default)
+                    if spec.ToolID and spec.ToolID.lower() not in ("string", "unknown", "none", ""):
+                        aggregated.ToolID = spec.ToolID
+                    if spec.ToolType and spec.ToolType.lower() not in ("string", "unknown", "none", ""):
+                        aggregated.ToolType = spec.ToolType
+                    if spec.Model and spec.Model.lower() not in ("string (optional)", "unknown", "none", ""):
+                        aggregated.Model = spec.Model
+                    if spec.Protocol and spec.Protocol.lower() not in ("string", "unknown", "none", ""):
+                        aggregated.Protocol = spec.Protocol
+                        
+                    # Merge Summary
+                    if spec.Summary:
+                        if not aggregated.Summary:
+                            aggregated.Summary = spec.Summary.model_copy(deep=True) if hasattr(spec.Summary, "model_copy") else spec.Summary.copy()
+                        else:
+                            if spec.Summary.EquipmentName and spec.Summary.EquipmentName.lower() not in ("string", "string - extract from 'project name' if specified, else generic name"):
+                                aggregated.Summary.EquipmentName = spec.Summary.EquipmentName
+                            if spec.Summary.WaferSize and spec.Summary.WaferSize.lower() != "string":
+                                aggregated.Summary.WaferSize = spec.Summary.WaferSize
+                            if spec.Summary.SoftwareRevision and spec.Summary.SoftwareRevision.lower() != "string":
+                                aggregated.Summary.SoftwareRevision = spec.Summary.SoftwareRevision
+                            if spec.Summary.ToolID and spec.Summary.ToolID.lower() not in ("string", "string - extract from 'project id' if specified, else tool/machine id"):
+                                aggregated.Summary.ToolID = spec.Summary.ToolID
+                            
+                            if spec.Summary.StandardsSupported:
+                                aggregated.Summary.StandardsSupported.extend(spec.Summary.StandardsSupported)
+                            if spec.Summary.GEMCompliance:
+                                aggregated.Summary.GEMCompliance.extend(spec.Summary.GEMCompliance)
+                            if spec.Summary.HSMSConfiguration and not aggregated.Summary.HSMSConfiguration:
+                                aggregated.Summary.HSMSConfiguration = spec.Summary.HSMSConfiguration
+                            if spec.Summary.StreamFunctions:
+                                aggregated.Summary.StreamFunctions.extend(spec.Summary.StreamFunctions)
+                            if spec.Summary.CommunicationStates:
+                                aggregated.Summary.CommunicationStates.extend(spec.Summary.CommunicationStates)
+                            if spec.Summary.ControlStates:
+                                aggregated.Summary.ControlStates.extend(spec.Summary.ControlStates)
 
                     is_excel = doc.FileName.lower().endswith(".xlsx")
                     is_txt = doc.FileName.lower().endswith(".txt")
@@ -120,7 +157,23 @@ class ProjectService:
         aggregated.StateTransitions = self._dedup_transitions(aggregated.StateTransitions)
         aggregated.Reports = self._dedup_by(aggregated.Reports, "RPTID")
 
+        # Generate Project-level Summary Report PDF using aggregated JSON data
+        self.generate_project_pdf(project_id, aggregated)
+
         return aggregated
+
+    def generate_project_pdf(self, project_id: int, spec: EquipmentSpec) -> None:
+        """Helper to generate the PDF report for a given spec."""
+        try:
+            from source.services.report_generator import ReportGenerator
+            report_gen = ReportGenerator()
+            report_dir = self.storage._project_dir(project_id) / "SummaryReport"
+            report_dir.mkdir(parents=True, exist_ok=True)
+            report_path = report_dir / "Summary_Report.pdf"
+            report_gen.generate_report(spec, report_path)
+            logger.info(f"Successfully generated Project Summary Report for project {project_id}")
+        except Exception as e:
+            logger.error("Failed to generate Project Summary Report: %s", e)
 
     # ── MES Mapping ───────────────────────────────────────────────────────────
 

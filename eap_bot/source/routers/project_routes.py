@@ -120,10 +120,10 @@ class ProjectAPI:
                 batch_path.unlink()
 
             for doc in metadata.Documents:
-                if doc.Status in ["completed", "failed"]:
-                    doc.Status = "uploaded"
+                doc.Status = "uploaded"
             
-            self.storage.update_project_metadata(project_id, metadata)
+            # Save the updated document statuses to disk properly
+            self.storage._write_metadata(metadata)
             
             _, aggregated = container.project_service.aggregate_project_data(project_id, auto_analyze=True)
             self.storage.save_spec_json(batch_path, aggregated)

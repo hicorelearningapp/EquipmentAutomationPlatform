@@ -128,9 +128,29 @@ class PdfProcessingStrategy(DocumentProcessingStrategy):
                 tables_store_path=tables_store_path,
             )
 
-        spec = container.extractor.extract(
-            doc_text,
+        # --- Stage 1: RAG Context & Table/Summary Extraction ---
+        context_chunks = []
+        try:
+            from source.utils.embedder import VectorStoreManager
+            category_slug = storage._doc_category_to_slug(document.DocumentType) if hasattr(document, "DocumentType") else "manuals"
+            category_store_path = storage.vectorstore_path_for_category(project_id, category_slug)
+            vstore = VectorStoreManager(category_store_path)
+            # Fetch generic system overview to help LLM find ToolID, Software version, etc.
+            docs = vstore.search("System Overview Tool Information Name Software Version Configuration", k=3)
+            context_chunks = [doc.page_content for doc in docs]
+        except Exception as e:
+            logger.warning("Could not fetch RAG context for Stage 1: %s", e)
+
+        spec = container.extractor.extract_stage_1(
+            pdf_text=doc_text,
             section_csvs=section_csvs,
+            context_chunks=context_chunks
+        )
+
+        # Stage 2: Deep Q&A Chunk Extraction
+        spec = container.extractor.extract_stage_2(
+            spec=spec,
+            pdf_text=doc_text
         )
 
         try:

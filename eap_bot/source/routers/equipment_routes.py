@@ -86,6 +86,10 @@ class EquipmentAPI:
                     questions = self.storage.get_questions(project_id)
                     if not questions:
                         container.document_service.generate_predefined_questions(project_id, spec_obj)
+                    
+                    # Generate the PDF to ensure it is up to date with the latest json
+                    container.project_service.generate_project_pdf(project_id, spec_obj)
+
                     return container.document_service._build_extraction_response(
                         project_id, "project_batch", spec_obj
                     )
@@ -240,6 +244,10 @@ class EquipmentAPI:
             spec_obj.Reports = [ReportDefinition(**r) for r in validated_req.Reports]
             
             self.storage.save_spec_json(json_path, spec_obj)
+            
+            # Regenerate the PDF to reflect the updated json
+            container.project_service.generate_project_pdf(project_id, spec_obj)
+            
             return {"Status": "success", "Message": "Extraction updated successfully"}
             
         except InvalidSlugError as exc:
@@ -322,6 +330,9 @@ class EquipmentAPI:
                 event.LinkedReports = sorted(list(chosen_rptids))
                 
             self.storage.save_spec_json(json_path, spec_obj)
+            
+            # Regenerate the PDF to reflect the updated json
+            container.project_service.generate_project_pdf(project_id, spec_obj)
             
             return container.document_service._build_extraction_response(
                 project_id, "project_batch", spec_obj
