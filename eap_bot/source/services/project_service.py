@@ -112,16 +112,26 @@ class ProjectService:
                                 aggregated.Summary.ToolID = spec.Summary.ToolID
                             
                             if spec.Summary.StandardsSupported:
+                                if aggregated.Summary.StandardsSupported is None:
+                                    aggregated.Summary.StandardsSupported = []
                                 aggregated.Summary.StandardsSupported.extend(spec.Summary.StandardsSupported)
                             if spec.Summary.GEMCompliance:
+                                if aggregated.Summary.GEMCompliance is None:
+                                    aggregated.Summary.GEMCompliance = []
                                 aggregated.Summary.GEMCompliance.extend(spec.Summary.GEMCompliance)
                             if spec.Summary.HSMSConfiguration and not aggregated.Summary.HSMSConfiguration:
                                 aggregated.Summary.HSMSConfiguration = spec.Summary.HSMSConfiguration
                             if spec.Summary.StreamFunctions:
+                                if aggregated.Summary.StreamFunctions is None:
+                                    aggregated.Summary.StreamFunctions = []
                                 aggregated.Summary.StreamFunctions.extend(spec.Summary.StreamFunctions)
                             if spec.Summary.CommunicationStates:
+                                if aggregated.Summary.CommunicationStates is None:
+                                    aggregated.Summary.CommunicationStates = []
                                 aggregated.Summary.CommunicationStates.extend(spec.Summary.CommunicationStates)
                             if spec.Summary.ControlStates:
+                                if aggregated.Summary.ControlStates is None:
+                                    aggregated.Summary.ControlStates = []
                                 aggregated.Summary.ControlStates.extend(spec.Summary.ControlStates)
 
                     is_excel = doc.FileName.lower().endswith(".xlsx")

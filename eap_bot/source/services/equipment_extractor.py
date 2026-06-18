@@ -367,6 +367,9 @@ class EquipmentExtractor:
                 self._sanitize(data)
                 return EquipmentSpec.model_validate(data)
             except Exception as retry_err:
+                import traceback
+                with open("extractor_error.txt", "w") as f:
+                    f.write(traceback.format_exc())
                 if total_chunks == 1:
                     raise
                 logger.error(
@@ -440,16 +443,26 @@ class EquipmentExtractor:
                     
                     # Merge arrays in summary
                     if spec.Summary.StandardsSupported:
+                        if merged.Summary.StandardsSupported is None:
+                            merged.Summary.StandardsSupported = []
                         merged.Summary.StandardsSupported.extend(spec.Summary.StandardsSupported)
                     if spec.Summary.GEMCompliance:
+                        if merged.Summary.GEMCompliance is None:
+                            merged.Summary.GEMCompliance = []
                         merged.Summary.GEMCompliance.extend(spec.Summary.GEMCompliance)
                     if not merged.Summary.HSMSConfiguration and spec.Summary.HSMSConfiguration:
                         merged.Summary.HSMSConfiguration = spec.Summary.HSMSConfiguration
                     if spec.Summary.StreamFunctions:
+                        if merged.Summary.StreamFunctions is None:
+                            merged.Summary.StreamFunctions = []
                         merged.Summary.StreamFunctions.extend(spec.Summary.StreamFunctions)
                     if spec.Summary.CommunicationStates:
+                        if merged.Summary.CommunicationStates is None:
+                            merged.Summary.CommunicationStates = []
                         merged.Summary.CommunicationStates.extend(spec.Summary.CommunicationStates)
                     if spec.Summary.ControlStates:
+                        if merged.Summary.ControlStates is None:
+                            merged.Summary.ControlStates = []
                         merged.Summary.ControlStates.extend(spec.Summary.ControlStates)
 
         return merged

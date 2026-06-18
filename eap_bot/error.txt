@@ -1,0 +1,52 @@
+Traceback (most recent call last):
+  File "E:\Github\EquipmentAutomationPlatforms\eap_bot\source\services\document_service.py", line 107, in analyze_document
+    spec, pages = strategy.analyze(
+                  ~~~~~~~~~~~~~~~~^
+        project_id=project_id,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        container=self._container,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\EquipmentAutomationPlatforms\eap_bot\source\services\document_strategies.py", line 144, in analyze
+    spec = container.extractor.extract_stage_1(
+        pdf_text=doc_text,
+        section_csvs=section_csvs,
+        context_chunks=context_chunks
+    )
+  File "E:\Github\EquipmentAutomationPlatforms\eap_bot\source\services\equipment_extractor.py", line 104, in extract_stage_1
+    summary = SummarySpec.model_validate(summary_data) if summary_data else None
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "E:\Github\EquipmentAutomationPlatforms\venv\Lib\site-packages\pydantic\main.py", line 732, in model_validate
+    return cls.__pydantic_validator__.validate_python(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        obj,
+        ^^^^
+    ...<5 lines>...
+        by_name=by_name,
+        ^^^^^^^^^^^^^^^^
+    )
+    ^
+pydantic_core._pydantic_core.ValidationError: 7 validation errors for SummarySpec
+StreamFunctions.0.Stream
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type
+StreamFunctions.0.Function
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type
+StreamFunctions.0.Description
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type
+CommunicationStates.0.State
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type
+CommunicationStates.0.Description
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type
+ControlStates.0.State
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type
+ControlStates.0.Description
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_type

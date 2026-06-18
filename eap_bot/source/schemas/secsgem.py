@@ -114,34 +114,34 @@ class HSMSConfig(BaseModel):
     BaudRate: Optional[str] = None
     Timeout: Optional[str] = None
 
+class StreamFunction(BaseModel):
+    Stream: Optional[str] = None
+    Function: Optional[str] = None
+    Description: Optional[str] = None
+
 class CommunicationState(BaseModel):
-    State: str
-    Description: str
+    State: Optional[str] = None
+    Description: Optional[str] = None
 
 class ControlState(BaseModel):
-    State: str
-    Description: str
+    State: Optional[str] = None
+    Description: Optional[str] = None
 
 class SupportedStandard(BaseModel):
     Standard: str
     Version: Optional[str] = None
-
-class StreamFunction(BaseModel):
-    Stream: str
-    Function: str
-    Description: str
 
 class SummarySpec(BaseModel):
     EquipmentName: Optional[str] = None
     WaferSize: Optional[str] = None
     SoftwareRevision: Optional[str] = None
     ToolID: Optional[str] = None
-    StandardsSupported: list[SupportedStandard] = Field(default_factory=list)
-    GEMCompliance: list[str] = Field(default_factory=list)
+    StandardsSupported: Optional[list[SupportedStandard]] = Field(default_factory=list)
+    GEMCompliance: Optional[list[str]] = Field(default_factory=list)
     HSMSConfiguration: Optional[HSMSConfig] = None
-    StreamFunctions: list[StreamFunction] = Field(default_factory=list)
-    CommunicationStates: list[CommunicationState] = Field(default_factory=list)
-    ControlStates: list[ControlState] = Field(default_factory=list)
+    StreamFunctions: Optional[list[StreamFunction]] = Field(default_factory=list)
+    CommunicationStates: Optional[list[CommunicationState]] = Field(default_factory=list)
+    ControlStates: Optional[list[ControlState]] = Field(default_factory=list)
 
 class EquipmentSpec(BaseModel):
     DocumentType: Optional[str] = None
