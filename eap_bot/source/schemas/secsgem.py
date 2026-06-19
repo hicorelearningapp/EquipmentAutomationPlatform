@@ -132,8 +132,11 @@ class SupportedStandard(BaseModel):
     Version: Optional[str] = None
 
 class GEMComplianceItem(BaseModel):
+    Category: Optional[str] = None
     Feature: Optional[str] = None
-    Implemented: Optional[str] = None
+    Implemented: Optional[bool] = None
+    GEMCompliant: Optional[bool] = None
+    ComplianceNote: Optional[str] = None
 
 class SummarySpec(BaseModel):
     EquipmentName: Optional[str] = None

@@ -130,18 +130,58 @@ class ReportGenerator:
                 std_rows.append([std.Standard, std.Version or ""])
         self._add_table(["Standard", "Version"], std_rows, elements)
 
-        # 3. GEM Compliance Statement Table
-        self._add_heading('3. GEM Compliance Statement Table', elements)
+        # 3. SEMI E30 Equipment Capabilities Profile
+        self._add_heading('3. SEMI E30 Equipment Capabilities Profile', elements)
         self._add_paragraph("Provide a detailed GEM compliance statement including:", elements)
-        gem_rows = []
+        
         if summary and summary.GEMCompliance:
+            # Group by category
+            categories = {}
             for item in summary.GEMCompliance:
-                if hasattr(item, "Feature"):
-                    gem_rows.append([item.Feature or "", item.Implemented or ""])
+                if hasattr(item, "Category"):
+                    cat = item.Category or "Capabilities"
+                    if cat not in categories:
+                        categories[cat] = []
+                    categories[cat].append(item)
                 else:
-                    # Fallback if old data format
-                    gem_rows.append([str(item), ""])
-            self._add_table(["Feature", "Implemented"], gem_rows, elements)
+                    # Fallback
+                    cat = "Capabilities"
+                    if cat not in categories:
+                        categories[cat] = []
+                    categories[cat].append(item)
+            
+            def render_cb(val):
+                if val is True: return "[x] Yes   [ ] No"
+                if val is False: return "[ ] Yes   [x] No"
+                return "[ ] Yes   [ ] No"
+
+            for cat, items in categories.items():
+                gem_rows = []
+                # Header row for this category
+                gem_rows.append([cat, "Implemented", "GEM Compliant"])
+                for item in items:
+                    if hasattr(item, "Feature"):
+                        impl_str = render_cb(item.Implemented)
+                        comp_str = render_cb(item.GEMCompliant)
+                        if getattr(item, "ComplianceNote", None):
+                            comp_str += f"\n{item.ComplianceNote}"
+                        gem_rows.append([item.Feature or "", impl_str, comp_str])
+                    else:
+                        gem_rows.append([str(item), render_cb(None), render_cb(None)])
+                
+                # We format this specific table to match the layout
+                t = Table(gem_rows, colWidths=[200, 120, 150])
+                t.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#dbe5f1')), # header background
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 10),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                ]))
+                elements.append(t)
+                elements.append(Spacer(1, 10))
         else:
             for item in ["Communication Capabilities", "Control Capabilities", "Data Collection Features", "Alarm Management"]:
                 self._add_paragraph(item, elements, bullet=True)
