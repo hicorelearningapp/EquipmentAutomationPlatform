@@ -1,0 +1,74 @@
+// --- COMPREHENSIVE TEST SCRIPT (PROJECT 16 ETCH-PRO) ---
+// --- Define Reports (S2F33) ---
+S2F33 W
+  <L [2]
+    <U4 100>                    * DATAID
+    <L [3]
+      <L [2]
+        <U4 1>                     * RPTID (Control & State Variables)
+        <L [4]
+          <U4 10001>                 * SVID
+          <U4 10002>                 * SVID
+          <U4 10003>                 * SVID
+          <U4 10004>                 * SVID
+        >
+      >
+      <L [2]
+        <U4 2>                     * RPTID (Chamber Environment Variables)
+        <L [3]
+          <U4 10015>                 * SVID
+          <U4 10016>                 * SVID
+          <U4 10017>                 * SVID
+        >
+      >
+      <L [2]
+        <U4 3>                     * RPTID (Process Environment Variables)
+        <L [3]
+          <U4 10019>                 * SVID
+          <U4 10020>                 * SVID
+          <U4 10021>                 * SVID
+        >
+      >
+    >
+  >
+.
+
+// --- Link Reports (S2F35) ---
+S2F35 W
+  <L [2]
+    <U4 100>                    * DATAID
+    <L [3]
+      <L [2]
+        <U4 5000>                   * CEID (Wafer Process Started)
+        <L [2]
+          <U4 1>                   * RPTID
+          <U4 2>                   * RPTID
+        >
+      >
+      <L [2]
+        <U4 5001>                   * CEID (Wafer Process Completed)
+        <L [3]
+          <U4 1>                   * RPTID
+          <U4 2>                   * RPTID
+          <U4 3>                   * RPTID
+        >
+      >
+      <L [2]
+        <U4 5002>                   * CEID (Alarm State Triggered)
+        <L [1]
+          <U4 1>                   * RPTID
+        >
+      >
+    >
+  >
+.
+
+// --- Enable Events (S2F37) ---
+S2F37 W
+  <Boolean True>                   * CEED
+  <L [3]
+    <U4 5000>                      * CEID
+    <U4 5001>                      * CEID
+    <U4 5002>                      * CEID
+  >
+.

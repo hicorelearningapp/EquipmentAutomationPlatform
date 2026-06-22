@@ -1,0 +1,2268 @@
+================================================================================
+--- FILE PATH: eap_bot/source/routers/tool_characterization_routes.py ---
+================================================================================
+
+import json
+import logging
+
+from typing import Optional, List
+from fastapi import APIRouter, HTTPException, File, UploadFile, Form
+
+from pathlib import Path
+
+from source.managers.service_container import container
+from source.schemas.secsgem import EquipmentSpec
+from source.schemas.codegen import ScriptUpdateRequest
+from source.schemas.test_script import GenerateTestScriptsRequest
+from source.schemas.project import DocumentCategory, TestResultFileType
+from source.schemas.sml_generation import SMLGenerationResponse
+from source.services.document_service import DocumentService
+from source.services.storage_service import ProjectNotFoundError, DocumentExistsError
+from source.services.test_script_service import TestScriptService
+
+logger = logging.getLogger(__name__)
+
+
+class ToolCharacterizationAPI:
+    def __init__(self):
+        self.router = APIRouter(tags=["tool characterizations"])
+        self.storage = container.storage
+        self.test_script_service = TestScriptService()
+        self.register_routes()
+
+    def register_routes(self):
+        self.router.post("/GenerateTestScripts/{project_id}")(self.generate_test_scripts)
+        self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
+        self.router.post("/GenerateSMLScripts/{project_id}", response_model=SMLGenerationResponse)(self.generate_sml_scripts)
+        # self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
+        self.router.post("/UploadTestResult")(self.upload_test_result)
+        self.router.get("/GetToolResults/{project_id}")(self.get_tool_results)
+
+    def generate_test_scripts(self, project_id: int, body: GenerateTestScriptsRequest):
+        try:
+            filename = body.filename
+
+            # Normalise filename for check
+            sml_filename = filename
+            if not sml_filename.endswith(".txt"):
+                if sml_filename == "ToolCharacterisationTesting":
+                    sml_filename = "tool_characterisation_testing.txt"
+                elif sml_filename == "GeneralGEMTesting":
+                    sml_filename = "general_gem_testing.txt"
+                else:
+                    sml_filename = f"{sml_filename}.txt"
+
+            # Check project-specific directory first
+            project_file_path = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR / sml_filename
+            if project_file_path.exists():
+                file_path = project_file_path
+            else:
+                # Fallback to the respective JSON in GEMTestScriptTemplates
+                if sml_filename == "tool_characterisation_testing.txt":
+                    fallback_filename = "ToolCharacterizationTestScriptjson (1).txt"
+                elif sml_filename == "general_gem_testing.txt":
+                    fallback_filename = "GeneraltestScriptjson (1).txt"
+                else:
+                    fallback_filename = sml_filename
+
+                file_path = Path(__file__).resolve().parent.parent.parent / "GEMTestScriptTemplates" / fallback_filename
+
+            if not file_path.exists():
+                raise HTTPException(404, f"Test script file '{filename}' not found.")
+
+            content = file_path.read_text(encoding="utf-8")
+            try:
+                tests = json.loads(content)
+            except Exception as json_err:
+                logger.info("Content is not valid JSON, trying SML parser fallback: %s", json_err)
+                try:
+                    tests = self.test_script_service.parse_sml_to_tests(content)
+                except Exception as parse_err:
+                    raise HTTPException(400, f"Failed to parse content as either JSON or SML: {parse_err}")
+
+            tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
+            tool_char_dir.mkdir(parents=True, exist_ok=True)
+
+            json_filename = Path(filename).stem + ".json"
+            dst_path = tool_char_dir / json_filename
+            dst_path.write_text(json.dumps(tests, indent=2), encoding="utf-8")
+
+            return tests
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error("Failed to generate and parse test scripts: %s", e)
+            raise HTTPException(500, str(e))
+
+    def update_tool_char_script(self, project_id: int, body: ScriptUpdateRequest):
+        try:
+            filename = body.key
+            if not filename.endswith(".txt"):
+                if filename == "ToolCharacterisationTesting":
+                    filename = "tool_characterisation_testing.txt"
+                elif filename == "GeneralGEMTesting":
+                    filename = "general_gem_testing.txt"
+                else:
+                    filename = f"{filename}.txt"
+
+            tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
+            tool_char_dir.mkdir(parents=True, exist_ok=True)
+
+            dst_path = tool_char_dir / filename
+            dst_path.write_text(body.script, encoding="utf-8")
+
+            return {
+                "Status": "success",
+                "Message": f"Script {body.key} updated successfully",
+                "FilePath": str(dst_path)
+            }
+        except Exception as e:
+            logger.error("Failed to update tool characterization script: %s", e)
+            raise HTTPException(500, str(e))
+
+    def generate_sml_scripts(self, project_id: int):
+        try:
+            return container.sml_generation_service.generate_scripts(project_id)
+        except FileNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except Exception as e:
+            logger.error("Failed to generate SML scripts: %s", e)
+            raise HTTPException(500, str(e))
+
+    # def generate_tool_char_report_summary(self, project_id: int):
+    #     try:
+    #         metadata = self.storage.get_project(project_id)
+    #         test_summary = {
+    #             "ProjectID": project_id,
+    #             "ProjectName": metadata.ProjectName,
+    #             "Timestamp": self.storage.now().isoformat(),
+    #             "Status": "completed",
+    #             "TotalTests": 15,
+    #             "PassedTests": 15,
+    #             "FailedTests": 0,
+    #             "SummaryReport": "All SECS/GEM message structures characterized successfully."
+    #         }
+    # 
+    #         test_summary_dir = self.storage._project_dir(project_id) / self.storage.TEST_SUMMARY_DIR
+    #         test_summary_dir.mkdir(parents=True, exist_ok=True)
+    # 
+    #         summary_path = test_summary_dir / "test_summary.json"
+    #         summary_path.write_text(json.dumps(test_summary, indent=2), encoding="utf-8")
+    # 
+    #         return {
+    #             "Status": "success",
+    #             "Summary": test_summary
+    #         }
+    #     except Exception as e:
+    #         logger.error("Failed to generate report summary: %s", e)
+    #         raise HTTPException(500, str(e))
+
+    async def upload_test_result(
+        self,
+        project_id: int = Form(...),
+        tool_id: str = Form(...),
+        files: List[UploadFile] = File(...)
+    ):
+        try:
+            if not files:
+                raise HTTPException(400, "No files uploaded")
+                
+            files_data = []
+            for file in files:
+                if not file.filename:
+                    raise HTTPException(400, "No file uploaded")
+                    
+                # Extract script names and prefix from the filename (e.g., Test_GEMTestScript.json)
+                stem = Path(file.filename).stem
+                parts = stem.split("_")
+                if len(parts) > 1:
+                    prefix = parts[0]
+                    script_names = [p.strip() for p in parts[1:] if p.strip() and not p.strip().isdigit()]
+                else:
+                    prefix = ""
+                    script_names = [parts[0].strip()] if parts[0].strip() else []
+
+                if not script_names:
+                    raise HTTPException(400, f"Could not extract test script name from filename: {file.filename}")
+
+                if prefix.lower() == "test":
+                    inferred_file_type = TestResultFileType.test
+                elif prefix.lower() == "secs":
+                    inferred_file_type = TestResultFileType.secs_log
+                else:
+                    raise HTTPException(
+                        400,
+                        f"Filename prefix must start with 'Test_' or 'SECS_': {file.filename}"
+                    )
+
+                filename = file.filename.lower()
+                file_bytes = await file.read()
+                
+                # Special case: save .txt SECS logs as SML Scripts (only once)
+                if inferred_file_type == TestResultFileType.secs_log and filename.endswith(".txt"):
+                    doc_service = DocumentService(self.storage, container)
+                    doc_service.upload_document(
+                        project_id=project_id,
+                        filename=file.filename,
+                        contents=file_bytes,
+                        doc_category=DocumentCategory.SML_SCRIPTS
+                    )
+                
+                files_data.append({
+                    "file_name": file.filename,
+                    "file_bytes": file_bytes,
+                    "test_script_names": script_names,
+                    "file_type": inferred_file_type.value
+                })
+                
+            saved_paths = self.storage.save_multiple_test_results(
+                project_id=project_id,
+                tool_id=tool_id,
+                files_data=files_data
+            )
+            
+            return {
+                "Status": "success",
+                "Message": f"Files uploaded successfully to {len(saved_paths)} location(s)",
+                "Paths": saved_paths
+            }
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error("Failed to upload test result: %s", exc)
+            raise HTTPException(500, str(exc)) from exc
+
+
+    async def get_tool_results(self, project_id: int, tool_id: str):
+        try:
+            results = self.storage.get_all_tool_results(project_id, tool_id)
+            return results
+        except ProjectNotFoundError as exc:
+            raise HTTPException(404, str(exc)) from exc
+        except Exception as exc:
+            logger.error("Failed to retrieve tool results: %s", exc)
+            raise HTTPException(500, str(exc)) from exc
+
+
+
+================================================================================
+--- FILE PATH: eap_bot/source/managers/service_container.py ---
+================================================================================
+
+import logging
+
+from source.services.automap_service import AutoMapService
+from source.services.equipment_extractor import EquipmentExtractor
+from source.services.mapping_service import MappingService
+from source.services.qa_service import QAService
+from source.services.report_service import ReportService
+from source.services.storage_service import StorageService
+from source.services.smart_automation_service import SmartAutomationService
+from source.utils.embedder import VectorStoreManager
+from source.utils.llm_factory import LLMFactory, LLMStrategy
+from source.utils.pdf_reader import DocumentParser, DocumentParserFactory
+from source.validators.spec_validator import SpecValidator
+
+logger = logging.getLogger(__name__)
+
+
+class ServiceContainer:
+    def __init__(self) -> None:
+        logger.info("ServiceContainer: initialising services ...")
+
+        self.llm_strategy: LLMStrategy = LLMFactory.create_strategy()
+        self.storage: StorageService = StorageService()
+
+        self.parser: DocumentParser = DocumentParserFactory.create()
+        self.validator: SpecValidator = SpecValidator()
+        self.extractor: EquipmentExtractor = EquipmentExtractor(
+            llm_strategy=self.llm_strategy
+        )
+        self.mapping_service: MappingService = MappingService(
+            llm_strategy=self.llm_strategy
+        )
+        self.report_service: ReportService = ReportService(
+            llm_strategy=self.llm_strategy
+        )
+        self.automap_service: AutoMapService = AutoMapService(
+            storage=self.storage,
+            llm_strategy=self.llm_strategy,
+        )
+        self.smart_automation_service: SmartAutomationService = SmartAutomationService()
+
+        # Import here to avoid circular imports at module load time
+        from source.services.project_service import ProjectService
+        from source.services.document_service import DocumentService
+        from source.services.sml_generation_service import SMLGenerationService
+
+        self.project_service: ProjectService = ProjectService(
+            storage=self.storage, container=self
+        )
+        self.document_service: DocumentService = DocumentService(
+            storage=self.storage, container=self
+        )
+        self.sml_generation_service: SMLGenerationService = SMLGenerationService(
+            storage=self.storage
+        )
+
+        logger.info("ServiceContainer: all services ready.")
+
+    def create_qa_service(
+        self,
+        vector_store: VectorStoreManager,
+        vector_filters: dict | None = None,
+    ) -> QAService:
+        return QAService(
+            llm_strategy=self.llm_strategy,
+            vector_store=vector_store,
+            vector_filters=vector_filters,
+        )
+
+
+container = ServiceContainer()
+
+
+
+================================================================================
+--- FILE PATH: eap_bot/source/services/sml_generation_service.py ---
+================================================================================
+
+import datetime
+from dataclasses import dataclass
+from typing import List, Dict
+
+from source.schemas.secsgem import EquipmentSpec
+from source.schemas.project import DocumentCategory, DocumentMetadata
+from source.services.storage_service import StorageService
+
+@dataclass
+class ReportDefinition:
+    report_id: int
+    svids: List[int]
+    name: str = ""
+
+@dataclass
+class EventLink:
+    ceid: int
+    report_ids: List[int]
+    name: str = ""
+
+class SMLGenerator:
+    """Generates the FULL chronological end-to-end SECS/GEM test suite."""
+    
+    def __init__(self, data_id: int = 1):
+        self.data_id = data_id
+
+    # ------------------ PHASE 1: COMM & SETUP ------------------
+    def generate_s1f1_ping(self) -> str:
+        return "// --- S1F1: Are You There --- \nS1F1 W\n."
+
+    def generate_s1f13_establish_comm(self) -> str:
+        return "// --- S1F13: Establish Communication --- \nS1F13 W\n  <L [0]>\n."
+
+    def generate_s1f11_status_variables(self, svids: List[int]) -> str:
+        if not svids:
+            return "// --- S1F11: Request ALL Status Variables --- \nS1F11 W\n  <L [0]>\n."
+        
+        lines = [
+            "// --- S1F11: Request Specific Status Variables ---",
+            "S1F11 W",
+            f"  <L [{len(svids)}]"
+        ]
+        for svid in svids:
+            lines.append(f"    <U4 {svid}>")
+        lines.append("  >")
+        lines.append(".")
+        return "\n".join(lines)
+
+    # ------------------ PHASE 2: DATA COLLECTION ------------------
+    def generate_s2f33_define_report(self, reports: List[ReportDefinition]) -> str:
+        if not reports:
+            return ""
+        lines = [
+            "// --- S2F33: Define Reports ---",
+            "S2F33 W",
+            f"  <L [2]",
+            f"    <U4 {self.data_id}>                    * DATAID",
+            f"    <L [{len(reports)}]"
+        ]
+        for rpt in reports:
+            lines.append(f"      <L [2]")
+            lines.append(f"        <U4 {rpt.report_id}>                     * RPTID ({rpt.name})")
+            lines.append(f"        <L [{len(rpt.svids)}]")
+            for svid in rpt.svids:
+                lines.append(f"          <U4 {svid}>                 * SVID")
+            lines.append("        >")
+            lines.append("      >")
+            
+        lines.append("    >")
+        lines.append("  >")
+        lines.append(".")
+        return "\n".join(lines)
+
+    def generate_s2f35_link_event(self, links: List[EventLink]) -> str:
+        if not links:
+            return ""
+        lines = [
+            "// --- S2F35: Link Reports to Events ---",
+            "S2F35 W",
+            f"  <L [2]",
+            f"    <U4 {self.data_id}>                    * DATAID",
+            f"    <L [{len(links)}]"
+        ]
+        for link in links:
+            lines.append(f"      <L [2]")
+            lines.append(f"        <U4 {link.ceid}>                   * CEID ({link.name})")
+            lines.append(f"        <L [{len(link.report_ids)}]")
+            for rptid in link.report_ids:
+                lines.append(f"          <U4 {rptid}>                   * RPTID")
+            lines.append("        >")
+            lines.append("      >")
+        lines.append("    >")
+        lines.append("  >")
+        lines.append(".")
+        return "\n".join(lines)
+
+    def generate_s2f37_enable_events(self, ceids: List[int]) -> str:
+        if not ceids:
+            return ""
+        lines = [
+            "// --- S2F37: Enable Event Reports ---",
+            "S2F37 W",
+            f"  <Boolean True>                   * CEED",
+            f"  <L [{len(ceids)}]"
+        ]
+        for ceid in ceids:
+            lines.append(f"    <U4 {ceid}>                      * CEID")
+        lines.append("  >")
+        lines.append(".")
+        return "\n".join(lines)
+
+    def generate_s2f23_trace_initialize(self, svids: List[int]) -> str:
+        if not svids:
+            return ""
+        lines = [
+            "// --- S2F23: Trace Initialize (Every 10s, 100 samples) ---",
+            "S2F23 W",
+            "  <L [5]",
+            "    <U4 1>                       * TRID",
+            "    <ASCII \"000010\">             * DSPPER (10s)",
+            "    <U4 100>                     * TOTSMP",
+            "    <U4 1>                       * REPGSZ",
+            f"    <L [{len(svids)}]"
+        ]
+        for svid in svids:
+            lines.append(f"      <U4 {svid}>                    * SVID")
+        lines.append("    >")
+        lines.append("  >")
+        lines.append(".")
+        return "\n".join(lines)
+
+    # ------------------ PHASE 3: EQUIPMENT CONTROL ------------------
+    def generate_s2f41_host_command(self, rcmd: str, params: Dict[str, str] = None) -> str:
+        params = params or {}
+        lines = [
+            f"// --- S2F41: Host Command ({rcmd}) ---",
+            "S2F41 W",
+            "  <L [2]",
+            f"    <ASCII \"{rcmd}\">",
+            f"    <L [{len(params)}]"
+        ]
+        for cpname, cpval in params.items():
+            lines.append("      <L [2]")
+            lines.append(f"        <ASCII \"{cpname}\">")
+            lines.append(f"        <ASCII \"{cpval}\">")
+            lines.append("      >")
+        lines.append("    >")
+        lines.append("  >")
+        lines.append(".")
+        return "\n".join(lines)
+
+    # ------------------ PHASE 4: RECIPE MANAGEMENT ------------------
+    def generate_s7f19_pp_directory(self) -> str:
+        return "// --- S7F19: Request Process Program Directory --- \nS7F19 W\n."
+
+
+class SMLGenerationService:
+    def __init__(self, storage: StorageService):
+        self.storage = storage
+
+    def generate_scripts(self, project_id: int) -> dict:
+        batch_path = self.storage.spec_json_path(project_id, "project_batch")
+        if not batch_path.exists():
+            raise FileNotFoundError(f"Project batch specification not found for project {project_id}")
+
+        spec_json = batch_path.read_text(encoding="utf-8")
+        spec = EquipmentSpec.model_validate_json(spec_json)
+
+        lines = [
+            "// ========================================================================",
+            f"// COMPREHENSIVE END-TO-END SML TEST SCRIPT FOR: {spec.ToolID}",
+            f"// MODEL: {spec.Model}",
+            f"// GENERATED ON: {datetime.datetime.now().isoformat()}",
+            "// ========================================================================\n"
+        ]
+
+        generator = SMLGenerator(data_id=1)
+
+        # === PHASE 1: ESTABLISH COMMUNICATIONS ===
+        lines.append(generator.generate_s1f1_ping())
+        lines.append("")
+        lines.append(generator.generate_s1f13_establish_comm())
+        lines.append("<S1F14\n  <L [2]\n    <B 00>\n    <L [2]\n      <A \"HOST\">\n      <A \"V1\">\n    >\n  >\n>\n.")
+        lines.append("")
+        
+        # S1F11 Status Variables
+        all_svids = []
+        if spec.StatusVariables:
+            all_svids = [sv.SVID for sv in spec.StatusVariables if isinstance(sv.SVID, int)]
+        lines.append(generator.generate_s1f11_status_variables(all_svids[:20]))
+        lines.append("<S1F12\n  <L [0]>\n>\n.")
+        lines.append("")
+
+        # S1F21 Data Variables
+        all_dvids = []
+        if spec.DataVariables:
+            all_dvids = [dv.DvID for dv in spec.DataVariables if isinstance(dv.DvID, int)]
+        lines.append(generator.generate_s1f11_status_variables(all_dvids[:20]).replace("S1F11", "S1F21").replace("Status", "Data"))
+        lines.append("<S1F22\n  <L [0]>\n>\n.")
+        lines.append("")
+
+        # === PHASE 2: DATA COLLECTION SETUP ===
+        reports_to_build = []
+        if spec.Reports:
+            for rpt in spec.Reports:
+                try:
+                    rptid = int(str(rpt.RPTID).replace("RPT_", ""))
+                    svids = [int(v) for v in rpt.LinkedVIDs]
+                    reports_to_build.append(ReportDefinition(report_id=rptid, svids=svids, name=rpt.Name))
+                except (ValueError, TypeError):
+                    continue
+
+        if reports_to_build:
+            lines.append(generator.generate_s2f33_define_report(reports_to_build))
+            lines.append("<S2F34\n  <B 00>\n>\n.")
+            lines.append("")
+
+        events_to_link = []
+        ceids_to_enable = []
+        if spec.Events:
+            for evt in spec.Events:
+                try:
+                    ceid = int(evt.CEID)
+                    ceids_to_enable.append(ceid)
+                    if hasattr(evt, "LinkedReports") and evt.LinkedReports:
+                        rpt_ids = []
+                        for r in evt.LinkedReports:
+                            r_str = str(r).replace("RPT_", "")
+                            if r_str.isdigit():
+                                rpt_ids.append(int(r_str))
+                        if rpt_ids:
+                            events_to_link.append(EventLink(ceid=ceid, report_ids=rpt_ids, name=getattr(evt, "EventName", "")))
+                except Exception:
+                    continue
+
+        if events_to_link:
+            lines.append(generator.generate_s2f35_link_event(events_to_link))
+            lines.append("<S2F36\n  <B 00>\n>\n.")
+            lines.append("")
+        if ceids_to_enable:
+            lines.append(generator.generate_s2f37_enable_events(ceids_to_enable))
+            lines.append("<S2F38\n  <B 00>\n>\n.")
+            lines.append("")
+
+        if all_svids:
+            lines.append(generator.generate_s2f23_trace_initialize(all_svids[:5]))
+            lines.append("<S2F24\n  <B 00>\n>\n.")
+            lines.append("")
+
+        # === PHASE 3: EQUIPMENT CONTROL ===
+        lines.append(generator.generate_s2f41_host_command("START"))
+        lines.append("<S2F42\n  <L [2]\n    <B 00>\n    <L [0]>\n  >\n>\n.")
+        lines.append("")
+        lines.append(generator.generate_s2f41_host_command("PP-SELECT", {"PPID": "TEST_RECIPE_01"}))
+        lines.append("<S2F42\n  <L [2]\n    <B 00>\n    <L [0]>\n  >\n>\n.")
+        lines.append("")
+        
+        # === PHASE 4: EVENT REPORTS (S6F11 & S6F1) ===
+        lines.append("// === EXPECTED EVENT REPORTS (S6F11) ===")
+        for ceid in ceids_to_enable[:5]: # Just do first 5 to show
+            lines.append(f"<S6F11 W\n  <L [3]\n    <U4 1>\n    <U4 {ceid}>\n    <L [0]>\n  >\n>\n.")
+            lines.append("<S6F12\n  <B 00>\n>\n.")
+            lines.append("")
+
+        lines.append("// === EXPECTED TRACE DATA (S6F1) ===")
+        lines.append("<S6F1 W\n  <L [4]\n    <U4 1>\n    <U4 100>\n    <ASCII \"2026061912000000\">\n    <L [0]>\n  >\n>\n.")
+        lines.append("<S6F2\n  <B 00>\n>\n.")
+        lines.append("")
+
+        lines.append(generator.generate_s2f41_host_command("STOP"))
+        lines.append("<S2F42\n  <L [2]\n    <B 00>\n    <L [0]>\n  >\n>\n.")
+        lines.append("")
+
+        # === PHASE 5: RECIPES ===
+        lines.append(generator.generate_s7f19_pp_directory())
+        lines.append("<S7F20\n  <L [1]\n    <ASCII \"TEST_RECIPE_01\">\n  >\n>\n.")
+        lines.append("")
+        
+        # --- S7F1: Process Program Load Inquire ---
+        lines.append("<S7F1 W\n  <L [2]\n    <ASCII \"TEST_RECIPE_01\">\n    <U4 1000>\n  >\n>\n.")
+        lines.append("<S7F2\n  <B 00>\n>\n.")
+        lines.append("")
+        
+        # --- S7F3: Process Program Send ---
+        lines.append("<S7F3 W\n  <L [2]\n    <ASCII \"TEST_RECIPE_01\">\n    <ASCII \"PPBODY=FORMATTED\">\n  >\n>\n.")
+        lines.append("<S7F4\n  <B 00>\n>\n.")
+        lines.append("")
+        
+        # --- S7F5: Process Program Request ---
+        lines.append("<S7F5 W\n  <ASCII \"TEST_RECIPE_01\">\n>\n.")
+        lines.append("<S7F6\n  <L [2]\n    <ASCII \"TEST_RECIPE_01\">\n    <ASCII \"PPBODY=FORMATTED\">\n  >\n>\n.")
+        lines.append("")
+        
+        # --- S7F17: Delete Process Program ---
+        lines.append("<S7F17 W\n  <L [1]\n    <ASCII \"TEST_RECIPE_01\">\n  >\n>\n.")
+        lines.append("<S7F18\n  <B 00>\n>\n.")
+        lines.append("")
+
+        script_content = "\n".join(lines)
+        file_name = f"sml_setup_{project_id}.txt"
+        document_id = f"sml_setup_{project_id}"
+
+        metadata = self.storage.get_project(project_id)
+        tool_char_dir = self.storage._project_dir(project_id) / self.storage.TOOL_CHAR_DIR
+        tool_char_dir.mkdir(parents=True, exist_ok=True)
+        file_path = tool_char_dir / file_name
+        file_path.write_text(script_content, encoding="utf-8")
+
+        doc_entry = next((d for d in metadata.Documents if d.DocumentID == document_id), None)
+        if not doc_entry:
+            doc_entry = DocumentMetadata(
+                DocumentID=document_id,
+                DocumentType=DocumentCategory.SML_SCRIPTS,
+                FileName=file_name,
+                FileSize=len(script_content.encode("utf-8")),
+                Pages=1,
+                Status="completed",
+                UploadDate=datetime.datetime.now()
+            )
+            metadata.Documents.append(doc_entry)
+        else:
+            doc_entry.FileSize = len(script_content.encode("utf-8"))
+            doc_entry.Status = "completed"
+
+        self.storage._write_metadata(metadata)
+        
+        spec_doc = EquipmentSpec(
+            DocumentType=DocumentCategory.SML_SCRIPTS.value,
+            ToolID=spec.ToolID,
+            ToolType=spec.ToolType,
+            Reports=[]
+        )
+        json_path = self.storage.spec_json_path(project_id, document_id)
+        self.storage.save_spec_json(json_path, spec_doc)
+        self.storage.complete_extraction(project_id, document_id, spec_doc)
+
+        return {
+            "Status": "success",
+            "Message": "SML script generated successfully",
+            "FileName": file_name,
+            "DocumentID": document_id,
+            "ScriptContent": script_content
+        }
+
+
+
+================================================================================
+--- FILE PATH: eap_bot/source/services/storage_service.py ---
+================================================================================
+
+import json
+import logging
+import re
+import shutil
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Optional
+
+from source.config import settings
+from source.schemas.project import DocumentMetadata, ProjectMetadata, ProjectCreate, ProjectOut, TestResultFileType
+from source.schemas.mapping import ProjectMapping
+from source.schemas.secsgem import EquipmentSpec
+from source.services.sml_template import SML_CHARACTERISATION_TEMPLATE, SML_TEMPLATE_FILENAME
+
+logger = logging.getLogger(__name__)
+
+
+class StorageError(RuntimeError):
+    pass
+
+
+class InvalidSlugError(StorageError):
+    pass
+
+
+class ProjectExistsError(StorageError):
+    pass
+
+
+class ProjectNotFoundError(StorageError):
+    pass
+
+
+class DocumentNotFoundError(StorageError):
+    pass
+
+
+class DocumentExistsError(StorageError):
+    pass
+
+
+class StorageService:
+    DOCUMENTS_DIR = "Documents"
+    MESTAG_DIR = "MESTemplates"
+    EXTRACTED_JSON_DIR = "ExtractedJson"
+    VECTORSTORE_DIR = "Vectorstore"
+    EXTRACTED_TABLES_DIR = "ExtractedTables"
+    METADATA_DIR = "ProjectsMetadata"
+    CODE_DIR = "Code"
+    TOOL_CHAR_DIR = "ToolCharacterization"
+    TEST_SUMMARY_DIR = "TestSummary"
+    SMART_AUTO_CODE_DIR = "SmartAutoCode"
+    MES_MAPPING_JSON_DIR = "MESMappingJSON"
+    REPORTS_DIR = "Reports"
+    RESULTS_DIR = "Results"
+    METADATA_FILE = "project.json"
+
+    _SLUG_RE = re.compile(r"[^a-z0-9]+")
+
+    def __init__(self, storage_root: str | Path | None = None) -> None:
+        if storage_root is None:
+            storage_root = settings.EAP_STORAGE_ROOT
+        if not str(storage_root).strip():
+            raise StorageError("EAP_STORAGE_ROOT must be set")
+        self.root = self._resolve_root(storage_root)
+        self._ensure_root()
+
+    def _get_next_id(self) -> int:
+        ids = []
+        for child in self.root.iterdir():
+            if child.is_dir() and child.name.isdigit():
+                ids.append(int(child.name))
+        return max(ids) + 1 if ids else 1
+
+    @classmethod
+    def slugify(cls, value: str, fallback: str = "item") -> str:
+        slug = cls._SLUG_RE.sub("_", value.strip().lower()).strip("_")
+        return slug or fallback
+
+    @staticmethod
+    def now() -> datetime:
+        return datetime.now(timezone.utc)
+
+    def create_project(self, project_create: ProjectCreate) -> ProjectOut:
+        existing_projects = self.list_projects()
+        for p in existing_projects:
+            if p.ProjectName.lower() == project_create.ProjectName.lower():
+                raise ProjectExistsError(f"Project with name '{project_create.ProjectName}' already exists.")
+                
+        project_id = self._get_next_id()
+        self._ensure_project_dirs(project_id)
+        
+        now = self.now()
+        metadata = ProjectOut(
+            ProjectID=project_id,
+            ProjectName=project_create.ProjectName,
+            ProjectVersion="1.0",
+            VendorName=project_create.VendorName,
+            ProjectCode=project_create.ProjectCode,
+            ProjectDescription=project_create.ProjectDescription,
+            Tool=project_create.Tool,
+            CreatedAt=now,
+            LastUpdatedOn=now,
+            Status="active",
+        )
+        self._write_metadata(metadata)
+        return metadata
+
+    def register_document(
+        self,
+        project_id: int,
+        document_id: str,
+        document_type: str,
+        filename: str,
+        file_size: float,
+        pages: int,
+    ) -> DocumentMetadata:
+        metadata = self.get_project(project_id)
+        project_dir = self._project_dir(project_id)
+        pdf_path = self.document_pdf_path(project_id, document_id)
+        json_path = self.spec_json_path(project_id, document_id)
+
+        document = DocumentMetadata(
+            DocumentID=document_id,
+            DocumentType=document_type,
+            FileName=filename,
+            FileSize=file_size,
+            Pages=pages,
+            UploadDate=self.now(),
+            Status="uploaded",
+        )
+
+        Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
+        Documents.append(document)
+        metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate)
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+        return document
+
+    def complete_extraction(
+        self,
+        project_id: int,
+        document_id: str,
+        spec: EquipmentSpec,
+    ) -> DocumentMetadata:
+        metadata = self.get_project(project_id)
+
+        for doc in metadata.Documents:
+            if doc.DocumentID == document_id:
+                doc.Status = "completed"
+                if spec.DocumentType:
+                    doc.DocumentType = spec.DocumentType
+                document = doc
+                break
+        else:
+            raise DocumentNotFoundError(
+                f"Document '{document_id}' was not found in project '{project_id}'"
+            )
+
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+        self.write_sml_template(project_id)
+        return document
+
+    def sml_template_path(self, project_id: int) -> Path:
+        return self._project_dir(project_id) / SML_TEMPLATE_FILENAME
+
+    def write_sml_template(self, project_id: int) -> None:
+        """Drop the hardcoded SML script template into the project directory.
+
+        Idempotent: only writes if the file does not already exist, so re-running
+        Analyze on the same project does not clobber edits made downstream.
+        """
+        path = self.sml_template_path(project_id)
+        if path.exists():
+            return
+        path.write_text(json.dumps(SML_CHARACTERISATION_TEMPLATE, indent=2), encoding="utf-8")
+        logger.info("Wrote SML template to %s", path)
+
+    def save_mes_mapping(self, project_id: int, family: str, template: str, data: dict) -> Path:
+        self.get_project(project_id)
+        # Handle template names that might have .json extension
+        template_name = template if template.lower().endswith(".json") else f"{template}.json"
+        template_name = template_name.replace(".json", "_mapped.json")
+        
+        mapping_dir = self._project_dir(project_id) / self.MES_MAPPING_JSON_DIR / family
+        mapping_dir.mkdir(parents=True, exist_ok=True)
+        
+        mapping_path = mapping_dir / template_name
+        with open(mapping_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+            
+        logger.info(f"Saved MES Mapping to {mapping_path}")
+        return mapping_path
+
+    def save_multiple_test_results(self, project_id: int, tool_id: str, files_data: list[dict], file_type: str = "unknown") -> list[str]:
+        self.get_project(project_id)
+        
+        timestamp = self.now().strftime("%Y-%m-%d_%H-%M-%S")
+        saved_paths = []
+        
+        results_dir = self._project_dir(project_id) / self.RESULTS_DIR / tool_id / timestamp
+        results_dir.mkdir(parents=True, exist_ok=True)
+        
+        for data in files_data:
+            file_name = data["file_name"]
+            file_bytes = data["file_bytes"]
+            test_script_names = data["test_script_names"]
+            file_type_to_save = data.get("file_type", file_type)
+            
+            # Save metadata so we can identify this file's type later
+            file_stem = Path(file_name).stem
+            meta_path = results_dir / f"{file_stem}_metadata.json"
+            meta_data = {
+                "file_name": file_name,
+                "file_type": file_type_to_save,
+                "test_script_names": test_script_names
+            }
+            meta_path.write_text(json.dumps(meta_data, indent=2), encoding="utf-8")
+            
+            file_path = results_dir / file_name
+            file_path.write_bytes(file_bytes)
+            saved_paths.append(str(file_path))
+            
+        return saved_paths
+
+    def get_all_tool_results(self, project_id: int, tool_id: str) -> dict:
+        self.get_project(project_id)
+        
+        results_dir = self._project_dir(project_id) / self.RESULTS_DIR / tool_id
+        
+        executions = []
+        
+        if results_dir.exists():
+            for ts_dir in sorted(results_dir.iterdir(), key=lambda d: d.name, reverse=True):
+                if not ts_dir.is_dir():
+                    continue
+                
+                timestamp = ts_dir.name
+                
+                # Dictionary to group by script_name: { "script_name": {"test": item, "secs_log": item} }
+                scripts_map = {}
+                
+                # Check for metadata files in ts_dir (new structure)
+                for meta_file in ts_dir.glob("*_metadata.json"):
+                    try:
+                        meta = json.loads(meta_file.read_text(encoding="utf-8"))
+                        file_name = meta.get("file_name")
+                        file_type = meta.get("file_type")
+                        test_script_names = meta.get("test_script_names", [])
+                        
+                        if not file_name:
+                            continue
+                        
+                        file_path = ts_dir / file_name
+                        if not file_path.exists():
+                            continue
+                            
+                        # Normalize file type
+                        lower_type = str(file_type).lower()
+                        if lower_type in ("test", "report", "summary_json"):
+                            norm_type = "Test"
+                            key_type = "test"
+                        elif lower_type in ("secslog", "secs_log", "secs"):
+                            norm_type = "SECSLog"
+                            key_type = "secs_log"
+                        else:
+                            norm_type = file_type
+                            key_type = file_type.lower()
+
+                        item_path = f"/projects/{project_id}/Results/{tool_id}/{timestamp}/{file_name}"
+
+                        item = {
+                            "file_name": file_name,
+                            "file_type": norm_type,
+                            "path": item_path
+                        }
+                        
+                        for script_name in test_script_names:
+                            if script_name.isdigit():
+                                continue
+                            if script_name not in scripts_map:
+                                scripts_map[script_name] = {}
+                            scripts_map[script_name][key_type] = item
+                    except Exception as e:
+                        logger.error(f"Error parsing metadata file {meta_file}: {e}")
+
+                # Check for metadata files in subdirectories (old structure)
+                for script_dir in ts_dir.iterdir():
+                    if not script_dir.is_dir():
+                        continue
+                    
+                    old_meta_file = script_dir / "metadata.json"
+                    if old_meta_file.exists():
+                        try:
+                            meta = json.loads(old_meta_file.read_text(encoding="utf-8"))
+                            file_type = meta.get("file_type")
+                            
+                            # Find the actual file (non-metadata) in that directory
+                            for f in script_dir.iterdir():
+                                if f.is_file() and f.name != "metadata.json":
+                                    file_name = f.name
+                                    file_path = f
+                                    
+                                    lower_type = str(file_type).lower()
+                                    if lower_type in ("test", "report", "summary_json"):
+                                        norm_type = "Test"
+                                        key_type = "test"
+                                    elif lower_type in ("secslog", "secs_log", "secs"):
+                                        norm_type = "SECSLog"
+                                        key_type = "secs_log"
+                                    else:
+                                        norm_type = file_type
+                                        key_type = file_type.lower()
+
+                                    script_name = script_dir.name
+                                    item_path = f"/projects/{project_id}/Results/{tool_id}/{timestamp}/{script_name}/{file_name}"
+
+                                    item = {
+                                        "file_name": file_name,
+                                        "file_type": norm_type,
+                                        "path": item_path
+                                    }
+                                    
+                                    if script_name not in scripts_map:
+                                        scripts_map[script_name] = {}
+                                    scripts_map[script_name][key_type] = item
+                                    break
+                        except Exception as e:
+                            logger.error(f"Error parsing old metadata file {old_meta_file}: {e}")
+
+                if scripts_map:
+                    scripts_list = []
+                    for script_name, artifacts in sorted(scripts_map.items()):
+                        scripts_list.append({
+                            "script_name": script_name,
+                            "artifacts": artifacts
+                        })
+                    
+                    executions.append({
+                        "execution_time": timestamp,
+                        "script_count": len(scripts_list),
+                        "scripts": scripts_list
+                    })
+
+        return {
+            "status": "success",
+            "tool_id": tool_id,
+            "execution_count": len(executions),
+            "executions": executions
+        }
+
+    def get_latest_test_summary(self, project_id: int, tool_id: Optional[str] = None) -> Any:
+        self.get_project(project_id)
+        
+        project_dir = self._project_dir(project_id)
+        results_dir = project_dir / self.RESULTS_DIR
+        if not results_dir.exists():
+            return None
+
+        def find_summary_in_ts_dir(ts_dir: Path) -> Optional[Path]:
+            # Old structure: ts_dir / "summary.json"
+            if (ts_dir / "summary.json").exists():
+                return ts_dir / "summary.json"
+                
+            # Current structure: metadata file tells us the file type
+            for f in ts_dir.glob("*_metadata.json"):
+                try:
+                    meta = json.loads(f.read_text(encoding="utf-8"))
+                    if meta.get("file_type") == "summary_json":
+                        report_file = ts_dir / meta.get("file_name", "")
+                        if report_file.exists():
+                            return report_file
+                except Exception:
+                    pass
+                    
+            # Fallback for previous structure: ts_dir / {test_script_name} / {original_name.json}
+            for script_dir in ts_dir.iterdir():
+                if script_dir.is_dir():
+                    for f in script_dir.iterdir():
+                        if f.is_file() and f.name.endswith(".json") and "summary" in f.name.lower():
+                            return f
+            return None
+            
+        if tool_id:
+            tool_dir = results_dir / tool_id
+            if not tool_dir.exists():
+                return None
+            timestamps = sorted([d.name for d in tool_dir.iterdir() if d.is_dir()])
+            for ts in reversed(timestamps):
+                summary_file = find_summary_in_ts_dir(tool_dir / ts)
+                if summary_file:
+                    return json.loads(summary_file.read_text(encoding="utf-8"))
+            return None
+        else:
+            all_summaries = []
+            for t_dir in results_dir.iterdir():
+                if t_dir.is_dir():
+                    timestamps = sorted([d.name for d in t_dir.iterdir() if d.is_dir()])
+                    for ts in reversed(timestamps):
+                        summary_file = find_summary_in_ts_dir(t_dir / ts)
+                        if summary_file:
+                            all_summaries.append((ts, summary_file))
+                            break
+            if not all_summaries:
+                return None
+            all_summaries.sort(key=lambda x: x[0])
+            latest_summary_file = all_summaries[-1][1]
+            return json.loads(latest_summary_file.read_text(encoding="utf-8"))
+
+    def get_test_reports(self, project_id: int, tool_id: str, script_names: list[str]) -> dict[str, Any]:
+        self.get_project(project_id)
+        
+        results_dir = self._project_dir(project_id) / self.RESULTS_DIR / tool_id
+        if not results_dir.exists():
+            return {}
+            
+        # Iterate over all script names the user requested
+        reports = {}
+        for target_script in script_names:
+            # Sort timestamps newest to oldest
+            timestamps = sorted([d.name for d in results_dir.iterdir() if d.is_dir()], reverse=True)
+            for ts in timestamps:
+                ts_dir = results_dir / ts
+                
+                # Check current structure: metadata files in ts_dir
+                found_report = False
+                for meta_file in ts_dir.glob("*_metadata.json"):
+                    try:
+                        meta = json.loads(meta_file.read_text(encoding="utf-8"))
+                        if meta.get("file_type") == "report" and target_script in meta.get("test_script_names", []):
+                            report_file = ts_dir / meta.get("file_name", "")
+                            if report_file.exists():
+                                reports[target_script] = json.loads(report_file.read_text(encoding="utf-8"))
+                                found_report = True
+                                break
+                    except Exception as e:
+                        logger.error("Failed to parse metadata or report for %s: %s", target_script, e)
+                        
+                if found_report:
+                    break  # Stop looking at older timestamps for this script
+                    
+                # Fallback for previous structure: subfolders with script name
+                matching_dirs = [d for d in ts_dir.iterdir() if d.is_dir() and target_script.lower() in d.name.lower()]
+                if not matching_dirs:
+                    continue
+                    
+                # We found a matching folder. Check if it has a report metadata
+                script_dir = matching_dirs[0]
+                meta_file = script_dir / "metadata.json"
+                if meta_file.exists():
+                    try:
+                        meta = json.loads(meta_file.read_text(encoding="utf-8"))
+                        if meta.get("file_type") == "report":
+                            # It is a report. Find the actual json file that is not metadata.json
+                            for f in script_dir.iterdir():
+                                if f.is_file() and f.name.endswith(".json") and f.name != "metadata.json":
+                                    reports[target_script] = json.loads(f.read_text(encoding="utf-8"))
+                                    found_report = True
+                                    break
+                            if found_report:
+                                break
+                    except Exception as e:
+                        logger.error("Failed to parse fallback metadata or report for %s: %s", target_script, e)
+                        
+        return reports
+
+    def count_connected_equipments(self, project_id: int) -> int:
+        """Count tool subdirectories under Results/ as connected equipments."""
+        results_dir = self._project_dir(project_id) / self.RESULTS_DIR
+        if not results_dir.exists():
+            return 0
+        return len([d for d in results_dir.iterdir() if d.is_dir()])
+
+    def vectorstore_path_for_category(self, project_id: int, category_slug: str) -> Path:
+        """
+        Return the FAISS directory for a specific document category or 'tables'.
+        """
+        self.get_project(project_id)
+        return self._project_dir(project_id) / self.VECTORSTORE_DIR / category_slug
+
+    def all_vectorstore_paths(self, project_id: int) -> dict[str, Path]:
+        """
+        Return a dict mapping category_slug -> Path for every known
+        FAISS subdirectory under this project's Vectorstore/ folder.
+        """
+        self.get_project(project_id)
+        base = self._project_dir(project_id) / self.VECTORSTORE_DIR
+        all_slugs = [
+            "gem_manual",
+            "user_manuals",
+            "troubleshooting_guidance",
+            "variable_files",
+            "log_files",
+            "sml_scripts",
+            "tables",
+        ]
+        result = {
+            slug: base / slug
+            for slug in all_slugs
+            if (base / slug).exists() and any((base / slug).iterdir())
+        }
+        # Legacy compatibility: if the project has a flat (pre-category) vectorstore, include it
+        legacy_path = base
+        if legacy_path.exists() and (legacy_path / "index.faiss").exists():
+            result["legacy"] = legacy_path
+        return result
+
+    def list_user_sml_scripts(self, project_id: int) -> list[tuple[str, Path]]:
+        """
+        Return user SML .txt files in ToolCharacterization, excluding protected templates.
+        """
+        system_templates = {"general_gem_testing.txt", "tool_characterisation_testing.txt"}
+        tool_char_dir = self._project_dir(project_id) / self.TOOL_CHAR_DIR
+        if not tool_char_dir.exists():
+            return []
+        return [
+            (f.name, f)
+            for f in sorted(tool_char_dir.iterdir())
+            if f.is_file() and f.suffix == ".txt" and f.name not in system_templates
+        ]
+
+    @staticmethod
+    def _doc_category_to_slug(document_category) -> str:
+        """
+        Convert a DocumentCategory enum instance or its string value
+        to the filesystem slug used as the FAISS subdirectory name.
+        """
+        val = document_category.value if hasattr(document_category, "value") else str(document_category)
+        return val.strip().lower().replace(" ", "_").replace("/", "_")
+
+    def get_populated_categories(self, project_id: int) -> list[str]:
+        """
+        Return the human-readable DocumentCategory values for which
+        a non-empty FAISS vectorstore exists for this project.
+        The internal 'tables' store is treated as 'Variable Files'.
+        """
+        from source.schemas.project import DocumentCategory
+        self.get_project(project_id)
+        base = self._project_dir(project_id) / self.VECTORSTORE_DIR
+
+        slug_to_label = {
+            self._doc_category_to_slug(cat): cat.value
+            for cat in DocumentCategory
+        }
+
+        populated = set()
+        for slug, label in slug_to_label.items():
+            store_path = base / slug
+            if store_path.exists() and any(store_path.iterdir()):
+                populated.add(label)
+
+        # If the internal 'tables' store is non-empty, also expose 'Variable Files'
+        tables_path = base / "tables"
+        if tables_path.exists() and any(tables_path.iterdir()):
+            populated.add(DocumentCategory.VARIABLE_FILES.value)
+
+        # Return in stable enum definition order
+        return [cat.value for cat in DocumentCategory if cat.value in populated]
+
+    def mark_failed(self, project_id: int, document_id: str) -> DocumentMetadata:
+        metadata = self.get_project(project_id)
+
+        for doc in metadata.Documents:
+            if doc.DocumentID == document_id:
+                doc.Status = "failed"
+                document = doc
+                break
+        else:
+            raise DocumentNotFoundError(
+                f"Document '{document_id}' was not found in project '{project_id}'"
+            )
+
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+        return document
+
+    def list_projects(self) -> list[ProjectOut]:
+        projects: list[ProjectOut] = []
+        for child in self.root.iterdir():
+            if not child.is_dir() or not child.name.isdigit():
+                continue
+            metadata_path = child / self.METADATA_DIR / self.METADATA_FILE
+            if not metadata_path.exists():
+                continue
+            
+            try:
+                raw_data = json.loads(metadata_path.read_text(encoding="utf-8"))
+                project = ProjectOut.model_validate(raw_data)
+                projects.append(project)
+            except Exception as e:
+                logger.error(f"Error reading project at {child}: {e}")
+                continue
+                
+        return sorted(projects, key=lambda p: p.ProjectID)
+
+    def get_project(self, project_id: int) -> ProjectMetadata:
+        metadata_path = self._metadata_path(project_id)
+        if not metadata_path.exists():
+            raise ProjectNotFoundError(f"Project '{project_id}' was not found")
+        return self._read_metadata(metadata_path)
+
+    def delete_project(self, project_id: int) -> None:
+        project_dir = self._project_dir(project_id)
+        if not self._metadata_path(project_id).exists():
+            raise ProjectNotFoundError(f"Project '{project_id}' was not found")
+        shutil.rmtree(project_dir)
+
+    def increment_project_version(self, project_id: int) -> str:
+        metadata = self.get_project(project_id)
+        current_version = metadata.ProjectVersion or "1.0"
+        
+        try:
+            parts = current_version.split(".")
+            if len(parts) >= 2:
+                # 2-tier logic: increment the second part
+                major = parts[0]
+                minor = int(parts[1]) + 1
+                new_version = f"{major}.{minor}"
+            else:
+                # Fallback for non-standard versions
+                new_version = f"{current_version}.1"
+        except (ValueError, IndexError):
+            new_version = "1.1"
+
+        metadata.ProjectVersion = new_version
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+        logger.info(f"Project {project_id} version bumped: {current_version} -> {new_version}")
+        return new_version
+
+    def update_project_metadata(self, project_id: int, update: Any) -> ProjectOut:
+        metadata = self.get_project(project_id)
+        
+        if update.ProjectName is not None and update.ProjectName != metadata.ProjectName:
+            existing_projects = self.list_projects()
+            for p in existing_projects:
+                if p.ProjectID != project_id and p.ProjectName.lower() == update.ProjectName.lower():
+                    raise ProjectExistsError(f"Project with name '{update.ProjectName}' already exists.")
+            metadata.ProjectName = update.ProjectName
+        if update.VendorName is not None:
+            metadata.VendorName = update.VendorName
+        if getattr(update, "ProjectCode", None) is not None:
+            metadata.ProjectCode = update.ProjectCode
+        if getattr(update, "ProjectDescription", None) is not None:
+            metadata.ProjectDescription = update.ProjectDescription
+        if update.Tool is not None:
+            metadata.Tool = update.Tool
+        if update.ProjectVersion is not None:
+            metadata.ProjectVersion = update.ProjectVersion
+            
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+        return ProjectOut.model_validate(metadata.model_dump())
+
+    def delete_document(self, project_id: int, document_id: str) -> None:
+        metadata = self.get_project(project_id)
+        document = self.get_document(project_id, document_id)
+
+        pdf_path = self.document_pdf_path(project_id, document_id)
+        json_path = self.spec_json_path(project_id, document_id)
+        if pdf_path.exists():
+            pdf_path.unlink()
+        if json_path.exists():
+            json_path.unlink()
+
+        metadata.Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+
+    def save_project_code(self, project_id: int, category: str, source_code: str) -> None:
+        project_dir = self._project_dir(project_id)
+        if not self._metadata_path(project_id).exists():
+            raise ProjectNotFoundError(f"Project '{project_id}' was not found")
+        
+        code_dir = project_dir / self.CODE_DIR
+        code_dir.mkdir(parents=True, exist_ok=True)
+        
+        code_file = code_dir / category
+        code_file.write_text(source_code, encoding="utf-8")
+        logger.info("Saved generated code to %s", code_file)
+
+    def prepare_document_paths(
+        self, project_id: int, original_filename: str, extension: str = ".pdf", doc_category: Optional[Any] = None
+    ) -> tuple[str, Path, Path]:
+        metadata = self.get_project(project_id)
+        
+        is_sml = doc_category and (str(doc_category) == "SML Scripts" or getattr(doc_category, "value", "") == "SML Scripts")
+        
+        if not is_sml:
+            for doc in metadata.Documents:
+                if doc.FileName.lower() == original_filename.lower():
+                    raise DocumentExistsError(
+                        f"Document '{original_filename}' already exists in project '{project_id}'."
+                    )
+
+        base_id = self.slugify(Path(original_filename).stem, fallback="document")
+        existing_ids = {doc.DocumentID for doc in metadata.Documents}
+        docs_dir = self._project_dir(project_id) / self.DOCUMENTS_DIR
+
+        document_id = base_id
+        counter = 2
+        
+        def is_id_taken(did: str) -> bool:
+            if is_sml:
+                existing_doc = next((d for d in metadata.Documents if d.DocumentID == did), None)
+                if existing_doc and existing_doc.FileName.lower() == original_filename.lower():
+                    return False
+                    
+            if did in existing_ids:
+                return True
+            if self.spec_json_path(project_id, did).exists():
+                return True
+            if (docs_dir / f"{did}{extension}").exists():
+                return True
+            nested_dir = docs_dir / did
+            if nested_dir.exists() and any(nested_dir.iterdir()):
+                return True
+            return False
+
+        while is_id_taken(document_id):
+            document_id = f"{base_id}_{counter}"
+            counter += 1
+
+        if is_sml:
+            timestamp = self.now().strftime("%Y-%m-%d_%H-%M-%S")
+            file_path = docs_dir / document_id / timestamp / original_filename
+        else:
+            file_path = docs_dir / f"{document_id}{extension}"
+
+        return (
+            document_id,
+            file_path,
+            self.spec_json_path(project_id, document_id),
+        )
+
+    def save_pdf(self, pdf_path: Path, contents: bytes) -> None:
+        self._assert_inside_root(pdf_path)
+        pdf_path.parent.mkdir(parents=True, exist_ok=True)
+        pdf_path.write_bytes(contents)
+
+    def save_spec_json(self, json_path: Path, spec: EquipmentSpec) -> None:
+        self._assert_inside_root(json_path)
+        json_path.parent.mkdir(parents=True, exist_ok=True)
+        json_path.write_text(spec.model_dump_json(indent=4), encoding="utf-8")
+
+    def base_script_path(self, project_id: int) -> Path:
+        """Path to the consolidated extracted-SML file in ToolCharacterization."""
+        return self._project_dir(project_id) / self.TOOL_CHAR_DIR / "base_script.txt"
+
+    # Header marking each document's section within base_script.txt.
+    _BASE_SCRIPT_HEADER_RE = re.compile(r"^// === (?P<name>.*?) ===\s*$")
+
+    def upsert_base_script(self, project_id: int, document_name: str, sml_text: str) -> None:
+        """Insert or replace this document's SML section in base_script.txt.
+
+        Sections are delimited by a ``// === <document_name> ===`` header so
+        re-analysis replaces the document's block rather than duplicating it.
+        """
+        path = self.base_script_path(project_id)
+        self._assert_inside_root(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Parse existing file into {document_name: section_body} (dict preserves order).
+        sections: dict[str, list[str]] = {}
+        if path.exists():
+            current_name: str | None = None
+            for line in path.read_text(encoding="utf-8").splitlines():
+                match = self._BASE_SCRIPT_HEADER_RE.match(line)
+                if match:
+                    current_name = match.group("name")
+                    sections.setdefault(current_name, [])
+                elif current_name is not None:
+                    sections[current_name].append(line)
+
+        sections[document_name] = sml_text.strip().splitlines()
+
+        parts: list[str] = []
+        for name, body in sections.items():
+            parts.append(f"// === {name} ===")
+            parts.append("\n".join(body).strip())
+            parts.append("")  # blank line between sections
+        path.write_text("\n".join(parts).rstrip() + "\n", encoding="utf-8")
+        logger.info("Updated base_script.txt section for '%s' at %s", document_name, path)
+
+    def add_document_metadata(
+        self,
+        project_id: int,
+        document_id: str,
+        document_type: str,
+        original_filename: str,
+        spec: EquipmentSpec,
+        vector_indexed: bool,
+        file_size: float = 0.0,
+        pages: int = 0,
+    ) -> DocumentMetadata:
+        metadata = self.get_project(project_id)
+        project_dir = self._project_dir(project_id)
+        pdf_path = self.document_pdf_path(project_id, document_id)
+        json_path = self.spec_json_path(project_id, document_id)
+
+        document = DocumentMetadata(
+            DocumentID=document_id,
+            DocumentType=document_type,
+            FileName=original_filename,
+            FileSize=file_size,
+            Pages=pages,
+            UploadDate=self.now(),
+            Status="completed",
+        )
+
+        Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
+        Documents.append(document)
+        metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate)
+        metadata.LastUpdatedOn = self.now()
+        self._write_metadata(metadata)
+        return document
+
+    def get_document(self, project_id: int, document_id: str) -> DocumentMetadata:
+        metadata = self.get_project(project_id)
+        for document in metadata.Documents:
+            if document.DocumentID == document_id:
+                return document
+        raise DocumentNotFoundError(
+            f"Document '{document_id}' was not found in project '{project_id}'"
+        )
+
+    def get_mapping(self, project_id: int) -> ProjectMapping:
+        path = self.mapping_path(project_id)
+        if not path.exists():
+            from source.schemas.mapping import ProjectMapping
+            return ProjectMapping(ProjectID=project_id)
+        try:
+            from source.schemas.mapping import ProjectMapping
+            return ProjectMapping.model_validate_json(path.read_text(encoding="utf-8"))
+        except Exception:
+            from source.schemas.mapping import ProjectMapping
+            return ProjectMapping(ProjectID=project_id)
+
+    def save_mapping(self, project_id: int, mapping: ProjectMapping) -> None:
+        path = self.mapping_path(project_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(mapping.model_dump_json(indent=2), encoding="utf-8")
+
+    def save_automap_result(self, project_id: int, family: str, template: str, result: dict) -> None:
+        """Save the full template with AutoMapping to MESMappingJSON/{family}/{template}"""
+        self.get_project(project_id)
+        path = self._project_dir(project_id) / self.MES_MAPPING_JSON_DIR / family / template
+        path.parent.mkdir(parents=True, exist_ok=True)
+        import json
+        path.write_text(json.dumps(result, indent=2), encoding="utf-8")
+        logger.info("Saved AutoMap result for project %s to %s", project_id, path)
+
+    def load_automap_result(self, project_id: int, family: str, template: str) -> dict | None:
+        """Load previously saved AutoMap result, or None if not found."""
+        path = self._project_dir(project_id) / self.MES_MAPPING_JSON_DIR / family / template
+        if path.exists():
+            import json
+            return json.loads(path.read_text(encoding="utf-8"))
+        return None
+
+    def read_spec_json(self, project_id: int, document_id: str) -> str:
+        self.get_document(project_id, document_id)
+        path = self.spec_json_path(project_id, document_id)
+        if not path.exists():
+            raise DocumentNotFoundError(
+                f"Extracted JSON for document '{document_id}' was not found"
+            )
+        return path.read_text(encoding="utf-8")
+
+    def vectorstore_path(self, project_id: int) -> Path:
+        self.get_project(project_id)
+        return self._project_dir(project_id) / self.VECTORSTORE_DIR
+
+    def extracted_tables_path(self, project_id: int) -> Path:
+        return self._project_dir(project_id) / self.EXTRACTED_TABLES_DIR
+
+    def save_extracted_tables(self, project_id: int, spec: "EquipmentSpec") -> None:
+        import csv
+        from pydantic import BaseModel
+
+        def _cell_to_str(val: Any) -> str:
+            if val is None:
+                return ""
+            if isinstance(val, BaseModel):
+                return json.dumps(val.model_dump(), ensure_ascii=False)
+            if isinstance(val, list):
+                return json.dumps(
+                    [v.model_dump() if isinstance(v, BaseModel) else v for v in val],
+                    ensure_ascii=False,
+                )
+            return str(val)
+
+        tables_dir = self.extracted_tables_path(project_id)
+        tables_dir.mkdir(parents=True, exist_ok=True)
+
+        table_configs = [
+            (
+                "status_variables.csv",
+                ["SVID", "Name", "Description", "DataType", "AccessType", "Value", "Confidence"],
+                spec.StatusVariables,
+                "SVID",
+            ),
+            (
+                "data_variables.csv",
+                ["DvID", "Name", "ValueType", "Unit"],
+                spec.DataVariables,
+                "DvID",
+            ),
+            (
+                "events.csv",
+                ["CEID", "Name", "Description", "LinkedVIDs", "LinkedReports", "Confidence"],
+                spec.Events,
+                "CEID",
+            ),
+            (
+                "alarms.csv",
+                ["AlarmID", "Name", "Severity", "LinkedVID", "Description", "Confidence"],
+                spec.Alarms,
+                "AlarmID",
+            ),
+            (
+                "remote_commands.csv",
+                ["RCMD", "Description", "Parameters", "Confidence"],
+                spec.RemoteCommands,
+                "RCMD",
+            ),
+            (
+                "states.csv",
+                ["StateID", "Name", "Description"],
+                spec.States,
+                "StateID",
+            ),
+            (
+                "state_transitions.csv",
+                ["FromState", "ToState", "TriggerEvent", "TriggerCommand", "Manual"],
+                spec.StateTransitions,
+                None,  # dedup by (FromState, ToState) tuple
+            ),
+        ]
+
+        for filename, headers, items, id_field in table_configs:
+            csv_path = tables_dir / filename
+            existing: dict = {}
+
+            # Load existing rows keyed by primary ID
+            if csv_path.exists():
+                with open(csv_path, newline="", encoding="utf-8") as f:
+                    reader = csv.DictReader(f)
+                    if reader.fieldnames and (not id_field or id_field in reader.fieldnames):
+                        for row in reader:
+                            if id_field:
+                                if row.get(id_field):
+                                    existing[row[id_field]] = row
+                            else:
+                                if "FromState" in row and "ToState" in row:
+                                    key = (row["FromState"], row["ToState"])
+                                    existing[key] = row
+                    else:
+                        logger.warning("Existing CSV %s has mismatched or missing headers. Skipping existing rows.", filename)
+
+            # Merge new items — new data wins on conflict
+            for item in items:
+                row = {h: _cell_to_str(getattr(item, h, None)) for h in headers}
+                if id_field:
+                    key = row[id_field]
+                else:
+                    key = (row["FromState"], row["ToState"])
+                existing[key] = row
+
+            with open(csv_path, "w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=headers, extrasaction="ignore")
+                writer.writeheader()
+                writer.writerows(existing.values())
+
+            logger.info("Saved %d rows to %s", len(existing), csv_path)
+
+
+    def mapping_path(self, project_id: int) -> Path:
+        return self._project_dir(project_id) / self.MES_MAPPING_JSON_DIR / "mes_mapping.json"
+
+    def mes_tags_json_path(self, project_id: int, document_id: str) -> Path:
+        return self._project_dir(project_id) / "MESTags" / f"{document_id}.json"
+
+    def save_mes_tags(self, project_id: int, document_id: str, tags: list[dict]) -> None:
+        path = self.mes_tags_json_path(project_id, document_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(tags, indent=2), encoding="utf-8")
+
+    def get_mes_tags(self, project_id: int, document_id: str) -> list[dict]:
+        path = self.mes_tags_json_path(project_id, document_id)
+        if not path.exists():
+            return []
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except Exception:
+            return []
+
+    def list_mes_tag_documents(self, project_id: int) -> list[str]:
+        base_dir = self._project_dir(project_id) / "MESTags"
+        if not base_dir.exists():
+            return []
+        return [f.stem for f in base_dir.glob("*.json")]
+
+    def _find_nested_document(self, docs_dir: Path, document_id: str) -> Optional[Path]:
+        nested_dir = docs_dir / document_id
+        if nested_dir.exists() and nested_dir.is_dir():
+            for ts_dir in sorted(nested_dir.iterdir(), key=lambda x: x.name, reverse=True):
+                if ts_dir.is_dir():
+                    for f in ts_dir.iterdir():
+                        if f.is_file():
+                            return f
+        return None
+
+    def document_pdf_path(self, project_id: int, document_id: str) -> Path:
+        docs_dir = self._project_dir(project_id) / self.DOCUMENTS_DIR
+        nested_file = self._find_nested_document(docs_dir, document_id)
+        if nested_file:
+            return nested_file
+        return docs_dir / f"{document_id}.pdf"
+
+    def document_excel_path(self, project_id: int, document_id: str, ext: str = ".xlsx") -> Path:
+        docs_dir = self._project_dir(project_id) / self.DOCUMENTS_DIR
+        nested_file = self._find_nested_document(docs_dir, document_id)
+        if nested_file:
+            return nested_file
+        return docs_dir / f"{document_id}{ext}"
+
+    def spec_json_path(self, project_id: int, document_id: str) -> Path:
+        return (
+            self._project_dir(project_id)
+            / self.EXTRACTED_JSON_DIR
+            / f"{document_id}.json"
+        )
+
+    def questions_json_path(self, project_id: int) -> Path:
+        return self._project_dir(project_id) / "Questions" / "questions.json"
+
+    def get_questions(self, project_id: int) -> list[dict[str, str]]:
+        path = self.questions_json_path(project_id)
+        if not path.exists():
+            return []
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                # Legacy format: dict mapping filename to list of QA dicts
+                flat_list = []
+                for qa_list in data.values():
+                    if isinstance(qa_list, list):
+                        flat_list.extend(qa_list)
+                return flat_list
+            elif isinstance(data, list):
+                return data
+            return []
+        except Exception as exc:
+            logger.error("Failed to read questions JSON: %s", exc)
+            return []
+
+    def save_questions(self, project_id: int, questions_data: list[dict[str, str]]) -> None:
+        path = self.questions_json_path(project_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(questions_data, indent=2), encoding="utf-8")
+
+    def mes_tag_path(self, project_id: int, document_id: str) -> Path:
+        self._validate_id(document_id)
+        return (
+            self._project_dir(project_id)
+            / self.MESTAG_DIR
+            / f"{document_id}.pdf"
+        )
+
+    def _resolve_root(self, storage_root: str | Path) -> Path:
+        root = Path(storage_root).expanduser()
+        if not root.is_absolute():
+            logger.warning(
+                "EAP_STORAGE_ROOT is relative (%s). Use an absolute path on Azure.",
+                storage_root,
+            )
+            root = Path.cwd() / root
+        return root.resolve()
+
+    def _ensure_root(self) -> None:
+        try:
+            self.root.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            raise StorageError(f"Could not create EAP_STORAGE_ROOT at {self.root}") from exc
+
+        if not self.root.is_dir():
+            raise StorageError(f"EAP_STORAGE_ROOT is not a directory: {self.root}")
+
+        probe = self.root / ".write_test"
+        try:
+            probe.write_text("ok", encoding="utf-8")
+            probe.unlink()
+        except OSError as exc:
+            raise StorageError(f"EAP_STORAGE_ROOT is not writable: {self.root}") from exc
+
+    def _ensure_project_dirs(self, project_id: int) -> None:
+        project_dir = self._project_dir(project_id)
+        for folder in (
+            self.DOCUMENTS_DIR,
+            self.MESTAG_DIR,
+            self.EXTRACTED_JSON_DIR,
+            self.VECTORSTORE_DIR,
+            self.METADATA_DIR,
+            self.EXTRACTED_TABLES_DIR,
+            self.TOOL_CHAR_DIR,
+            self.TEST_SUMMARY_DIR,
+            self.SMART_AUTO_CODE_DIR,
+            self.MES_MAPPING_JSON_DIR,
+            self.REPORTS_DIR,
+        ):
+            path = project_dir / folder
+            self._assert_inside_root(path)
+            path.mkdir(parents=True, exist_ok=True)
+
+    def _project_dir(self, project_id: int) -> Path:
+        path = (self.root / str(project_id)).resolve()
+        self._assert_inside_root(path)
+        return path
+
+    def _metadata_path(self, project_id: int) -> Path:
+        return self._project_dir(project_id) / self.METADATA_DIR / self.METADATA_FILE
+
+    def _project_relative_path(self, project_id: int, relative_path: str) -> Path:
+        if Path(relative_path).is_absolute():
+            raise InvalidSlugError("Stored project paths must be relative")
+        project_dir = self._project_dir(project_id)
+        path = (project_dir / relative_path).resolve()
+        if path != project_dir and project_dir not in path.parents:
+            raise InvalidSlugError(f"Path escapes project storage: {relative_path}")
+        return path
+
+    def _read_metadata(self, path: Path) -> ProjectMetadata:
+        try:
+            return ProjectMetadata.model_validate_json(path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            import traceback
+            raise StorageError(f"Could not read project metadata at {path}. Exception: {exc}\nTraceback: {traceback.format_exc()}") from exc
+
+    def _write_metadata(self, metadata: ProjectOut | ProjectMetadata) -> None:
+        self._ensure_project_dirs(metadata.ProjectID)
+        path = self._metadata_path(metadata.ProjectID)
+        payload = json.dumps(metadata.model_dump(mode="json"), indent=2)
+        temp_path = path.with_suffix(".json.tmp")
+        temp_path.write_text(payload + "\n", encoding="utf-8")
+        temp_path.replace(path)
+
+    def _validate_id(self, value: str) -> None:
+        if value != self.slugify(value):
+            raise InvalidSlugError(f"Invalid id: {value}")
+
+    def _assert_inside_root(self, path: Path) -> None:
+        resolved = path.resolve()
+        if resolved != self.root and self.root not in resolved.parents:
+            raise InvalidSlugError(f"Path escapes EAP_STORAGE_ROOT: {path}")
+
+
+
+================================================================================
+--- FILE PATH: eap_bot/source/schemas/secsgem.py ---
+================================================================================
+
+from typing import Literal, Optional, Any, Union
+from pydantic import BaseModel, Field, model_validator, field_validator
+
+from source.schemas.report import ReportDefinition
+
+
+class StatusVariable(BaseModel):
+    SVID: int
+    Name: str
+    Description: Optional[str] = None
+    DataType: str = "-"
+    AccessType: str = "-"
+    Value: Optional[str] = "-"
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+
+    @field_validator('Description', 'DataType', 'AccessType', 'Value', mode='before')
+    @classmethod
+    def replace_empty(cls, v: Any) -> Any:
+        if v is None or (isinstance(v, str) and str(v).strip().lower() in ("", "unknown", "n/a", "none")):
+            return "-"
+        return v
+
+
+class DataVariable(BaseModel):
+    DvID: int
+    Name: str
+    ValueType: str = "-"
+    Unit: Optional[str] = "-"
+
+    @field_validator('ValueType', 'Unit', mode='before')
+    @classmethod
+    def replace_empty(cls, v: Any) -> Any:
+        if v is None or (isinstance(v, str) and str(v).strip().lower() in ("", "unknown", "n/a", "none")):
+            return "-"
+        return v
+
+
+class RCMDParameter(BaseModel):
+    Name: str
+    Type: str
+
+
+class RemoteCommand(BaseModel):
+    RCMD: str
+    Description: Optional[str] = None
+    Parameters: list[RCMDParameter] = Field(default_factory=list)
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+
+
+class Event(BaseModel):
+    CEID: int
+    EventName: str = Field(alias="Name")
+    Description: Optional[str] = None
+    LinkedVIDs: list[int] = Field(default_factory=list)
+    LinkedReports: list[str] = Field(default_factory=list)
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    
+    @field_validator('Description', mode='before')
+    @classmethod
+    def replace_empty(cls, v: Any) -> Any:
+        if v is None or (isinstance(v, str) and str(v).strip().lower() in ("", "unknown", "n/a", "none")):
+            return "-"
+        return v
+    
+    model_config = {
+        "populate_by_name": True
+    }
+
+
+class Alarm(BaseModel):
+    AlarmID: int
+    AlarmName: str = Field(alias="Name")
+    Severity: str = "-"
+    LinkedVID: Optional[int] = None
+    Description: Optional[str] = "-"
+    Confidence: float = Field(default=1.0, ge=0.0, le=1.0)
+    
+    @field_validator('Severity', 'Description', mode='before')
+    @classmethod
+    def replace_empty(cls, v: Any) -> Any:
+        if v is None or (isinstance(v, str) and str(v).strip().lower() in ("", "unknown", "n/a", "none")):
+            return "-"
+        return v
+    
+    model_config = {
+        "populate_by_name": True
+    }
+
+
+class State(BaseModel):
+    StateID: str
+    Name: str
+    Description: Optional[str] = None
+
+
+class StateTransition(BaseModel):
+    FromState: str
+    ToState: str
+    TriggerEvent: Optional[str] = None
+    TriggerCommand: Optional[str] = None
+    Manual: bool = False
+
+    @model_validator(mode="after")
+    def at_least_one_trigger(self) -> "StateTransition":
+        if not (self.TriggerEvent or self.TriggerCommand or self.Manual):
+            self.Manual = True
+        return self
+
+
+class HSMSConfig(BaseModel):
+    DeviceID: Optional[str] = None
+    IPAddress: Optional[str] = None
+    PortNumber: Optional[str] = None
+    BaudRate: Optional[str] = None
+    Timeout: Optional[str] = None
+
+class StreamFunction(BaseModel):
+    Stream: Optional[str] = None
+    Function: Optional[str] = None
+    Description: Optional[str] = None
+
+class CommunicationState(BaseModel):
+    State: Optional[str] = None
+    Description: Optional[str] = None
+
+class ControlState(BaseModel):
+    State: Optional[str] = None
+    Description: Optional[str] = None
+
+class SupportedStandard(BaseModel):
+    Standard: str
+    Version: Optional[str] = None
+
+class GEMComplianceItem(BaseModel):
+    Category: Optional[str] = None
+    Feature: Optional[str] = None
+    Implemented: Optional[bool] = None
+    GEMCompliant: Optional[bool] = None
+    ComplianceNote: Optional[str] = None
+
+class SummarySpec(BaseModel):
+    EquipmentName: Optional[str] = None
+    WaferSize: Optional[str] = None
+    SoftwareRevision: Optional[str] = None
+    ToolID: Optional[str] = None
+    StandardsSupported: Optional[list[SupportedStandard]] = Field(default_factory=list)
+    GEMCompliance: Optional[list[Union[GEMComplianceItem, str]]] = Field(default_factory=list)
+    HSMSConfiguration: Optional[HSMSConfig] = None
+    StreamFunctions: Optional[list[StreamFunction]] = Field(default_factory=list)
+    CommunicationStates: Optional[list[CommunicationState]] = Field(default_factory=list)
+    ControlStates: Optional[list[ControlState]] = Field(default_factory=list)
+
+class EquipmentSpec(BaseModel):
+    DocumentType: Optional[str] = None
+    ToolID: Optional[str] = None
+    ToolType: Optional[str] = None
+    Model: Optional[str] = None
+    Protocol: str = "SECS/GEM"
+    Summary: Optional[SummarySpec] = None
+    StatusVariables: list[StatusVariable] = Field(default_factory=list)
+    DataVariables: list[DataVariable] = Field(default_factory=list)
+    Events: list[Event] = Field(default_factory=list)
+    Alarms: list[Alarm] = Field(default_factory=list)
+    RemoteCommands: list[RemoteCommand] = Field(default_factory=list)
+    States: list[State] = Field(default_factory=list)
+    StateTransitions: list[StateTransition] = Field(default_factory=list)
+    Reports: list[ReportDefinition] = Field(default_factory=list)
+
+
+class ValidationIssue(BaseModel):
+    Severity: str
+    Code: str
+    Message: str
+    EntityID: Optional[str] = None
+
+
+class ValidationReport(BaseModel):
+    Issues: list[ValidationIssue] = Field(default_factory=list)
+
+    def is_clean(self) -> bool:
+        return not any(i.Severity == "error" for i in self.Issues)
+
+
+
+================================================================================
+--- FILE PATH: eap_bot/source/schemas/report.py ---
+================================================================================
+
+from pydantic import BaseModel, Field
+from typing import Optional
+
+class ReportDefinition(BaseModel):
+    RPTID: str
+    Name: str
+    LinkedVIDs: list[int] = Field(default_factory=list)
+    Type: str = "Built-in"
+    Confidence: float = Field(default=0.7, ge=0.0, le=1.0)
+    Reasoning: Optional[str] = None
+
+
+class ReportSuggestionResponse(BaseModel):
+    ProjectID: int
+    DocumentID: str
+    Reports: list[ReportDefinition] = Field(default_factory=list)
+    Strategy: str = ""  # "event_centric" or "shared"
+    OverallConfidence: float = 0.0
+
+
+
+================================================================================
+--- FILE PATH: eap_bot/source/schemas/project.py ---
+================================================================================
+
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
+
+from pydantic import BaseModel, Field, field_validator
+
+
+class ToolType(str, Enum):
+    NONE = "None"
+    MOCVD = "MOCVD"
+    CVD = "CVD"
+    LITHO = "LITHO"
+    ETCH = "ETCH"
+    ION_IMPLANTER = "ION_IMPLANTER"
+
+
+class DocumentCategory(str, Enum):
+    USER_MANUALS = "User Manuals"
+    TROUBLESHOOTING_GUIDANCE = "Troubleshooting Guidance"
+    GEM_MANUAL = "GEM Manual"
+    VARIABLE_FILES = "Variable Files"
+    LOG_FILES = "Log Files"
+    ALARM_FILES = "Alarm Files"
+    SML_SCRIPTS = "SML Scripts"
+    MISCELLANEOUS = "Miscellaneous"
+
+
+class TestResultFileType(str, Enum):
+    test = "Test"
+    secs_log = "SECSLog"
+
+
+class VariableCategory(str, Enum):
+    """Selectable variable categories for the GetVariable endpoint (renders as dropdown in Swagger)."""
+    STATUS_VARIABLE = "StatusVariable"
+    DATA_VARIABLE = "DataVariable"
+    EVENT = "Event"
+    ALARM = "Alarm"
+    REMOTE_COMMAND = "RemoteCommand"
+    STATE = "State"
+
+
+class ProjectCreate(BaseModel):
+    ProjectName: str = Field(min_length=1)
+    VendorName: str = Field(min_length=1)
+    ProjectCode: str = Field(min_length=1)
+    ProjectDescription: Optional[str] = Field(default="")
+    Tool: ToolType = ToolType.NONE
+
+
+class DocumentMetadata(BaseModel):
+    DocumentID: str = Field(alias="document_id")
+    DocumentType: DocumentCategory = Field(alias="document_type")
+
+    @field_validator("DocumentType", mode="before")
+    def coerce_document_type(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            mapping = {
+                "user manual": DocumentCategory.USER_MANUALS,
+                "variable file": DocumentCategory.VARIABLE_FILES,
+                "log file": DocumentCategory.LOG_FILES,
+                "log files": DocumentCategory.LOG_FILES,
+                "alarm file": DocumentCategory.ALARM_FILES,
+                "sml script": DocumentCategory.SML_SCRIPTS,
+            }
+            return mapping.get(v.strip().lower(), v)
+        return v
+    FileName: str = Field(alias="filename")
+    FileSize: float = Field(default=0.0, alias="file_size")
+    Pages: int = Field(default=0, alias="pages")
+    UploadDate: datetime = Field(alias="upload_date")
+    Status: str = Field(default="completed", alias="status")
+
+    model_config = {
+        "populate_by_name": True
+    }
+
+
+class ProjectOut(BaseModel):
+    ProjectID: int = Field(alias="project_id")
+    ProjectName: str = Field(alias="project_name")
+    VendorName: str = Field(default="", alias="vendor_name")
+    ProjectCode: str = Field(default="", alias="project_code")
+    ProjectDescription: Optional[str] = Field(default="", alias="project_description")
+    Tool: ToolType = Field(alias="tool")
+    CreatedAt: datetime = Field(alias="created_at")
+    LastUpdatedOn: datetime = Field(alias="last_updated_on")
+    Status: str = Field(alias="status")
+    ProjectVersion: str = Field(default="1.0", alias="project_version")
+
+    model_config = {
+        "populate_by_name": True
+    }
+
+
+class ProjectMetadata(ProjectOut):
+    Documents: list[DocumentMetadata] = Field(default_factory=list, alias="documents")
+
+    model_config = {
+        "populate_by_name": True
+    }
+
+
+class AggregatedSpec(BaseModel):
+    StatusVariables: list[Any] = Field(default_factory=list)
+    DataVariables: list[Any] = Field(default_factory=list)
+    Events: list[Any] = Field(default_factory=list)
+    Alarms: list[Any] = Field(default_factory=list)
+    RemoteCommands: list[Any] = Field(default_factory=list)
+    States: list[Any] = Field(default_factory=list)
+    StateTransitions: list[Any] = Field(default_factory=list)
+    Reports: list[Any] = Field(default_factory=list)
+
+class ProjectDetail(ProjectMetadata):
+    Extractions: AggregatedSpec = Field(default_factory=AggregatedSpec)
+    Mappings: dict[str, Any] = Field(default_factory=dict)
+    SmlTemplate: Any = Field(default_factory=dict)
+    Questions: list[dict[str, str]] = Field(default_factory=list)
+
+
+class ProjectUpdate(BaseModel):
+    ProjectName: Optional[str] = None
+    ProjectDescription: Optional[str] = None
+    VendorName: Optional[str] = None
+    ProjectCode: Optional[str] = None
+    Tool: Optional[ToolType] = None
+    ProjectVersion: Optional[str] = None
+
+
+class AskRequest(BaseModel):
+    Question: str
+    DocumentCategory: Optional[str] = None
+
+
+class ProjectDetailsResponse(BaseModel):
+    Id: int
+    ProjectName: str
+    ProjectCode: str
+    ProjectDescription: Optional[str] = None
+    VendorName: Optional[str] = None
+    Tool: Optional[str] = None
+    ProjectVersion: Optional[str] = None
+    CreatedAt: datetime
+    DocumentCount: int
+    SVCount: int
+    DVCount: int
+    RCCount: int
+    SmlScriptCount: int
+    ReportCount: int
+    AlarmCount: int
+    EventCount: int
+
+class SystemSummaryResponse(BaseModel):
+    TotalProjects: int
+    TotalSmlScripts: int
+    TotalConnectedTools: int
+    TotalScriptsTested: int = 0
+
+class FrontendStatusVariable(BaseModel):
+    SVID: int
+    Name: str
+    Description: Optional[str] = ""
+    DataType: str
+    AccessType: str
+    Value: Optional[str] = ""
+    Confidence: float = 0.0
+
+class FrontendDataVariable(BaseModel):
+    DvID: int
+    Name: str
+    Unit: Optional[str] = ""
+    ValueType: str
+
+class FrontendEvent(BaseModel):
+    CEID: int
+    EventName: str
+    Description: Optional[str] = ""
+    LinkedVIDs: list[int] = Field(default_factory=list)
+    LinkedReports: list[str] = Field(default_factory=list)
+    Confidence: float = 0.0
+
+class FrontendAlarm(BaseModel):
+    AlarmID: int
+    AlarmName: str
+    Severity: str
+    LinkedVID: Optional[int] = None
+    Description: Optional[str] = ""
+    Confidence: float = 0.0
+
+class FrontendRemoteCommand(BaseModel):
+    RCMD: str
+    Description: Optional[str] = ""
+    Parameters: list[dict] = Field(default_factory=list)
+    Confidence: float = 0.0
+
+class UpdateExtractionRequest(BaseModel):
+    ProjectID: int
+    ExtractionID: str
+    ConfidenceScore: float = 0.0
+    ExtractionStatus: str = "completed"
+    StatusVariables: list[FrontendStatusVariable] = Field(default_factory=list)
+    DataVariables: list[FrontendDataVariable] = Field(default_factory=list)
+    Events: list[FrontendEvent] = Field(default_factory=list)
+    Alarms: list[FrontendAlarm] = Field(default_factory=list)
+    RemoteCommands: list[FrontendRemoteCommand] = Field(default_factory=list)
+    States: list[dict] = Field(default_factory=list)
+    StateTransitions: list[dict] = Field(default_factory=list)
+    Reports: list[dict] = Field(default_factory=list)
+
+class GenerateReportsRequest(BaseModel):
+    ceids: list[int] = Field(default_factory=list, description="List of CEIDs to generate reports for. If empty, generates for all events.")

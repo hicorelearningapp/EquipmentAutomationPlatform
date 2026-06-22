@@ -1,0 +1,39 @@
+// --- SIMPLE DEMO SCRIPT (PROJECT 16 ETCH-PRO) ---
+// This is a minimal example used for demonstrations
+// --- Define Reports (S2F33) ---
+S2F33 W
+  <L [2]
+    <U4 100>                    * DATAID
+    <L [1]
+      <L [2]
+        <U4 1>                     * RPTID (Pressure Report)
+        <L [1]
+          <U4 10015>                 * SVID
+        >
+      >
+    >
+  >
+.
+
+// --- Link Reports (S2F35) ---
+S2F35 W
+  <L [2]
+    <U4 100>                    * DATAID
+    <L [1]
+      <L [2]
+        <U4 5000>                   * CEID (Recipe Start)
+        <L [1]
+          <U4 1>                   * RPTID
+        >
+      >
+    >
+  >
+.
+
+// --- Enable Events (S2F37) ---
+S2F37 W
+  <Boolean True>                   * CEED
+  <L [1]
+    <U4 5000>                      * CEID
+  >
+.

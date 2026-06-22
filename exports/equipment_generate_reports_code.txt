@@ -1,3 +1,7 @@
+================================================================================
+--- FILE PATH: eap_bot\source\routers\tool_characterization_routes.py ---
+================================================================================
+
 import json
 import logging
 
@@ -29,7 +33,7 @@ class ToolCharacterizationAPI:
     def register_routes(self):
         self.router.post("/GenerateTestScripts/{project_id}")(self.generate_test_scripts)
         self.router.post("/UpdateToolCharacterizationScript/{project_id}")(self.update_tool_char_script)
-        self.router.post("/GenerateSMLScripts/{project_id}")(self.generate_sml_scripts)
+        self.router.post("/GenerateSMLScripts/{project_id}", response_model=SMLGenerationResponse)(self.generate_sml_scripts)
         # self.router.post("/GenerateToolCharacterisationReportSummary/{project_id}")(self.generate_tool_char_report_summary)
         self.router.post("/UploadTestResult")(self.upload_test_result)
         self.router.get("/GetToolResults/{project_id}")(self.get_tool_results)
@@ -125,6 +129,34 @@ class ToolCharacterizationAPI:
             logger.error("Failed to generate SML scripts: %s", e)
             raise HTTPException(500, str(e))
 
+    # def generate_tool_char_report_summary(self, project_id: int):
+    #     try:
+    #         metadata = self.storage.get_project(project_id)
+    #         test_summary = {
+    #             "ProjectID": project_id,
+    #             "ProjectName": metadata.ProjectName,
+    #             "Timestamp": self.storage.now().isoformat(),
+    #             "Status": "completed",
+    #             "TotalTests": 15,
+    #             "PassedTests": 15,
+    #             "FailedTests": 0,
+    #             "SummaryReport": "All SECS/GEM message structures characterized successfully."
+    #         }
+    # 
+    #         test_summary_dir = self.storage._project_dir(project_id) / self.storage.TEST_SUMMARY_DIR
+    #         test_summary_dir.mkdir(parents=True, exist_ok=True)
+    # 
+    #         summary_path = test_summary_dir / "test_summary.json"
+    #         summary_path.write_text(json.dumps(test_summary, indent=2), encoding="utf-8")
+    # 
+    #         return {
+    #             "Status": "success",
+    #             "Summary": test_summary
+    #         }
+    #     except Exception as e:
+    #         logger.error("Failed to generate report summary: %s", e)
+    #         raise HTTPException(500, str(e))
+
     async def upload_test_result(
         self,
         project_id: int = Form(...),
@@ -212,3 +244,6 @@ class ToolCharacterizationAPI:
         except Exception as exc:
             logger.error("Failed to retrieve tool results: %s", exc)
             raise HTTPException(500, str(exc)) from exc
+
+
+

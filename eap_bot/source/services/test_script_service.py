@@ -8,12 +8,16 @@ class TestScriptService:
         lines = content.splitlines()
         tests = []
         current_lines = []
+        last_comment = ""
 
         for line in lines:
             stripped = line.strip()
             # If we are not currently accumulating a block, skip comments and empty lines
             if not current_lines:
-                if not stripped or stripped.startswith("//") or stripped.startswith("#"):
+                if not stripped:
+                    continue
+                if stripped.startswith("//") or stripped.startswith("#"):
+                    last_comment = stripped
                     continue
 
             current_lines.append(line)
@@ -55,14 +59,26 @@ class TestScriptService:
                         except (ValueError, TypeError):
                             pass
 
+                # Determine TestName
+                test_name = header_line
+                if last_comment:
+                    cleaned = last_comment.replace("//", "").replace("#", "").replace("---", "").replace("===", "").strip()
+                    if cleaned:
+                        test_name = cleaned.replace(":", " -", 1)
+                
+                if not test_name:
+                    test_name = f"Test {len(tests) + 1}"
+
                 tests.append(
                     {
                         "TestID": str(len(tests) + 1),
+                        "TestName": test_name,
                         "Category": category,
                         "SML": sml_text,
                         "Status": "NotRun",
                     }
                 )
                 current_lines = []
+                last_comment = ""
 
         return tests

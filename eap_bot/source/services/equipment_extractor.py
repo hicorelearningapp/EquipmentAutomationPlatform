@@ -197,7 +197,40 @@ class EquipmentExtractor:
                 
         chunk_spec = self._merge_specs(partial_specs)
         merged = self._merge_specs([chunk_spec, spec])
+        if merged.RemoteCommands:
+            merged.RemoteCommands = self._clean_rcmd_parameters(merged.RemoteCommands)
         return merged
+
+    def _clean_rcmd_parameters(self, commands: list) -> list:
+        """Dedup and clean RCMDParameter lists per command."""
+        import re
+        for cmd in commands:
+            seen_names = {}
+            clean_params = []
+            for p in cmd.Parameters:
+                name = p.Name.strip().rstrip(".")
+                # Skip sentence-style names entirely
+                if any(kw in name for kw in ("Required:", "Optional:", "No required", ". ")):
+                    continue
+                
+                # Normalize: strip trailing punctuation, lowercase for dedup key
+                key = re.sub(r"[^a-zA-Z0-9]", "", name).lower()
+                if key not in seen_names:
+                    seen_names[key] = True
+                    # Prefer typed entries over UNKNOWN
+                    p.Name = name
+                    clean_params.append(p)
+                else:
+                    # If existing entry has UNKNOWN type and this one is typed, replace
+                    existing_idx = next(
+                        i for i, x in enumerate(clean_params)
+                        if re.sub(r"[^a-zA-Z0-9]", "", x.Name).lower() == key
+                    )
+                    if clean_params[existing_idx].Type == "UNKNOWN" and p.Type != "UNKNOWN":
+                        p.Name = name
+                        clean_params[existing_idx] = p
+            cmd.Parameters = clean_params
+        return commands
     
     # ------------------------------------------------------------------
     # Chunking (Split)
@@ -615,10 +648,17 @@ EXPECTED JSON FORMAT:
     {{
       "RCMD": "string - the name of the command/message",
       "Description": "string",
-      "Parameters": [{{ "Name": "string", "Type": "string" }}],
+      "Parameters": [{"Name": "string", "Type": "string"}],
       "Confidence": 0.0 to 1.0
     }}
   ],
+  
+  For RemoteCommands[].Parameters:
+  - Each entry must be ONE parameter only — never a sentence describing multiple params.
+  - Name must be the raw parameter name only (e.g. "RecipeID", not "Required: RecipeID. Optional: LotID").
+  - If a parameter is optional, still list it as a separate entry with the clean name.
+  - Type must be the SECS-II data type (ASCII, U4, BOOLEAN, etc.). Use "ASCII" as default if unknown, never "UNKNOWN" or "string".
+  - Never duplicate the same parameter name within one command.
   "States": [
     {{ "StateID": "string", "Name": "string", "Description": "string" }}
   ],
@@ -670,10 +710,11 @@ RULES:
 - DataVariables    : {{ "DvID": int, "Name": str, "ValueType": "float|integer|string|boolean", "Unit": str }}
 - Events           : {{ "CEID": int, "Name": str, "Description": str, "LinkedVIDs": [int], "LinkedReports": ["str"], "Confidence": float }}
                      SKIP any row without a numeric CEID. Parse comma-separated VID lists into LinkedVIDs.
-- Alarms           : {{ "AlarmID": int, "Name": str, "Severity": "critical|warning|info", "LinkedVID": int|null, "Description": str, "Confidence": float }}
+- Alarms           : { "AlarmID": int, "Name": str, "Severity": "critical|warning|info", "LinkedVID": int|null, "Description": str, "Confidence": float }
                      SKIP any row without a numeric AlarmID. Severity MUST be lowercase.
-- RemoteCommands   : {{ "RCMD": str, "Description": str, "Parameters": [{{"Name": str, "Type": str}}], "Confidence": float }}
-- States           : {{ "StateID": str, "Name": str, "Description": str }}
+- RemoteCommands   : { "RCMD": str, "Description": str, "Parameters": [{"Name": str, "Type": str}], "Confidence": float }
+                     For Parameters: Each entry must be ONE parameter only (never a sentence). Name must be the raw parameter name only. Type must be the SECS-II data type (ASCII, U4, etc.) or ASCII if unknown, never UNKNOWN.
+- States           : { "StateID": str, "Name": str, "Description": str }
 - StateTransitions : {{ "FromState": str (REQUIRED), "ToState": str (REQUIRED), "TriggerEvent": str|null, "TriggerCommand": str|null, "Manual": bool }}
                      Never set both TriggerEvent and TriggerCommand on the same entry.
 - Reports          : {{ "RPTID": str, "Name": str, "LinkedVIDs": [int] }}
