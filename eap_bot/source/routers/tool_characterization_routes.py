@@ -83,7 +83,14 @@ class ToolCharacterizationAPI:
             dst_path = tool_char_dir / json_filename
             dst_path.write_text(json.dumps(tests, indent=2), encoding="utf-8")
 
-            return tests
+            raw_sml_blocks = []
+            for test in tests:
+                sml = test.get("SML", "").strip()
+                if sml:
+                    raw_sml_blocks.append(sml)
+            raw_sml_string = "\n\n".join(raw_sml_blocks)
+
+            return {"script": raw_sml_string}
         except HTTPException:
             raise
         except Exception as e:
@@ -115,7 +122,6 @@ class ToolCharacterizationAPI:
         except Exception as e:
             logger.error("Failed to update tool characterization script: %s", e)
             raise HTTPException(500, str(e))
-
     def generate_sml_scripts(self, project_id: int):
         try:
             return container.sml_generation_service.generate_scripts(project_id)

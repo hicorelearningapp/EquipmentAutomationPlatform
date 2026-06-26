@@ -40,20 +40,42 @@ SML_TEMPLATE_CONTENT = SML_CHARACTERISATION_TEMPLATE
 _test_script_service = TestScriptService()
 
 
+def _tests_to_sml_string(tests: list) -> str:
+    raw_sml_blocks = []
+    for test in tests:
+        sml = test.get("SML", "").strip()
+        if sml:
+            raw_sml_blocks.append(sml)
+    return "\n\n".join(raw_sml_blocks)
+
+
 def build_sml_templates(project_id: int, storage) -> dict:
     """
     Build the project SmlTemplate response with system templates and user SML scripts.
     """
     result = {
-        "GeneralGEMTesting": SML_GENERAL_TEMPLATE,
-        "ToolCharacterisationTesting": SML_CHARACTERISATION_TEMPLATE,
+        "GeneralGEMTesting": _tests_to_sml_string(SML_GENERAL_TEMPLATE),
+        "ToolCharacterisationTesting": _tests_to_sml_string(SML_CHARACTERISATION_TEMPLATE),
     }
     try:
         user_scripts = storage.list_user_sml_scripts(project_id)
         for filename, path in user_scripts:
             try:
                 content = path.read_text(encoding="utf-8")
-                result[filename] = _test_script_service.parse_sml_to_tests(content)
+                # Strip the extension for the UI key
+                key = Path(filename).stem
+                
+                # If it's valid JSON list, reconstruct SML. Otherwise, it's raw SML text.
+                try:
+                    import json
+                    tests = json.loads(content)
+                    if isinstance(tests, list):
+                        result[key] = _tests_to_sml_string(tests)
+                    else:
+                        result[key] = content
+                except Exception:
+                    result[key] = content
+                    
             except Exception as e:
                 logger.warning("Failed to parse user SML script %s: %s", filename, e)
     except Exception as e:

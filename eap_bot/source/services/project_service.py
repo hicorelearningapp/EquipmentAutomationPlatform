@@ -170,6 +170,13 @@ class ProjectService:
         # Generate Project-level Summary Report PDF using aggregated JSON data
         self.generate_project_pdf(project_id, aggregated)
 
+        # Auto-generate ToolSpecificTesting script
+        try:
+            self._container.sml_generation_service.generate_scripts(project_id, spec=aggregated)
+            logger.info(f"Successfully generated ToolSpecificTesting script for project {project_id}")
+        except Exception as e:
+            logger.error(f"Failed to auto-generate ToolSpecificTesting script for project {project_id}: {e}")
+
         return aggregated
 
     def generate_project_pdf(self, project_id: int, spec: EquipmentSpec) -> None:

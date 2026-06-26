@@ -664,6 +664,21 @@ class StorageService:
         if json_path.exists():
             json_path.unlink()
 
+        # Delete SML script files from ToolCharacterization if applicable
+        from source.schemas.project import DocumentCategory
+        doc_type_val = document.DocumentType.value if hasattr(document.DocumentType, 'value') else str(document.DocumentType)
+        if doc_type_val == "SML Scripts" or getattr(DocumentCategory, "SML_SCRIPTS", None) == document.DocumentType:
+            tool_char_dir = self._project_dir(project_id) / self.TOOL_CHAR_DIR
+            if document.FileName:
+                txt_path = tool_char_dir / document.FileName
+                if txt_path.exists():
+                    txt_path.unlink()
+                
+                json_filename = Path(document.FileName).with_suffix(".json").name
+                json_file_path = tool_char_dir / json_filename
+                if json_file_path.exists():
+                    json_file_path.unlink()
+
         metadata.Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)

@@ -248,6 +248,12 @@ class EquipmentAPI:
             # Regenerate the PDF to reflect the updated json
             container.project_service.generate_project_pdf(project_id, spec_obj)
             
+            # Auto-regenerate ToolSpecificTesting script
+            try:
+                container.sml_generation_service.generate_scripts(project_id, spec=spec_obj)
+            except Exception as e:
+                logger.error("Failed to auto-generate ToolSpecificTesting script on extraction update: %s", e)
+            
             return {"Status": "success", "Message": "Extraction updated successfully"}
             
         except InvalidSlugError as exc:
@@ -334,6 +340,12 @@ class EquipmentAPI:
             # Regenerate the PDF to reflect the updated json
             container.project_service.generate_project_pdf(project_id, spec_obj)
             
+            # Auto-regenerate ToolSpecificTesting script
+            try:
+                container.sml_generation_service.generate_scripts(project_id, spec=spec_obj)
+            except Exception as e:
+                logger.error("Failed to auto-generate ToolSpecificTesting script after generating reports: %s", e)
+            
             return container.document_service._build_extraction_response(
                 project_id, "project_batch", spec_obj
             )
@@ -360,6 +372,12 @@ class EquipmentAPI:
             
             spec_obj.Reports = reports
             self.storage.save_spec_json(json_path, spec_obj)
+            
+            # Auto-regenerate ToolSpecificTesting script
+            try:
+                container.sml_generation_service.generate_scripts(project_id, spec=spec_obj)
+            except Exception as e:
+                logger.error("Failed to auto-generate ToolSpecificTesting script on updating reports: %s", e)
             
             return container.document_service._build_extraction_response(
                 project_id, "project_batch", spec_obj

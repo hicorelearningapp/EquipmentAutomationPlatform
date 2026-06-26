@@ -26,17 +26,16 @@ class SMLGenerator:
 
     # ------------------ PHASE 1: COMM & SETUP ------------------
     def generate_s1f1_ping(self) -> str:
-        return "// --- S1F1: Are You There --- \nS1F1 W\n."
+        return "S1F1 W\n."
 
     def generate_s1f13_establish_comm(self) -> str:
-        return "// --- S1F13: Establish Communication --- \nS1F13 W\n  <L [0]>\n."
+        return "S1F13 W\n  <L [0]>\n."
 
     def generate_s1f11_status_variables(self, svids: List[int]) -> str:
         if not svids:
-            return "// --- S1F11: Request ALL Status Variables --- \nS1F11 W\n  <L [0]>\n."
+            return "S1F11 W\n  <L [0]>\n."
         
         lines = [
-            "// --- S1F11: Request Specific Status Variables ---",
             "S1F11 W",
             f"  <L [{len(svids)}]"
         ]
@@ -51,18 +50,17 @@ class SMLGenerator:
         if not reports:
             return ""
         lines = [
-            "// --- S2F33: Define Reports ---",
             "S2F33 W",
             f"  <L [2]",
-            f"    <U4 {self.data_id}>                    * DATAID",
+            f"    <U4 {self.data_id}>",
             f"    <L [{len(reports)}]"
         ]
         for rpt in reports:
             lines.append(f"      <L [2]")
-            lines.append(f"        <U4 {rpt.report_id}>                     * RPTID ({rpt.name})")
+            lines.append(f"        <U4 {rpt.report_id}>")
             lines.append(f"        <L [{len(rpt.svids)}]")
             for svid in rpt.svids:
-                lines.append(f"          <U4 {svid}>                 * SVID")
+                lines.append(f"          <U4 {svid}>")
             lines.append("        >")
             lines.append("      >")
             
@@ -75,18 +73,17 @@ class SMLGenerator:
         if not links:
             return ""
         lines = [
-            "// --- S2F35: Link Reports to Events ---",
             "S2F35 W",
             f"  <L [2]",
-            f"    <U4 {self.data_id}>                    * DATAID",
+            f"    <U4 {self.data_id}>",
             f"    <L [{len(links)}]"
         ]
         for link in links:
             lines.append(f"      <L [2]")
-            lines.append(f"        <U4 {link.ceid}>                   * CEID ({link.name})")
+            lines.append(f"        <U4 {link.ceid}>")
             lines.append(f"        <L [{len(link.report_ids)}]")
             for rptid in link.report_ids:
-                lines.append(f"          <U4 {rptid}>                   * RPTID")
+                lines.append(f"          <U4 {rptid}>")
             lines.append("        >")
             lines.append("      >")
         lines.append("    >")
@@ -98,13 +95,12 @@ class SMLGenerator:
         if not ceids:
             return ""
         lines = [
-            "// --- S2F37: Enable Event Reports ---",
             "S2F37 W",
-            f"  <Boolean True>                   * CEED",
+            f"  <Boolean True>",
             f"  <L [{len(ceids)}]"
         ]
         for ceid in ceids:
-            lines.append(f"    <U4 {ceid}>                      * CEID")
+            lines.append(f"    <U4 {ceid}>")
         lines.append("  >")
         lines.append(".")
         return "\n".join(lines)
@@ -113,17 +109,16 @@ class SMLGenerator:
         if not svids:
             return ""
         lines = [
-            "// --- S2F23: Trace Initialize (Every 10s, 100 samples) ---",
             "S2F23 W",
             "  <L [5]",
-            "    <U4 1>                       * TRID",
-            "    <ASCII \"000010\">             * DSPPER (10s)",
-            "    <U4 100>                     * TOTSMP",
-            "    <U4 1>                       * REPGSZ",
+            "    <U4 1>",
+            "    <A \"000010\">",
+            "    <U4 100>",
+            "    <U4 1>",
             f"    <L [{len(svids)}]"
         ]
         for svid in svids:
-            lines.append(f"      <U4 {svid}>                    * SVID")
+            lines.append(f"      <U4 {svid}>")
         lines.append("    >")
         lines.append("  >")
         lines.append(".")
@@ -133,16 +128,15 @@ class SMLGenerator:
     def generate_s2f41_host_command(self, rcmd: str, params: Dict[str, str] = None) -> str:
         params = params or {}
         lines = [
-            f"// --- S2F41: Host Command ({rcmd}) ---",
             "S2F41 W",
             "  <L [2]",
-            f"    <ASCII \"{rcmd}\">",
+            f"    <A \"{rcmd}\">",
             f"    <L [{len(params)}]"
         ]
         for cpname, cpval in params.items():
             lines.append("      <L [2]")
-            lines.append(f"        <ASCII \"{cpname}\">")
-            lines.append(f"        <ASCII \"{cpval}\">")
+            lines.append(f"        <A \"{cpname}\">")
+            lines.append(f"        <A \"{cpval}\">")
             lines.append("      >")
         lines.append("    >")
         lines.append("  >")
@@ -151,28 +145,23 @@ class SMLGenerator:
 
     # ------------------ PHASE 4: RECIPE MANAGEMENT ------------------
     def generate_s7f19_pp_directory(self) -> str:
-        return "// --- S7F19: Request Process Program Directory --- \nS7F19 W\n."
+        return "S7F19 W\n."
 
 
 class SMLGenerationService:
     def __init__(self, storage: StorageService):
         self.storage = storage
 
-    def generate_scripts(self, project_id: int) -> dict:
-        batch_path = self.storage.spec_json_path(project_id, "project_batch")
-        if not batch_path.exists():
-            raise FileNotFoundError(f"Project batch specification not found for project {project_id}")
+    def generate_scripts(self, project_id: int, spec: EquipmentSpec = None) -> dict:
+        if spec is None:
+            batch_path = self.storage.spec_json_path(project_id, "project_batch")
+            if not batch_path.exists():
+                raise FileNotFoundError(f"Project batch specification not found for project {project_id}")
 
-        spec_json = batch_path.read_text(encoding="utf-8")
-        spec = EquipmentSpec.model_validate_json(spec_json)
+            spec_json = batch_path.read_text(encoding="utf-8")
+            spec = EquipmentSpec.model_validate_json(spec_json)
 
-        lines = [
-            "// ========================================================================",
-            f"// COMPREHENSIVE END-TO-END SML TEST SCRIPT FOR: {spec.ToolID}",
-            f"// MODEL: {spec.Model}",
-            f"// GENERATED ON: {datetime.datetime.now().isoformat()}",
-            "// ========================================================================\n"
-        ]
+        lines = []
 
         generator = SMLGenerator(data_id=1)
 
@@ -247,13 +236,11 @@ class SMLGenerationService:
         lines.append("")
         
         # === PHASE 4: EVENT REPORTS (S6F11 & S6F1) ===
-        lines.append("// === EXPECTED EVENT REPORTS (S6F11) ===")
         for ceid in ceids_to_enable[:5]: # Just do first 5 to show
-            lines.append(f"// --- S6F11: Event Report for CEID {ceid} ---\n<S6F11 W\n  <L [3]\n    <U4 1>\n    <U4 {ceid}>\n    <L [0]>\n  >\n>\n.")
+            lines.append(f"S6F11 W\n  <L [3]\n    <U4 1>\n    <U4 {ceid}>\n    <L [0]>\n  >\n.")
             lines.append("")
 
-        lines.append("// === EXPECTED TRACE DATA (S6F1) ===")
-        lines.append("// --- S6F1: Trace Data ---\n<S6F1 W\n  <L [4]\n    <U4 1>\n    <U4 100>\n    <ASCII \"2026061912000000\">\n    <L [0]>\n  >\n>\n.")
+        lines.append("S6F1 W\n  <L [4]\n    <U4 1>\n    <U4 100>\n    <A \"2026061912000000\">\n    <L [0]>\n  >\n.")
         lines.append("")
 
         lines.append(generator.generate_s2f41_host_command("STOP"))
@@ -263,20 +250,16 @@ class SMLGenerationService:
         lines.append(generator.generate_s7f19_pp_directory())
         lines.append("")
         
-        lines.append("// --- S7F1: Process Program Load Inquire ---")
-        lines.append("<S7F1 W\n  <L [2]\n    <ASCII \"TEST_RECIPE_01\">\n    <U4 1000>\n  >\n>\n.")
+        lines.append("S7F1 W\n  <L [2]\n    <A \"TEST_RECIPE_01\">\n    <U4 1000>\n  >\n.")
         lines.append("")
         
-        lines.append("// --- S7F3: Process Program Send ---")
-        lines.append("<S7F3 W\n  <L [2]\n    <ASCII \"TEST_RECIPE_01\">\n    <ASCII \"PPBODY=FORMATTED\">\n  >\n>\n.")
+        lines.append("S7F3 W\n  <L [2]\n    <A \"TEST_RECIPE_01\">\n    <A \"PPBODY=FORMATTED\">\n  >\n.")
         lines.append("")
         
-        lines.append("// --- S7F5: Process Program Request ---")
-        lines.append("<S7F5 W\n  <ASCII \"TEST_RECIPE_01\">\n>\n.")
+        lines.append("S7F5 W\n  <A \"TEST_RECIPE_01\">\n.")
         lines.append("")
         
-        lines.append("// --- S7F17: Delete Process Program ---")
-        lines.append("<S7F17 W\n  <L [1]\n    <ASCII \"TEST_RECIPE_01\">\n  >\n>\n.")
+        lines.append("S7F17 W\n  <L [1]\n    <A \"TEST_RECIPE_01\">\n  >\n.")
         lines.append("")
 
         script_content = "\n".join(lines)
