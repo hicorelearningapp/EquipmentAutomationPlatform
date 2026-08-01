@@ -201,47 +201,50 @@ class EquipmentAPI:
             except Exception:
                 spec_obj = EquipmentSpec(ToolID="", ToolType="")
                 
-            # Map fields back to EquipmentSpec format
-            spec_obj.StatusVariables = [
-                StatusVariable(
-                    SVID=sv.SVID, Name=sv.Name, Description=sv.Description,
-                    DataType=sv.DataType, AccessType=sv.AccessType,
-                    Value=sv.Value, Confidence=sv.Confidence
-                ) for sv in validated_req.StatusVariables
-            ]
-            
-            spec_obj.DataVariables = [
-                DataVariable(
-                    DvID=dv.DvID, Name=dv.Name, Unit=dv.Unit, ValueType=dv.ValueType
-                ) for dv in validated_req.DataVariables
-            ]
-            
-            spec_obj.Events = [
-                Event(
-                    CEID=e.CEID, Name=e.EventName, Description=e.Description,
-                    LinkedVIDs=e.LinkedVIDs, LinkedReports=e.LinkedReports,
-                    Confidence=e.Confidence
-                ) for e in validated_req.Events
-            ]
-            
-            spec_obj.Alarms = [
-                Alarm(
-                    AlarmID=a.AlarmID, Name=a.AlarmName, Severity=a.Severity,
-                    LinkedVID=a.LinkedVID, Description=a.Description,
-                    Confidence=a.Confidence
-                ) for a in validated_req.Alarms
-            ]
-            
-            spec_obj.RemoteCommands = [
-                RemoteCommand(
-                    RCMD=rc.RCMD, Description=rc.Description, Parameters=rc.Parameters,
-                    Confidence=rc.Confidence
-                ) for rc in validated_req.RemoteCommands
-            ]
-            
-            spec_obj.States = [State(**s) for s in validated_req.States]
-            spec_obj.StateTransitions = [StateTransition(**st) for st in validated_req.StateTransitions]
-            spec_obj.Reports = [ReportDefinition(**r) for r in validated_req.Reports]
+            try:
+                # Map fields back to EquipmentSpec format
+                spec_obj.StatusVariables = [
+                    StatusVariable(
+                        SVID=sv.SVID, Name=sv.Name, Description=sv.Description,
+                        DataType=sv.DataType, AccessType=sv.AccessType,
+                        Value=sv.Value, Confidence=sv.Confidence
+                    ) for sv in validated_req.StatusVariables
+                ]
+                
+                spec_obj.DataVariables = [
+                    DataVariable(
+                        DvID=dv.DvID, Name=dv.Name, Unit=dv.Unit, ValueType=dv.ValueType
+                    ) for dv in validated_req.DataVariables
+                ]
+                
+                spec_obj.Events = [
+                    Event(
+                        CEID=e.CEID, Name=e.EventName, Description=e.Description,
+                        LinkedVIDs=e.LinkedVIDs, LinkedReports=e.LinkedReports,
+                        Confidence=e.Confidence
+                    ) for e in validated_req.Events
+                ]
+                
+                spec_obj.Alarms = [
+                    Alarm(
+                        AlarmID=a.AlarmID, Name=a.AlarmName, Severity=a.Severity,
+                        LinkedVID=a.LinkedVID, Description=a.Description,
+                        Confidence=a.Confidence
+                    ) for a in validated_req.Alarms
+                ]
+                
+                spec_obj.RemoteCommands = [
+                    RemoteCommand(
+                        RCMD=rc.RCMD, Description=rc.Description, Parameters=rc.Parameters,
+                        Confidence=rc.Confidence
+                    ) for rc in validated_req.RemoteCommands
+                ]
+                
+                spec_obj.States = [State(**s) for s in validated_req.States]
+                spec_obj.StateTransitions = [StateTransition(**st) for st in validated_req.StateTransitions]
+                spec_obj.Reports = [ReportDefinition(**r) for r in validated_req.Reports]
+            except ValidationError as ve:
+                raise HTTPException(422, f"Payload mapping failed: {ve}")
             
             self.storage.save_spec_json(json_path, spec_obj)
             

@@ -1,11 +1,14 @@
+from source.utils.embedder import VectorStoreManager
 import csv
 import io
 import json
 import logging
 import re
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Union
+import openpyxl
 
 import pdfplumber
 import tiktoken
@@ -23,6 +26,8 @@ from source.schemas.secsgem import (
     StatusVariable,
 )
 from source.utils.llm_factory import LLMStrategy
+from source.schemas.secsgem import SummarySpec, EquipmentSpec, StatusVariable, Event, Alarm, RemoteCommand, DataVariable, State, StateTransition
+from source.schemas.report import ReportDefinition
 
 logger = logging.getLogger(__name__)
 
@@ -86,11 +91,6 @@ class EquipmentExtractor:
         
         response_obj = self._llm.invoke(prompt).content
         response_text = response_obj if isinstance(response_obj, str) else "".join(p.get("text", "") if isinstance(p, dict) else str(p) for p in response_obj)
-        import json
-        import csv
-        import io
-        from source.schemas.secsgem import SummarySpec, EquipmentSpec, StatusVariable, Event, Alarm, RemoteCommand, DataVariable, State, StateTransition
-        from source.schemas.report import ReportDefinition
 
         try:
             # Clean possible markdown formatting
@@ -184,7 +184,6 @@ class EquipmentExtractor:
         chunks = self._chunk_text(pdf_text)
         workers = min(self._max_parallel, len(chunks))
         
-        from concurrent.futures import ThreadPoolExecutor
         partial_specs: list[EquipmentSpec] = [None] * len(chunks)  # type: ignore[list-item]
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = {
@@ -203,7 +202,6 @@ class EquipmentExtractor:
 
     def _clean_rcmd_parameters(self, commands: list) -> list:
         """Dedup and clean RCMDParameter lists per command."""
-        import re
         for cmd in commands:
             seen_names = {}
             clean_params = []
@@ -400,7 +398,6 @@ class EquipmentExtractor:
                 self._sanitize(data)
                 return EquipmentSpec.model_validate(data)
             except Exception as retry_err:
-                import traceback
                 with open("extractor_error.txt", "w") as f:
                     f.write(traceback.format_exc())
                 if total_chunks == 1:
@@ -1038,7 +1035,6 @@ TABLE (CSV):
 
         report_items = data.get("Reports") or []
         if report_items:
-            from source.schemas.report import ReportDefinition
             reports = []
             for item in report_items:
                 try:
@@ -1087,8 +1083,6 @@ TABLE (CSV):
         prompts used for PDF table extraction. Sheets are classified first by
         their column headers, then by sheet name as fallback.
         """
-        import openpyxl
-
         excel_path = Path(excel_path)
         try:
             wb = openpyxl.load_workbook(excel_path, read_only=True, data_only=True)
@@ -1185,7 +1179,6 @@ TABLE (CSV):
                             
                             if heading:
                                 # Sanitize heading
-                                import re
                                 section = re.sub(r'[^A-Za-z0-9_]', '_', heading)
                                 section = re.sub(r'_+', '_', section).strip('_')
                                 
@@ -1245,7 +1238,6 @@ TABLE (CSV):
         # ── Index table rows into the dedicated 'tables' vector store ──────────
         if tables_store_path is not None and section_rows:
             try:
-                from source.utils.embedder import VectorStoreManager
                 tables_vs = VectorStoreManager(tables_store_path)
                 for section, rows in section_rows.items():
                     if len(rows) < 2:
@@ -1332,7 +1324,6 @@ TABLE (CSV):
                 valid = [t for t in items if t.get("FromState") and t.get("ToState")]
                 spec.StateTransitions = [StateTransition.model_validate(t) for t in valid]
             elif section == "Reports":
-                from source.schemas.secsgem import ReportDefinition
                 spec.Reports = [ReportDefinition.model_validate(i) for i in items]
         except Exception as exc:
             logger.warning("model_validate failed for %s table response: %s", section, exc)
