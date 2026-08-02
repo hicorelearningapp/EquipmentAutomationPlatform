@@ -1330,3 +1330,60 @@ TABLE (CSV):
             return None
 
         return spec
+
+    def auto_heal_spec(self, spec: EquipmentSpec) -> EquipmentSpec:
+        """Autonomously uses the LLM to fix validation errors in the extracted specification."""
+        from source.validators.spec_validator import SpecValidator
+        validator = SpecValidator()
+        
+        max_iterations = 2
+        for iteration in range(1, max_iterations + 1):
+            report = validator.validate(spec)
+            if report.is_clean():
+                logger.info("Validation clean on auto-heal iteration %d.", iteration)
+                break
+                
+            logger.warning("Auto-heal iteration %d found %d validation errors.", iteration, len(report.Issues))
+            
+            error_details = json.dumps([i.model_dump() for i in report.Issues], indent=2)
+            spec_json = spec.model_dump_json(indent=2)
+            
+            schema = json.dumps(EquipmentSpec.model_json_schema(), indent=2)
+            prompt = (
+                "You are an expert software debugger for SECS/GEM equipment specifications.\n"
+                "The following EquipmentSpec JSON contains validation errors. "
+                "Your task is to fix the provided JSON to resolve these specific validation errors. "
+                "Do not change anything else that isn't broken.\n\n"
+                f"### EquipmentSpec Schema:\n{schema}\n\n"
+                f"### Validation Errors:\n{error_details}\n\n"
+                f"### Current JSON:\n{spec_json}\n\n"
+                "Output ONLY valid JSON matching the exact schema."
+            )
+            
+            try:
+                # Use self._llm_retry for a slightly higher temperature, encouraging fixes
+                raw = self._llm_retry.invoke(prompt).content
+                if isinstance(raw, list):
+                    raw = "".join(p.get("text", "") if isinstance(p, dict) else str(p) for p in raw)
+                    
+                # Strip markdown code blocks if any
+                if raw.strip().startswith("```"):
+                    raw = re.sub(r"^```(?:json)?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
+                    
+                data = json.loads(raw)
+                
+                # Reconstruct the spec to ensure Pydantic validation
+                new_spec = EquipmentSpec.model_validate(data)
+                
+                # Preserve non-extractive fields
+                new_spec.ToolID = spec.ToolID
+                new_spec.ToolType = spec.ToolType
+                new_spec.DocumentType = spec.DocumentType
+                
+                spec = new_spec
+                logger.info("Successfully applied LLM auto-heal patch on iteration %d.", iteration)
+            except Exception as e:
+                logger.error("Failed to auto-heal spec on iteration %d: %s", iteration, e)
+                break
+                
+        return spec

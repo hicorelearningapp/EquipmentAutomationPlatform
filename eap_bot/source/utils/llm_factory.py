@@ -1,5 +1,9 @@
 from abc import ABC, abstractmethod
 from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_groq import ChatGroq
+from langchain_ollama import ChatOllama
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_mistralai import ChatMistralAI
 
 from source.config import settings
 
@@ -11,7 +15,6 @@ class LLMStrategy(ABC):
 
 class GroqStrategy(LLMStrategy):
     def get_model(self, temperature: float = 0.0, require_json: bool = False) -> BaseChatModel:
-        from langchain_groq import ChatGroq
         
         kwargs = {
             "model": settings.LLM_MODEL_NAME,
@@ -27,7 +30,6 @@ class GroqStrategy(LLMStrategy):
 
 class OllamaStrategy(LLMStrategy):
     def get_model(self, temperature: float = 0.0, require_json: bool = False) -> BaseChatModel:
-        from langchain_ollama import ChatOllama
         
         kwargs = {
             "model": settings.LLM_MODEL_NAME,
@@ -42,7 +44,6 @@ class OllamaStrategy(LLMStrategy):
 
 class GeminiStrategy(LLMStrategy):
     def get_model(self, temperature: float = 0.0, require_json: bool = False) -> BaseChatModel:
-        from langchain_google_genai import ChatGoogleGenerativeAI
         
         kwargs = {
             "model": settings.LLM_MODEL_NAME,
@@ -57,8 +58,7 @@ class GeminiStrategy(LLMStrategy):
 
 class MistralStrategy(LLMStrategy):
     def get_model(self, temperature: float = 0.0, require_json: bool = False) -> BaseChatModel:
-        from langchain_mistralai import ChatMistralAI
-
+        
         kwargs = {
             "model": settings.LLM_MODEL_NAME,
             "api_key": settings.MISTRAL_API_KEY,

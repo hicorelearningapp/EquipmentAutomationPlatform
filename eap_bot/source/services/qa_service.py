@@ -35,7 +35,7 @@ class QAService:
         project_id: int, 
         document_id: str, 
         storage_service: Any
-    ) -> tuple[str, str, list[str]]:
+    ) -> tuple[str, str, list[str], list[dict]]:
         """Return (answer_text, source, context_chunks) using the requested category context."""
         q = query.strip()
         
@@ -44,17 +44,36 @@ class QAService:
         table_chunks = []
         
         if self._vector_store:
-            text_chunks, table_chunks = self._fetch_context(
+            text_chunks, table_chunks, raw_chunks = self._fetch_context(
                 q, spec, project_id, document_id, storage_service, self._vector_store, self._vector_filters
             )
+        else:
+            raw_chunks = []
 
         text_context_str = "\n\n---\n\n".join(text_chunks)
         table_context_str = "\n".join(table_chunks)
         all_chunks = text_chunks + table_chunks
 
+        # Build structured citation list from chunk metadata
+        citations = []
+        seen = set()
+        for c in raw_chunks:
+            doc_name = c.metadata.get("document_name") or document_id
+            page = c.metadata.get("page_number")
+            key = (doc_name, page)
+            if key not in seen:
+                seen.add(key)
+                citations.append({
+                    "DocumentName": doc_name,
+                    "Page": page,
+                })
+        
+        # Sort by document name then page
+        citations.sort(key=lambda x: (x["DocumentName"] or "", x["Page"] or 0))
+
         # 2. Generate final answer
         if not text_chunks and not table_chunks:
-            return "No relevant context found in the requested category.", "rag", []
+            return "No relevant context found in the requested category.", "rag", [], []
 
         prompt = (
             "You are an expert equipment engineer. Answer the user's question using ONLY the provided contexts below. "
@@ -66,7 +85,7 @@ class QAService:
             f"{table_context_str or 'None'}\n\n"
             f"QUESTION: {q}"
         )
-        return self._llm.invoke(prompt).content, "rag", all_chunks
+        return self._llm.invoke(prompt).content, "rag", all_chunks, citations
 
     def _fetch_context(
         self, 
@@ -77,7 +96,7 @@ class QAService:
         storage_service: Any,
         vector_store: VectorStoreManager,
         filters: dict
-    ) -> tuple[list[str], list[str]]:
+    ) -> tuple[list[str], list[str], list]:
         """Fetch text and tabular context from a specific vector store and entity cache."""
         # 1. FAISS Text Chunks Search
         chunks = vector_store.search_with_filters(query, filters, k=6)
@@ -108,4 +127,4 @@ class QAService:
         except Exception as e:
             logger.error("Failed to perform tabular entity search: %s", e)
 
-        return formatted_chunks, lines
+        return formatted_chunks, lines, chunks or []

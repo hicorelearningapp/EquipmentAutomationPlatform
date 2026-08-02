@@ -25,8 +25,9 @@ class SpecValidator:
     def _check_duplicate_ids(
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
+        vids = [v.SVID for v in spec.StatusVariables] + [v.DvID for v in spec.DataVariables]
         pairs = [
-            ("Variable", [v.VID for v in spec.Variables]),
+            ("Variable", vids),
             ("Event", [e.CEID for e in spec.Events]),
             ("Alarm", [a.AlarmID for a in spec.Alarms]),
             ("RemoteCommand", [c.RCMD for c in spec.RemoteCommands]),
@@ -46,7 +47,7 @@ class SpecValidator:
     def _check_linked_vids(
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
-        known = {v.VID for v in spec.Variables}
+        known = {v.SVID for v in spec.StatusVariables} | {v.DvID for v in spec.DataVariables}
         for e in spec.Events:
             for vid in e.LinkedVIDs:
                 if vid not in known:
@@ -124,8 +125,8 @@ class SpecValidator:
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
         by_name: dict[str, set[str]] = {}
-        for v in spec.Variables:
-            if v.Unit:
+        for v in spec.DataVariables:
+            if v.Unit and v.Unit != "-":
                 by_name.setdefault(v.Name.lower(), set()).add(v.Unit)
         for name, units in by_name.items():
             if len(units) > 1:
@@ -141,7 +142,7 @@ class SpecValidator:
     def _check_critical_sections(
         self, spec: EquipmentSpec, issues: list[ValidationIssue]
     ) -> None:
-        if not spec.Variables:
+        if not spec.StatusVariables and not spec.DataVariables:
             issues.append(
                 ValidationIssue(
                     Severity="error",

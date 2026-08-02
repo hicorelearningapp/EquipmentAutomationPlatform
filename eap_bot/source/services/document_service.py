@@ -113,6 +113,10 @@ class DocumentService:
                 container=self._container,
             )
 
+            # NEW: Agentic Healing Loop
+            logger.info("Initiating auto-healing validation loop...")
+            spec = self._container.extractor.auto_heal_spec(spec)
+
             json_path = self.storage.spec_json_path(project_id, document_id)
             self.storage.save_spec_json(json_path, spec)
 

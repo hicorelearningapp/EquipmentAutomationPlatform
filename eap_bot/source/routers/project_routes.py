@@ -282,7 +282,7 @@ class ProjectAPI:
                 qa_store,
                 vector_filters=filters,
             )
-            answer_text, source, context_chunks = qa_service.answer(
+            answer_text, source, context_chunks, citations = qa_service.answer(
                 query=request.Question, 
                 spec=spec,
                 project_id=project_id,
@@ -309,7 +309,8 @@ class ProjectAPI:
             "DocumentCategory": winning_category,
             "Answer": answer_text,
             "Source": source,
-            "Context": context_chunks
+            "Context": context_chunks,
+            "Citations": citations
         }
 
     def get_knowledge_category(self, project_id: int) -> list[str]:
