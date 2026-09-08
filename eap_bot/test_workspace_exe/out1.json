@@ -1,0 +1,26 @@
+{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "VendorName"
+      ],
+      "msg": "Field required",
+      "input": {
+        "ProjectName": "ExeAutoTest"
+      }
+    },
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "ProjectCode"
+      ],
+      "msg": "Field required",
+      "input": {
+        "ProjectName": "ExeAutoTest"
+      }
+    }
+  ]
+}

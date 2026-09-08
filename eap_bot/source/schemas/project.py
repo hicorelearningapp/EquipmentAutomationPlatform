@@ -119,12 +119,17 @@ class ProjectDetail(ProjectMetadata):
 
 
 class ProjectUpdate(BaseModel):
-    ProjectName: Optional[str] = None
-    ProjectDescription: Optional[str] = None
-    VendorName: Optional[str] = None
-    ProjectCode: Optional[str] = None
-    Tool: Optional[ToolType] = None
-    ProjectVersion: Optional[str] = None
+    ProjectName: Optional[str] = Field(default=None, alias="project_name")
+    ProjectDescription: Optional[str] = Field(default=None, alias="project_description")
+    VendorName: Optional[str] = Field(default=None, alias="vendor_name")
+    ProjectCode: Optional[str] = Field(default=None, alias="project_code")
+    Tool: Optional[ToolType] = Field(default=None, alias="tool")
+    ProjectVersion: Optional[str] = Field(default=None, alias="project_version")
+
+    model_config = {
+        "populate_by_name": True,
+        "alias_generator": lambda x: x[0].lower() + x[1:] if x else x # also accept camelCase
+    }
 
 
 class AskRequest(BaseModel):

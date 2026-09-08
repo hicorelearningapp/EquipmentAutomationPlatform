@@ -1,0 +1,1796 @@
+{
+  "ProjectID": 1,
+  "ExtractionID": "project_batch",
+  "ConfidenceScore": 1.0,
+  "ExtractionStatus": "completed",
+  "StatusVariables": [
+    {
+      "SVID": 10001,
+      "Name": "BeamCurrent",
+      "Description": "Actual ion beam current",
+      "DataType": "Float",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10002,
+      "Name": "DoseAmount",
+      "Description": "Cumulative dose per scan",
+      "DataType": "Float",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10003,
+      "Name": "EnergyLevel",
+      "Description": "Acceleration energy",
+      "DataType": "Float",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10004,
+      "Name": "VacuumLevel",
+      "Description": "Chamber vacuum state",
+      "DataType": "Float",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10005,
+      "Name": "ScanPosition",
+      "Description": "Current beam X/Y position",
+      "DataType": "Float",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10006,
+      "Name": "WaferID",
+      "Description": "Current wafer identifier.",
+      "DataType": "ASCII",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10007,
+      "Name": "ActiveAlarmCount",
+      "Description": "Number of active alarm conditions.",
+      "DataType": "U2",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10008,
+      "Name": "LastAlarmID",
+      "Description": "Most recent alarm ID set or cleared.",
+      "DataType": "U4",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10009,
+      "Name": "LastRemoteCommand",
+      "Description": "Most recently received host command, including START alias or INITIALIZE.",
+      "DataType": "ASCII",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10010,
+      "Name": "LastCommandStatus",
+      "Description": "Status text for most recent command, such as ACCEPTED, REJECTED_PARAM, NOT_ALLOWED, COMPLETED.",
+      "DataType": "ASCII",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10011,
+      "Name": "CommandQueueCount",
+      "Description": "Number of host commands waiting in the command queue.",
+      "DataType": "U2",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10012,
+      "Name": "SpoolingState",
+      "Description": "Spooling state: INACTIVE, ACTIVE, TRANSMITTING, COMPLETE.",
+      "DataType": "ASCII",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10013,
+      "Name": "SpoolCount",
+      "Description": "Number of messages currently stored in the spool buffer.",
+      "DataType": "U4",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10014,
+      "Name": "SpoolCapacity",
+      "Description": "Maximum configured spool buffer capacity in messages.",
+      "DataType": "U4",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10015,
+      "Name": "ChamberPressure",
+      "Description": "Current chamber pressure in mTorr.",
+      "DataType": "F4",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10016,
+      "Name": "ChamberTemperature",
+      "Description": "Current chamber temperature in degrees C.",
+      "DataType": "F4",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10017,
+      "Name": "RFForwardPower",
+      "Description": "Current RF forward power in W.",
+      "DataType": "F4",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10018,
+      "Name": "RFReflectedPower",
+      "Description": "Current RF reflected power in W.",
+      "DataType": "F4",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10019,
+      "Name": "GasFlowRate",
+      "Description": "Total commanded/actual process gas flow in sccm.",
+      "DataType": "F4",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10020,
+      "Name": "PlasmaState",
+      "Description": "TRUE when plasma is ignited and stable.",
+      "DataType": "BOOLEAN",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10021,
+      "Name": "EndpointStatus",
+      "Description": "Endpoint detection status: NOT_ACTIVE, SEARCHING, DETECTED, TIMEOUT.",
+      "DataType": "ASCII",
+      "AccessType": "-"
+    },
+    {
+      "SVID": 10022,
+      "Name": "Clock",
+      "Description": "Equipment date/time in YYYYMMDDhhmmss format.",
+      "DataType": "ASCII",
+      "AccessType": "-"
+    }
+  ],
+  "DataVariables": [
+    {
+      "DvID": 10101,
+      "Name": "TargetDose",
+      "Unit": "ions/cm2",
+      "ValueType": "Float"
+    },
+    {
+      "DvID": 10102,
+      "Name": "WaferID",
+      "Unit": "-",
+      "ValueType": "String"
+    },
+    {
+      "DvID": 10103,
+      "Name": "ScanCount",
+      "Unit": "-",
+      "ValueType": "Integer"
+    },
+    {
+      "DvID": 3001,
+      "Name": "RecipeID",
+      "Unit": "-",
+      "ValueType": "ASCII"
+    },
+    {
+      "DvID": 3002,
+      "Name": "WaferID",
+      "Unit": "-",
+      "ValueType": "ASCII"
+    },
+    {
+      "DvID": 3003,
+      "Name": "LotID",
+      "Unit": "-",
+      "ValueType": "ASCII"
+    },
+    {
+      "DvID": 3004,
+      "Name": "CarrierID",
+      "Unit": "-",
+      "ValueType": "ASCII"
+    },
+    {
+      "DvID": 3005,
+      "Name": "ChamberID",
+      "Unit": "-",
+      "ValueType": "ASCII"
+    },
+    {
+      "DvID": 3007,
+      "Name": "EtchTime",
+      "Unit": "-",
+      "ValueType": "F4"
+    },
+    {
+      "DvID": 3016,
+      "Name": "EtchDepth",
+      "Unit": "-",
+      "ValueType": "F4"
+    },
+    {
+      "DvID": 3017,
+      "Name": "ProcessDurationSec",
+      "Unit": "-",
+      "ValueType": "U4"
+    },
+    {
+      "DvID": 3018,
+      "Name": "ProcessEndStatus",
+      "Unit": "-",
+      "ValueType": "ASCII"
+    },
+    {
+      "DvID": 3019,
+      "Name": "RFPowerAverage",
+      "Unit": "-",
+      "ValueType": "F4"
+    },
+    {
+      "DvID": 3020,
+      "Name": "GasFlowAverage",
+      "Unit": "-",
+      "ValueType": "F4"
+    },
+    {
+      "DvID": 3021,
+      "Name": "ChamberPressureAverage",
+      "Unit": "-",
+      "ValueType": "F4"
+    },
+    {
+      "DvID": 3022,
+      "Name": "ChamberTemperatureAverage",
+      "Unit": "-",
+      "ValueType": "F4"
+    },
+    {
+      "DvID": 3023,
+      "Name": "EndpointResult",
+      "Unit": "-",
+      "ValueType": "ASCII"
+    },
+    {
+      "DvID": 3024,
+      "Name": "OperatorID",
+      "Unit": "-",
+      "ValueType": "ASCII"
+    }
+  ],
+  "Events": [
+    {
+      "CEID": 10201,
+      "EventName": "BeamStable",
+      "Description": "Ion beam reached stable intensity",
+      "LinkedVIDs": [
+        10001,
+        10003
+      ],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 10202,
+      "EventName": "ScanStarted",
+      "Description": "Wafer scanning process initiated",
+      "LinkedVIDs": [
+        10102,
+        10101
+      ],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 10203,
+      "EventName": "ScanCompleted",
+      "Description": "Scan finished for current wafer",
+      "LinkedVIDs": [
+        10102,
+        10002
+      ],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 10204,
+      "EventName": "VacuumReady",
+      "Description": "Required vacuum level achieved",
+      "LinkedVIDs": [
+        10004
+      ],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5001,
+      "EventName": "ProcessStarted",
+      "Description": "Process sequence started; original ETCH-PRO naming may appear as ProcessStart.",
+      "LinkedVIDs": [],
+      "LinkedReports": [
+        "ProcessStartReport"
+      ]
+    },
+    {
+      "CEID": 5002,
+      "EventName": "ProcessCompleted",
+      "Description": "Process sequence completed; original ETCH-PRO naming may appear as ProcessEnd.",
+      "LinkedVIDs": [],
+      "LinkedReports": [
+        "ProcessCompletionReport"
+      ]
+    },
+    {
+      "CEID": 5100,
+      "EventName": "PlasmaIgnition",
+      "Description": "Plasma ignition was attempted or achieved during process start.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5200,
+      "EventName": "CarrierLoaded",
+      "Description": "Carrier/cassette is loaded and material context can be read.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5201,
+      "EventName": "CarrierUnloaded",
+      "Description": "Carrier/cassette is unloaded and lot processing context ends.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5300,
+      "EventName": "AlarmTriggered",
+      "Description": "Alarm set or clear condition created a collection event context.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5301,
+      "EventName": "ProcessPaused",
+      "Description": "Process paused by host command or recoverable condition.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5302,
+      "EventName": "ProcessResumed",
+      "Description": "Paused process resumed by host command.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5303,
+      "EventName": "ProcessAborted",
+      "Description": "Process aborted by STOP, fault, or operator action.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5400,
+      "EventName": "ControlStateChanged",
+      "Description": "Control state changed between OFF-LINE, LOCAL, or REMOTE.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5500,
+      "EventName": "CommunicationEstablished",
+      "Description": "HSMS selected and S1F13/S1F14 completed successfully.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5501,
+      "EventName": "CommunicationLost",
+      "Description": "TCP disconnect, HSMS deselect, or timeout caused loss of communication.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5600,
+      "EventName": "SpoolActivated",
+      "Description": "Spooling became active due to communication loss.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    },
+    {
+      "CEID": 5601,
+      "EventName": "SpoolTransmitComplete",
+      "Description": "All requested spooled messages were transmitted to the host.",
+      "LinkedVIDs": [],
+      "LinkedReports": []
+    }
+  ],
+  "Alarms": [
+    {
+      "AlarmID": 10301,
+      "AlarmName": "BeamLoss",
+      "Severity": "critical"
+    },
+    {
+      "AlarmID": 10302,
+      "AlarmName": "OverDose",
+      "Severity": "critical"
+    },
+    {
+      "AlarmID": 10303,
+      "AlarmName": "VacuumLeak",
+      "Severity": "warning"
+    },
+    {
+      "AlarmID": 1006,
+      "AlarmName": "RFPowerFault",
+      "Severity": "critical"
+    },
+    {
+      "AlarmID": 1007,
+      "AlarmName": "CoolingWaterTempHigh",
+      "Severity": "warning"
+    },
+    {
+      "AlarmID": 1008,
+      "AlarmName": "CoolingWaterFlowLow",
+      "Severity": "warning"
+    },
+    {
+      "AlarmID": 1009,
+      "AlarmName": "DoorInterlockOpen",
+      "Severity": "critical"
+    },
+    {
+      "AlarmID": 1010,
+      "AlarmName": "EmergencyStopActivated",
+      "Severity": "critical"
+    },
+    {
+      "AlarmID": 1011,
+      "AlarmName": "RecipeDataInvalid",
+      "Severity": "warning"
+    },
+    {
+      "AlarmID": 1012,
+      "AlarmName": "CassetteNotPresent",
+      "Severity": "warning"
+    },
+    {
+      "AlarmID": 1013,
+      "AlarmName": "WaferTransferError",
+      "Severity": "critical"
+    },
+    {
+      "AlarmID": 1014,
+      "AlarmName": "SystemCommunicationTimeout",
+      "Severity": "warning"
+    },
+    {
+      "AlarmID": 1015,
+      "AlarmName": "MaintenanceDue",
+      "Severity": "warning"
+    },
+    {
+      "AlarmID": 1001,
+      "AlarmName": "ChamberOverheat",
+      "Severity": "critical"
+    },
+    {
+      "AlarmID": 1002,
+      "AlarmName": "VacuumPressureTooHigh",
+      "Severity": "critical"
+    },
+    {
+      "AlarmID": 1005,
+      "AlarmName": "GasFlowOutOfRange",
+      "Severity": "warning"
+    },
+    {
+      "AlarmID": 1003,
+      "AlarmName": "VacuumPressureTooHigh",
+      "Severity": "Critical"
+    },
+    {
+      "AlarmID": 1004,
+      "AlarmName": "VacuumPumpFailure",
+      "Severity": "Warning"
+    },
+    {
+      "AlarmID": 792677,
+      "AlarmName": "",
+      "Severity": "-"
+    }
+  ],
+  "RemoteCommands": [
+    {
+      "RCMD": "START_BEAM",
+      "Description": "Initialize the ion source and acceleration",
+      "Parameters": []
+    },
+    {
+      "RCMD": "ABORT_SCAN",
+      "Description": "Immediately stop wafer scanning and close shutter",
+      "Parameters": []
+    },
+    {
+      "RCMD": "SET_ENERGY",
+      "Description": "Update the acceleration energy setpoint",
+      "Parameters": []
+    },
+    {
+      "RCMD": "START",
+      "Description": "Host-facing command alias for RCMD=INITIALIZE. Starts process setup and processing when accepted.",
+      "Parameters": [
+        {
+          "Name": "RecipeID",
+          "Type": "ASCII"
+        },
+        {
+          "Name": "LotID",
+          "Type": "ASCII"
+        },
+        {
+          "Name": "WaferID",
+          "Type": "ASCII"
+        },
+        {
+          "Name": "CarrierID",
+          "Type": "ASCII"
+        },
+        {
+          "Name": "ChamberID",
+          "Type": "ASCII"
+        }
+      ]
+    },
+    {
+      "RCMD": "INITIALIZE",
+      "Description": "Canonical ETCH-PRO command that initializes and starts the process sequence. START maps to this command.",
+      "Parameters": [
+        {
+          "Name": "RecipeID",
+          "Type": "ASCII"
+        },
+        {
+          "Name": "LotID",
+          "Type": "ASCII"
+        },
+        {
+          "Name": "WaferID",
+          "Type": "ASCII"
+        },
+        {
+          "Name": "CarrierID",
+          "Type": "ASCII"
+        },
+        {
+          "Name": "ChamberID",
+          "Type": "ASCII"
+        }
+      ]
+    },
+    {
+      "RCMD": "STOP",
+      "Description": "Stops or aborts active process according to safe-stop policy.",
+      "Parameters": [
+        {
+          "Name": "StopMode",
+          "Type": "ASCII"
+        },
+        {
+          "Name": "ReasonCode",
+          "Type": "ASCII"
+        }
+      ]
+    },
+    {
+      "RCMD": "PAUSE",
+      "Description": "Pauses active process if current step supports pause.",
+      "Parameters": []
+    },
+    {
+      "RCMD": "RESUME",
+      "Description": "Resumes process from PAUSED state after conditions are valid.",
+      "Parameters": []
+    },
+    {
+      "RCMD": "RESET",
+      "Description": "Clears ERROR state after alarms are resolved and returns process state to\nIDLE.",
+      "Parameters": [
+        {
+          "Name": "ReasonCode",
+          "Type": "UNKNOWN"
+        }
+      ]
+    },
+    {
+      "RCMD": "PUMP_DOWN",
+      "Description": "Starts chamber pump-down sequence when idle and interlocks are safe.",
+      "Parameters": [
+        {
+          "Name": "TargetPressure",
+          "Type": "UNKNOWN"
+        }
+      ]
+    },
+    {
+      "RCMD": "VENT",
+      "Description": "Starts chamber vent sequence when idle or maintenance mode allows.",
+      "Parameters": [
+        {
+          "Name": "VentMode",
+          "Type": "UNKNOWN"
+        }
+      ]
+    },
+    {
+      "RCMD": "CLEAN_CHAMBER",
+      "Description": "Runs chamber clean recipe or predefined clean cycle.",
+      "Parameters": []
+    }
+  ],
+  "States": [
+    {
+      "StateID": "IDLE",
+      "Name": "IDLE",
+      "Description": ""
+    },
+    {
+      "StateID": "VACUUM_PULL",
+      "Name": "VACUUM_PULL",
+      "Description": ""
+    },
+    {
+      "StateID": "BEAM_WARMUP",
+      "Name": "BEAM_WARMUP",
+      "Description": ""
+    },
+    {
+      "StateID": "PROCESSING",
+      "Name": "PROCESSING",
+      "Description": ""
+    },
+    {
+      "StateID": "COMPLETED",
+      "Name": "COMPLETED",
+      "Description": ""
+    },
+    {
+      "StateID": "ERROR",
+      "Name": "ERROR",
+      "Description": ""
+    },
+    {
+      "StateID": "COMM_STATE",
+      "Name": "NOT SELECTED",
+      "Description": "Initial communication state"
+    },
+    {
+      "StateID": "CTRL_STATE",
+      "Name": "OFF-LINE",
+      "Description": "Remote control enabled"
+    },
+    {
+      "StateID": "PROC_STATE",
+      "Name": "IDLE",
+      "Description": "Ready for processing"
+    },
+    {
+      "StateID": "COMM-0",
+      "Name": "DISABLED",
+      "Description": "SECS/GEM communication is disabled by configuration or operator action. Equipment\ndoes not initiate or accept application messages."
+    },
+    {
+      "StateID": "COMM-1",
+      "Name": "NOT SELECTED / NOT COMMUNICATING",
+      "Description": "Default communication state on power-up. TCP may be disconnected or HSMS not\nselected; S1F13/S1F14 has not completed."
+    },
+    {
+      "StateID": "COMM-2",
+      "Name": "SELECTED / COMMUNICATING",
+      "Description": "HSMS Select is complete and S1F13/S1F14 establish communications has completed with\nCOMMACK=0."
+    },
+    {
+      "StateID": "CTRL-0",
+      "Name": "OFF-LINE",
+      "Description": "Initial control state. Host command control is not permitted except communication and online\nrequests."
+    },
+    {
+      "StateID": "CTRL-1",
+      "Name": "ON-LINE LOCAL",
+      "Description": "Host may monitor and collect data. Process initiation and direct equipment control are\nlocal/operator controlled."
+    },
+    {
+      "StateID": "CTRL-2",
+      "Name": "ON-LINE REMOTE",
+      "Description": "Host has remote control authority. S2F41 remote commands are accepted when process state and\nparameters are valid."
+    },
+    {
+      "StateID": "PROC-0",
+      "Name": "IDLE",
+      "Description": "Initial process state. Equipment is not processing, no active wafer in etch sequence, and START/INITIALIZE\nmay be accepted if in REMOTE."
+    },
+    {
+      "StateID": "PROC-1",
+      "Name": "SETUP",
+      "Description": "Recipe and material context are being validated; chamber preparation may start."
+    },
+    {
+      "StateID": "PROC-2",
+      "Name": "PROCESSING",
+      "Description": "Wafer etch is active; plasma, gas flow, RF power, pressure, and endpoint are monitored."
+    },
+    {
+      "StateID": "PROC-3",
+      "Name": "PAUSED",
+      "Description": "Processing is temporarily suspended by PAUSE or an interlock condition that permits resume."
+    },
+    {
+      "StateID": "PROC-4",
+      "Name": "COMPLETING",
+      "Description": "Etch sequence is ending, post-process purge/vent/robot handoff and result calculation are underway."
+    },
+    {
+      "StateID": "PROC-5",
+      "Name": "ERROR",
+      "Description": "Fault state caused by critical alarm, failed command, unsafe pressure/temperature, or unrecoverable\ntransfer error."
+    }
+  ],
+  "StateTransitions": [
+    {
+      "FromState": "IDLE",
+      "ToState": "VACUUM_PULL",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "VACUUM_PULL",
+      "ToState": "BEAM_WARMUP",
+      "TriggerEvent": "VacuumReady",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "BEAM_WARMUP",
+      "ToState": "PROCESSING",
+      "TriggerEvent": "BeamStable",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "PROCESSING",
+      "ToState": "COMPLETED",
+      "TriggerEvent": "ScanCompleted",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "PROCESSING",
+      "ToState": "ERROR",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "COMPLETED",
+      "ToState": "IDLE",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "IDLE",
+      "ToState": "SETUP",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "SETUP",
+      "ToState": "PROCESSING",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "PROCESSING",
+      "ToState": "COMPLETING",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "COMPLETING",
+      "ToState": "IDLE",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "PROCESSING",
+      "ToState": "PAUSED",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "PAUSED",
+      "ToState": "PROCESSING",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "ERROR",
+      "ToState": "IDLE",
+      "TriggerEvent": "",
+      "TriggerCommand": "",
+      "Manual": true
+    },
+    {
+      "FromState": "DISABLED",
+      "ToState": "NOT SELECTED / NOT COMMUNICATING",
+      "TriggerEvent": "CommunicationsEnabled=TRUE or operator enables host\ncommunication.",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "NOT SELECTED / NOT COMMUNICATING",
+      "ToState": "SELECTED / COMMUNICATING",
+      "TriggerEvent": "HSMS Select succeeds and host/equipment complete\nS1F13/S1F14 with COMMACK=0.",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "SELECTED / COMMUNICATING",
+      "ToState": "NOT SELECTED / NOT COMMUNICATING",
+      "TriggerEvent": "TCP disconnect, HSMS Deselect, T3/T7/T8 timeout, or\ncommunication fault.",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "SELECTED / COMMUNICATING",
+      "ToState": "DISABLED",
+      "TriggerEvent": "Operator or maintenance disables SECS/GEM\ncommunication.",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "OFF-LINE",
+      "ToState": "ON-LINE LOCAL",
+      "TriggerEvent": "Host sends S1F17 and equipment accepts online request with ONLACK=0;\ndefault online sub-state may be LOCAL.",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "ON-LINE LOCAL",
+      "ToState": "ON-LINE REMOTE",
+      "TriggerEvent": "Operator selects REMOTE or host/site policy grants remote control.",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "ON-LINE REMOTE",
+      "ToState": "ON-LINE LOCAL",
+      "TriggerEvent": "Operator selects LOCAL or remote mode is revoked.",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "ON-LINE LOCAL",
+      "ToState": "OFF-LINE",
+      "TriggerEvent": "Host sends S1F15 or operator selects OFF-LINE.",
+      "TriggerCommand": "",
+      "Manual": false
+    },
+    {
+      "FromState": "ON-LINE REMOTE",
+      "ToState": "OFF-LINE",
+      "TriggerEvent": "Host sends S1F15, communication failure policy forces offline, or operator\nselects OFF-LINE.",
+      "TriggerCommand": "",
+      "Manual": false
+    }
+  ],
+  "Reports": [
+    {
+      "RPTID": "RPT_001",
+      "Name": "BeamStatusReport",
+      "Reasoning": "Groups beam current, energy level, dose amount and vacuum/scan position to give full beam status beyond BeamStable event",
+      "LinkedVIDs": [
+        10001,
+        10003,
+        10002,
+        10004,
+        10005
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.97
+    },
+    {
+      "RPTID": "RPT_002",
+      "Name": "ScanStartReport",
+      "Reasoning": "Combines wafer ID, target dose, scan count and current beam current to provide context for ScanStarted",
+      "LinkedVIDs": [
+        10102,
+        10101,
+        10103,
+        10001
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.96
+    },
+    {
+      "RPTID": "RPT_003",
+      "Name": "ScanCompleteReport",
+      "Reasoning": "Enriches ScanCompleted with wafer ID, delivered dose, scan count and final scan position",
+      "LinkedVIDs": [
+        10102,
+        10002,
+        10103,
+        10005
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.96
+    },
+    {
+      "RPTID": "RPT_004",
+      "Name": "VacuumReadyReport",
+      "Reasoning": "Adds beam current and energy level to vacuum level for a broader view of equipment readiness",
+      "LinkedVIDs": [
+        10004,
+        10001,
+        10003
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.95
+    },
+    {
+      "RPTID": "7003",
+      "Name": "ProcessStartReport",
+      "Reasoning": "Start of process includes recipe, wafer, lot, chamber and process state.",
+      "LinkedVIDs": [
+        3001,
+        3002,
+        3003,
+        3005,
+        10003
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.9
+    },
+    {
+      "RPTID": "7004",
+      "Name": "ProcessCompletionReport",
+      "Reasoning": "Completion includes timing, depth, duration, status and endpoint result.",
+      "LinkedVIDs": [
+        3007,
+        3016,
+        3017,
+        3018,
+        3023
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.9
+    },
+    {
+      "RPTID": "7005",
+      "Name": "AlarmReport",
+      "Reasoning": "Alarm report includes last alarm ID, count, command status and equipment states.",
+      "LinkedVIDs": [
+        10008,
+        10007,
+        10010,
+        10003,
+        10001
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.9
+    },
+    {
+      "RPTID": "RPT_005",
+      "Name": "ProcessResumeReport",
+      "Reasoning": "Resume includes same context as pause.",
+      "LinkedVIDs": [
+        10003,
+        10002,
+        10001,
+        10007
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.85
+    },
+    {
+      "RPTID": "RPT_006",
+      "Name": "ProcessAbortReport",
+      "Reasoning": "Abort includes process state, last alarm, command status, alarm count.",
+      "LinkedVIDs": [
+        10003,
+        10008,
+        10010,
+        10007
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.85
+    },
+    {
+      "RPTID": "7002",
+      "Name": "ControlStateReport",
+      "Reasoning": "Control state change includes control, communication, process states.",
+      "LinkedVIDs": [
+        10002,
+        10001,
+        10003
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.9
+    },
+    {
+      "RPTID": "7001",
+      "Name": "CommunicationStateReport",
+      "Reasoning": "Communication events include state, clock and process state.",
+      "LinkedVIDs": [
+        10001,
+        10022,
+        10003
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.9
+    },
+    {
+      "RPTID": "RPT_007",
+      "Name": "CommunicationLostReport",
+      "Reasoning": "Lost communication includes same context.",
+      "LinkedVIDs": [
+        10001,
+        10022,
+        10003
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.85
+    },
+    {
+      "RPTID": "7006",
+      "Name": "SpoolingReport",
+      "Reasoning": "Spooling includes state, count, capacity and queue.",
+      "LinkedVIDs": [
+        10012,
+        10013,
+        10014,
+        10011
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.9
+    },
+    {
+      "RPTID": "RPT_008",
+      "Name": "SpoolTransmitCompleteReport",
+      "Reasoning": "Spool transmit complete shares spooling context.",
+      "LinkedVIDs": [
+        10012,
+        10013,
+        10014,
+        10011
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.85
+    },
+    {
+      "RPTID": "7007",
+      "Name": "TraceSummaryReport",
+      "Reasoning": "Summary includes key identifiers and process state.",
+      "LinkedVIDs": [
+        3001,
+        3002,
+        3003,
+        3016,
+        10003
+      ],
+      "Type": "Built-in",
+      "Confidence": 0.8
+    }
+  ],
+  "SmlTemplate": {
+    "GeneralGEMTesting": "S1F1 W\n<L [0]>\n.\n\nS1F3 W\n<L [0]>\n.\n\nS1F3 W\n<L\n  <U4 1001>\n  <U4 1002>\n>\n.\n\nS1F11 W\n<L\n  <U4 1001>\n  <U4 1002>\n>\n.\n\nS1F13 W\n<L [0]>\n.\n\nS1F15 W\n<L [0]>\n.\n\nS1F17 W\n<L [0]>\n.\n\nS1F21 W\n<L [0]>\n.\n\nS1F21 W\n<L\n  <U4 2001>\n  <U4 2002>\n>\n.\n\nS1F23 W\n<L [0]>\n.\n\nS1F23 W\n<L\n  <U4 3001>\n>\n.\n\nS2F13 W\n<L [0]>\n.\n\nS2F13 W\n<L\n  <U4 5001>\n>\n.\n\nS2F15 W\n<L [0]>\n.\n\nS2F15 W\n<L\n  <L\n    <U4 5001>\n    <A \"150\">\n  >\n>\n.\n\nS2F17 W\n<L [0]>\n.\n\nS2F23 W\n<L [0]>\n.\n\nS2F23 W\n<L\n  <U4 1>\n  <U4 10>\n  <U4 5>\n>\n.\n\nS2F29 W\n<L [0]>\n.\n\nS2F29 W\n<L\n  <U4 5001>\n>\n.\n\nS2F31 W\n<A \"20260514123045\">\n.\n\nS2F33 W\n<L\n  <U4 1>\n  <L\n    <U4 1001>\n    <U4 1002>\n  >\n>\n.\n\nS2F35 W\n<L\n  <U4 3001>\n  <U4 1>\n>\n.\n\nS2F37 W\n<L\n  <BOOLEAN TRUE>\n  <U4 3001>\n>\n.\n\nS2F37 W\n<L [2]\n  <B 0x00>\n  <L [0]>\n>\n.\n\nS2F39 W\n<U4 2048>\n.\n\nS2F49 W\n<L\n  <A \"PPSELECT\">\n  <L\n    <L\n      <A \"PPID\">\n      <A \"RECIPE01\">\n    >\n  >\n>\n.",
+    "ToolCharacterisationTesting": "S1F1 W\n<L [0]>\n.\n\nS1F13 W\n<L [0]>\n.\n\nS5F3 W\n<L\n  <BOOLEAN FALSE>\n  <U4 1001>\n>\n.\n\nS2F37 W\n<L\n  <BOOLEAN FALSE>\n  <U4 2001>\n>\n.\n\nS2F35 W\n<L\n  <U4 2001>\n  <U4 3001>\n>\n.\n\nS2F33 W\n<L\n  <U4 3001>\n  <L [0]>\n>\n.\n\nS2F33 W\n<L\n  <U4 3001>\n  <L\n    <U4 4001>\n    <U4 5001>\n    <U4 6001>\n  >\n>\n.\n\nS2F35 W\n<L\n  <U4 2001>\n  <U4 3001>\n>\n.\n\nS2F37 W\n<L\n  <BOOLEAN TRUE>\n  <U4 2001>\n>\n.\n\nS5F3 W\n<L\n  <BOOLEAN TRUE>\n  <U4 1001>\n>\n.\n\nS2F41 W\n<L\n  <A \"PPSELECT\">\n  <L\n    <L\n      <A \"PPID\">\n      <A \"RECIPE_01\">\n    >\n  >\n>\n.\n\nS2F41 W\n<L\n  <A \"PPSTART\">\n  <L\n    <L\n      <A \"LOTID\">\n      <A \"LOT1001\">\n    >\n  >\n>\n.\n\nS2F23 W\n<L\n  <U4 7001>\n  <U4 10>\n  <U4 50>\n  <L\n    <U4 5001>\n  >\n>\n.\n\nS2F23 W\n<L\n  <U4 7001>\n  <U4 0>\n  <U4 0>\n  <L [0]>\n>\n.",
+    "base_script": "// === etch_pro_x100_secs_gem_revised_manual_fixed.pdf ===\n<S1F13 W\n  <L[2]\n    <A \"ETCH-PRO-X100\">\n    <A \"RevA\">\n  >\n>\n.\n\n<S1F14\n  <L[2]\n    <B 00>\n    <L[2]\n      <A \"ETCH-PRO-X100\">\n      <A \"EXP-5000-RevA\">\n    >\n  >\n>\n.\n\n<S1F3 W\n  <L[5]\n    <U4 10001> /* CommunicationState */\n    <U4 10002> /* ControlState */\n    <U4 10003> /* ProcessState */\n    <U4 10015> /* ChamberPressure */\n    <U4 10017> /* RFForwardPower */\n  >\n>\n.\n\n<S1F4\n  <L[5]\n    <A \"SELECTED / COMMUNICATING\">\n    <A \"ON-LINE REMOTE\">\n    <A \"IDLE\">\n    <F4 12.5>\n    <F4 0.0>\n  >\n>\n.\n\n<S1F11 W\n  <L[0]>\n>\n.\n\n<S1F12\n  <L[3]\n    <L[3] <U4 10001> <A \"CommunicationState\"> <A \"ASCII\"> >\n    <L[3] <U4 10002> <A \"ControlState\"> <A \"ASCII\"> >\n    <L[3] <U4 10003> <A \"ProcessState\"> <A \"ASCII\"> >\n  >\n>\n.\n\n<S2F33 W\n  <L[2]\n    <U4 0>\n    <L[1]\n      <L[2]\n        <U4 7004>\n        <L[12]\n          <U4 3001> <U4 3003> <U4 3002> <U4 3004>\n          <U4 3007> <U4 3016> <U4 3017> <U4 3018>\n          <U4 3019> <U4 3020> <U4 3021> <U4 3022>\n        >\n      >\n    >\n  >\n>\n.\n\n<S2F34\n  <B 00>\n>\n.\n\n<S2F35 W\n  <L[2]\n    <U4 0>\n    <L[1]\n      <L[2]\n        <U4 5002>\n        <L[1] <U4 7004> >\n      >\n    >\n  >\n>\n.\n\n<S2F36\n  <B 00>\n>\n.\n\n<S2F37 W\n  <L[2]\n    <BOOLEAN TRUE>\n    <L[2]\n      <U4 5001>\n      <U4 5002>\n    >\n  >\n>\n.\n\n<S2F38\n  <B 00>\n>\n.\n\n<S2F41 W\n  <L[2]\n    <A \"START\">\n    <L[5]\n      <L[2] <A \"RecipeID\"> <A \"RCP001\"> >\n      <L[2] <A \"LotID\"> <A \"LOT-ALPHA-01\"> >\n      <L[2] <A \"WaferID\"> <A \"WAFER-001\"> >\n      <L[2] <A \"CarrierID\"> <A \"CARR-01\"> >\n      <L[2] <A \"ChamberID\"> <A \"ETCH-CH1\"> >\n    >\n  >\n>\n.\n\n<S2F42\n  <L[2]\n    <B 00>\n    <L[0]>\n  >\n>\n.\n\n<S2F41 W\n  <L[2]\n    <A \"STOP\">\n    <L[1]\n      <L[2] <A \"ReasonCode\"> <A \"HOST_ABORT\"> >\n    >\n  >\n>\n.\n\n<S2F41 W\n  <L[2] <A \"PAUSE\"> <L[0]> >\n>\n.\n\n<S2F41 W\n  <L[2] <A \"RESUME\"> <L[0]> >\n>\n.\n\n<S2F41 W\n  <L[2] <A \"RESET\"> <L[0]> >\n>\n.\n\n<S5F1 W\n  <L[3]\n    <B 81>\n    <U4 1006>\n    <A \"RFPowerFault\">\n  >\n>\n.\n\n<S5F2\n  <B 00>\n>\n.\n\n<S6F11 W\n  <L[3]\n    <U4 0>\n    <U4 5001>\n    <L[1]\n      <L[2]\n        <U4 7003>\n        <L[6]\n          <A \"RCP001\"> <A \"LOT-ALPHA-01\"> <A \"WAFER-001\">\n          <A \"CARR-01\"> <A \"ETCH-CH1\"> <F4 120.0>\n        >\n      >\n    >\n  >\n>\n.\n\n<S6F12 <B 00> >\n.\n\n<S6F11 W\n  <L[3]\n    <U4 0>\n    <U4 5002>\n    <L[1]\n      <L[2]\n        <U4 7004>\n        <L[12]\n          <A \"RCP001\"> <A \"LOT-ALPHA-01\"> <A \"WAFER-001\"> <A \"CARR-01\">\n          <F4 120.0> <F4 85.4> <U4 132> <A \"NORMAL\">\n          <F4 749.2> <F4 124.6> <F4 13.2> <F4 44.8>\n        >\n      >\n    >\n  >\n>\n.\n\n<S2F43 W\n  <L[2]\n    <B 01>\n    <L[2]\n      <L[2] <U1 5> <U1 1> >\n      <L[2] <U1 6> <U1 11> >\n    >\n  >\n>\n.\n\n<S2F44\n  <B 00>\n>\n.\n\n<S6F23 W\n  <L[2]\n    <U4 0>\n    <U4 100>\n  >\n>\n.\n\n<S6F24\n  <L[2]\n    <B 00>\n    <L[2]\n      <S5F1 W <L[3] <B 81> <U4 1001> <A \"ChamberOverheat\"> > >\n      <S6F11 W <L[3] <U4 0> <U4 5002> <L[0]> > >\n    >\n  >\n>\n.\n\n<S7F3 W\n  <L[2]\n    <A \"RCP001\">\n    <A \"ETCH_TIME=120;RF_POWER=750;GAS_FLOW=125;PRESSURE=13.0\">\n  >\n>\n.\n\n<S7F4\n  <B 00>\n>\n.\n\n<S7F5 W\n  <A \"RCP001\">\n>\n.\n\n<S7F6\n  <L[2]\n    <A \"RCP001\">\n    <A \"ETCH_TIME=120;RF_POWER=750;GAS_FLOW=125;PRESSURE=13.0\">\n  >\n>\n.\n",
+    "SECS_GeneralGEMTesting": "================================\nTIME : 07:45:57.199\nTYPE : RX\nS2F50\nS2F50\n<B[1] 04>\n\n================================\nTIME : 07:45:57.160\nTYPE : TX\nS2F49\nS2F49 W\n<L[2/1] \n   <A[8/1] \"PPSELECT\">\n   <L[1/1] \n      <L[2/1] \n         <A[4/1] \"PPID\">\n         <A[8/1] \"RECIPE01\">\n      >\n   >\n>\n\n================================\nTIME : 07:45:56.127\nTYPE : RX\nS2F40\nS2F40\n<A[20/1] \"UNSUPPORTED_FUNCTION\">\n\n================================\nTIME : 07:45:56.115\nTYPE : TX\nS2F39\nS2F39 W\n<U4[0/1]  2048>\n\n================================\nTIME : 07:45:55.087\nTYPE : RX\nS2F38\nS2F38\n<B[1] 00>\n\n================================\nTIME : 07:45:55.073\nTYPE : TX\nS2F37\nS2F37 W\n<L[2/1] \n   <B[1] 00>\n   <L[0/1] \n   >\n>\n\n================================\nTIME : 07:45:44.037\nTYPE : RX\nS9F7\nS9F7 W\n<B[10] 00 01 82 25 00 00 00 00 00 00>\n\n================================\nTIME : 07:45:44.022\nTYPE : TX\nS2F37\nS2F37 W\n<L[2/1] \n   <BOOLEAN [1] 1 bytes>\n   <U4[0/1]  3001>\n>\n\n================================\nTIME : 07:45:32.989\nTYPE : RX\nS9F7\nS9F7 W\n<B[10] 00 01 82 23 00 00 00 00 00 00>\n\n================================\nTIME : 07:45:32.974\nTYPE : TX\nS2F35\nS2F35 W\n<L[2/1] \n   <U4[0/1]  3001>\n   <U4[0/1]  1>\n>\n\n================================\nTIME : 07:45:31.955\nTYPE : RX\nS2F34\nS2F34\n<B[1] 00>\n\n================================\nTIME : 07:45:31.936\nTYPE : TX\nS2F33\nS2F33 W\n<L[2/1] \n   <U4[0/1]  1>\n   <L[2/1] \n      <U4[0/1]  1001>\n      <U4[0/1]  1002>\n   >\n>\n\n================================\nTIME : 07:45:30.901\nTYPE : RX\nS2F32\nS2F32\n<B[1] 00>\n\n================================\nTIME : 07:45:30.887\nTYPE : TX\nS2F31\nS2F31 W\n<A[14/1] \"20260514123045\">\n\n================================\nTIME : 07:45:29.861\nTYPE : RX\nS2F30\nS2F30\n<L[27/1] \n   <L[6/1] \n      <U4[0/1]  1001>\n      <A[17/1] \"MaxProcessTimeSec\">\n      <U4[0/1]  0>\n      <U4[0/1]  7200>\n      <U4[0/1]  1800>\n      <A[3/1] \"sec\">\n   >\n   <L[6/1] \n      <U4[0/1]  1002>\n      <A[17/1] \"MinProcessTimeSec\">\n      <U4[0/1]  0>\n      <U4[0/1]  600>\n      <U4[0/1]  10>\n      <A[3/1] \"sec\">\n   >\n   <L[6/1] \n      <U4[0/1]  1003>\n      <A[15/1] \"ChamberMaxTempC\">\n      <U4[0/1]  20>\n      <U4[0/1]  120>\n      <U4[0/1]  85>\n      <A[2/1] \"?C\">\n   >\n   <L[6/1] \n      <U4[0/1]  1004>\n      <A[15/1] \"ChamberMinTempC\">\n      <U4[0/1]  10>\n      <U4[0/1]  60>\n      <U4[0/1]  25>\n      <A[2/1] \"?C\">\n   >\n   <L[6/1] \n      <U4[0/1]  1005>\n      <A[21/1] \"VacuumPressureMaxTorr\">\n      <U4[0/1]  0>\n      <U4[0/1]  10>\n      <U4[0/1]  1>\n      <A[4/1] \"Torr\">\n   >\n   <L[6/1] \n      <U4[0/1]  1006>\n      <A[16/1] \"VacuumPumpEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1007>\n      <A[17/1] \"RobotSpeedPercent\">\n      <U4[0/1]  10>\n      <U4[0/1]  100>\n      <U4[0/1]  80>\n      <A[1/1] \"%\">\n   >\n   <L[6/1] \n      <U4[0/1]  1008>\n      <A[19/1] \"DoorInterlockEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1009>\n      <A[21/1] \"AutoRecipeStartEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  0>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1010>\n      <A[17/1] \"AlarmBuzzerEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1011>\n      <A[14/1] \"GasFlowMaxSccm\">\n      <U4[0/1]  50>\n      <U4[0/1]  2000>\n      <U4[0/1]  500>\n      <A[4/1] \"sccm\">\n   >\n   <L[6/1] \n      <U4[0/1]  1012>\n      <A[14/1] \"RFPowerMaxWatt\">\n      <U4[0/1]  100>\n      <U4[0/1]  2000>\n      <U4[0/1]  800>\n      <A[1/1] \"W\">\n   >\n   <L[6/1] \n      <U4[0/1]  1013>\n      <A[14/1] \"RFPowerMinWatt\">\n      <U4[0/1]  10>\n      <U4[0/1]  500>\n      <U4[0/1]  50>\n      <A[1/1] \"W\">\n   >\n   <L[6/1] \n      <U4[0/1]  1014>\n      <A[20/1] \"CoolingWaterMaxTempC\">\n      <U4[0/1]  10>\n      <U4[0/1]  60>\n      <U4[0/1]  35>\n      <A[2/1] \"?C\">\n   >\n   <L[6/1] \n      <U4[0/1]  1015>\n      <A[19/1] \"CoolingWaterFlowLpm\">\n      <U4[0/1]  1>\n      <U4[0/1]  10>\n      <U4[0/1]  4>\n      <A[5/1] \"L/min\">\n   >\n   <L[6/1] \n      <U4[0/1]  1016>\n      <A[15/1] \"AutoCleanEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1017>\n      <A[21/1] \"AutoCleanIntervalRuns\">\n      <U4[0/1]  1>\n      <U4[0/1]  500>\n      <U4[0/1]  50>\n      <A[4/1] \"runs\">\n   >\n   <L[6/1] \n      <U4[0/1]  1018>\n      <A[14/1] \"MaxIdleTimeMin\">\n      <U4[0/1]  0>\n      <U4[0/1]  1440>\n      <U4[0/1]  120>\n      <A[3/1] \"min\">\n   >\n   <L[6/1] \n      <U4[0/1]  1021>\n      <A[16/1] \"LotMaxWaferCount\">\n      <U4[0/1]  1>\n      <U4[0/1]  50>\n      <U4[0/1]  25>\n      <A[6/1] \"wafers\">\n   >\n   <L[6/1] \n      <U4[0/1]  1022>\n      <A[17/1] \"CassetteSlotCount\">\n      <U4[0/1]  1>\n      <U4[0/1]  50>\n      <U4[0/1]  25>\n      <A[5/1] \"slots\">\n   >\n   <L[6/1] \n      <U4[0/1]  1024>\n      <A[21/1] \"MaintenanceReminderHr\">\n      <U4[0/1]  0>\n      <U4[0/1]  10000>\n      <U4[0/1]  1000>\n      <A[2/1] \"hr\">\n   >\n   <L[6/1] \n      <U4[0/1]  1025>\n      <A[17/1] \"DataLoggingEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1026>\n      <A[19/1] \"RemoteCommandEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1027>\n      <A[14/1] \"HostTimeoutSec\">\n      <U4[0/1]  5>\n      <U4[0/1]  300>\n      <U4[0/1]  30>\n      <A[3/1] \"sec\">\n   >\n   <L[6/1] \n      <U4[0/1]  1028>\n      <A[17/1] \"LocalUiTimeoutMin\">\n      <U4[0/1]  1>\n      <U4[0/1]  120>\n      <U4[0/1]  15>\n      <A[3/1] \"min\">\n   >\n   <L[6/1] \n      <U4[0/1]  1029>\n      <A[16/1] \"RecipeChangeLock\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  0>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1030>\n      <A[20/1] \"SimulationModeEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  0>\n      <A[7/1] \"Boolean\">\n   >\n>\n\n================================\nTIME : 07:45:29.841\nTYPE : TX\nS2F29\nS2F29 W\n<L[1/1] \n   <U4[0/1]  5001>\n>\n\n================================\nTIME : 07:45:28.798\nTYPE : RX\nS2F30\nS2F30\n<L[27/1] \n   <L[6/1] \n      <U4[0/1]  1001>\n      <A[17/1] \"MaxProcessTimeSec\">\n      <U4[0/1]  0>\n      <U4[0/1]  7200>\n      <U4[0/1]  1800>\n      <A[3/1] \"sec\">\n   >\n   <L[6/1] \n      <U4[0/1]  1002>\n      <A[17/1] \"MinProcessTimeSec\">\n      <U4[0/1]  0>\n      <U4[0/1]  600>\n      <U4[0/1]  10>\n      <A[3/1] \"sec\">\n   >\n   <L[6/1] \n      <U4[0/1]  1003>\n      <A[15/1] \"ChamberMaxTempC\">\n      <U4[0/1]  20>\n      <U4[0/1]  120>\n      <U4[0/1]  85>\n      <A[2/1] \"?C\">\n   >\n   <L[6/1] \n      <U4[0/1]  1004>\n      <A[15/1] \"ChamberMinTempC\">\n      <U4[0/1]  10>\n      <U4[0/1]  60>\n      <U4[0/1]  25>\n      <A[2/1] \"?C\">\n   >\n   <L[6/1] \n      <U4[0/1]  1005>\n      <A[21/1] \"VacuumPressureMaxTorr\">\n      <U4[0/1]  0>\n      <U4[0/1]  10>\n      <U4[0/1]  1>\n      <A[4/1] \"Torr\">\n   >\n   <L[6/1] \n      <U4[0/1]  1006>\n      <A[16/1] \"VacuumPumpEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1007>\n      <A[17/1] \"RobotSpeedPercent\">\n      <U4[0/1]  10>\n      <U4[0/1]  100>\n      <U4[0/1]  80>\n      <A[1/1] \"%\">\n   >\n   <L[6/1] \n      <U4[0/1]  1008>\n      <A[19/1] \"DoorInterlockEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1009>\n      <A[21/1] \"AutoRecipeStartEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  0>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1010>\n      <A[17/1] \"AlarmBuzzerEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1011>\n      <A[14/1] \"GasFlowMaxSccm\">\n      <U4[0/1]  50>\n      <U4[0/1]  2000>\n      <U4[0/1]  500>\n      <A[4/1] \"sccm\">\n   >\n   <L[6/1] \n      <U4[0/1]  1012>\n      <A[14/1] \"RFPowerMaxWatt\">\n      <U4[0/1]  100>\n      <U4[0/1]  2000>\n      <U4[0/1]  800>\n      <A[1/1] \"W\">\n   >\n   <L[6/1] \n      <U4[0/1]  1013>\n      <A[14/1] \"RFPowerMinWatt\">\n      <U4[0/1]  10>\n      <U4[0/1]  500>\n      <U4[0/1]  50>\n      <A[1/1] \"W\">\n   >\n   <L[6/1] \n      <U4[0/1]  1014>\n      <A[20/1] \"CoolingWaterMaxTempC\">\n      <U4[0/1]  10>\n      <U4[0/1]  60>\n      <U4[0/1]  35>\n      <A[2/1] \"?C\">\n   >\n   <L[6/1] \n      <U4[0/1]  1015>\n      <A[19/1] \"CoolingWaterFlowLpm\">\n      <U4[0/1]  1>\n      <U4[0/1]  10>\n      <U4[0/1]  4>\n      <A[5/1] \"L/min\">\n   >\n   <L[6/1] \n      <U4[0/1]  1016>\n      <A[15/1] \"AutoCleanEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1017>\n      <A[21/1] \"AutoCleanIntervalRuns\">\n      <U4[0/1]  1>\n      <U4[0/1]  500>\n      <U4[0/1]  50>\n      <A[4/1] \"runs\">\n   >\n   <L[6/1] \n      <U4[0/1]  1018>\n      <A[14/1] \"MaxIdleTimeMin\">\n      <U4[0/1]  0>\n      <U4[0/1]  1440>\n      <U4[0/1]  120>\n      <A[3/1] \"min\">\n   >\n   <L[6/1] \n      <U4[0/1]  1021>\n      <A[16/1] \"LotMaxWaferCount\">\n      <U4[0/1]  1>\n      <U4[0/1]  50>\n      <U4[0/1]  25>\n      <A[6/1] \"wafers\">\n   >\n   <L[6/1] \n      <U4[0/1]  1022>\n      <A[17/1] \"CassetteSlotCount\">\n      <U4[0/1]  1>\n      <U4[0/1]  50>\n      <U4[0/1]  25>\n      <A[5/1] \"slots\">\n   >\n   <L[6/1] \n      <U4[0/1]  1024>\n      <A[21/1] \"MaintenanceReminderHr\">\n      <U4[0/1]  0>\n      <U4[0/1]  10000>\n      <U4[0/1]  1000>\n      <A[2/1] \"hr\">\n   >\n   <L[6/1] \n      <U4[0/1]  1025>\n      <A[17/1] \"DataLoggingEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1026>\n      <A[19/1] \"RemoteCommandEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  1>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1027>\n      <A[14/1] \"HostTimeoutSec\">\n      <U4[0/1]  5>\n      <U4[0/1]  300>\n      <U4[0/1]  30>\n      <A[3/1] \"sec\">\n   >\n   <L[6/1] \n      <U4[0/1]  1028>\n      <A[17/1] \"LocalUiTimeoutMin\">\n      <U4[0/1]  1>\n      <U4[0/1]  120>\n      <U4[0/1]  15>\n      <A[3/1] \"min\">\n   >\n   <L[6/1] \n      <U4[0/1]  1029>\n      <A[16/1] \"RecipeChangeLock\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  0>\n      <A[7/1] \"Boolean\">\n   >\n   <L[6/1] \n      <U4[0/1]  1030>\n      <A[20/1] \"SimulationModeEnable\">\n      <U4[0/1]  0>\n      <U4[0/1]  1>\n      <U4[0/1]  0>\n      <A[7/1] \"Boolean\">\n   >\n>\n\n================================\nTIME : 07:45:28.776\nTYPE : TX\nS2F29\nS2F29 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:27.740\nTYPE : RX\nS2F24\nS2F24\n<B[1] 02>\n\n================================\nTIME : 07:45:27.725\nTYPE : TX\nS2F23\nS2F23 W\n<L[3/1] \n   <U4[0/1]  1>\n   <U4[0/1]  10>\n   <U4[0/1]  5>\n>\n\n================================\nTIME : 07:45:26.703\nTYPE : RX\nS2F24\nS2F24\n<B[1] 02>\n\n================================\nTIME : 07:45:26.683\nTYPE : TX\nS2F23\nS2F23 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:25.668\nTYPE : RX\nS2F18\nS2F18\n<A[14/1] \"20260514123348\">\n\n================================\nTIME : 07:45:25.654\nTYPE : TX\nS2F17\nS2F17 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:24.629\nTYPE : RX\nS2F16\nS2F16\n<B[1] 01>\n\n================================\nTIME : 07:45:24.619\nTYPE : TX\nS2F15\nS2F15 W\n<L[1/1] \n   <L[2/1] \n      <U4[0/1]  5001>\n      <A[3/1] \"150\">\n   >\n>\n\n================================\nTIME : 07:45:23.599\nTYPE : RX\nS2F16\nS2F16\n<U1[1/1] 0 >\n\n================================\nTIME : 07:45:23.586\nTYPE : TX\nS2F15\nS2F15 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:22.565\nTYPE : RX\nS2F14\nS2F14\n<A[17/1] \"HANDLER_EXCEPTION\">\n\n================================\nTIME : 07:45:22.544\nTYPE : TX\nS2F13\nS2F13 W\n<L[1/1] \n   <U4[0/1]  5001>\n>\n\n================================\nTIME : 07:45:21.530\nTYPE : RX\nS2F14\nS2F14\n<L[30/1] \n   <A[4/1] \"1800\">\n   <A[2/1] \"10\">\n   <A[2/1] \"85\">\n   <A[2/1] \"25\">\n   <A[3/1] \"1.2\">\n   <A[1/1] \"1\">\n   <A[2/1] \"80\">\n   <A[1/1] \"1\">\n   <A[1/1] \"0\">\n   <A[1/1] \"1\">\n   <A[3/1] \"500\">\n   <A[3/1] \"800\">\n   <A[2/1] \"50\">\n   <A[2/1] \"35\">\n   <A[3/1] \"3.5\">\n   <A[1/1] \"1\">\n   <A[2/1] \"50\">\n   <A[3/1] \"120\">\n   <A[2/1] \"EN\">\n   <A[3/1] \"330\">\n   <A[2/1] \"25\">\n   <A[2/1] \"25\">\n   <A[10/1] \"PRODUCTION\">\n   <A[4/1] \"1000\">\n   <A[1/1] \"1\">\n   <A[1/1] \"1\">\n   <A[2/1] \"30\">\n   <A[2/1] \"15\">\n   <A[1/1] \"0\">\n   <A[1/1] \"0\">\n>\n\n================================\nTIME : 07:45:21.520\nTYPE : TX\nS2F13\nS2F13 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:20.498\nTYPE : RX\nS1F24\nS1F24\n<L[0/1] \n>\n\n================================\nTIME : 07:45:20.482\nTYPE : TX\nS1F23\nS1F23 W\n<L[1/1] \n   <U4[0/1]  3001>\n>\n\n================================\nTIME : 07:45:19.458\nTYPE : RX\nS1F24\nS1F24\n<L[48/1] \n   <L[2/1] \n      <U4[0/1]  4001>\n      <A[20/1] \"EquipmentOnlineLocal\">\n   >\n   <L[2/1] \n      <U4[0/1]  4002>\n      <A[21/1] \"EquipmentOnlineRemote\">\n   >\n   <L[2/1] \n      <U4[0/1]  4003>\n      <A[16/1] \"EquipmentOffline\">\n   >\n   <L[2/1] \n      <U4[0/1]  4004>\n      <A[13/1] \"EquipmentIdle\">\n   >\n   <L[2/1] \n      <U4[0/1]  4005>\n      <A[16/1] \"EquipmentRunning\">\n   >\n   <L[2/1] \n      <U4[0/1]  4006>\n      <A[15/1] \"EquipmentPaused\">\n   >\n   <L[2/1] \n      <U4[0/1]  4007>\n      <A[16/1] \"EquipmentStopped\">\n   >\n   <L[2/1] \n      <U4[0/1]  5001>\n      <A[14/1] \"ProcessStarted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5002>\n      <A[16/1] \"ProcessCompleted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5003>\n      <A[14/1] \"ProcessAborted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5004>\n      <A[13/1] \"ProcessPaused\">\n   >\n   <L[2/1] \n      <U4[0/1]  5005>\n      <A[14/1] \"ProcessResumed\">\n   >\n   <L[2/1] \n      <U4[0/1]  5006>\n      <A[18/1] \"ProcessStepStarted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5007>\n      <A[20/1] \"ProcessStepCompleted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5008>\n      <A[10/1] \"LotStarted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5009>\n      <A[12/1] \"LotCompleted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5010>\n      <A[9/1] \"JobQueued\">\n   >\n   <L[2/1] \n      <U4[0/1]  5011>\n      <A[11/1] \"JobDequeued\">\n   >\n   <L[2/1] \n      <U4[0/1]  5100>\n      <A[8/1] \"AlarmSet\">\n   >\n   <L[2/1] \n      <U4[0/1]  5101>\n      <A[12/1] \"AlarmCleared\">\n   >\n   <L[2/1] \n      <U4[0/1]  5102>\n      <A[22/1] \"EmergencyStopActivated\">\n   >\n   <L[2/1] \n      <U4[0/1]  5103>\n      <A[21/1] \"EmergencyStopReleased\">\n   >\n   <L[2/1] \n      <U4[0/1]  5104>\n      <A[18/1] \"InterlockTriggered\">\n   >\n   <L[2/1] \n      <U4[0/1]  5200>\n      <A[13/1] \"CarrierLoaded\">\n   >\n   <L[2/1] \n      <U4[0/1]  5201>\n      <A[15/1] \"CarrierUnloaded\">\n   >\n   <L[2/1] \n      <U4[0/1]  5202>\n      <A[12/1] \"WaferStarted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5203>\n      <A[14/1] \"WaferCompleted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5204>\n      <A[26/1] \"MaterialVerificationFailed\">\n   >\n   <L[2/1] \n      <U4[0/1]  5300>\n      <A[14/1] \"RecipeSelected\">\n   >\n   <L[2/1] \n      <U4[0/1]  5301>\n      <A[16/1] \"RecipeDownloaded\">\n   >\n   <L[2/1] \n      <U4[0/1]  5302>\n      <A[14/1] \"RecipeUploaded\">\n   >\n   <L[2/1] \n      <U4[0/1]  5303>\n      <A[14/1] \"RecipeModified\">\n   >\n   <L[2/1] \n      <U4[0/1]  5400>\n      <A[13/1] \"OperatorLogin\">\n   >\n   <L[2/1] \n      <U4[0/1]  5401>\n      <A[14/1] \"OperatorLogout\">\n   >\n   <L[2/1] \n      <U4[0/1]  5402>\n      <A[23/1] \"ManualOverrideActivated\">\n   >\n   <L[2/1] \n      <U4[0/1]  5500>\n      <A[22/1] \"MaintenanceModeEntered\">\n   >\n   <L[2/1] \n      <U4[0/1]  5501>\n      <A[21/1] \"MaintenanceModeExited\">\n   >\n   <L[2/1] \n      <U4[0/1]  5502>\n      <A[18/1] \"CalibrationStarted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5503>\n      <A[20/1] \"CalibrationCompleted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5600>\n      <A[21/1] \"RemoteCommandReceived\">\n   >\n   <L[2/1] \n      <U4[0/1]  5601>\n      <A[21/1] \"RemoteCommandExecuted\">\n   >\n   <L[2/1] \n      <U4[0/1]  5602>\n      <A[19/1] \"RemoteCommandFailed\">\n   >\n   <L[2/1] \n      <U4[0/1]  5603>\n      <A[17/1] \"SpoolingActivated\">\n   >\n   <L[2/1] \n      <U4[0/1]  6000>\n      <A[15/1] \"E10StateChanged\">\n   >\n   <L[2/1] \n      <U4[0/1]  7000>\n      <A[10/1] \"JobStarted\">\n   >\n   <L[2/1] \n      <U4[0/1]  7001>\n      <A[12/1] \"JobCompleted\">\n   >\n   <L[2/1] \n      <U4[0/1]  8000>\n      <A[12/1] \"WaferStarted\">\n   >\n   <L[2/1] \n      <U4[0/1]  8001>\n      <A[14/1] \"WaferCompleted\">\n   >\n>\n\n================================\nTIME : 07:45:19.441\nTYPE : TX\nS1F23\nS1F23 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:18.430\nTYPE : RX\nS1F22\nS1F22\n<L[2/1] \n   <L[3/1] \n      <U4[0/1]  2001>\n      <A[12/1] \"ControlState\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  2002>\n      <A[12/1] \"ProcessState\">\n      <A[0/1] >\n   >\n>\n\n================================\nTIME : 07:45:18.406\nTYPE : TX\nS1F21\nS1F21 W\n<L[2/1] \n   <U4[0/1]  2001>\n   <U4[0/1]  2002>\n>\n\n================================\nTIME : 07:45:17.387\nTYPE : RX\nS1F22\nS1F22\n<L[36/1] \n   <L[3/1] \n      <U4[0/1]  3001>\n      <A[15/1] \"CompletedRecipe\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3002>\n      <A[14/1] \"CompletedLotId\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3003>\n      <A[19/1] \"ProcessedWaferCount\">\n      <A[5/1] \"wafer\">\n   >\n   <L[3/1] \n      <U4[0/1]  3004>\n      <A[16/1] \"ProcessEndStatus\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3005>\n      <A[16/1] \"ProcessStartTime\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3006>\n      <A[14/1] \"ProcessEndTime\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3007>\n      <A[18/1] \"ProcessDurationSec\">\n      <A[3/1] \"sec\">\n   >\n   <L[3/1] \n      <U4[0/1]  3008>\n      <A[11/1] \"AbortReason\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3009>\n      <A[13/1] \"RecipeVersion\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3010>\n      <A[10/1] \"OperatorId\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3011>\n      <A[9/1] \"CarrierId\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3012>\n      <A[9/1] \"SlotStart\">\n      <A[4/1] \"slot\">\n   >\n   <L[3/1] \n      <U4[0/1]  3013>\n      <A[7/1] \"SlotEnd\">\n      <A[4/1] \"slot\">\n   >\n   <L[3/1] \n      <U4[0/1]  3014>\n      <A[19/1] \"TotalSlotsProcessed\">\n      <A[4/1] \"slot\">\n   >\n   <L[3/1] \n      <U4[0/1]  3015>\n      <A[11/1] \"ChamberUsed\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3016>\n      <A[14/1] \"AvgChamberTemp\">\n      <A[1/1] \"C\">\n   >\n   <L[3/1] \n      <U4[0/1]  3017>\n      <A[14/1] \"MaxChamberTemp\">\n      <A[1/1] \"C\">\n   >\n   <L[3/1] \n      <U4[0/1]  3018>\n      <A[14/1] \"MinChamberTemp\">\n      <A[1/1] \"C\">\n   >\n   <L[3/1] \n      <U4[0/1]  3019>\n      <A[17/1] \"AvgVacuumPressure\">\n      <A[4/1] \"Torr\">\n   >\n   <L[3/1] \n      <U4[0/1]  3020>\n      <A[10/1] \"RFPowerAvg\">\n      <A[1/1] \"W\">\n   >\n   <L[3/1] \n      <U4[0/1]  3021>\n      <A[10/1] \"GasFlowAvg\">\n      <A[4/1] \"sccm\">\n   >\n   <L[3/1] \n      <U4[0/1]  3022>\n      <A[19/1] \"CoolingWaterTempAvg\">\n      <A[1/1] \"C\">\n   >\n   <L[3/1] \n      <U4[0/1]  3023>\n      <A[23/1] \"AlarmCountDuringProcess\">\n      <A[5/1] \"count\">\n   >\n   <L[3/1] \n      <U4[0/1]  3024>\n      <A[11/1] \"LastAlarmId\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3025>\n      <A[13/1] \"AbortStepName\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3026>\n      <A[17/1] \"SystemCpuUsageAvg\">\n      <A[1/1] \"%\">\n   >\n   <L[3/1] \n      <U4[0/1]  3027>\n      <A[20/1] \"SystemMemoryUsageAvg\">\n      <A[1/1] \"%\">\n   >\n   <L[3/1] \n      <U4[0/1]  3028>\n      <A[18/1] \"MaintenanceDueFlag\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3029>\n      <A[17/1] \"ProcessResultCode\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3030>\n      <A[19/1] \"EventSequenceNumber\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3031>\n      <A[17/1] \"E10EquipmentState\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3032>\n      <A[7/1] \"JobName\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3033>\n      <A[9/1] \"WaferName\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3101>\n      <A[5/1] \"JobId\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3102>\n      <A[6/1] \"Recipe\">\n      <A[0/1] >\n   >\n   <L[3/1] \n      <U4[0/1]  3103>\n      <A[7/1] \"WaferId\">\n      <A[0/1] >\n   >\n>\n\n================================\nTIME : 07:45:17.366\nTYPE : TX\nS1F21\nS1F21 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:16.353\nTYPE : RX\nS1F18\nS1F18\n<B[1] 00>\n\n================================\nTIME : 07:45:16.328\nTYPE : TX\nS1F17\nS1F17 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:15.320\nTYPE : RX\nS1F16\nS1F16\n<B[1] 00>\n\n================================\nTIME : 07:45:15.296\nTYPE : TX\nS1F15\nS1F15 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:14.261\nTYPE : RX\nS1F14\nS1F14\n<L[2/1] \n   <B[1] 01>\n   <L[2/1] \n      <A[13/1] \"ETCH-PRO-X100\">\n      <A[7/1] \"EXP 2.0\">\n   >\n>\n\n================================\nTIME : 07:45:14.245\nTYPE : TX\nS1F13\nS1F13 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:13.216\nTYPE : RX\nS1F12\nS1F12\n<L[2/1] \n   <L[3/1] \n      <U4[0/1]  1001>\n      <A[17/1] \"MaxProcessTimeSec\">\n      <A[3/1] \"sec\">\n   >\n   <L[3/1] \n      <U4[0/1]  1002>\n      <A[17/1] \"MinProcessTimeSec\">\n      <A[3/1] \"sec\">\n   >\n>\n\n================================\nTIME : 07:45:13.192\nTYPE : TX\nS1F11\nS1F11 W\n<L[2/1] \n   <U4[0/1]  1001>\n   <U4[0/1]  1002>\n>\n\n================================\nTIME : 07:45:12.181\nTYPE : RX\nS1F4\nS1F4\n<L[2/1] \n   <A[0/1] >\n   <A[0/1] >\n>\n\n================================\nTIME : 07:45:12.150\nTYPE : TX\nS1F3\nS1F3 W\n<L[2/1] \n   <U4[0/1]  1001>\n   <U4[0/1]  1002>\n>\n\n================================\nTIME : 07:45:11.141\nTYPE : RX\nS1F4\nS1F4\n<L[20/1] \n   <A[8/1] \"07:45:08\">\n   <A[8/1] \"07:45:08\">\n   <F4[1/1] 82.42302>\n   <F4[1/1] 88.48563>\n   <F4[1/1] 73.34569>\n   <F4[1/1] 18.71586>\n   <U2[1/1] 31296 >\n   <U2[1/1] 42355 >\n   <F4[1/1] 92.98457>\n   <F4[1/1] 77.78621>\n   <BOOLEAN [1] 1 bytes>\n   <BOOLEAN [1] 1 bytes>\n   <BOOLEAN [1] 1 bytes>\n   <A[8/1] \"07:45:08\">\n   <A[8/1] \"07:45:08\">\n   <U2[1/1] 16623 >\n   <U2[1/1] 39636 >\n   <F4[1/1] 56.81786>\n   <F4[1/1] 42.36551>\n   <BOOLEAN [1] 1 bytes>\n>\n\n================================\nTIME : 07:45:11.100\nTYPE : TX\nS1F3\nS1F3 W\n<L[0/1] \n>\n\n================================\nTIME : 07:45:10.080\nTYPE : RX\nS1F2\nS1F2\n<L[3/1] \n   <A[8/1] \"EQP-5000\">\n   <A[13/1] \"ETCH-PRO-X100\">\n   <A[7/1] \"EXP 2.0\">\n>\n\n================================\nTIME : 07:45:10.063\nTYPE : TX\nS1F1\nS1F1 W\n<L[0/1] \n>\n\n",
+    "SECS_ToolCharacterisationTesting": "================================\nTIME : 07:47:04.324\nTYPE : RX\nS2F24\nS2F24\n<B[1] 02>\n\n================================\nTIME : 07:47:04.306\nTYPE : TX\nS2F23\nS2F23 W\n<L[4/1] \n   <U4[0/1]  7001>\n   <U4[0/1]  0>\n   <U4[0/1]  0>\n   <L[0/1] \n   >\n>\n\n================================\nTIME : 07:47:03.270\nTYPE : RX\nS2F24\nS2F24\n<B[1] 02>\n\n================================\nTIME : 07:47:03.257\nTYPE : TX\nS2F23\nS2F23 W\n<L[4/1] \n   <U4[0/1]  7001>\n   <U4[0/1]  10>\n   <U4[0/1]  50>\n   <L[1/1] \n      <U4[0/1]  5001>\n   >\n>\n\n================================\nTIME : 07:47:02.230\nTYPE : RX\nS2F42\nS2F42\n<B[1] 03>\n\n================================\nTIME : 07:47:02.211\nTYPE : TX\nS2F41\nS2F41 W\n<L[2/1] \n   <A[7/1] \"PPSTART\">\n   <L[1/1] \n      <L[2/1] \n         <A[5/1] \"LOTID\">\n         <A[7/1] \"LOT1001\">\n      >\n   >\n>\n\n================================\nTIME : 07:47:01.195\nTYPE : RX\nS2F42\nS2F42\n<B[1] 04>\n\n================================\nTIME : 07:47:01.171\nTYPE : TX\nS2F41\nS2F41 W\n<L[2/1] \n   <A[8/1] \"PPSELECT\">\n   <L[1/1] \n      <L[2/1] \n         <A[4/1] \"PPID\">\n         <A[9/1] \"RECIPE_01\">\n      >\n   >\n>\n\n================================\nTIME : 07:47:00.146\nTYPE : RX\nS5F4\nS5F4\n<B[1] 00>\n\n================================\nTIME : 07:47:00.130\nTYPE : TX\nS5F3\nS5F3 W\n<L[2/1] \n   <BOOLEAN [1] 1 bytes>\n   <U4[0/1]  1001>\n>\n\n================================\nTIME : 07:46:49.089\nTYPE : RX\nS9F7\nS9F7 W\n<B[10] 00 01 82 25 00 00 00 00 00 00>\n\n================================\nTIME : 07:46:49.075\nTYPE : TX\nS2F37\nS2F37 W\n<L[2/1] \n   <BOOLEAN [1] 1 bytes>\n   <U4[0/1]  2001>\n>\n\n================================\nTIME : 07:46:38.039\nTYPE : RX\nS9F7\nS9F7 W\n<B[10] 00 01 82 23 00 00 00 00 00 00>\n\n================================\nTIME : 07:46:38.030\nTYPE : TX\nS2F35\nS2F35 W\n<L[2/1] \n   <U4[0/1]  2001>\n   <U4[0/1]  3001>\n>\n\n================================\nTIME : 07:46:37.015\nTYPE : RX\nS2F34\nS2F34\n<B[1] 00>\n\n================================\nTIME : 07:46:36.999\nTYPE : TX\nS2F33\nS2F33 W\n<L[2/1] \n   <U4[0/1]  3001>\n   <L[3/1] \n      <U4[0/1]  4001>\n      <U4[0/1]  5001>\n      <U4[0/1]  6001>\n   >\n>\n\n================================\nTIME : 07:46:35.971\nTYPE : RX\nS2F34\nS2F34\n<B[1] 00>\n\n================================\nTIME : 07:46:35.946\nTYPE : TX\nS2F33\nS2F33 W\n<L[2/1] \n   <U4[0/1]  3001>\n   <L[0/1] \n   >\n>\n\n================================\nTIME : 07:46:24.887\nTYPE : RX\nS9F7\nS9F7 W\n<B[10] 00 01 82 23 00 00 00 00 00 00>\n\n================================\nTIME : 07:46:24.872\nTYPE : TX\nS2F35\nS2F35 W\n<L[2/1] \n   <U4[0/1]  2001>\n   <U4[0/1]  3001>\n>\n\n================================\nTIME : 07:46:13.828\nTYPE : RX\nS9F7\nS9F7 W\n<B[10] 00 01 82 25 00 00 00 00 00 00>\n\n================================\nTIME : 07:46:13.812\nTYPE : TX\nS2F37\nS2F37 W\n<L[2/1] \n   <BOOLEAN [1] 1 bytes>\n   <U4[0/1]  2001>\n>\n\n================================\nTIME : 07:46:12.779\nTYPE : RX\nS5F4\nS5F4\n<B[1] 00>\n\n================================\nTIME : 07:46:12.761\nTYPE : TX\nS5F3\nS5F3 W\n<L[2/1] \n   <BOOLEAN [1] 1 bytes>\n   <U4[0/1]  1001>\n>\n\n================================\nTIME : 07:46:11.734\nTYPE : RX\nS1F14\nS1F14\n<L[2/1] \n   <B[1] 01>\n   <L[2/1] \n      <A[13/1] \"ETCH-PRO-X100\">\n      <A[7/1] \"EXP 2.0\">\n   >\n>\n\n================================\nTIME : 07:46:11.724\nTYPE : TX\nS1F13\nS1F13 W\n<L[0/1] \n>\n\n================================\nTIME : 07:46:10.678\nTYPE : RX\nS1F2\nS1F2\n<L[3/1] \n   <A[8/1] \"EQP-5000\">\n   <A[13/1] \"ETCH-PRO-X100\">\n   <A[7/1] \"EXP 2.0\">\n>\n\n================================\nTIME : 07:46:10.661\nTYPE : TX\nS1F1\nS1F1 W\n<L[0/1] \n>\n\n",
+    "sml_setup_1": "// ========================================================================\n// COMPREHENSIVE END-TO-END SML TEST SCRIPT FOR: CVD Furnace System\n// MODEL: None\n// GENERATED ON: 2026-06-22T16:34:50.087214\n// ========================================================================\n\n// --- S1F1: Are You There --- \nS1F1 W\n.\n\n// --- S1F13: Establish Communication --- \nS1F13 W\n  <L [0]>\n.\n<S1F14\n  <L [2]\n    <B 00>\n    <L [2]\n      <A \"HOST\">\n      <A \"V1\">\n    >\n  >\n>\n.\n\n// --- S1F11: Request Specific Status Variables ---\nS1F11 W\n  <L [20]\n    <U4 1001>\n    <U4 1002>\n    <U4 1003>\n    <U4 1004>\n    <U4 1005>\n    <U4 1006>\n    <U4 1007>\n    <U4 1008>\n    <U4 1009>\n    <U4 1010>\n    <U4 1011>\n    <U4 1012>\n    <U4 1101>\n    <U4 1102>\n    <U4 1103>\n    <U4 1104>\n    <U4 1105>\n    <U4 1106>\n    <U4 1107>\n    <U4 1108>\n  >\n.\n<S1F12\n  <L [0]>\n>\n.\n\n// --- S1F21: Request Specific Data Variables ---\nS1F21 W\n  <L [20]\n    <U4 2001>\n    <U4 2002>\n    <U4 2003>\n    <U4 2004>\n    <U4 2005>\n    <U4 2006>\n    <U4 2007>\n    <U4 2008>\n    <U4 2009>\n    <U4 2010>\n    <U4 2011>\n    <U4 2012>\n    <U4 2013>\n    <U4 2014>\n    <U4 2015>\n    <U4 2016>\n    <U4 2051>\n    <U4 2052>\n    <U4 2053>\n    <U4 2054>\n  >\n.\n<S1F22\n  <L [0]>\n>\n.\n\n// --- S2F33: Define Reports ---\nS2F33 W\n  <L [2]\n    <U4 1>                    * DATAID\n    <L [36]\n      <L [2]\n        <U4 3101>                     * RPTID (RPT_ProcessStart_ChamberA)\n        <L [19]\n          <U4 1101>                 * SVID\n          <U4 1102>                 * SVID\n          <U4 1103>                 * SVID\n          <U4 1104>                 * SVID\n          <U4 1105>                 * SVID\n          <U4 1106>                 * SVID\n          <U4 1107>                 * SVID\n          <U4 1108>                 * SVID\n          <U4 1109>                 * SVID\n          <U4 1112>                 * SVID\n          <U4 2001>                 * SVID\n          <U4 2004>                 * SVID\n          <U4 2007>                 * SVID\n          <U4 2008>                 * SVID\n          <U4 2009>                 * SVID\n          <U4 2010>                 * SVID\n          <U4 1001>                 * SVID\n          <U4 1002>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3102>                     * RPTID (RPT_ProcessEnd_ChamberA)\n        <L [17]\n          <U4 2051>                 * SVID\n          <U4 2052>                 * SVID\n          <U4 2053>                 * SVID\n          <U4 2054>                 * SVID\n          <U4 2055>                 * SVID\n          <U4 2056>                 * SVID\n          <U4 2061>                 * SVID\n          <U4 2064>                 * SVID\n          <U4 2065>                 * SVID\n          <U4 2057>                 * SVID\n          <U4 2058>                 * SVID\n          <U4 2059>                 * SVID\n          <U4 2060>                 * SVID\n          <U4 2062>                 * SVID\n          <U4 2063>                 * SVID\n          <U4 1001>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3103>                     * RPTID (RPT_ProcessStart_ChamberB)\n        <L [19]\n          <U4 1201>                 * SVID\n          <U4 1202>                 * SVID\n          <U4 1203>                 * SVID\n          <U4 1204>                 * SVID\n          <U4 1205>                 * SVID\n          <U4 1206>                 * SVID\n          <U4 1207>                 * SVID\n          <U4 1208>                 * SVID\n          <U4 1209>                 * SVID\n          <U4 1212>                 * SVID\n          <U4 2001>                 * SVID\n          <U4 2005>                 * SVID\n          <U4 2007>                 * SVID\n          <U4 2008>                 * SVID\n          <U4 2009>                 * SVID\n          <U4 2010>                 * SVID\n          <U4 1001>                 * SVID\n          <U4 1002>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3104>                     * RPTID (RPT_ProcessEnd_ChamberB)\n        <L [17]\n          <U4 2051>                 * SVID\n          <U4 2052>                 * SVID\n          <U4 2053>                 * SVID\n          <U4 2054>                 * SVID\n          <U4 2055>                 * SVID\n          <U4 2056>                 * SVID\n          <U4 2061>                 * SVID\n          <U4 2064>                 * SVID\n          <U4 2065>                 * SVID\n          <U4 2057>                 * SVID\n          <U4 2058>                 * SVID\n          <U4 2059>                 * SVID\n          <U4 2060>                 * SVID\n          <U4 2062>                 * SVID\n          <U4 2063>                 * SVID\n          <U4 1001>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3105>                     * RPTID (RPT_WaferLoad)\n        <L [11]\n          <U4 1110>                 * SVID\n          <U4 1111>                 * SVID\n          <U4 1210>                 * SVID\n          <U4 1211>                 * SVID\n          <U4 2004>                 * SVID\n          <U4 2005>                 * SVID\n          <U4 2006>                 * SVID\n          <U4 1003>                 * SVID\n          <U4 1004>                 * SVID\n          <U4 1007>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3106>                     * RPTID (RPT_WaferUnload)\n        <L [11]\n          <U4 1110>                 * SVID\n          <U4 1111>                 * SVID\n          <U4 1210>                 * SVID\n          <U4 1211>                 * SVID\n          <U4 2004>                 * SVID\n          <U4 2005>                 * SVID\n          <U4 2064>                 * SVID\n          <U4 1003>                 * SVID\n          <U4 1004>                 * SVID\n          <U4 1007>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3107>                     * RPTID (RPT_AlarmEvent)\n        <L [6]\n          <U4 1001>                 * SVID\n          <U4 1008>                 * SVID\n          <U4 1010>                 * SVID\n          <U4 1011>                 * SVID\n          <U4 1015>                 * SVID\n          <U4 1315>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3108>                     * RPTID (RPT_GasStatus)\n        <L [11]\n          <U4 1301>                 * SVID\n          <U4 1302>                 * SVID\n          <U4 1303>                 * SVID\n          <U4 1304>                 * SVID\n          <U4 1305>                 * SVID\n          <U4 1306>                 * SVID\n          <U4 1307>                 * SVID\n          <U4 1308>                 * SVID\n          <U4 1309>                 * SVID\n          <U4 1314>                 * SVID\n          <U4 1315>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3109>                     * RPTID (RPT_RFStatus)\n        <L [11]\n          <U4 1351>                 * SVID\n          <U4 1352>                 * SVID\n          <U4 1353>                 * SVID\n          <U4 1354>                 * SVID\n          <U4 1355>                 * SVID\n          <U4 1356>                 * SVID\n          <U4 1357>                 * SVID\n          <U4 1358>                 * SVID\n          <U4 1359>                 * SVID\n          <U4 1360>                 * SVID\n          <U4 1361>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3110>                     * RPTID (RPT_ChamberA_TempProfile)\n        <L [10]\n          <U4 1101>                 * SVID\n          <U4 1102>                 * SVID\n          <U4 1103>                 * SVID\n          <U4 1104>                 * SVID\n          <U4 1105>                 * SVID\n          <U4 1106>                 * SVID\n          <U4 1115>                 * SVID\n          <U4 2007>                 * SVID\n          <U4 2015>                 * SVID\n          <U4 2016>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3111>                     * RPTID (RPT_ChamberB_TempProfile)\n        <L [10]\n          <U4 1201>                 * SVID\n          <U4 1202>                 * SVID\n          <U4 1203>                 * SVID\n          <U4 1204>                 * SVID\n          <U4 1205>                 * SVID\n          <U4 1206>                 * SVID\n          <U4 1215>                 * SVID\n          <U4 2007>                 * SVID\n          <U4 2015>                 * SVID\n          <U4 2016>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3112>                     * RPTID (RPT_MaintenanceEvent)\n        <L [5]\n          <U4 1012>                 * SVID\n          <U4 1008>                 * SVID\n          <U4 1002>                 * SVID\n          <U4 1001>                 * SVID\n          <U4 1013>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3113>                     * RPTID (RPT_ControlStateChange)\n        <L [3]\n          <U4 1002>                 * SVID\n          <U4 1008>                 * SVID\n          <U4 1001>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3114>                     * RPTID (RPT_RecipeManagement)\n        <L [4]\n          <U4 2001>                 * SVID\n          <U4 2002>                 * SVID\n          <U4 1008>                 * SVID\n          <U4 1002>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3115>                     * RPTID (RPT_ProcessAbort)\n        <L [7]\n          <U4 2065>                 * SVID\n          <U4 2066>                 * SVID\n          <U4 1109>                 * SVID\n          <U4 1209>                 * SVID\n          <U4 1001>                 * SVID\n          <U4 1008>                 * SVID\n          <U4 1002>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 1>                     * RPTID (RPT_RampStart_ChamberA)\n        <L [9]\n          <U4 1101>                 * SVID\n          <U4 1102>                 * SVID\n          <U4 1103>                 * SVID\n          <U4 1104>                 * SVID\n          <U4 1105>                 * SVID\n          <U4 1106>                 * SVID\n          <U4 2007>                 * SVID\n          <U4 2015>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 2>                     * RPTID (RPT_SoakComplete_ChamberA)\n        <L [7]\n          <U4 1101>                 * SVID\n          <U4 1103>                 * SVID\n          <U4 1105>                 * SVID\n          <U4 1107>                 * SVID\n          <U4 2007>                 * SVID\n          <U4 2016>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 3>                     * RPTID (RPT_RampStart_ChamberB)\n        <L [9]\n          <U4 1201>                 * SVID\n          <U4 1202>                 * SVID\n          <U4 1203>                 * SVID\n          <U4 1204>                 * SVID\n          <U4 1205>                 * SVID\n          <U4 1206>                 * SVID\n          <U4 2007>                 * SVID\n          <U4 2015>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 4>                     * RPTID (RPT_SoakComplete_ChamberB)\n        <L [7]\n          <U4 1201>                 * SVID\n          <U4 1203>                 * SVID\n          <U4 1205>                 * SVID\n          <U4 1207>                 * SVID\n          <U4 2007>                 * SVID\n          <U4 2016>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 5>                     * RPTID (RPT_PurgeStart_ChamberA)\n        <L [5]\n          <U4 1307>                 * SVID\n          <U4 1310>                 * SVID\n          <U4 1107>                 * SVID\n          <U4 1009>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 6>                     * RPTID (RPT_PurgeComplete_ChamberA)\n        <L [5]\n          <U4 1107>                 * SVID\n          <U4 1307>                 * SVID\n          <U4 1310>                 * SVID\n          <U4 1009>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 7>                     * RPTID (RPT_PurgeStart_ChamberB)\n        <L [5]\n          <U4 1307>                 * SVID\n          <U4 1311>                 * SVID\n          <U4 1207>                 * SVID\n          <U4 1009>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 8>                     * RPTID (RPT_PurgeComplete_ChamberB)\n        <L [5]\n          <U4 1207>                 * SVID\n          <U4 1307>                 * SVID\n          <U4 1311>                 * SVID\n          <U4 1009>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 9>                     * RPTID (RPT_PlasmaIgnition_ChamberA)\n        <L [6]\n          <U4 1351>                 * SVID\n          <U4 1352>                 * SVID\n          <U4 1354>                 * SVID\n          <U4 1358>                 * SVID\n          <U4 2010>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 10>                     * RPTID (RPT_PlasmaExtinguish_ChamberA)\n        <L [4]\n          <U4 1351>                 * SVID\n          <U4 1354>                 * SVID\n          <U4 1358>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 11>                     * RPTID (RPT_PlasmaIgnition_ChamberB)\n        <L [6]\n          <U4 1355>                 * SVID\n          <U4 1356>                 * SVID\n          <U4 1357>                 * SVID\n          <U4 1359>                 * SVID\n          <U4 2010>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 12>                     * RPTID (RPT_PlasmaExtinguish_ChamberB)\n        <L [4]\n          <U4 1355>                 * SVID\n          <U4 1357>                 * SVID\n          <U4 1359>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 13>                     * RPTID (RPT_CassetteLoad_Port1)\n        <L [3]\n          <U4 1005>                 * SVID\n          <U4 1007>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 14>                     * RPTID (RPT_CassetteUnload_Port1)\n        <L [3]\n          <U4 1005>                 * SVID\n          <U4 1007>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 15>                     * RPTID (RPT_CassetteLoad_Port2)\n        <L [3]\n          <U4 1006>                 * SVID\n          <U4 1007>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 16>                     * RPTID (RPT_CassetteUnload_Port2)\n        <L [3]\n          <U4 1006>                 * SVID\n          <U4 1007>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 17>                     * RPTID (RPT_RobotFault)\n        <L [3]\n          <U4 1003>                 * SVID\n          <U4 1004>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 18>                     * RPTID (RPT_SlotMapComplete)\n        <L [4]\n          <U4 1005>                 * SVID\n          <U4 1006>                 * SVID\n          <U4 1007>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 19>                     * RPTID (RPT_PumpVentEvents)\n        <L [4]\n          <U4 1009>                 * SVID\n          <U4 1107>                 * SVID\n          <U4 1207>                 * SVID\n          <U4 1008>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 20>                     * RPTID (RPT_EquipmentClockSync)\n        <L [2]\n          <U4 1008>                 * SVID\n          <U4 1001>                 * SVID\n        >\n      >\n      <L [2]\n        <U4 21>                     * RPTID (RPT_PreventiveMaintenanceDue)\n        <L [3]\n          <U4 1013>                 * SVID\n          <U4 1008>                 * SVID\n          <U4 1001>                 * SVID\n        >\n      >\n    >\n  >\n.\n<S2F34\n  <B 00>\n>\n.\n\n// --- S2F35: Link Reports to Events ---\nS2F35 W\n  <L [2]\n    <U4 1>                    * DATAID\n    <L [2]\n      <L [2]\n        <U4 3001>                   * CEID (ProcessStart_ChamberA)\n        <L [1]\n          <U4 3101>                   * RPTID\n        >\n      >\n      <L [2]\n        <U4 3002>                   * CEID (ProcessEnd_ChamberA)\n        <L [1]\n          <U4 3102>                   * RPTID\n        >\n      >\n    >\n  >\n.\n<S2F36\n  <B 00>\n>\n.\n\n// --- S2F37: Enable Event Reports ---\nS2F37 W\n  <Boolean True>                   * CEED\n  <L [46]\n    <U4 3001>                      * CEID\n    <U4 3002>                      * CEID\n    <U4 3003>                      * CEID\n    <U4 3004>                      * CEID\n    <U4 3005>                      * CEID\n    <U4 3006>                      * CEID\n    <U4 3007>                      * CEID\n    <U4 3008>                      * CEID\n    <U4 3009>                      * CEID\n    <U4 3010>                      * CEID\n    <U4 3011>                      * CEID\n    <U4 3012>                      * CEID\n    <U4 3013>                      * CEID\n    <U4 3014>                      * CEID\n    <U4 3015>                      * CEID\n    <U4 3016>                      * CEID\n    <U4 3017>                      * CEID\n    <U4 3018>                      * CEID\n    <U4 3031>                      * CEID\n    <U4 3032>                      * CEID\n    <U4 3033>                      * CEID\n    <U4 3034>                      * CEID\n    <U4 3035>                      * CEID\n    <U4 3036>                      * CEID\n    <U4 3037>                      * CEID\n    <U4 3038>                      * CEID\n    <U4 3039>                      * CEID\n    <U4 3040>                      * CEID\n    <U4 3041>                      * CEID\n    <U4 3061>                      * CEID\n    <U4 3062>                      * CEID\n    <U4 3063>                      * CEID\n    <U4 3064>                      * CEID\n    <U4 3065>                      * CEID\n    <U4 3066>                      * CEID\n    <U4 3067>                      * CEID\n    <U4 3068>                      * CEID\n    <U4 3069>                      * CEID\n    <U4 3070>                      * CEID\n    <U4 3071>                      * CEID\n    <U4 3072>                      * CEID\n    <U4 3073>                      * CEID\n    <U4 1001>                      * CEID\n    <U4 1002>                      * CEID\n    <U4 1003>                      * CEID\n    <U4 1004>                      * CEID\n  >\n.\n<S2F38\n  <B 00>\n>\n.\n\n// --- S2F23: Trace Initialize (Every 10s, 100 samples) ---\nS2F23 W\n  <L [5]\n    <U4 1>                       * TRID\n    <ASCII \"000010\">             * DSPPER (10s)\n    <U4 100>                     * TOTSMP\n    <U4 1>                       * REPGSZ\n    <L [5]\n      <U4 1001>                    * SVID\n      <U4 1002>                    * SVID\n      <U4 1003>                    * SVID\n      <U4 1004>                    * SVID\n      <U4 1005>                    * SVID\n    >\n  >\n.\n<S2F24\n  <B 00>\n>\n.\n\n// --- S2F41: Host Command (START) ---\nS2F41 W\n  <L [2]\n    <ASCII \"START\">\n    <L [0]\n    >\n  >\n.\n<S2F42\n  <L [2]\n    <B 00>\n    <L [0]>\n  >\n>\n.\n\n// --- S2F41: Host Command (PP-SELECT) ---\nS2F41 W\n  <L [2]\n    <ASCII \"PP-SELECT\">\n    <L [1]\n      <L [2]\n        <ASCII \"PPID\">\n        <ASCII \"TEST_RECIPE_01\">\n      >\n    >\n  >\n.\n<S2F42\n  <L [2]\n    <B 00>\n    <L [0]>\n  >\n>\n.\n\n// === EXPECTED EVENT REPORTS (S6F11) ===\n<S6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3001>\n    <L [0]>\n  >\n>\n.\n<S6F12\n  <B 00>\n>\n.\n\n<S6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3002>\n    <L [0]>\n  >\n>\n.\n<S6F12\n  <B 00>\n>\n.\n\n<S6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3003>\n    <L [0]>\n  >\n>\n.\n<S6F12\n  <B 00>\n>\n.\n\n<S6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3004>\n    <L [0]>\n  >\n>\n.\n<S6F12\n  <B 00>\n>\n.\n\n<S6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3005>\n    <L [0]>\n  >\n>\n.\n<S6F12\n  <B 00>\n>\n.\n\n// === EXPECTED TRACE DATA (S6F1) ===\n<S6F1 W\n  <L [4]\n    <U4 1>\n    <U4 100>\n    <ASCII \"2026061912000000\">\n    <L [0]>\n  >\n>\n.\n<S6F2\n  <B 00>\n>\n.\n\n// --- S2F41: Host Command (STOP) ---\nS2F41 W\n  <L [2]\n    <ASCII \"STOP\">\n    <L [0]\n    >\n  >\n.\n<S2F42\n  <L [2]\n    <B 00>\n    <L [0]>\n  >\n>\n.\n\n// --- S7F19: Request Process Program Directory --- \nS7F19 W\n.\n<S7F20\n  <L [1]\n    <ASCII \"TEST_RECIPE_01\">\n  >\n>\n.\n\n// --- S7F1: Process Program Load Inquire ---\n<S7F1 W\n  <L [2]\n    <ASCII \"TEST_RECIPE_01\">\n    <U4 1000>\n  >\n>\n.\n<S7F2\n  <B 00>\n>\n.\n\n// --- S7F3: Process Program Send ---\n<S7F3 W\n  <L [2]\n    <ASCII \"TEST_RECIPE_01\">\n    <ASCII \"PPBODY=FORMATTED\">\n  >\n>\n.\n<S7F4\n  <B 00>\n>\n.\n\n// --- S7F5: Process Program Request ---\n<S7F5 W\n  <ASCII \"TEST_RECIPE_01\">\n>\n.\n<S7F6\n  <L [2]\n    <ASCII \"TEST_RECIPE_01\">\n    <ASCII \"PPBODY=FORMATTED\">\n  >\n>\n.\n\n// --- S7F17: Delete Process Program ---\n<S7F17 W\n  <L [1]\n    <ASCII \"TEST_RECIPE_01\">\n  >\n>\n.\n<S7F18\n  <B 00>\n>\n.\n",
+    "ToolSpecificTest": "S1F1 W\n.\n\nS1F13 W\n  <L [0]>\n.\n\nS1F11 W\n  <L [20]\n    <U4 10001>\n    <U4 10002>\n    <U4 10003>\n    <U4 10004>\n    <U4 10005>\n    <U4 10006>\n    <U4 10007>\n    <U4 10008>\n    <U4 10009>\n    <U4 10010>\n    <U4 10011>\n    <U4 10012>\n    <U4 10013>\n    <U4 10014>\n    <U4 10015>\n    <U4 10016>\n    <U4 10017>\n    <U4 10018>\n    <U4 10019>\n    <U4 10020>\n  >\n.\n\nS1F21 W\n  <L [18]\n    <U4 10101>\n    <U4 10102>\n    <U4 10103>\n    <U4 3001>\n    <U4 3002>\n    <U4 3003>\n    <U4 3004>\n    <U4 3005>\n    <U4 3007>\n    <U4 3016>\n    <U4 3017>\n    <U4 3018>\n    <U4 3019>\n    <U4 3020>\n    <U4 3021>\n    <U4 3022>\n    <U4 3023>\n    <U4 3024>\n  >\n.\n\nS2F33 W\n  <L [2]\n    <U4 1>\n    <L [15]\n      <L [2]\n        <U4 1>\n        <L [5]\n          <U4 10001>\n          <U4 10003>\n          <U4 10002>\n          <U4 10004>\n          <U4 10005>\n        >\n      >\n      <L [2]\n        <U4 2>\n        <L [4]\n          <U4 10102>\n          <U4 10101>\n          <U4 10103>\n          <U4 10001>\n        >\n      >\n      <L [2]\n        <U4 3>\n        <L [4]\n          <U4 10102>\n          <U4 10002>\n          <U4 10103>\n          <U4 10005>\n        >\n      >\n      <L [2]\n        <U4 4>\n        <L [3]\n          <U4 10004>\n          <U4 10001>\n          <U4 10003>\n        >\n      >\n      <L [2]\n        <U4 7003>\n        <L [5]\n          <U4 3001>\n          <U4 3002>\n          <U4 3003>\n          <U4 3005>\n          <U4 10003>\n        >\n      >\n      <L [2]\n        <U4 7004>\n        <L [5]\n          <U4 3007>\n          <U4 3016>\n          <U4 3017>\n          <U4 3018>\n          <U4 3023>\n        >\n      >\n      <L [2]\n        <U4 7005>\n        <L [5]\n          <U4 10008>\n          <U4 10007>\n          <U4 10010>\n          <U4 10003>\n          <U4 10001>\n        >\n      >\n      <L [2]\n        <U4 5>\n        <L [4]\n          <U4 10003>\n          <U4 10002>\n          <U4 10001>\n          <U4 10007>\n        >\n      >\n      <L [2]\n        <U4 6>\n        <L [4]\n          <U4 10003>\n          <U4 10008>\n          <U4 10010>\n          <U4 10007>\n        >\n      >\n      <L [2]\n        <U4 7002>\n        <L [3]\n          <U4 10002>\n          <U4 10001>\n          <U4 10003>\n        >\n      >\n      <L [2]\n        <U4 7001>\n        <L [3]\n          <U4 10001>\n          <U4 10022>\n          <U4 10003>\n        >\n      >\n      <L [2]\n        <U4 7>\n        <L [3]\n          <U4 10001>\n          <U4 10022>\n          <U4 10003>\n        >\n      >\n      <L [2]\n        <U4 7006>\n        <L [4]\n          <U4 10012>\n          <U4 10013>\n          <U4 10014>\n          <U4 10011>\n        >\n      >\n      <L [2]\n        <U4 8>\n        <L [4]\n          <U4 10012>\n          <U4 10013>\n          <U4 10014>\n          <U4 10011>\n        >\n      >\n      <L [2]\n        <U4 7007>\n        <L [5]\n          <U4 3001>\n          <U4 3002>\n          <U4 3003>\n          <U4 3016>\n          <U4 10003>\n        >\n      >\n    >\n  >\n.\n\nS2F37 W\n  <Boolean True>\n  <L [18]\n    <U4 10201>\n    <U4 10202>\n    <U4 10203>\n    <U4 10204>\n    <U4 5001>\n    <U4 5002>\n    <U4 5100>\n    <U4 5200>\n    <U4 5201>\n    <U4 5300>\n    <U4 5301>\n    <U4 5302>\n    <U4 5303>\n    <U4 5400>\n    <U4 5500>\n    <U4 5501>\n    <U4 5600>\n    <U4 5601>\n  >\n.\n\nS2F23 W\n  <L [5]\n    <U4 1>\n    <A \"000010\">\n    <U4 100>\n    <U4 1>\n    <L [5]\n      <U4 10001>\n      <U4 10002>\n      <U4 10003>\n      <U4 10004>\n      <U4 10005>\n    >\n  >\n.\n\nS2F41 W\n  <L [2]\n    <A \"START\">\n    <L [0]\n    >\n  >\n.\n\nS2F41 W\n  <L [2]\n    <A \"PP-SELECT\">\n    <L [1]\n      <L [2]\n        <A \"PPID\">\n        <A \"TEST_RECIPE_01\">\n      >\n    >\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 10201>\n    <L [0]>\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 10202>\n    <L [0]>\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 10203>\n    <L [0]>\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 10204>\n    <L [0]>\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 5001>\n    <L [0]>\n  >\n.\n\nS6F1 W\n  <L [4]\n    <U4 1>\n    <U4 100>\n    <A \"2026061912000000\">\n    <L [0]>\n  >\n.\n\nS2F41 W\n  <L [2]\n    <A \"STOP\">\n    <L [0]\n    >\n  >\n.\n\nS7F19 W\n.\n\nS7F1 W\n  <L [2]\n    <A \"TEST_RECIPE_01\">\n    <U4 1000>\n  >\n.\n\nS7F3 W\n  <L [2]\n    <A \"TEST_RECIPE_01\">\n    <A \"PPBODY=FORMATTED\">\n  >\n.\n\nS7F5 W\n  <A \"TEST_RECIPE_01\">\n.\n\nS7F17 W\n  <L [1]\n    <A \"TEST_RECIPE_01\">\n  >\n.\n",
+    "ToolSpecificTesting": "S1F1 W\n.\n\nS1F13 W\n  <L [0]>\n.\n\nS1F11 W\n  <L [20]\n    <U4 1001>\n    <U4 1002>\n    <U4 1003>\n    <U4 1004>\n    <U4 1005>\n    <U4 1006>\n    <U4 1007>\n    <U4 1008>\n    <U4 1009>\n    <U4 1010>\n    <U4 1011>\n    <U4 1012>\n    <U4 1101>\n    <U4 1102>\n    <U4 1103>\n    <U4 1104>\n    <U4 1105>\n    <U4 1106>\n    <U4 1107>\n    <U4 1108>\n  >\n.\n\nS1F21 W\n  <L [20]\n    <U4 2001>\n    <U4 2002>\n    <U4 2003>\n    <U4 2004>\n    <U4 2005>\n    <U4 2006>\n    <U4 2007>\n    <U4 2008>\n    <U4 2009>\n    <U4 2010>\n    <U4 2011>\n    <U4 2012>\n    <U4 2013>\n    <U4 2014>\n    <U4 2015>\n    <U4 2016>\n    <U4 2051>\n    <U4 2052>\n    <U4 2053>\n    <U4 2054>\n  >\n.\n\nS2F33 W\n  <L [2]\n    <U4 1>\n    <L [36]\n      <L [2]\n        <U4 3101>\n        <L [19]\n          <U4 1101>\n          <U4 1102>\n          <U4 1103>\n          <U4 1104>\n          <U4 1105>\n          <U4 1106>\n          <U4 1107>\n          <U4 1108>\n          <U4 1109>\n          <U4 1112>\n          <U4 2001>\n          <U4 2004>\n          <U4 2007>\n          <U4 2008>\n          <U4 2009>\n          <U4 2010>\n          <U4 1001>\n          <U4 1002>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 3102>\n        <L [17]\n          <U4 2051>\n          <U4 2052>\n          <U4 2053>\n          <U4 2054>\n          <U4 2055>\n          <U4 2056>\n          <U4 2061>\n          <U4 2064>\n          <U4 2065>\n          <U4 2057>\n          <U4 2058>\n          <U4 2059>\n          <U4 2060>\n          <U4 2062>\n          <U4 2063>\n          <U4 1001>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 3103>\n        <L [19]\n          <U4 1201>\n          <U4 1202>\n          <U4 1203>\n          <U4 1204>\n          <U4 1205>\n          <U4 1206>\n          <U4 1207>\n          <U4 1208>\n          <U4 1209>\n          <U4 1212>\n          <U4 2001>\n          <U4 2005>\n          <U4 2007>\n          <U4 2008>\n          <U4 2009>\n          <U4 2010>\n          <U4 1001>\n          <U4 1002>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 3104>\n        <L [17]\n          <U4 2051>\n          <U4 2052>\n          <U4 2053>\n          <U4 2054>\n          <U4 2055>\n          <U4 2056>\n          <U4 2061>\n          <U4 2064>\n          <U4 2065>\n          <U4 2057>\n          <U4 2058>\n          <U4 2059>\n          <U4 2060>\n          <U4 2062>\n          <U4 2063>\n          <U4 1001>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 3105>\n        <L [11]\n          <U4 1110>\n          <U4 1111>\n          <U4 1210>\n          <U4 1211>\n          <U4 2004>\n          <U4 2005>\n          <U4 2006>\n          <U4 1003>\n          <U4 1004>\n          <U4 1007>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 3106>\n        <L [11]\n          <U4 1110>\n          <U4 1111>\n          <U4 1210>\n          <U4 1211>\n          <U4 2004>\n          <U4 2005>\n          <U4 2064>\n          <U4 1003>\n          <U4 1004>\n          <U4 1007>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 3107>\n        <L [6]\n          <U4 1001>\n          <U4 1008>\n          <U4 1010>\n          <U4 1011>\n          <U4 1015>\n          <U4 1315>\n        >\n      >\n      <L [2]\n        <U4 3108>\n        <L [11]\n          <U4 1301>\n          <U4 1302>\n          <U4 1303>\n          <U4 1304>\n          <U4 1305>\n          <U4 1306>\n          <U4 1307>\n          <U4 1308>\n          <U4 1309>\n          <U4 1314>\n          <U4 1315>\n        >\n      >\n      <L [2]\n        <U4 3109>\n        <L [11]\n          <U4 1351>\n          <U4 1352>\n          <U4 1353>\n          <U4 1354>\n          <U4 1355>\n          <U4 1356>\n          <U4 1357>\n          <U4 1358>\n          <U4 1359>\n          <U4 1360>\n          <U4 1361>\n        >\n      >\n      <L [2]\n        <U4 3110>\n        <L [10]\n          <U4 1101>\n          <U4 1102>\n          <U4 1103>\n          <U4 1104>\n          <U4 1105>\n          <U4 1106>\n          <U4 1115>\n          <U4 2007>\n          <U4 2015>\n          <U4 2016>\n        >\n      >\n      <L [2]\n        <U4 3111>\n        <L [10]\n          <U4 1201>\n          <U4 1202>\n          <U4 1203>\n          <U4 1204>\n          <U4 1205>\n          <U4 1206>\n          <U4 1215>\n          <U4 2007>\n          <U4 2015>\n          <U4 2016>\n        >\n      >\n      <L [2]\n        <U4 3112>\n        <L [5]\n          <U4 1012>\n          <U4 1008>\n          <U4 1002>\n          <U4 1001>\n          <U4 1013>\n        >\n      >\n      <L [2]\n        <U4 3113>\n        <L [3]\n          <U4 1002>\n          <U4 1008>\n          <U4 1001>\n        >\n      >\n      <L [2]\n        <U4 3114>\n        <L [4]\n          <U4 2001>\n          <U4 2002>\n          <U4 1008>\n          <U4 1002>\n        >\n      >\n      <L [2]\n        <U4 3115>\n        <L [7]\n          <U4 2065>\n          <U4 2066>\n          <U4 1109>\n          <U4 1209>\n          <U4 1001>\n          <U4 1008>\n          <U4 1002>\n        >\n      >\n      <L [2]\n        <U4 1>\n        <L [9]\n          <U4 1101>\n          <U4 1102>\n          <U4 1103>\n          <U4 1104>\n          <U4 1105>\n          <U4 1106>\n          <U4 2007>\n          <U4 2015>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 2>\n        <L [7]\n          <U4 1101>\n          <U4 1103>\n          <U4 1105>\n          <U4 1107>\n          <U4 2007>\n          <U4 2016>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 3>\n        <L [9]\n          <U4 1201>\n          <U4 1202>\n          <U4 1203>\n          <U4 1204>\n          <U4 1205>\n          <U4 1206>\n          <U4 2007>\n          <U4 2015>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 4>\n        <L [7]\n          <U4 1201>\n          <U4 1203>\n          <U4 1205>\n          <U4 1207>\n          <U4 2007>\n          <U4 2016>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 5>\n        <L [5]\n          <U4 1307>\n          <U4 1310>\n          <U4 1107>\n          <U4 1009>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 6>\n        <L [5]\n          <U4 1107>\n          <U4 1307>\n          <U4 1310>\n          <U4 1009>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 7>\n        <L [5]\n          <U4 1307>\n          <U4 1311>\n          <U4 1207>\n          <U4 1009>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 8>\n        <L [5]\n          <U4 1207>\n          <U4 1307>\n          <U4 1311>\n          <U4 1009>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 9>\n        <L [6]\n          <U4 1351>\n          <U4 1352>\n          <U4 1354>\n          <U4 1358>\n          <U4 2010>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 10>\n        <L [4]\n          <U4 1351>\n          <U4 1354>\n          <U4 1358>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 11>\n        <L [6]\n          <U4 1355>\n          <U4 1356>\n          <U4 1357>\n          <U4 1359>\n          <U4 2010>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 12>\n        <L [4]\n          <U4 1355>\n          <U4 1357>\n          <U4 1359>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 13>\n        <L [3]\n          <U4 1005>\n          <U4 1007>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 14>\n        <L [3]\n          <U4 1005>\n          <U4 1007>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 15>\n        <L [3]\n          <U4 1006>\n          <U4 1007>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 16>\n        <L [3]\n          <U4 1006>\n          <U4 1007>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 17>\n        <L [3]\n          <U4 1003>\n          <U4 1004>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 18>\n        <L [4]\n          <U4 1005>\n          <U4 1006>\n          <U4 1007>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 19>\n        <L [4]\n          <U4 1009>\n          <U4 1107>\n          <U4 1207>\n          <U4 1008>\n        >\n      >\n      <L [2]\n        <U4 20>\n        <L [2]\n          <U4 1008>\n          <U4 1001>\n        >\n      >\n      <L [2]\n        <U4 21>\n        <L [3]\n          <U4 1013>\n          <U4 1008>\n          <U4 1001>\n        >\n      >\n    >\n  >\n.\n\nS2F35 W\n  <L [2]\n    <U4 1>\n    <L [2]\n      <L [2]\n        <U4 3001>\n        <L [1]\n          <U4 3101>\n        >\n      >\n      <L [2]\n        <U4 3002>\n        <L [1]\n          <U4 3102>\n        >\n      >\n    >\n  >\n.\n\nS2F37 W\n  <Boolean True>\n  <L [46]\n    <U4 3001>\n    <U4 3002>\n    <U4 3003>\n    <U4 3004>\n    <U4 3005>\n    <U4 3006>\n    <U4 3007>\n    <U4 3008>\n    <U4 3009>\n    <U4 3010>\n    <U4 3011>\n    <U4 3012>\n    <U4 3013>\n    <U4 3014>\n    <U4 3015>\n    <U4 3016>\n    <U4 3017>\n    <U4 3018>\n    <U4 3031>\n    <U4 3032>\n    <U4 3033>\n    <U4 3034>\n    <U4 3035>\n    <U4 3036>\n    <U4 3037>\n    <U4 3038>\n    <U4 3039>\n    <U4 3040>\n    <U4 3041>\n    <U4 3061>\n    <U4 3062>\n    <U4 3063>\n    <U4 3064>\n    <U4 3065>\n    <U4 3066>\n    <U4 3067>\n    <U4 3068>\n    <U4 3069>\n    <U4 3070>\n    <U4 3071>\n    <U4 3072>\n    <U4 3073>\n    <U4 1001>\n    <U4 1002>\n    <U4 1003>\n    <U4 1004>\n  >\n.\n\nS2F23 W\n  <L [5]\n    <U4 1>\n    <A \"000010\">\n    <U4 100>\n    <U4 1>\n    <L [5]\n      <U4 1001>\n      <U4 1002>\n      <U4 1003>\n      <U4 1004>\n      <U4 1005>\n    >\n  >\n.\n\nS2F41 W\n  <L [2]\n    <A \"START\">\n    <L [0]\n    >\n  >\n.\n\nS2F41 W\n  <L [2]\n    <A \"PP-SELECT\">\n    <L [1]\n      <L [2]\n        <A \"PPID\">\n        <A \"TEST_RECIPE_01\">\n      >\n    >\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3001>\n    <L [0]>\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3002>\n    <L [0]>\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3003>\n    <L [0]>\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3004>\n    <L [0]>\n  >\n.\n\nS6F11 W\n  <L [3]\n    <U4 1>\n    <U4 3005>\n    <L [0]>\n  >\n.\n\nS6F1 W\n  <L [4]\n    <U4 1>\n    <U4 100>\n    <A \"2026061912000000\">\n    <L [0]>\n  >\n.\n\nS2F41 W\n  <L [2]\n    <A \"STOP\">\n    <L [0]\n    >\n  >\n.\n\nS7F19 W\n.\n\nS7F1 W\n  <L [2]\n    <A \"TEST_RECIPE_01\">\n    <U4 1000>\n  >\n.\n\nS7F3 W\n  <L [2]\n    <A \"TEST_RECIPE_01\">\n    <A \"PPBODY=FORMATTED\">\n  >\n.\n\nS7F5 W\n  <A \"TEST_RECIPE_01\">\n.\n\nS7F17 W\n  <L [1]\n    <A \"TEST_RECIPE_01\">\n  >\n.\n"
+  },
+  "Questions": [
+    {
+      "Question": "What is the tool type or model of this equipment?",
+      "Answer": "The provided contexts contain only alarm definitions and status/data variable listings; none of them specify a tool type, model name, or similar equipment identifier. Therefore, the tool type or model cannot be determined from the given information. \n\n[Source: Structured Tabular Context]",
+      "Source": "rag"
+    },
+    {
+      "Question": "What protocol version of SECS/GEM does this equipment support?",
+      "Answer": "The provided contexts do not include any information about the SECS/GEM protocol version supported by this equipment.",
+      "Source": "rag"
+    },
+    {
+      "Question": "Are there any status variables (SVs) defined for monitoring process parameters?",
+      "Answer": "Yes. The status\u2011variable list includes a variable that monitors a process\u2011parameter:\n\n- **ID\u202f10019 \u2013 GasFlowRate** \u2013 \u201cTotal commanded/actual process gas flow in sccm.\u201d\u202f[Source: Structured Tabular Context \u2013 ID\u202f10019, GasFlowRate]",
+      "Source": "rag"
+    },
+    {
+      "Question": "What are the primary data variables (DVs) related to processing?",
+      "Answer": "The key processing\u2011related Data Variables (DVs) defined in the system are:\n\n- **ProcessDurationSec** \u2013 ID\u202f3017\u202f[Source:\u202fData Variable ID:\u202f3017]  \n- **ProcessEndStatus** \u2013 ID\u202f3018\u202f[Source:\u202fData Variable ID:\u202f3018]  \n- **ChamberPressureAverage** \u2013 ID\u202f3021\u202f[Source:\u202fData Variable ID:\u202f3021]  \n- **GasFlowAverage** \u2013 ID\u202f3020\u202f[Source:\u202fData Variable ID:\u202f3020]  \n- **ChamberTemperatureAverage** \u2013 ID\u202f3022\u202f[Source:\u202fData Variable ID:\u202f3022]  \n- **ChamberID** \u2013 ID\u202f3005\u202f[Source:\u202fData Variable ID:\u202f3005]  \n- **WaferID** \u2013 ID\u202f3002\u202f[Source:\u202fData Variable ID:\u202f3002] (also listed as ID\u202f10102 with a String type)\u202f[Source:\u202fData Variable ID:\u202f10102]  \n\nThese variables capture the core parameters and identifiers used during a processing run.",
+      "Source": "rag"
+    },
+    {
+      "Question": "List any critical events (CEIDs) triggered during a lot start or lot end.",
+      "Answer": "The provided context does not contain any critical event identifiers (CEIDs) associated with a lot start or lot end.\u202f[Source: Structured Tabular Context]",
+      "Source": "rag"
+    },
+    {
+      "Question": "Which alarms are defined for safety or equipment fault conditions?",
+      "Answer": "The defined alarms that relate to safety\u2011related or equipment\u2011fault conditions are:\n\n| Alarm ID | Name                     | Reason it is a safety/equipment\u2011fault alarm |\n|----------|--------------------------|---------------------------------------------|\n| 1009     | DoorInterlockOpen        | Indicates the equipment door interlock opened during operation \u2013 a safety interlock breach. **[Source: Alarm ID: 1009]** |\n| 1010     | EmergencyStopActivated   | Shows the emergency\u2011stop button was pressed \u2013 a critical safety shutdown. **[Source: Alarm ID: 1010]** |\n| 1014     | SystemCommunicationTimeout | Detects an internal or host communication timeout \u2013 a fault that can affect safe operation. **[Source: Alarm ID: 1014]** |\n| 1006     | RFPowerFault             | Reports a fault in the RF generator, match network, or forward/reflected RF power \u2013 an equipment fault condition. **[Source: Alarm ID: 1006]** |\n| 1001     | ChamberOverheat          | Signals that chamber temperature exceeded the maximum safe limit \u2013 an equipment\u2011over\u2011temperature fault. **[Source: Alarm ID: 1001]** |\n\nThese alarms are explicitly defined in the provided context as relating to safety interlocks, emergency stops, communication failures, RF power issues, or overheating, all of which are safety or equipment\u2011fault conditions.",
+      "Source": "rag"
+    },
+    {
+      "Question": "What remote commands (RCMDs) are supported to control the equipment?",
+      "Answer": "The only remote\u2011command information present in the provided data is the description of the **LastRemoteCommand** status variable, which notes that the most recent host command can be a **START** alias or **INITIALIZE**\u202fcommand\u3010Source: Status Variable ID: 10009\u3011. No additional list of supported remote commands (RCMDs) is included in the given context.",
+      "Source": "rag"
+    },
+    {
+      "Question": "Are there any states or state transition definitions mentioned?",
+      "Answer": "Yes. The provided data includes several state definitions and a state\u2011transition description:\n\n* **SpoolingState** (Status Variable\u202fID\u202f10012) defines the possible spooling conditions as **INACTIVE, ACTIVE, TRANSMITTING, COMPLETE**\u3010Source: Status Variable ID 10012\u3011.  \n* **ControlStateChanged** (Event\u202fID\u202f5400) describes a transition of the control mode between the states **OFF\u2011LINE, LOCAL, REMOTE**\u3010Source: Event ID 5400\u3011.  \n* **PlasmaState** (Status Variable\u202fID\u202f10020) is a Boolean flag that is **TRUE when the plasma is ignited and stable**\u3010Source: Status Variable ID 10020\u3011.  \n\nThese entries constitute the only state or state\u2011transition definitions present in the given context.",
+      "Source": "rag"
+    },
+    {
+      "Question": "What is the default communication state on power-up?",
+      "Answer": "The provided contexts do not specify what the default communication state is when the system powers up.",
+      "Source": "rag"
+    },
+    {
+      "Question": "Describe the process state machine transitions.",
+      "Answer": "The process is controlled by the **SpoolingState** status variable (ID\u202f10012), which can take the four values **INACTIVE**, **ACTIVE**, **TRANSMITTING**, and **COMPLETE**\u202f[Source: Status Variable ID\u202f10012].  \n\nThe transitions between these states are driven by the defined events:\n\n| Current State | Event that triggers the transition | New State |\n|---------------|-----------------------------------|-----------|\n| **INACTIVE** | **ScanStarted** (ID\u202f10202) \u2013 the wafer\u2011scan process is launched | **ACTIVE**\u202f[Source: Event ID\u202f10202] |\n| **ACTIVE** | **ProcessPaused** (ID\u202f5301) \u2013 host command or a recoverable condition pauses the run | **PAUSED** (implicit; the process remains in a hold condition)\u202f[Source: Event ID\u202f5301] |\n| **PAUSED** | **ProcessResumed** (ID\u202f5302) \u2013 host command resumes the run | **ACTIVE**\u202f[Source: Event ID\u202f5302] |\n| **ACTIVE** | **ProcessAborted** (ID\u202f5303) \u2013 stop command, fault, or operator abort ends the run | **INACTIVE**\u202f[Source: Event ID\u202f5303] |\n| **ACTIVE** | Internal data\u2011transfer phase begins | **TRANSMITTING**\u202f[Source: SpoolingState values] |\n| **TRANSMITTING** | Data transmission finishes | **COMPLETE**\u202f[Source: SpoolingState values] |\n| **COMPLETE** | Process reset or new scan start | **INACTIVE** (ready for the next cycle) |\n\nAdditional conditions can force a transition to **INACTIVE** (or prevent entry into **ACTIVE**) when the **GasFlowOutOfRange** alarm (ID\u202f1005) is raised, because the measured gas flow is outside the configured tolerance\u202f[Source: Alarm ID\u202f1005].\n\nIn summary, the state machine moves from **INACTIVE \u2192 ACTIVE \u2192 TRANSMITTING \u2192 COMPLETE**, with the ability to **pause**, **resume**, or **abort** the process at any point via the corresponding events.",
+      "Source": "rag"
+    },
+    {
+      "Question": "Is spooling supported, and how is it configured?",
+      "Answer": "Yes. The device includes built\u2011in spooling functionality, as shown by the **SpoolActivated** event (ID\u202f5600) and the **SpoolTransmitComplete** event (ID\u202f5601) that report when spooling starts and when all spooled messages have been sent\u202f[Source: Event ID\u202f5600]\u202f[Source: Event ID\u202f5601].\n\nSpooling is configured through a set of status variables:\n\n* **SpoolCapacity** \u2013 defines the maximum configured spool buffer capacity in number of messages\u202f[Source: Status Variable ID\u202f10014].  \n* **SpoolState** \u2013 indicates the current spooling state (INACTIVE, ACTIVE, TRANSMITTING, COMPLETE)\u202f[Source: Status Variable ID\u202f10012].  \n* **SpoolCount** \u2013 shows how many messages are currently stored in the spool buffer\u202f[Source: Status Variable ID\u202f10013].\n\nThus, spooling is supported and its operation is controlled by setting the spool buffer size (SpoolCapacity) and monitoring the state and count via the associated status variables.",
+      "Source": "rag"
+    },
+    {
+      "Question": "What reports are predefined in this specification?",
+      "Answer": "The provided context does not contain any information about predefined reports in this specification.\u202f[Source: Structured Tabular Context]",
+      "Source": "rag"
+    },
+    {
+      "Question": "What data variables are linked to the process completion event?",
+      "Answer": "The provided context does not specify any data variables that are linked to the **ProcessCompleted** event (ID\u202f5002). No such association is listed in the tables.",
+      "Source": "rag"
+    },
+    {
+      "Question": "Detail the parameter requirements for the remote command START.",
+      "Answer": "The provided contexts do not include any information about the parameter requirements for the remote command **START**. Therefore, I cannot detail those requirements based on the given data.",
+      "Source": "rag"
+    },
+    {
+      "Question": "Are there any specific alarm IDs (ALIDs) linked to mass filter or beam drift?",
+      "Answer": "The provided context lists only the following alarm definitions:\n\n- 10301\u202f\u2013\u202fBeamLoss  \n- 1005\u202f\u2013\u202fGasFlowOutOfRange  \n- 1006\u202f\u2013\u202fRFPowerFault  \n- 1010\u202f\u2013\u202fEmergencyStopActivated  \n- 792677\u202f\u2013\u202f(no name/description)  \n\nNone of these alarm IDs mention a mass filter or beam\u2011drift condition. Therefore, within the given information there are no specific alarm IDs (ALIDs) linked to a mass filter or beam drift.  \n\n[Source: Structured Tabular Context]",
+      "Source": "rag"
+    }
+  ],
+  "Mappings": {
+    "FactoryWorks": {
+      "STANDARD_EVENT_MODEL.json": {
+        "Variables": [
+          {
+            "MESVariableName": "EquipmentID",
+            "EquipmentVariableName": "SystemStatus",
+            "VID": "1001",
+            "MESDescription": "Standard MES object for Equipment I D",
+            "EquipmentDescription": "Overall equipment status string: IDLE, PROCESSING, FAULT, MAINTENANCE",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "LotID",
+            "EquipmentVariableName": "LotID",
+            "VID": "2003",
+            "MESDescription": "Standard MES object for Lot I D",
+            "EquipmentDescription": "-",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "WaferID",
+            "EquipmentVariableName": "WaferID_ChamberA",
+            "VID": "2004",
+            "MESDescription": "Standard MES object for Wafer I D",
+            "EquipmentDescription": "-",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "SlotNumber",
+            "EquipmentVariableName": "SlotNumber",
+            "VID": "2006",
+            "MESDescription": "Standard MES object for Slot Number",
+            "EquipmentDescription": "-",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "RecipeName",
+            "EquipmentVariableName": "RecipeID",
+            "VID": "2001",
+            "MESDescription": "Standard MES object for Recipe Name",
+            "EquipmentDescription": "-",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "RecipeVersion",
+            "EquipmentVariableName": "RecipeVersion",
+            "VID": "2002",
+            "MESDescription": "Standard MES object for Recipe Version",
+            "EquipmentDescription": "-",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "CarrierID",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "Standard MES object for Carrier I D",
+            "EquipmentDescription": "",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "PortID",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "Standard MES object for Port I D",
+            "EquipmentDescription": "",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "OperatorID",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "Standard MES object for Operator I D",
+            "EquipmentDescription": "",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "EquipmentState",
+            "EquipmentVariableName": "SystemStatus",
+            "VID": "1001",
+            "MESDescription": "Standard MES object for Equipment State",
+            "EquipmentDescription": "Overall equipment status string: IDLE, PROCESSING, FAULT, MAINTENANCE",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "AlarmID",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "Standard MES object for Alarm I D",
+            "EquipmentDescription": "",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "AlarmText",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "Standard MES object for Alarm Text",
+            "EquipmentDescription": "",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "AlarmSeverity",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "Standard MES object for Alarm Severity",
+            "EquipmentDescription": "",
+            "Enabled": true
+          },
+          {
+            "MESVariableName": "EventTime",
+            "EquipmentVariableName": "EquipmentTime",
+            "VID": "1008",
+            "MESDescription": "Standard MES object for Event Time",
+            "EquipmentDescription": "Equipment real-time clock in format YYYYMMDDHHmmss",
+            "Enabled": true
+          }
+        ],
+        "Events": [
+          {
+            "MESEventName": "LotStart",
+            "EquipmentEventName": "ProcessStart_ChamberA",
+            "CEID": "3001",
+            "MESDescription": "Standard MES object for Lot Start",
+            "EquipmentDescription": "Deposition step begins in Chamber A",
+            "Enabled": true,
+            "PayloadName": "LotStartPayload"
+          },
+          {
+            "MESEventName": "LotEnd",
+            "EquipmentEventName": "ProcessEnd_ChamberA",
+            "CEID": "3002",
+            "MESDescription": "Standard MES object for Lot End",
+            "EquipmentDescription": "Deposition step ends (pass or fail) in Chamber A",
+            "Enabled": true,
+            "PayloadName": "LotEndPayload"
+          },
+          {
+            "MESEventName": "AlarmSet",
+            "EquipmentEventName": "AlarmSet",
+            "CEID": "3070",
+            "MESDescription": "Standard MES object for Alarm Set",
+            "EquipmentDescription": "Any alarm condition became active",
+            "Enabled": true,
+            "PayloadName": "AlarmPayload"
+          },
+          {
+            "MESEventName": "AlarmClear",
+            "EquipmentEventName": "AlarmCleared",
+            "CEID": "3071",
+            "MESDescription": "Standard MES object for Alarm Clear",
+            "EquipmentDescription": "Any alarm condition was cleared",
+            "Enabled": true,
+            "PayloadName": "AlarmPayload"
+          },
+          {
+            "MESEventName": "TrackIn",
+            "EquipmentEventName": "",
+            "CEID": "",
+            "MESDescription": "Standard MES object for Track In",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "PayloadName": ""
+          },
+          {
+            "MESEventName": "TrackOut",
+            "EquipmentEventName": "",
+            "CEID": "",
+            "MESDescription": "Standard MES object for Track Out",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "PayloadName": ""
+          },
+          {
+            "MESEventName": "WaferStart",
+            "EquipmentEventName": "WaferLoaded_ChamberA",
+            "CEID": "3031",
+            "MESDescription": "Standard MES object for Wafer Start",
+            "EquipmentDescription": "Wafer successfully placed on Chamber A susceptor by robot",
+            "Enabled": true,
+            "PayloadName": "WaferPayload"
+          },
+          {
+            "MESEventName": "WaferEnd",
+            "EquipmentEventName": "WaferUnloaded_ChamberA",
+            "CEID": "3032",
+            "MESDescription": "Standard MES object for Wafer End",
+            "EquipmentDescription": "Wafer removed from Chamber A susceptor by robot after process",
+            "Enabled": true,
+            "PayloadName": "WaferPayload"
+          },
+          {
+            "MESEventName": "EquipmentStateChange",
+            "EquipmentEventName": "ControlStateChange",
+            "CEID": "3061",
+            "MESDescription": "Standard MES object for Equipment State Change",
+            "EquipmentDescription": "GEM control state changed (e.g., OFFLINE to ONLINE)",
+            "Enabled": true,
+            "PayloadName": "StateChangePayload"
+          }
+        ],
+        "Alarms": [
+          {
+            "MESAlarmName": "EquipmentAlarm",
+            "EquipmentAlarmName": "Critical Alarm 4001",
+            "ALID": "4001",
+            "MESDescription": "Standard MES object for Equipment Alarm",
+            "EquipmentDescription": "Chamber over-temperature detected in one or more zones.",
+            "Severity": "Critical",
+            "Enabled": true,
+            "PayloadName": "AlarmPayload"
+          },
+          {
+            "MESAlarmName": "ProcessAlarm",
+            "EquipmentAlarmName": "Critical Alarm 4005",
+            "ALID": "4005",
+            "MESDescription": "Standard MES object for Process Alarm",
+            "EquipmentDescription": "Gas leak detected by the gas leak detector.",
+            "Severity": "Warning",
+            "Enabled": true,
+            "PayloadName": "AlarmPayload"
+          },
+          {
+            "MESAlarmName": "CommunicationAlarm",
+            "EquipmentAlarmName": "",
+            "ALID": "",
+            "MESDescription": "Standard MES object for Communication Alarm",
+            "EquipmentDescription": "",
+            "Severity": "Minor",
+            "Enabled": true,
+            "PayloadName": "AlarmPayload"
+          }
+        ]
+      }
+    },
+    "Camstar": {
+      "STANDARD_EVENT_MODEL.json": {
+        "Variables": [
+          {
+            "MESVariableName": "ProcessRecipeName",
+            "EquipmentVariableName": "RecipeID",
+            "VID": "2001",
+            "MESDescription": "Name of the process recipe loaded or executing",
+            "EquipmentDescription": "-",
+            "Enabled": true,
+            "DataType": "ASCII"
+          },
+          {
+            "MESVariableName": "LotID",
+            "EquipmentVariableName": "LotID",
+            "VID": "2003",
+            "MESDescription": "Identifier of the current lot being processed",
+            "EquipmentDescription": "-",
+            "Enabled": true,
+            "DataType": "ASCII"
+          },
+          {
+            "MESVariableName": "CarrierID",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "The pod, FOUP, or cassette identifier",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "DataType": "ASCII"
+          },
+          {
+            "MESVariableName": "OperatorID",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "ID of the operator running the tool",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "DataType": "ASCII"
+          },
+          {
+            "MESVariableName": "ControlState",
+            "EquipmentVariableName": "ControlState",
+            "VID": "1002",
+            "MESDescription": "SECS/GEM Online/Offline control state",
+            "EquipmentDescription": "GEM control state: 1=OFF-LINE, 2=ATTEMPT ON-LINE, 3=HOST INITIATED, 4=EQUIPMENT INITIATED, 5=ON-LINE",
+            "Enabled": true,
+            "DataType": "INT"
+          },
+          {
+            "MESVariableName": "AlarmsActive",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "List of active alarm IDs on the tool",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "DataType": "ARRAY"
+          },
+          {
+            "MESVariableName": "SubstrateCount",
+            "EquipmentVariableName": "ActiveWaferCount",
+            "VID": "1007",
+            "MESDescription": "Number of wafers processed in the current run",
+            "EquipmentDescription": "Total number of wafers currently inside the equipment (both chambers + robot)",
+            "Enabled": true,
+            "DataType": "INT"
+          },
+          {
+            "MESVariableName": "ProcessStepName",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "The current step within the recipe execution",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "DataType": "ASCII"
+          },
+          {
+            "MESVariableName": "ChamberPressure",
+            "EquipmentVariableName": "ChamberA_Pressure",
+            "VID": "1107",
+            "MESDescription": "Main process chamber vacuum pressure reading",
+            "EquipmentDescription": "Chamber A process pressure measured by capacitance manometer",
+            "Enabled": true,
+            "DataType": "FLOAT"
+          },
+          {
+            "MESVariableName": "ChamberTemperature",
+            "EquipmentVariableName": "ChamberA_TempSetpoint",
+            "VID": "1106",
+            "MESDescription": "Main process chamber temperature reading",
+            "EquipmentDescription": "Active recipe temperature setpoint for Chamber A (R/W)",
+            "Enabled": true,
+            "DataType": "FLOAT"
+          },
+          {
+            "MESVariableName": "GasFlowRate1",
+            "EquipmentVariableName": "MFC1_Flow_SiH4",
+            "VID": "1301",
+            "MESDescription": "Mass Flow Controller (MFC) Flow Rate for Gas 1",
+            "EquipmentDescription": "Silane (SiH4) mass flow controller actual flow rate",
+            "Enabled": true,
+            "DataType": "FLOAT"
+          },
+          {
+            "MESVariableName": "RFPowerForward",
+            "EquipmentVariableName": "RF_ForwardPower_A",
+            "VID": "1351",
+            "MESDescription": "Forward RF Generator power output",
+            "EquipmentDescription": "RF generator forward power delivered to Chamber A plasma",
+            "Enabled": true,
+            "DataType": "FLOAT"
+          },
+          {
+            "MESVariableName": "RFPowerReflected",
+            "EquipmentVariableName": "RF_ReflectedPower_A",
+            "VID": "1352",
+            "MESDescription": "Reflected RF Generator power feedback",
+            "EquipmentDescription": "RF reflected power from Chamber A (should be <5% of forward power)",
+            "Enabled": true,
+            "DataType": "FLOAT"
+          },
+          {
+            "MESVariableName": "ChuckTemperature",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "Electrostatic Chuck (ESC) temperature",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "DataType": "FLOAT"
+          },
+          {
+            "MESVariableName": "HeliumBackingPressure",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "Cooling helium backing pressure to the wafer chuck",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "DataType": "FLOAT"
+          },
+          {
+            "MESVariableName": "ToolStatus",
+            "EquipmentVariableName": "SystemStatus",
+            "VID": "1001",
+            "MESDescription": "General tool state (Idle, Processing, Down, Maintenance)",
+            "EquipmentDescription": "Overall equipment status string: IDLE, PROCESSING, FAULT, MAINTENANCE",
+            "Enabled": true,
+            "DataType": "ASCII"
+          },
+          {
+            "MESVariableName": "SystemStatus",
+            "EquipmentVariableName": "SystemStatus",
+            "VID": "1001",
+            "MESDescription": "Overall status of the equipment",
+            "Enabled": true,
+            "DataType": "ASCII"
+          },
+          {
+            "MESVariableName": "RecipeID",
+            "EquipmentVariableName": "RecipeID",
+            "VID": "2001",
+            "MESDescription": "Active recipe name",
+            "Enabled": true,
+            "DataType": "ASCII"
+          },
+          {
+            "MESVariableName": "ChamberA_WaferID",
+            "EquipmentVariableName": "ChamberA_WaferID",
+            "VID": "1111",
+            "MESDescription": "The wafer ID in Chamber A",
+            "Enabled": true,
+            "DataType": "ASCII"
+          },
+          {
+            "MESVariableName": "EquipmentID",
+            "EquipmentVariableName": "",
+            "VID": "",
+            "MESDescription": "Standard MES object for Equipment ID",
+            "EquipmentDescription": "",
+            "Enabled": true
+          }
+        ],
+        "Events": [
+          {
+            "MESEventName": "LotStart",
+            "EquipmentEventName": "",
+            "CEID": "",
+            "MESDescription": "Standard MES object for Lot Start",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "PayloadName": ""
+          },
+          {
+            "MESEventName": "TrackIn",
+            "EquipmentEventName": "",
+            "CEID": "",
+            "MESDescription": "Triggered when a lot/carrier tracks into the equipment",
+            "EquipmentDescription": "",
+            "Enabled": true,
+            "PayloadName": ""
+          },
+          {
+            "MESEventName": "ProcessStart",
+            "EquipmentEventName": "ProcessStart_ChamberA",
+            "CEID": "3001",
+            "MESDescription": "Process start in Chamber A",
+            "Enabled": true,
+            "PayloadName": ""
+          },
+          {
+            "MESEventName": "RecipeLoaded",
+            "EquipmentEventName": "RecipeLoaded",
+            "CEID": "3062",
+            "MESDescription": "A recipe has been loaded on the tool",
+            "Enabled": true,
+            "PayloadName": ""
+          },
+          {
+            "MESEventName": "AlarmSet",
+            "EquipmentEventName": "AlarmSet",
+            "CEID": "3070",
+            "MESDescription": "Any alarm condition active",
+            "Enabled": true,
+            "PayloadName": ""
+          }
+        ],
+        "Alarms": [
+          {
+            "MESAlarmName": "ChamberOverTemp",
+            "EquipmentAlarmName": "Critical Alarm 4001",
+            "ALID": "4001",
+            "MESDescription": "Chamber over-temperature alarm",
+            "Severity": "Critical",
+            "Enabled": true,
+            "PayloadName": ""
+          },
+          {
+            "MESAlarmName": "PressureInstability",
+            "EquipmentAlarmName": "ChamberA_PressureInstability",
+            "ALID": "4053",
+            "MESDescription": "Chamber pressure instability detected",
+            "Severity": "Warning",
+            "Enabled": true,
+            "PayloadName": ""
+          },
+          {
+            "MESAlarmName": "EquipmentAlarm",
+            "EquipmentAlarmName": "",
+            "ALID": "",
+            "MESDescription": "Standard MES object for Equipment Alarm",
+            "EquipmentDescription": "",
+            "Severity": "Critical",
+            "Enabled": true,
+            "PayloadName": ""
+          }
+        ]
+      }
+    },
+    "Critical Manufacturing": {
+      "NEW_MODEL.json": {
+        "Variables": [
+          {
+            "MESVariableName": "EquipmentID",
+            "EquipmentVariableName": "LotID",
+            "VID": "2003",
+            "MESDescription": "Standard MES object for Equipment I D",
+            "EquipmentDescription": "-",
+            "Enabled": true
+          }
+        ],
+        "Events": [
+          {
+            "MESEventName": "LotStart",
+            "EquipmentEventName": "ProcessStart_ChamberA",
+            "EquipmentEventID": "3001",
+            "MESDescription": "Standard MES object for Lot Start",
+            "EquipmentDescription": "Deposition step begins in Chamber A",
+            "Enabled": true,
+            "PayloadName": "LotStartPayload",
+            "CEID": "3001"
+          },
+          {
+            "MESEventName": "LotEnd",
+            "EquipmentEventName": "ProcessEnd_ChamberA",
+            "EquipmentEventID": "3002",
+            "MESDescription": "Standard MES object for Lot End",
+            "EquipmentDescription": "Deposition step ends (pass or fail) in Chamber A",
+            "Enabled": true,
+            "PayloadName": "LotEndPayload",
+            "CEID": "3002"
+          },
+          {
+            "MESEventName": "MaterialIn",
+            "EquipmentEventName": "WaferLoaded_ChamberA",
+            "EquipmentEventID": "3031",
+            "MESDescription": "Standard MES object for Material In",
+            "EquipmentDescription": "Wafer successfully placed on Chamber A susceptor by robot",
+            "Enabled": true,
+            "PayloadName": "MaterialPayload",
+            "CEID": "3031"
+          },
+          {
+            "MESEventName": "MaterialOut",
+            "EquipmentEventName": "WaferUnloaded_ChamberA",
+            "EquipmentEventID": "3032",
+            "MESDescription": "Standard MES object for Material Out",
+            "EquipmentDescription": "Wafer removed from Chamber A susceptor by robot after process",
+            "Enabled": true,
+            "PayloadName": "MaterialPayload",
+            "CEID": "3032"
+          },
+          {
+            "MESEventName": "ParametricDataReported",
+            "EquipmentEventName": "ProcessStart_ChamberA",
+            "EquipmentEventID": "3001",
+            "MESDescription": "Standard MES object for Parametric Data Reported",
+            "EquipmentDescription": "Deposition step begins in Chamber A",
+            "Enabled": true,
+            "PayloadName": "ParametricPayload",
+            "CEID": "3001"
+          },
+          {
+            "MESEventName": "AlarmSet",
+            "EquipmentEventName": "AlarmSet",
+            "EquipmentEventID": "3070",
+            "MESDescription": "Standard MES object for Alarm Set",
+            "EquipmentDescription": "Any alarm condition became active",
+            "Enabled": true,
+            "PayloadName": "AlarmPayload",
+            "CEID": "3070"
+          },
+          {
+            "MESEventName": "AlarmClear",
+            "EquipmentEventName": "AlarmCleared",
+            "EquipmentEventID": "3071",
+            "MESDescription": "Standard MES object for Alarm Clear",
+            "EquipmentDescription": "Any alarm condition was cleared",
+            "Enabled": true,
+            "PayloadName": "AlarmPayload",
+            "CEID": "3071"
+          },
+          {
+            "MESEventName": "SchedulerRequest",
+            "EquipmentEventName": "ControlStateChange",
+            "EquipmentEventID": "3061",
+            "MESDescription": "Standard MES object for Scheduler Request",
+            "EquipmentDescription": "GEM control state changed (e.g., OFFLINE to ONLINE)",
+            "Enabled": true,
+            "PayloadName": "SchedulerPayload",
+            "CEID": "3061"
+          },
+          {
+            "MESEventName": "TrackIn",
+            "EquipmentEventName": "CassetteLoaded_Port1",
+            "EquipmentEventID": "3035",
+            "MESDescription": "Standard MES object for Track In",
+            "EquipmentDescription": "Cassette placed and mapped on Load Port 1",
+            "Enabled": true,
+            "PayloadName": "MaterialPayload",
+            "CEID": "3035"
+          },
+          {
+            "MESEventName": "TrackOut",
+            "EquipmentEventName": "CassetteUnloaded_Port1",
+            "EquipmentEventID": "3036",
+            "MESDescription": "Standard MES object for Track Out",
+            "EquipmentDescription": "Cassette removed from Load Port 1",
+            "Enabled": true,
+            "PayloadName": "MaterialPayload",
+            "CEID": "3036"
+          }
+        ],
+        "Alarms": []
+      }
+    }
+  }
+}

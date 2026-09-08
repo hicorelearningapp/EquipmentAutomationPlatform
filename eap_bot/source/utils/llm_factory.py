@@ -41,7 +41,6 @@ class OllamaStrategy(LLMStrategy):
             
         return ChatOllama(**kwargs)
 
-
 class GeminiStrategy(LLMStrategy):
     def get_model(self, temperature: float = 0.0, require_json: bool = False) -> BaseChatModel:
         

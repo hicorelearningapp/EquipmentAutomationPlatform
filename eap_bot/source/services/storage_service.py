@@ -132,7 +132,7 @@ class StorageService:
 
         Documents = [doc for doc in metadata.Documents if doc.DocumentID != document_id]
         Documents.append(document)
-        metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate)
+        metadata.Documents = sorted(Documents, key=lambda doc: doc.UploadDate.replace(tzinfo=timezone.utc) if getattr(doc.UploadDate, 'tzinfo', None) is None else doc.UploadDate)
         metadata.LastUpdatedOn = self.now()
         self._write_metadata(metadata)
         return document

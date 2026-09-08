@@ -137,7 +137,17 @@ class EquipmentExtractor:
                                 val = obj_data[list_field].strip()
                                 # handle multiline or comma separated
                                 val = val.replace("\n", "").replace("\r", "")
-                                obj_data[list_field] = [x.strip() for x in val.split(",") if x.strip()]
+                                items = [x.strip() for x in val.split(",") if x.strip()]
+                                
+                                if list_field == "LinkedVIDs":
+                                    clean_items = []
+                                    for x in items:
+                                        match = re.search(r'\b(\d+)\b', x)
+                                        if match:
+                                            clean_items.append(int(match.group(1)))
+                                    obj_data[list_field] = clean_items
+                                else:
+                                    obj_data[list_field] = items
                         
                         if entity_class.__name__ == "State" and "Name" not in obj_data and "StateID" in obj_data:
                             obj_data["Name"] = str(obj_data["StateID"])
@@ -645,7 +655,7 @@ EXPECTED JSON FORMAT:
     {{
       "RCMD": "string - the name of the command/message",
       "Description": "string",
-      "Parameters": [{"Name": "string", "Type": "string"}],
+      "Parameters": [{{ "Name": "string", "Type": "string" }}],
       "Confidence": 0.0 to 1.0
     }}
   ],

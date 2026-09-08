@@ -1,0 +1,217 @@
+TC ID,Objective,Test Steps,Expected Result,Actual Result,Pass/Fail
+TC ID - 006,Verify the DV count is displayed correctly.,"1. Open the BraceLink application on the system.
+2. Go to the Overview page from the main page.
+3. Select a project from the Project dropdown.
+4. Find the DV Counts section on the Overview page.
+5. Check the DV count shown for the selected project.","1. The BraceLink application should open successfully on the system.
+2. The Overview page should open successfully from the main page.
+3. The project should be selected successfully from the Project dropdown.
+4. The DV Counts section should be visible on the Overview page.
+5. The correct DV count should be shown for the selected project.","1. The BraceLink application opened successfully.
+2. The Overview page opened successfully.
+3. The project was successfully selected from the Project dropdown.
+4. The DV Counts section was visible on the Overview page.
+5. The correct DV count was displayed for the selected project.",PASS
+TC ID - 007,Verify the Remote Commands count is displayed correctly.,"1. Open the BraceLink application on the system.
+2. Go to the Overview page from the main page.
+3. Select a project from the Project dropdown.
+4. Find the Remote Commands Count section on the Overview page.
+5. Check the Remote Commands count shown for the selected project.","1. The BraceLink application should open successfully on the system.
+2. The Overview page should open successfully from the main page.
+3. The project should be selected successfully from the Project dropdown.
+4. The Remote Commands Count section should be visible on the Overview page.
+5. The correct Remote Commands count should be shown for the selected project.","1. The BraceLink application opened successfully.
+2. The Overview page opened successfully.
+3. The project was successfully selected from the Project dropdown.
+4. The Remote Commands Count section was visible on the Overview page.
+5. The correct Remote Commands count was displayed for the selected project.",PASS
+TC ID - 008,Verify the Scripts count is displayed correctly.,"1. Open the BraceLink application on the system.
+2. Go to the Overview page from the main page.
+3. Select a project from the Project dropdown.
+4. Find the Scripts Counts section on the Overview page.
+5. Check the Scripts count shown for the selected project.","1. The BraceLink application should open successfully on the system.
+2. The Overview page should open successfully from the main page.
+3. The project should be selected successfully from the Project dropdown.
+4. The Scripts Counts section should be visible on the Overview page.
+5. The correct Scripts count should be shown for the selected project.","1. The BraceLink application opened successfully.
+2. The Overview page opened successfully.
+3. The project was successfully selected from the Project dropdown.
+4. The Scripts Counts section was visible on the Overview page.
+5. The correct Scripts count was displayed for the selected project.",PASS
+TC ID - 009,Verify the Refresh button updates the Project Overview data.,"1. Open the BraceLink application on the system.
+2. Go to the Overview page from the main page.
+3. Select a project from the Project dropdown.
+4. Click the Refresh button next to the dropdown.
+5. Verify that the data in the Project Overview section refreshes.","1. The BraceLink application should open successfully.
+2. The Overview page should open successfully.
+3. The project should be selected successfully.
+4. The Refresh button should be clickable.
+5. The Project Overview data (Counts, Summary) should reload and show the most up-to-date information.","1. The BraceLink application opened successfully.
+2. The Overview page opened successfully.
+3. The project was successfully selected.
+4. The Refresh button was clicked successfully.
+5. The Project Overview data reloaded and displayed the updated information correctly.",PASS
+TC ID - 010,Verify the Total Projects in System count is displayed correctly.,"1. Open the BraceLink application on the system.
+2. Go to the Overview page from the main page.
+3. Find the Overall Project section on the page.
+4. Locate the Total Projects in System card.
+5. Check the Active Projects count shown.","1. The BraceLink application should open successfully.
+2. The Overview page should open successfully.
+3. The Overall Project section should be visible.
+4. The Total Projects in System card should be visible.
+5. The correct number of active projects in the system should be shown.","1. The BraceLink application opened successfully.
+2. The Overview page opened successfully.
+3. The Overall Project section was visible.
+4. The Total Projects in System card was visible.
+5. The correct number of active projects was displayed.",PASS
+TC ID - 011,Verify the SML Scripts count (Overall) is displayed correctly.,"1. Open the BraceLink application on the system.
+2. Go to the Overview page from the main page.
+3. Find the Overall Project section on the page.
+4. Locate the SML Scripts card.
+5. Check the Total Scripts count shown.","1. The BraceLink application should open successfully.
+2. The Overview page should open successfully.
+3. The Overall Project section should be visible.
+4. The SML Scripts card should be visible.
+5. The correct total number of SML scripts across all projects should be shown.","1. The BraceLink application opened successfully.
+2. The Overview page opened successfully.
+3. The Overall Project section was visible.
+4. The SML Scripts card was visible.
+5. The correct total number of SML scripts was displayed.",PASS
+TC ID - 012,Verify the Tools Integrated and Tests Executed summaries are displayed correctly.,"1. Open the BraceLink application on the system.
+2. Go to the Overview page from the main page.
+3. Find the Summary panel inside the Overall Project section.
+4. Check the Tools Integrated count.
+5. Check the Tests Executed count.","1. The BraceLink application should open successfully.
+2. The Overview page should open successfully.
+3. The Summary panel should be visible.
+4. The correct Tools Integrated count should be shown.
+5. The correct Tests Executed count should be shown.","1. The BraceLink application opened successfully.
+2. The Overview page opened successfully.
+3. The Summary panel was visible.
+4. The correct Tools Integrated count was displayed.
+5. The correct Tests Executed count was displayed.",PASS
+TC ID - 301,"Verify the ""Select All"" checkbox functionality in the extraction grid.","1. Go to the WorkSpace > Upload Document tab.
+2. Select an analyzed document.
+3. Click the checkbox in the header row of the extraction table (e.g., Status Variables).
+4. Click the header checkbox again.","1. The extraction grid should load.
+2. Clicking the header checkbox should select all visible rows in the grid.
+3. Clicking it again should deselect all rows.","1. The extraction grid loaded.
+2. The header checkbox successfully selected all rows.
+3. Clicking it again deselected all rows.",PASS
+TC ID - 302,Verify the 'Delete Selected' button removes multiple checked variables simultaneously.,"1. Go to the WorkSpace > Upload Document tab.
+2. Select an analyzed document and view its Status Variables.
+3. Check the checkboxes for at least 3 different variables.
+4. Click 'Delete Selected'.
+5. Click 'Update Extraction'.","1. The variables should be selectable.
+2. Clicking 'Delete Selected' should immediately remove all checked rows from the UI.
+3. Clicking 'Update Extraction' should successfully save the bulk deletion.","1. Variables were selectable.
+2. 'Delete Selected' removed all checked rows from the view.
+3. 'Update Extraction' saved the changes successfully.",PASS
+TC ID - 303,Verify file extension validation when browsing for a document.,"1. Go to the WorkSpace > Upload Document tab.
+2. Click the 'Browse' button.
+3. Attempt to select a non-PDF file (e.g., .jpg, .exe, or .docx) if the system allows it, or check if the file dialog restricts extensions.
+4. If a non-PDF is selected, click Upload.","1. The Browse dialog should ideally filter for supported files (e.g., *.pdf).
+2. If an unsupported file is selected and Upload is clicked, the system should display a clear error message (e.g., 'Invalid file format').","1. The file dialog correctly filtered file types.
+2. When forced, the system correctly rejected unsupported file formats with an error.",PASS
+TC ID - 304,Verify handling of very long file names in the uploaded documents table.,"1. Rename a valid PDF file to have an extremely long name (e.g., > 100 characters).
+2. Upload this document via the WorkSpace > Upload Document tab.
+3. Observe how the 'File Name' and 'Document ID' columns display the text.","1. The document should upload successfully.
+2. The long file name should be gracefully truncated with an ellipsis (...) in the table UI to prevent horizontal scrolling or layout breakage.
+3. Hovering over the truncated name should ideally show a tooltip with the full name.","1. Document uploaded successfully.
+2. The long file name was gracefully truncated in the table without breaking the layout.",PASS
+TC ID - 305,Verify column sorting functionality in the extraction grid.,"1. View the Status Variables extraction tab for an analyzed document.
+2. Click on a column header (e.g., 'SVID' or 'Name').
+3. Click the same column header again.","1. Clicking the header once should sort the rows in ascending order based on that column.
+2. Clicking it again should sort the rows in descending order.","1. The grid data sorted ascending on first click.
+2. The grid data sorted descending on the second click.",PASS
+TC ID - 306,Verify UI feedback when the 'Analyze' process is initiated.,"1. Upload a new document.
+2. Click the 'Analyze' button.
+3. Immediately observe the button and the document's Status column.","1. The 'Analyze' button should be temporarily disabled to prevent double-clicking.
+2. The Status column should change to 'Analyzing' or display a loading spinner while the background process runs.","1. The Analyze button was disabled during processing.
+2. The UI provided clear visual feedback that analysis was in progress.",PASS
+TC ID - 307,Verify 'Update Extraction' only processes items that are ticked (checked) in the grid.,"1. Go to the WorkSpace > Upload Document tab.
+2. Analyze a document and view the Status Variables list.
+3. Edit the details (e.g., Description) of two different variables.
+4. Tick the checkbox for ONLY ONE of the edited variables.
+5. Click 'Update Extraction'.
+6. Refresh the page.","1. The page should reload.
+2. Only the edited variable that was ticked should have its new details saved.
+3. The edited variable that was NOT ticked should revert to its original state (modifications ignored).","1. The page reloaded.
+2. Only the ticked item's updates were saved to the backend.
+3. The unticked item reverted to its previous state.",PASS
+TC ID - 308,Verify 'Delete Selected' removes ticked items from both the Upload Document and main Extraction tabs.,"1. Go to the WorkSpace > Upload Document tab.
+2. Tick the checkboxes for two specific variables (e.g., SVID 83 and 90).
+3. Click 'Delete Selected'.
+4. Verify they are removed from the current grid.
+5. Navigate to the main 'Extraction' tab (at the top, next to Upload Document).
+6. Check the Status Variables list on the main Extraction tab.","1. The ticked items should immediately disappear from the Upload Document grid.
+2. Upon navigating to the main Extraction tab, the deleted items (SVID 83 and 90) must NOT be present in that list either. The data must be synchronized.","1. The items were deleted from the Upload Document grid.
+2. The items were also successfully removed from the main Extraction tab.",PASS
+TC ID - 309,Verify unticked items remain completely unaffected when 'Delete Selected' is clicked.,"1. Go to the WorkSpace > Upload Document tab.
+2. Note the total number of variables in the grid.
+3. Tick the checkbox for exactly one variable.
+4. Click 'Delete Selected'.
+5. Review the remaining items in the grid.","1. Only the single ticked variable should be deleted.
+2. All unticked variables must remain in the grid with their data completely intact and unaltered.","1. Only the ticked variable was deleted.
+2. All unticked variables remained intact and visible.",PASS
+TC ID - 310,Verify 'Update Extraction' behavior when no items are ticked.,"1. Go to the WorkSpace > Upload Document tab.
+2. Ensure absolutely NO checkboxes are ticked in the grid.
+3. Click the 'Update Extraction' button.","1. The system should ideally show a validation message (e.g., 'Please select items to update').
+2. Alternatively, if it processes silently, no data should be altered, corrupted, or deleted on the backend.","1. The system prompted to select items.
+2. No data was unintentionally modified.",PASS
+TC ID - 311,Verify 'Delete Selected' behavior when no items are ticked.,"1. Go to the WorkSpace > Upload Document tab.
+2. Ensure absolutely NO checkboxes are ticked in the grid.
+3. Click the 'Delete Selected' button.","1. The system should display a validation warning (e.g., 'No items selected for deletion').
+2. No items should be deleted from the grid.","1. The system displayed a warning message.
+2. No items were deleted.",PASS
+TC ID - 312,Verify cross-tab data synchronization after 'Update Extraction'.,"1. Go to the WorkSpace > Upload Document tab.
+2. Tick a variable and modify its Data Type or Access Type.
+3. Click 'Update Extraction'.
+4. Navigate to the main 'Extraction' tab.
+5. Locate the same variable.","1. The modifications should save successfully.
+2. The main 'Extraction' tab must immediately reflect the updated Data Type or Access Type for that specific variable.","1. The modifications saved successfully.
+2. The main Extraction tab displayed the updated values correctly.",PASS
+TC ID - 401,Verify extracted Status Variables accurately match the source document.,"1. Open the original PDF/source document outside the application.
+2. Navigate to the Status Variables section in the document.
+3. In BraceLink, go to WorkSpace > Upload Document and select the analyzed file.
+4. Click the 'Status Variables' extraction tab.
+5. Manually compare 5-10 random entries (checking SVID, Name, Description, Data Type, and Access Type) between the UI and the PDF.","1. The data in the UI grid must perfectly match the data presented in the original document.
+2. No Status Variables from the document should be missing in the UI.
+3. No hallucinatory or incorrect variables should exist in the UI.","1. The sampled Status Variables in the UI accurately matched the original document.
+2. No missing or hallucinated data was found.",PASS
+TC ID - 402,Verify extracted Data Variables accurately match the source document.,"1. Open the original source document.
+2. Navigate to the Data Variables (Equipment Constants/Setup Variables) section.
+3. In BraceLink, click the 'Data Variables' extraction tab.
+4. Manually compare a sample of entries (checking ID, Name, Data Type) between the UI and the document.","1. All sampled Data Variables in the UI must exactly mirror the document.
+2. The IDs and Names must be correctly mapped and free of spelling/parsing errors.","1. The Data Variables mapped perfectly to the source document.
+2. IDs and Names were parsed without errors.",PASS
+TC ID - 403,Verify extracted Events accurately match the source document.,"1. Open the original source document.
+2. Navigate to the Collection Events (CEID) section.
+3. In BraceLink, click the 'Events' extraction tab.
+4. Manually cross-check the CEID, Event Name, and any Linked VIDs against the PDF.","1. The CEIDs and Event Names in the UI must match the document precisely.
+2. Any variables linked to the events (Linked VIDs) must be accurately parsed and listed.","1. The Events were correctly extracted.
+2. Linked VIDs matched the document's specifications.",PASS
+TC ID - 404,Verify extracted Alarms accurately match the source document.,"1. Open the original source document.
+2. Navigate to the Alarms (ALID) section.
+3. In BraceLink, click the 'Alarms' extraction tab.
+4. Manually compare the ALID, Alarm Name, Severity, and Description between the UI and the document.","1. The Alarm IDs, Names, and Severity levels in the UI must perfectly reflect the document.
+2. Multiline descriptions in the PDF should be cleanly formatted as single entries in the UI.","1. Alarms were extracted correctly with accurate IDs and Severities.
+2. Descriptions were cleanly formatted.",PASS
+TC ID - 405,Verify extracted Remote Commands accurately match the source document.,"1. Open the original source document.
+2. Navigate to the Remote Commands (RCMD) section.
+3. In BraceLink, click the 'Remote Commands' extraction tab.
+4. Manually cross-verify the Command Names and any associated Parameters.","1. The Remote Commands in the UI must match the source document.
+2. If a command requires specific parameters (CPNAME), they must be accurately captured.","1. Remote Commands matched the source document perfectly.
+2. Associated parameters were captured correctly.",PASS
+TC ID - 406,Verify extracted States accurately match the source document.,"1. Open the original source document.
+2. Navigate to the Equipment States / Control States section.
+3. In BraceLink, click the 'States' extraction tab.
+4. Manually verify the State IDs, State Names, and Descriptions.","1. The extracted States must accurately represent the state models defined in the document (e.g., Online, Offline, Local, Remote).
+2. The hierarchy or naming must match the document.","1. Equipment states were accurately extracted.
+2. State names and IDs mirrored the original document.",PASS
+TC ID - 407,Verify extracted Reports accurately match the source document.,"1. Open the original source document.
+2. Navigate to the Pre-defined Reports (RPTID) section.
+3. In BraceLink, click the 'Reports' extraction tab.
+4. Manually verify the RPTID, Report Name, and the list of Included Variables (Linked VIDs).","1. The Reports in the UI must match the document exactly.
+2. The list of Included Variables for each report must contain only the correct numeric VIDs, stripped of any excess text from the PDF.","1. Reports were extracted correctly.
+2. Included Variables were correctly formatted as numeric lists.",PASS

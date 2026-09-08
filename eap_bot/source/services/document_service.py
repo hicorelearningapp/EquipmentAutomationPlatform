@@ -177,7 +177,7 @@ class DocumentService:
                 for q in PREDEFINED_QUESTIONS:
                     future = future_map[q]
                     try:
-                        ans, source, _ = future.result()
+                        ans, source, _, _ = future.result()
                         qa_results.append({
                             "Question": q,
                             "Answer": ans,

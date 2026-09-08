@@ -29,6 +29,7 @@ from typing import Optional
 
 from source.schemas.secsgem import EquipmentSpec, ReportDefinition
 from source.utils.llm_factory import LLMStrategy
+from langchain_core.messages import HumanMessage
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +187,7 @@ class ReportService:
     # ── Helpers ───────────────────────────────────────────────────────────────
 
     def _invoke(self, prompt: str) -> str:
-        from langchain_core.messages import HumanMessage
+        
         response = self._llm.invoke([HumanMessage(content=prompt)])
         content = response.content
         if isinstance(content, list):

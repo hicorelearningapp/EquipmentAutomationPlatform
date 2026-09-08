@@ -1,0 +1,2527 @@
+TC ID,Objective,Test Steps,Expected Result,Actual Result
+TC ID - 001,Verify the Overview page opens correctly.,"1. Open the BraceLink application on the system.
+ 2. Go to the Overview page from the main page.
+ 3. Wait for the Overview page to load completely.
+ 4. View the complete Overview page and its sections.
+ 5. Check the Overview page for any errors.","1. The BraceLink application should open successfully on the system.
+ 2. The Overview page should open successfully from the main page.
+ 3. The Overview page should load completely without any issue.
+ 4. The complete Overview page and its sections should be displayed.
+ 5. The Overview page should not show any errors.","1. The BraceLink application opened successfully on the system.
+ 2. The Overview page opened successfully from the main page.
+ 3. The Overview page loaded completely without any issue.
+ 4. The complete Overview page and its sections were displayed correctly.
+ 5. No errors were observed on the Overview page."
+TC ID - 002,Verify the Project dropdown shows the available projects.,"1. Open the BraceLink application on the system.
+ 2. Go to the Overview page from the main page.
+ 3. Find the Project dropdown on the Overview page.
+ 4. Click the Project dropdown to view the list.
+ 5. Check all the project names shown in the list.","1. The BraceLink application should open successfully on the system.
+ 2. The Overview page should open successfully from the main page.
+ 3. The Project dropdown should be visible on the Overview page.
+ 4. The Project dropdown should open successfully and show the list.
+ 5. All available project names should be shown correctly in the list.","1. The BraceLink application opened successfully.
+ 2. The Overview page opened successfully from the main page.
+ 3. The Project dropdown was visible on the Overview page.
+ 4. The Project dropdown opened successfully and displayed the project list.
+ 5. All available project names were displayed correctly in the list."
+TC ID - 003,Verify a project can be selected from the Project dropdown.,"1. Open the BraceLink application on the system.
+ 2. Go to the Overview page from the main page.
+ 3. Click the Project dropdown to view the projects.
+ 4. Select a project from the available project list.
+ 5. Check the selected project name on the Overview page.","1. The BraceLink application should open successfully.
+ 2. The Overview page should open successfully.
+ 3. The Project dropdown should open successfully.
+ 4. The project should be selected successfully from the project list.
+ 5. The selected project name should be displayed correctly.","1. The BraceLink application opened successfully.
+ 2. The Overview page opened successfully.
+ 3. The Project dropdown opened and displayed the available projects.
+ 4. The selected project was successfully chosen from the list.
+ 5. The selected project name was displayed correctly on the Overview page."
+TC ID - 004,Verify the Remote Command count is displayed correctly.,"1. Open the BraceLink application on the system.
+ 2. Go to the Overview page from the main page.
+ 3. Select a project from the Project dropdown.
+ 4. Find the Remote Command Counts section on the page.
+ 5. Check the Remote Command count shown for the project.","1. The BraceLink application should open successfully.
+ 2. The Overview page should open successfully.
+ 3. The project should be selected successfully from the Project dropdown.
+ 4. The Remote Command Counts section should be visible.
+ 5. The correct Remote Command count should be displayed.","1. The BraceLink application opened successfully.
+ 2. The Overview page opened successfully.
+ 3. The project was successfully selected from the Project dropdown.
+ 4. The Remote Command Counts section was visible on the page.
+ 5. The correct Remote Command count was displayed for the selected project."
+TC ID - 005,Verify the Overview data changes when another project is selected.,"1. Open the BraceLink application on the system.
+ 2. Go to the Overview page from the main page.
+ 3. Select the first project and note its Overview data.
+ 4. Select another project from the Project dropdown.
+ 5. Check the Overview data for the newly selected project.","1. The BraceLink application should open successfully.
+ 2. The Overview page should open successfully.
+ 3. The first project's Overview data should be displayed correctly.
+ 4. Another project should be selected successfully from the Project dropdown.
+ 5. The Overview data should change based on the selected project.","1. The BraceLink application opened successfully.
+ 2. The Overview page opened successfully from the main page.
+ 3. The first project was selected and its Overview data was displayed.
+ 4. Another project was selected successfully from the Project dropdown.
+ 5. The Overview data changed and displayed the data related to the newly selected project"
+TC ID - 006,Verify the Project Information is displayed correctly.,"1. Open the BraceLink application on the system.
+ 2. Go to the Project Information page.
+ 3. View the project information section displayed on the page.
+ 4. Check the project details shown in the information section.
+ 5. Verify all the displayed project information.","1. The BraceLink application should open properly.
+ 2. The Project Information page should open properly.
+ 3. The project information section should be displayed.
+ 4. The project details should be displayed correctly.
+ 5. All the project information should be correct.","1. The BraceLink application opened successfully.
+ 2. The Project Information page opened successfully.
+ 3. The Project Information section was displayed on the page.
+ 4. The project details were displayed for verification.
+ 5. The Created At date and time was mismatched and did not show the current date and time, so the project information was not displayed completely correctly."
+TC ID - 007,Verify that the Edit Project function updates the required project details correctly.,"1. Open the BraceLink application on the system.
+ 2. Go to the Project Information page.
+ 3. Select the required project and click Edit Project.
+ 4. Update the required project details in the form.
+ 5. Save the updated project information.","1. The BraceLink application should open properly.
+ 2. The Project Information page should open properly.
+ 3. The project should open in Edit Project mode.
+ 4. The required project details should be updated.
+ 5. The updated project information should be saved correctly.","1. The BraceLink application opened successfully.
+ 2. The Project Information page opened successfully.
+ 3. The required project was selected and opened in Edit Project mode.
+ 4. The required project details were updated successfully in the form.
+ 5. The updated project information was saved successfully."
+TC ID - 008,Verify that data related to deleted documents is removed from the Workspace,"1. Open the BraceLink application.
+2. Go to the Workspace panel and select the WesternDigital project.
+3. Open the Upload Document tab and delete all uploaded documents.
+4. Check the Status Variables, Data Variables, Events, Alarms, States, and Reports sections.
+5. Verify whether any data related to the deleted documents is still displayed.","1. The BraceLink application should open successfully.
+2. The Workspace should display the selected WesternDigital project correctly.
+3. All selected documents should be deleted successfully from the Upload Document section.
+4. The Status Variables, Data Variables, Events, Alarms, States, and Reports sections should not display data related to the deleted documents.
+5. The Workspace should not contain any data associated with the deleted documents","1. The BraceLink application opened successfully.
+2. The WesternDigital project was selected and displayed in the Workspace.
+3. The uploaded documents were deleted successfully from the Upload Document section.
+4. The Status Variables, Data Variables, Events, Alarms, States, and Reports sections continued to display data related to the deleted documents.
+5. Deleted document data remained visible in the Workspace."
+TC ID - 009,Verify that data from another project is not displayed after switching between projects.,"1. Open the BraceLink application and go to the Workspace.
+2. Select the WesternDigital project and delete all its uploaded documents.
+3. Select the Lithography project from the Current Project dropdown.
+4. Switch back to the WesternDigital project.
+5. Check the document contents, variables, events, alarms, states, and reports","1. The BraceLink application and Workspace should open successfully.
+2. All documents in the WesternDigital project should be deleted successfully.
+3. The Lithography project data should be displayed only under the Lithography project.
+4. The WesternDigital project should load independently without retaining data from Lithography.
+5. The related sections in WesternDigital should be blank when all its documents have been deleted.","1. The BraceLink application and Workspace opened successfully.
+2. All documents in the WesternDigital project were deleted successfully.
+3. The Lithography project was selected and its data was displayed.
+4. After switching back to WesternDigital, Lithography project data was displayed under WesternDigital.
+5. The related sections in WesternDigital were not blank and contained Lithography project data."
+TC ID - 010,Verify that the Extraction function displays the required extracted information correctly.,"1. Open the BraceLink application on the system.
+ 2. Go to the Extraction page.
+ 3. Select the required document for extraction.
+ 4. Start the extraction process from the page.
+ 5. Check the information extracted from the document.","1. The BraceLink application should open properly.
+ 2. The Extraction page should open properly.
+ 3. The required document should be selected for extraction.
+ 4. The extraction process should start.
+ 5. The extracted information should be displayed correctly.","1. The BraceLink application opened successfully.
+ 2. The Extraction page opened successfully.
+ 3. The required document was selected for extraction.
+ 4. The extraction process was started successfully.
+ 5. The extracted information was displayed correctly,"
+TC ID - 011,Verify that the SML Definitions section displays the available definitions correctly.,"1. Open the BraceLink application on the system.
+ 2. Go to the SML Definitions page.
+ 3. View the SML Definitions section displayed on the page.
+ 4. Check the available SML definitions in the section.
+ 5. Verify all the displayed SML definitions.","1. The BraceLink application should open properly.
+ 2. The SML Definitions page should open properly.
+ 3. The SML Definitions section should be displayed.
+ 4. The available SML definitions should be displayed correctly.
+ 5. All the displayed SML definitions should be correct.","1. The BraceLink application opened successfully.
+ 2. The SML Definitions page opened successfully.
+ 3. The SML Definitions section was displayed on the page.
+ 4. The available SML definitions were displayed in the section.
+ 5. All displayed SML definitions were verified and found to be correct."
+TC ID - 012,Check the Tool dropdown displays the available tool options correctly.,"1. Open the BraceLink application.
+ 2. Go to the Project Information page.
+ 3. Open the Tool dropdown in the Add New Project form.
+ 4. View the available tool options in the dropdown.
+ 5. Check the tool option displayed in the dropdown.","1. The BraceLink application should open properly.
+ 2. The Project Information page should open properly.
+ 3. The Tool dropdown should open properly.
+ 4. The available tool options should be displayed.
+ 5. The tool option should be displayed correctly in the dropdown.","1. The BraceLink application opened successfully.
+ 2. The Project Information page opened successfully.
+ 3. The Add New Project form was opened and the Tool dropdown was accessed.
+ 4. The available tool options were displayed in the dropdown.
+ 5. The tool options were displayed correctly."
+TC ID - 013,Check the Close button closes the Add New Project form correctly.,"1. Open the BraceLink application.
+ 2. Go to the Project Information page.
+ 3. Open the Add New Project form.
+ 4. Click the Close button shown at the bottom.
+ 5. Check the Project Information page after closing the form.","1. The BraceLink application should open properly.
+ 2. The Project Information page should open properly.
+ 3. The Add New Project form should be displayed.
+ 4. The Add New Project form should be closed.
+ 5. The Project Information page should be displayed again.","1. The BraceLink application opened successfully.
+ 2. The Project Information page opened successfully.
+ 3. The Add New Project form was opened successfully.
+ 4. The Close button was clicked and the form closed successfully.
+ 5. The Project Information page was displayed again after closing the form."
+TC ID - 014,Verify the Delete Project feature is available and allows a project to be deleted.,"1. Open the BraceLink application.
+ 2. Go to the Workspace panel.
+ 3. Select a specific project from the project list.
+ 4. Check the available options or buttons for the selected project.
+ 5. Check whether the Delete Project option is available and try to delete the selected project.","1. The BraceLink application should open successfully.
+ 2. The Workspace panel should open successfully.
+ 3. The required project should be selected successfully.
+ 4. The available project options should be displayed.
+ 5. A Delete Project option should be available and the selected project should be deleted successfully.","1. The BraceLink application opened successfully.
+ 2. The Workspace panel opened successfully.
+ 3. The required project was selected successfully.
+ 4. The available project options were displayed, but the Delete Project option was not available.
+ 5. The selected project could not be deleted because the Delete Project feature was missing."
+TC ID - 015,Verify the Refresh feature updates the project list without restarting the application.,"1. Open the BraceLink application.
+ 2. Go to the Workspace panel.
+ 3. Add a new project successfully.
+ 4. Check the Workspace and Overview panels for the newly added project.
+ 5. Check whether a Refresh option is available and verify the project list without restarting the application.","1. The BraceLink application should open successfully.
+ 2. The Workspace panel should open successfully.
+ 3. A new project should be added successfully.
+ 4. The newly added project should appear in the Workspace and Overview panels.
+ 5. A Refresh option should be available and should update the project list without requiring an application restart.","1. The BraceLink application opened successfully.
+ 2. The Workspace panel opened successfully.
+ 3. A new project was added successfully.
+ 4. The newly added project did not appear immediately in the Workspace or Overview panels.
+ 5. The Refresh feature was not available, and the new project appeared only after restarting the application."
+TC ID - 016,Check the Document Type dropdown displays the available document types correctly.,"1. Open the BraceLink application from the system.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the Upload Document page from the Workspace.
+ 4. Open the Document Type option and view the available document types.
+ 5. Check all the document types displayed in the list.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed properly.
+ 3. The Upload Document page should open properly.
+ 4. The available document types should be displayed.
+ 5. All the document types should be shown correctly.","1. The BraceLink application opened successfully.
+ 2. The Workspace section opened successfully.
+ 3. The Upload Document page opened successfully.
+ 4. The Document Type dropdown was opened successfully and the available options were displayed.
+ 5. All document types were displayed correctly in the dropdown without any missing or incorrect options."
+TC ID - 017,Check the uploaded document list displays the required document details correctly.,"1. Open the BraceLink application from the system.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the Upload Document page from the Workspace.
+ 4. View the uploaded document table and check the details shown for each document.
+ 5. Check all the required information displayed in the document table.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed properly.
+ 3. The Upload Document page should open properly.
+ 4. The uploaded document table and its details should be displayed.
+ 5. The required document information should be shown correctly.","1. The BraceLink application opened successfully.
+ 2. The Workspace section opened successfully.
+ 3. The Upload Document page opened successfully.
+ 4. The uploaded documents were displayed in the document table.
+ 5. The required document details were displayed correctly for the uploaded documents without any missing information."
+TC ID - 018,Check the Document Status is displayed correctly for uploaded documents.,"1. Open the BraceLink application from the system.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the Upload Document page from the Workspace.
+ 4. View the Status column shown for the uploaded documents.
+ 5. Select a document and check the status displayed for it.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed properly.
+ 3. The Upload Document page should open properly.
+ 4. The Status column should be displayed in the table.
+ 5. The selected document status should be displayed correctly.","1. The BraceLink application opened successfully.
+ 2. The Workspace section opened successfully.
+ 3. The Upload Document page opened successfully.
+ 4. The uploaded document table displayed the Status column.
+ 5. The selected document showed the correct status without any mismatch in the displayed status."
+TC ID - 019,Check the Analyze option processes the selected uploaded document correctly.,"1. Open the BraceLink application from the system.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the Upload Document page from the Workspace.
+ 4. Select an uploaded document and click the Analyze option.
+ 5. View the document status after the analysis process is completed.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed properly.
+ 3. The Upload Document page should open properly.
+ 4. The selected document should be processed for analysis.
+ 5. The document status should be updated after analysis.","1. The BraceLink application opened successfully.
+ 2. The Workspace section opened successfully.
+ 3. The Upload Document page opened successfully.
+ 4. The uploaded document was selected and the Analyze option was clicked successfully.
+ 5. The selected document was analyzed successfully and updated after the analysis process."
+TC ID - 020,Check the Delete option removes the selected uploaded document correctly.,"1. Open the BraceLink application from the system.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the Upload Document page from the Workspace.
+ 4. Select an uploaded document and click the Delete option.
+ 5. View the document table and check the selected document after deletion.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed properly.
+ 3. The Upload Document page should open properly.
+ 4. The selected document should be removed from the list.
+ 5. The deleted document should no longer be shown in the table.","1. The BraceLink application opened successfully.
+ 2. The Workspace section opened successfully.
+ 3. The Upload Document page opened successfully.
+ 4. The required uploaded document was selected and the Delete option was clicked successfully.
+ 5. The selected document was removed successfully and was no longer available in the document table."
+TC ID - 021,Check the Update Extraction option updates the selected extraction data correctly.,"1. Open the BraceLink application from the system.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the Upload Document page from the Workspace.
+ 4. Select the required extraction records and click Update Extraction.
+ 5. View the extraction data and check the details after the update.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed properly.
+ 3. The Upload Document page should open properly.
+ 4. The selected extraction records should be updated.
+ 5. The updated extraction data should be displayed correctly","1. The BraceLink application opened successfully.
+ 2. The Workspace section opened successfully.
+ 3. The Upload Document page opened successfully.
+ 4. The required extraction records were selected and the Update Extraction option was clicked successfully.
+ 5. The selected extraction records were updated successfully and the latest extraction details were displayed."
+TC ID - 022,Check the extraction tabs display their corresponding information correctly.,"1. Open the BraceLink application from the system.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the Upload Document page from the Workspace.
+ 4. Select an extraction tab and view the information displayed under it.
+ 5. Check the available extraction tabs and their related information.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed properly.
+ 3. The Upload Document page should open properly.
+ 4. The selected tab should display its related information.
+ 5. The available tabs and their information should be displayed correctly.","1. The BraceLink application opened successfully.
+ 2. The Workspace section opened successfully.
+ 3. The Upload Document page opened successfully.
+ 4. The available extraction tabs were displayed and could be selected successfully.
+ 5. Each selected extraction tab displayed its corresponding information correctly without any mismatch."
+TC ID - 023,Check the extraction summary shows the required document and record details.,"1. Open the BraceLink application.
+ 2. Go to the Workspace section.
+ 3. Open the Extraction page.
+ 4. View the Extraction Summary section and its details.
+ 5. Check the Total Documents and Total Records Extracted values.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed properly.
+ 3. The Extraction page should open properly.
+ 4. The Extraction Summary section and its details should be displayed.
+ 5. The Total Documents and Total Records Extracted values should be shown correctly.","1. The BraceLink application opened successfully.
+ 2. The Workspace section opened successfully.
+ 3. The Extraction page opened successfully.
+ 4. The Extraction Summary section was displayed with the required values.
+ 5. The Total Documents and Total Records Extracted values were displayed correctly based on the available extraction data."
+TC ID - 024,Check the equipment connection details and data retrieval option.,"1. Open the BraceLink application and Brace.
+ 2. Go to the Workspace section.
+ 3. Open the Extraction page.
+ 4. View the Connect Equipment (SECS/GEM) section and its fields.
+ 5. Click Get Data to retrieve the equipment data.","1. The BraceLink application and Brace should open properly.
+ 2. The Workspace section should be displayed properly.
+ 3. The Extraction page should open properly.
+ 4. The Connect Equipment (SECS/GEM) section and its fields should be displayed.
+ 5. The equipment data should be retrieved and displayed in the application.","1. The BraceLink application and Brace opened successfully.
+ 2. The Workspace section was displayed successfully.
+ 3. The Extraction page opened successfully.
+ 4. The Connect Equipment (SECS/GEM) section and its required fields were displayed.
+ 5. The Get Data option was clicked successfully and the required data was collected from the Brace application and displayed in BraceLink."
+TC ID - 025,Check the SML Files section and file selection.,"1. Open the BraceLink application.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the SML Definitions page from the Workspace.
+ 4. View the SML Files section displayed on the left side.
+ 5. Select an available SML file from the list.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed.
+ 3. The SML Definitions page should open.
+ 4. The available SML files should be shown in the list.
+ 5. The selected SML file should be highlighted.","1.BraceLink application opened successfully.
+ 2.Workspace section was displayed successfully.
+ 3.SML Definitions page opened successfully.
+ 4.Available SML files were displayed in the SML Files list.
+ 5.The selected SML file was highlighted successfully."
+TC ID - 026,Check the Upload option adds an SML file to the SML Files list.,"1. Open the BraceLink application.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the SML Definitions page.
+ 4. Click the Upload option and select a valid SML file.
+ 5. Complete the upload and view the SML Files list.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed.
+ 3. The SML Definitions page should open.
+ 4. The selected SML file should be accepted for upload.
+ 5. The uploaded SML file should be shown in the list.","1.BraceLink application opened successfully.
+ 2.Workspace section was displayed successfully.
+ 3.SML Definitions page opened successfully.
+ 4.The selected SML file was accepted and uploaded successfully.
+ 5.The uploaded SML file was displayed in the SML Files list successfully."
+TC ID - 027,Check the Download option downloads the selected SML content.,"1. Open the BraceLink application.
+ 2. Go to the Workspace section from the main page.
+ 3. Open the SML Definitions page.
+ 4. Select an SML file and view its content in the SML Content section.
+ 5. Click the Download option and check the downloaded file.","1. The BraceLink application should open properly.
+ 2. The Workspace section should be displayed.
+ 3. The SML Definitions page should open.
+ 4. The selected SML content should be displayed.
+ 5. The SML file should be downloaded with the displayed content.","1.BraceLink application opened successfully.
+ 2.Workspace section was displayed successfully.
+ 3.SML Definitions page opened successfully.
+ 4.The selected SML content was displayed correctly.
+ 5.The selected SML file was downloaded successfully with the displayed content."
+TC ID - 028,Verify the Connect and Start buttons establish the connection and initiate the selected test execution.,"1. Open the BraceLink application and select Brace.
+ 2. Search for and open Tool Characterization Testing.
+ 3. Select the required SML file and click Connect.
+ 4. Verify the connection status and click Start to begin test execution.
+ 5. Observe the Test Execution area and execution sta","1. BraceLink and Brace should open successfully.
+ 2. Tool Characterization Testing page should open successfully.
+ 3. The selected SML file should be loaded and connected successfully.
+ 4. The Start button should initiate the selected test execution.
+ 5. The Test Execution area should display the running test information and status.","1. BraceLink and Brace opened successfully.
+ 2. Tool Characterization Testing page opened successfully.
+ 3. The selected SML file was loaded and connected successfully.
+ 4. The Start button initiated the selected test execution successfully.
+ 5. The Test Execution area displayed the running test information and execution status correctly."
+TC ID - 029,Check the Overall Progress and Tests Summary show the execution status.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and start a test.
+ 4. View the Overall Progress and Tests Summary sections during execution.
+ 5. Check the Passed, Failed, and Not Run values shown in the summary.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open and the test should start.
+ 4. The Overall Progress and Tests Summary sections should be displayed.
+ 5. The Passed, Failed, and Not Run values should show the current status.",
+TC ID - 030,Check the Success Rate shows the current test execution result.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and start the required test.
+ 4. View the Success Rate section after the test cases are processed.
+ 5. Compare the displayed percentage with the completed test results.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open and the test should start.
+ 4. The Success Rate section should display the current percentage.
+ 5. The displayed percentage should match the completed test results.",
+TC ID - 031,"Check the Test Suite, SECS Log, Report, and Report Overview sections.","1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and view the available sections.
+ 4. Open Test Suite, SECS Log, Report, and Report Overview one by one.
+ 5. Check the information displayed in each selected section.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open with the available sections.
+ 4. The Test Suite, SECS Log, Report, and Report Overview sections should open.
+ 5. Each selected section should display its related information correctly.",
+TC ID - 032,Check the Communication and Event Reporting categories show their test cases.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and locate Test Suite Explorer.
+ 4. Select the Communication and Event Reporting categories from the explorer.
+ 5. Check the test cases displayed under both selected categories.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Test Suite Explorer should be displayed on the page.
+ 4. The Communication and Event Reporting categories should be available for selection.
+ 5. The related test cases should be displayed under each category.",
+TC ID - 033,Check the Equipment Configuration and Unknown categories show their test cases.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and locate Test Suite Explorer.
+ 4. Select the Equipment Configuration and Unknown categories from the explorer.
+ 5. Check the test cases displayed under both selected categories.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Test Suite Explorer should be displayed on the page.
+ 4. The Equipment Configuration and Unknown categories should be available for selection.
+ 5. The related test cases should be displayed under each category.",
+TC ID - 034,Check the SECS/GEM Transaction Console displays equipment communication details.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and select the SECS Log section.
+ 4. View the SECS/GEM Transaction Console shown in the selected section.
+ 5. Check the transaction console area for the equipment communication details.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open with the SECS Log section.
+ 4. The SECS/GEM Transaction Console should be displayed in the selected section.
+ 5. The transaction console should provide the area for monitoring equipment communication details.",
+TC ID - 035,Check the Execution Reports section displays the available report details.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and select the Report section.
+ 4. View the Execution Reports section displayed on the page.
+ 5. Check the report table for the available report details and column headings.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open with the Report section.
+ 4. The Execution Reports section should be displayed on the page.
+ 5. The report table should show the available headings for SML File, Generated Time, Device, Total, Pass, Fail, and Status.",
+TC ID - 036,Check the Upload Summaries option is available in the Execution Reports section.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and select the Report section.
+ 4. Locate the Upload Summaries option in the Execution Reports section.
+ 5. Click Upload Summaries and check the response shown by the application.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open with the Report section.
+ 4. The Upload Summaries option should be clearly displayed in the Execution Reports section.
+ 5. The application should provide the required option or interface to upload report summaries.",
+TC ID - 037,Check the Execution History section displays the previous test execution details.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and select the Report section.
+ 4. Locate and open the Execution History section from the report page.
+ 5. Check the previous execution details displayed in the history section.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open with the Report section.
+ 4. The Execution History section should be available and open correctly.
+ 5. The previous test execution details should be displayed in the history section.",
+TC ID - 038,Check the Raw JSON option displays the report data in JSON format.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and select the Report section.
+ 4. Locate and open the Raw JSON option from the report page.
+ 5. Check the report information displayed in the Raw JSON view.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open with the Report section.
+ 4. The Raw JSON option should be available and open correctly.
+ 5. The report information should be displayed in JSON format.",
+TC ID - 039,Check the SECS Logs section displays the communication log details.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and select the Report Overview section.
+ 4. Select SECS Logs from the available report details.
+ 5. Check the log table for the Time, Direction, Stream, Function, and Message details.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open with the Report Overview section.
+ 4. The SECS Logs section should be displayed with the report details.
+ 5. The log table should show the Time, Direction, Stream, Function, and Message columns.",
+TC ID - 040,Check the Test Results table displays the test execution details.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the page and select the Report section.
+ 4. Locate the Test Results table displayed on the page.
+ 5. Check the test details shown in the table.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The page should open with the Report section.
+ 4. The Test Results table should be displayed on the page.
+ 5. The test execution details should be displayed correctly.",
+TC ID - 041,Check the execution timing details are displayed correctly.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the page and view the current test execution details.
+ 4. Locate the Start Time, Elapsed Time, and Estimated Time Left details.
+ 5. Check the timing information displayed for the test.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The page should display the current test execution details.
+ 4. The Start Time, Elapsed Time, and Estimated Time Left should be displayed.
+ 5. The timing information should be displayed correctly for the test.",
+TC ID - 042,Check the test execution follows the displayed execution flow.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the page and start the required test execution.
+ 4. Observe the Send, Wait Response, and Validate stages during execution.
+ 5. Check that the stages are followed in the displayed order.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The page should open with the required test execution option.
+ 4. The Send, Wait Response, and Validate stages should be displayed.
+ 5. The execution should follow the stages in the displayed order.",
+TC ID - 043,Check the Scripts section is available under Tool Reports.,"1. Open the BraceLink application from the system.
+ 2. Search for Tool Characterization Testing from the available options.
+ 3. Open the Tool Characterization Testing page and select the Report section.
+ 4. Locate the Scripts section under the Tool Reports.
+ 5. Check that the Scripts section is displayed correctly.","1. The BraceLink application should open properly.
+ 2. Tool Characterization Testing should be available in the options.
+ 3. The Tool Characterization Testing page should open with the Report section.
+ 4. The Scripts section should be available under Tool Reports.
+ 5. The Scripts section should be displayed correctly.",
+TC ID - 044,Check the Auto Map function creates the required mappings.,"1. Open the BraceLink application from the system.
+ 2. Navigate to the MES Mapping section and open Smart Mapping.
+ 3. Select the required MES Family and Template for mapping.
+ 4. Click the Auto Map option available on the page.
+ 5. Check the mapping records displayed after the Auto Map process.","1. The BraceLink application should open properly.
+ 2. The MES Mapping and Smart Mapping page should open correctly.
+ 3. The required MES Family and Template should be selected.
+ 4. The Auto Map process should start and complete as expected.
+ 5. The required mapping records should be created or updated correctly.",
+TC ID - 045,Check the mapping status displays the current state correctly.,"1. Open the BraceLink application from the system.
+ 2. Navigate to the MES Mapping section and open Smart Mapping.
+ 3. Select the required mapping options displayed on the page.
+ 4. Locate the mapping status shown for the selected configuration.
+ 5. Check the status displayed after the mapping information is loaded.","1. The BraceLink application should open properly.
+ 2. The MES Mapping and Smart Mapping page should open correctly.
+ 3. The required mapping options should be available for selection.
+ 4. The mapping status should be displayed for the selected configuration.
+ 5. The current mapping status should be shown correctly.",
+TC ID - 046,Check each mapping category displays its corresponding records.,"1. Open the BraceLink application from the system.
+ 2. Navigate to the MES Mapping section and open Smart Mapping.
+ 3. Locate the Events, Alarms, Variables, and Payloads categories on the page.
+ 4. Select each category one by one to view its mapping records.
+ 5. Check the records displayed under each selected category.","1. The BraceLink application should open properly.
+ 2. The MES Mapping and Smart Mapping page should open correctly.
+ 3. The Events, Alarms, Variables, and Payloads categories should be available.
+ 4. Each category should open and display its related mapping records.
+ 5. The correct records should be displayed for each selected category.",
+TC ID - 047,Check the mapping category count matches the displayed records.,"1. Open the BraceLink application from the system.
+ 2. Navigate to the MES Mapping section and open Smart Mapping.
+ 3. Select one of the available mapping categories on the page.
+ 4. Note the record count displayed for the selected category.
+ 5. Compare the displayed count with the records available in the category.","1. The BraceLink application should open properly.
+ 2. The MES Mapping and Smart Mapping page should open correctly.
+ 3. The available mapping categories should be displayed.
+ 4. The record count should be shown for the selected category.
+ 5. The displayed count should match the available mapping records.",
+TC ID - 048,Check an individual mapping record can be selected.,"1. Open the BraceLink application from the system.
+ 2. Navigate to the MES Mapping section and open Smart Mapping.
+ 3. Locate the mapping records displayed in the selected category.
+ 4. Select the checkbox for one individual mapping record.
+ 5. Check the selection status of the selected record.","1. The BraceLink application should open properly.
+ 2. The MES Mapping and Smart Mapping page should open correctly.
+ 3. The mapping records should be displayed with selection options.
+ 4. The individual mapping record should be selected using its checkbox.
+ 5. The selected record should show the correct selection status.",
+TC ID - 049,Check the MES and equipment mapping fields show the correct details.,"1. Open the BraceLink application from the system.
+ 2. Navigate to the MES Mapping section and open Smart Mapping.
+ 3. Select an available mapping record from the displayed table.
+ 4. View the MES and equipment-related fields shown for the selected record.
+ 5. Check the mapping details displayed in the table.","1. The BraceLink application should open properly.
+ 2. The MES Mapping and Smart Mapping page should open correctly.
+ 3. The available mapping records should be displayed in the table.
+ 4. The MES and equipment-related fields should be available for the selected record.
+ 5. The mapping details should be displayed correctly.",
+TC ID - 050,Check whether the three-line menu displays the menu information correctly,"1. Open the Brace Link application.
+ 2. Click WorkSpace from the left-side menu.
+ 3. Check the three-line menu button at the top-left of the WorkSpace page.
+ 4. Click the three-line menu button.
+ 5. Check whether the menu information is displayed.","1. Brace Link application should open successfully.
+ 2. WorkSpace page should open successfully.
+ 3. Three-line menu button should be visible.
+ 4. Menu should open when the button is clicked.
+ 5. Menu items and information should be displayed correctly.",
+TC ID - 051,Check whether the “Project updated successfully” popup is clearly visible after updating the project,"1. Open the Brace Link application.
+ 2. Click WorkSpace and open Project Info.
+ 3. Click Edit Project and change any project detail.
+ 4. Click the Update button.
+ 5. Check the success popup displayed on the screen.","1. Brace Link application should open successfully.
+ 2. Project Info page should open successfully.
+ 3. Project details should be changed successfully.
+ 4. Project should be updated successfully.
+ 5. “Project updated successfully” popup should appear clearly and should be easy for the user to see.",
+TC ID - 052,Check whether the user can easily search and select a project by name,"1. Open the Brace Link application.
+ 2. Click WorkSpace from the left-side menu.
+ 3. Click the Current Project dropdown.
+ 4. Try to search for a project by entering its name.
+ 5. Check whether the required project can be found and selected easily","1. Brace Link application should open successfully.
+ 2. WorkSpace page should open successfully.
+ 3. Current Project dropdown should open.
+ 4. A search option should be available to enter the project name.
+ 5. The searched project should be displayed and easily selected.",
+TC ID - 053,Check whether the Current Project updates correctly when a project is selected or changed,"1. Open the Brace Link application and click Overview.
+ 2. Select a project from the Project Overview dropdown and verify that its project details are displayed correctly.
+ 3. Click WorkSpace and check the Project Info and Upload Document sections.
+ 4. Change the project using the Current Project dropdown in WorkSpace and check whether the selected project changes.
+ 5. Go back to Overview and check whether the same project is selected there.","1. Brace Link application should open successfully.
+ 2. Selected project details should be displayed correctly in Overview.
+ 3. WorkSpace should show the same selected project's information and documents correctly.
+ 4. Changing the Current Project should update the selected project throughout the application.
+ 5. Overview should show the same project selected in Current Project.",
+TC ID - 054,Check whether a project added from WorkSpace is immediately available in the Overview page,"1. Open the Brace Link application.
+ 2. Click WorkSpace and go to Project Info.
+ 3. Click Add Project, enter the project details, and save the project.
+ 4. Click Overview without closing or restarting the application.
+ 5. Check the Project Overview project dropdown for the newly added project.","1. Brace Link application should open successfully.
+ 2. WorkSpace Project Info page should open.
+ 3. New project should be added successfully.
+ 4. Overview page should open with the latest project data.
+ 5. Newly added project should be immediately available in the Project Overview dropdown.",
+TC ID - 055,Check whether a new project shows any document before uploading one,"1. Open the Brace Link application.
+ 2. Go to WorkSpace → Project Info and create a new project.
+ 3. Select the newly created project from Current Project.
+ 4. Open the Upload Document tab.
+ 5. Check the document list.","1. Brace Link application should open successfully.
+ 2. New project should be created successfully.
+ 3. Newly created project should be selected.
+ 4. Upload Document page should open successfully.
+ 5. No documents should be displayed because no document has been uploaded to the new project",
+TC ID - 056,Check whether a deleted file can be uploaded again for every document type,"1. Open Brace Link → WorkSpace → Upload Document and select any document type from the Choose dropdown.
+ 2. Upload a file and verify that it is added successfully.
+ 3. Delete the uploaded file.
+ 4. Upload the same deleted file again under the same document type.
+ 5. Repeat the test with the other available document types and check the result.","1. Brace Link application should open successfully.
+ 2. WorkSpace page should open successfully.
+ 3. Three-line menu button should be visible.
+ 4. Menu should open when the button is clicked.
+ 5. Menu items and information should be displayed correctly.",
+TC ID - 057,Check whether the uploaded document appears in the document list after successful upload,"1. Open Brace Link application.
+ 2. Click WorkSpace from the left-side menu.
+ 3. Open Upload Document page.
+ 4. Select Communication Logs, select a file, and click the Upload button.
+ 5. Check the upload message and the document list below the upload section.","1. Brace Link application should open successfully.
+ 2. WorkSpace page should open successfully.
+ 3. Upload Document page should open successfully.
+ 4. Communication Logs should be selected and the file should upload successfully.
+ 5. Upload success message should be displayed and the uploaded file should appear in the document list with its File Name, Document ID, Document Type, Pages, Status, and Action.",
+TC ID - 058,Check whether the uploaded document appears in the document list after a successful upload,"1. Open Brace Link application.
+ 2. Click WorkSpace from the left-side menu.
+ 3. Open Upload Document page.
+ 4. Select Equipment Data, select a file, and click the Upload button.
+ 5. Check the upload message and the document list below the upload section.","1. Brace Link application should open successfully.
+ 2. WorkSpace page should open successfully.
+ 3. Upload Document page should open successfully.
+ 4. Equipment Data should be selected and the file should upload successfully.
+ 5. Upload success message should be displayed and the uploaded file should appear in the document list with its File Name, Document ID, Document Type, Pages, Status, and Action.",
+TC ID - 059,Check whether the uploaded document appears in the document list after a successful upload,"1. Open Brace Link application.
+ 2. Click WorkSpace from the left-side menu.
+ 3. Open Upload Document page.
+ 4. Select SECS GEM Scripts, select a file, and click the Upload button.
+ 5. Check the upload message and the document list below the upload section","1. Brace Link application should open successfully.
+ 2. WorkSpace page should open successfully.
+ 3. Upload Document page should open successfully.
+ 4. SECS GEM Scripts should be selected and the file should upload successfully.
+ 5. Upload success message should be displayed and the uploaded file should appear in the document list with File Name, Document ID, Document Type, Pages, Status, and Action.",
+TC ID - 060,Check whether the BraceLink project is displayed correctly in the Project Explorer.,"1. Navigate to the Smart Automation Code section.
+2. Open the Smart Code Generator page.
+3. Locate the Project Explorer section.
+4. Check the root project displayed in the explorer.
+5. Verify the available folders under the BraceLink project.","1. Smart Automation Code section should open successfully.
+2. Smart Code Generator page should load correctly.
+3. Project Explorer should be displayed.
+4. BraceLink project should be shown correctly.
+5. Available project folders should be displayed properly.",
+TC ID - 061,Check whether selecting a configuration file displays its content in the code area.,"1. Navigate to the Smart Code Generator page.
+2. Expand the Configuration folder.
+3. Select an available JSON configuration file.
+4. Wait for the selected file to open.
+5. Check the content shown in the code area.","1. Smart Code Generator page should open successfully.
+2. Configuration folder should expand correctly.
+3. The selected JSON file should open successfully.
+4. File content should load without errors.
+5. The correct content should be displayed in the code area.",
+TC ID - 062,Check whether selecting different files updates the displayed file content.,"1. Navigate to the Smart Code Generator page.
+2. Select a file from Project Explorer.
+3. Check the content displayed in the code area.
+4. Select another available file.
+5. Check the updated content in the code area.","1. Smart Code Generator page should open successfully.
+2. The first file should be selected successfully.
+3. Its related content should be displayed.
+4. Another file should open successfully.
+5. The code area should update with the selected file content.",
+TC ID - 063,Check whether a generated C# file can be selected and its content displayed.,"1. Navigate to the Smart Code Generator page.
+2. Expand the RunTimeGenerated folder.
+3. Select an available .cs file.
+4. Wait for the file to load in the code area.
+5. Check the displayed source code.","1. Smart Code Generator page should open successfully.
+2. RunTimeGenerated folder should expand correctly.
+3. The selected C# file should open successfully.
+4. File content should load correctly.
+5. The correct source code should be displayed.",
+TC ID - 064,Check whether Project Explorer folders can be collapsed correctly.,"1. Navigate to the Smart Code Generator page.
+2. Expand a folder in Project Explorer.
+3. Verify the files inside the folder.
+4. Collapse the same folder.
+5. Check the Project Explorer after collapsing.","1. Smart Code Generator page should open successfully.
+2. The selected folder should expand successfully.
+3. Files inside the folder should be visible.
+4. The folder should collapse successfully.
+5. The files should be hidden after collapsing.",
+TC ID - 065,Check whether the Select All checkbox selects all MES mapping records.,"1. Navigate to MES Mapping and open Smart Mapping.
+2. Select a category with multiple mapping records.
+3. Locate the checkbox in the table header.
+4. Click the Select All checkbox.
+5. Check the selection status of all records.","1. Smart Mapping page should open successfully.
+2. Mapping records should be displayed.
+3. Header checkbox should be available.
+4. Select All action should work successfully.
+5. All displayed mapping records should be selected.",
+TC ID - 066,Check whether the Select All checkbox can deselect all MES mapping records.,"1. Navigate to the Smart Mapping page.
+2. Select all mapping records using the header checkbox.
+3. Verify that all records are selected.
+4. Click the header checkbox again.
+5. Check the selection status of all records.","1. Smart Mapping page should open successfully.
+2. All records should be selected successfully.
+3. Selected status should be shown for each record.
+4. The checkbox should clear the selection.
+5. All mapping records should be deselected.",
+TC ID - 067,Check whether all MES mapping columns can be viewed using horizontal scrolling.,"1. Navigate to the Smart Mapping page.
+2. Select a category with multiple mapping columns.
+3. Locate the horizontal scrollbar below the table.
+4. Scroll the table from left to right.
+5. Check the hidden columns and their data.","1. Smart Mapping page should open successfully.
+2. Mapping table should display the available records.
+3. Horizontal scrollbar should be available when needed.
+4. The table should scroll smoothly.
+5. All columns and mapping data should be visible correctly.",
+TC ID - 068,Check whether the Tool Characterization Testing page displays the connection fields correctly.,"1. Navigate to the Tool Characterization Testing section.
+2. Wait for the page to load completely.
+3. Check the IP Address field.
+4. Check the Port and Device ID fields.
+5. Check the Connect button.","1. Tool Characterization Testing section should open successfully.
+2. The page should load correctly.
+3. IP Address field should be displayed.
+4. Port and Device ID fields should be displayed.
+5. Connect button should be visible and accessible.",
+TC ID - 069,"Check whether the user can enter and modify the IP Address, Port, and Device ID.","1. Navigate to Tool Characterization Testing.
+2. Enter a valid value in the IP Address field.
+3. Enter valid Port and Device ID values.
+4. Modify the entered values.
+5. Check whether the updated values are retained.","1. Tool Characterization Testing page should open successfully.
+2. IP Address field should accept valid input.
+3. Port and Device ID fields should accept valid values.
+4. Entered values should be editable.
+5. Updated values should be displayed correctly.",
+TC ID - 070,Check whether the Connect button initiates equipment connection using the entered details.,"1. Navigate to Tool Characterization Testing.
+2. Enter valid IP Address details.
+3. Enter valid Port and Device ID values.
+4. Click the Connect button.
+5. Check the connection response displayed by the application.","1. Tool Characterization Testing page should open successfully.
+2. IP Address should accept the entered value.
+3. Port and Device ID should accept valid values.
+4. Connection process should be initiated.
+5. Appropriate connection status should be displayed.",
+TC ID - 071,Check whether the SML Files dropdown displays the available SML files.,"1. Navigate to Tool Characterization Testing.
+2. Locate the SML Files dropdown.
+3. Click the dropdown.
+4. Check the available SML files.
+5. Verify that an SML file can be selected.","1. Tool Characterization Testing page should open successfully.
+2. SML Files dropdown should be displayed.
+3. The dropdown should open successfully.
+4. Available SML files should be listed.
+5. An available SML file should be selectable.",
+TC ID - 072,Check whether selecting an SML file updates the selected file value.,"1. Navigate to Tool Characterization Testing.
+2. Open the SML Files dropdown.
+3. Select an available SML file.
+4. Check the selected value in the field.
+5. Verify the displayed file name.","1. Tool Characterization Testing page should open successfully.
+2. SML Files dropdown should open correctly.
+3. The selected SML file should be accepted.
+4. The selected value should update successfully.
+5. The correct file name should be displayed.",
+TC ID - 073,Check whether the selected SML file remains associated with the test execution.,"1. Navigate to Tool Characterization Testing.
+2. Configure the required connection details.
+3. Select an available SML file.
+4. Start the test execution.
+5. Check the selected SML file during execution.","1. Tool Characterization Testing page should open successfully.
+2. Required connection details should be configured.
+3. The SML file should be selected successfully.
+4. Test execution should start successfully.
+5. The selected SML file should remain associated with the test.",
+TC ID - 074,Check whether the execution status changes when a test starts.,"1. Navigate to Tool Characterization Testing.
+2. Complete the required test configuration.
+3. Check the initial execution status.
+4. Click the Start button.
+5. Observe the execution status after starting","1. Tool Characterization Testing page should open successfully.
+2. Required details should be configured correctly.
+3. Initial execution status should be displayed.
+4. Test execution should start successfully.
+5. Execution status should update according to the test state.",
+TC ID - 075,Check whether mandatory project fields are validated when creating a new project.,"1. Navigate to WorkSpace and open Project Info.
+2. Click the Add Project option.
+3. Leave the required project fields empty.
+4. Try to save the project details.
+5. Check the validation message displayed.","1. Project Info page should open successfully.
+2. Add Project form should be displayed.
+3. Required fields should remain empty for validation.
+4. The project should not be saved.
+5. Appropriate validation messages should be displayed.",
+TC ID - 076,Check whether a duplicate project name is handled correctly.,"1. Navigate to WorkSpace and open Project Info.
+2. Click the Add Project option.
+3. Enter the name of an existing project.
+4. Enter valid details in the remaining required fields.
+5. Try to save the project.","1. Project Info page should open successfully.
+2. Add Project form should be displayed.
+3. Duplicate project name should be accepted for validation.
+4. Other required details should be entered successfully.
+5. Duplicate project should be prevented or a validation message should appear.",
+TC ID - 077,Check whether project details remain unchanged when editing is cancelled.,"1. Navigate to WorkSpace and open Project Info.
+2. Select an existing project for editing.
+3. Modify one or more project details.
+4. Cancel or close the edit without saving.
+5. Check the project details again.","1. Project Info page should open successfully.
+2. Selected project should open in edit mode.
+3. Project details should allow modification.
+4. Unsaved changes should be cancelled.
+5. Original project details should remain unchanged.",
+TC ID - 078,Check whether updated project information remains after navigation.,"1. Navigate to WorkSpace and open Project Info.
+2. Edit the required project information.
+3. Save the updated project details.
+4. Navigate to another section and return to Project Info.
+5. Check the saved project information.","1. Project Info page should open successfully.
+2. Project details should be editable.
+3. Updated information should save successfully.
+4. Navigation between sections should work correctly.
+5. Saved project information should remain unchanged.",
+TC ID - 079,Check whether project names with leading or trailing spaces are handled correctly.,"1. Navigate to Project Info and select Add Project.
+2. Enter a project name with leading or trailing spaces.
+3. Enter valid values in the remaining fields.
+4. Save the project details.
+5. Check the project name displayed in the application.","1. Add Project form should open successfully.
+2. Project name should be validated correctly.
+3. Other required details should be accepted.
+4. Project should follow the defined validation rules.
+5. Project name should be displayed according to the application rules.",
+TC ID - 080,Check whether uploading is prevented when no file is selected.,"1. Navigate to WorkSpace and open Upload Document.
+2. Select a valid document type.
+3. Do not select any file.
+4. Try to click the Upload option.
+5. Check the application response.","1. Upload Document page should open successfully.
+2. Document type should be selectable.
+3. No file should be shown as selected.
+4. Upload should be prevented without a file.
+5. Appropriate validation should be displayed.",
+TC ID - 081,Check whether a document type is required before uploading a file.,"1. Click on WorkSpace and open Upload Document.
+2. Leave the document type unselected.
+3. Browse and select a valid file.
+4. Try to upload the selected file.
+5. Check the validation message.","1. Upload Document page should open successfully.
+2. Document type should remain unselected.
+3. The selected file should be displayed.
+4. Upload should be prevented without a document type.
+5. Appropriate validation should be displayed.",
+TC ID - 082,Check whether the selected file name is displayed before uploading.,"1. Click on WorkSpace and open Upload Document.
+2. Select the required document type.
+3. Click on the Browse option.
+4. Select a valid document from the system.
+5. Check the selected file name in the upload area.","1. Upload Document page should open successfully.
+2. Document type should be selected successfully.
+3. File browser should open successfully.
+4. Selected file should be accepted.
+5. The correct file name should be displayed.",
+TC ID - 083,Check whether uploading the same document again is handled correctly.,"1. Click on Upload Document for the selected project.
+2. Select the required document type.
+3. Upload a valid document successfully.
+4. Select the same document again for upload.
+5. Check the result of the second upload.","1. Upload Document page should open successfully.
+2. Required document type should be selected.
+3. First document upload should complete successfully.
+4. Duplicate file should be checked by the application.
+5. Duplicate upload should be handled according to the application rules.",
+TC ID - 084,Check whether document action buttons work on the correct document row.,"1. Click on Upload Document with multiple documents.
+2. Locate the Action column.
+3. Select an action for one specific document.
+4. Check which document is processed.
+5. Return to the document list and verify the selected row.","1. Multiple documents should be displayed.
+2. Action controls should be available for each document.
+3. Selected action should be triggered successfully.
+4. Only the selected document should be processed.
+5. The correct document should remain associated with the action.",
+TC ID - 085,Check whether deleting a document removes only the selected document,"1. Click on Upload Document with multiple documents.
+2. Identify the document to be deleted.
+3. Click on the Delete action for that document.
+4. Confirm the deletion if confirmation is displayed.
+5. Check the updated document list.","1. Multiple documents should be displayed correctly.
+2. Each document should be identifiable separately.
+3. Delete action should apply to the selected document.
+4. Selected document should be deleted successfully.
+5. Other documents should remain unchanged in the list.",
+TC ID - 086,Check whether the Data Variables tab displays its corresponding records.,"1. Click on the Extraction page.
+2. Select a document with extraction information.
+3. Click on the Data Variables tab.
+4. Review the records displayed in the table.
+5. Verify that the records belong to Data Variables.","1. Extraction page should open successfully.
+2. Selected document should load successfully.
+3. Data Variables tab should open correctly.
+4. Data Variable records should be displayed.
+5. Displayed records should match the selected tab.",
+TC ID - 087,Check whether the Events tab displays event records correctly.,"1. Click on the Extraction page.
+2. Select a document containing event information.
+3. Click on the Events tab.
+4. Review the event records displayed.
+5. Switch to another tab and return to Events.","1. Extraction page should open successfully.
+2. Selected document should load correctly.
+3. Events tab should open successfully.
+4. Event records should be displayed correctly.
+5. Correct event records should remain available when returning to the tab.",
+TC ID - 088,Check whether the States tab displays state information correctly.,"1. Click on WorkSpace and open Extraction.
+2. Select a document containing state information.
+3. Click on the States tab.
+4. Review the displayed state records.
+5. Verify the data against the selected document.","1. Extraction page should open successfully.
+2. Selected document should load successfully.
+3. States tab should open correctly.
+4. State records should be displayed.
+5. Displayed state information should match the selected document.",
+TC ID - 089,Check whether the Reports tab displays report-related information correctly.,"1. Click on WorkSpace and open Extraction.
+2. Select a document with extraction information.
+3. Click on the Reports tab.
+4. Review the report information displayed.
+5. Check that the information belongs to the selected document.","1. Extraction page should open successfully.
+2. Selected document should load correctly.
+3. Reports tab should open successfully.
+4. Available report information should be displayed.
+5. Report information should match the selected document.",
+TC ID - 090,Check whether changing extraction tabs preserves the selected document.,"1. Click on Extraction and select a document.
+2. Check the selected document name.
+3. Click on the Status Variables tab.
+4. Switch between different extraction tabs.
+5. Check the selected document after switching tabs.","1. Extraction page should open successfully.
+2. Document should be selected successfully.
+3. Status Variables tab should display correctly.
+4. Other extraction tabs should open successfully.
+5. The selected document should remain unchanged.",
+TC ID - 091,Check whether changing the selected SML file updates the displayed SML content.,"1. Click on WorkSpace and open SML Definitions.
+2. Select an available SML file.
+3. Check the displayed SML content.
+4. Select another available SML file.
+5. Compare the displayed content.","1. SML Definitions page should open successfully.
+2. First SML file should be selected successfully.
+3. Its related content should be displayed.
+4. Second SML file should open successfully.
+5. Displayed content should update to the selected file.",
+TC ID - 092,Check whether uploading an SML file without selecting a file is prevented.,"1. Click on the SML Definitions page.
+2. Locate the Upload option.
+3. Do not select any SML file.
+4. Try to perform the upload.
+5. Check the application response.","1. SML Definitions page should open successfully.
+2. Upload option should be available.
+3. No file should be selected.
+4. Empty upload should be prevented.
+5. Appropriate validation should be displayed.",
+TC ID - 093,Check whether connection is prevented when required connection fields are empty.,"1. Click on Tool Characterization Testing.
+2. Leave the IP Address field empty.
+3. Leave Port or Device ID fields empty.
+4. Click on the Connect button.
+5. Check the application response.","1. Tool Characterization Testing page should open successfully.
+2. Empty IP Address should be detected.
+3. Missing connection details should be detected.
+4. Connection should be prevented.
+5. Appropriate validation should be displayed.",
+TC ID - 094,Check whether an invalid IP Address is handled correctly during connection.,"1. Click on Tool Characterization Testing.
+2. Enter an invalid IP Address.
+3. Enter valid Port and Device ID values.
+4. Click on the Connect button.
+5. Check the connection result.","1. Tool Characterization Testing page should open successfully.
+2. Invalid IP Address should be detected or rejected.
+3. Other fields should accept valid values.
+4. Invalid connection should not complete successfully.
+5. Appropriate error or validation should be displayed.",
+TC ID - 095,Check whether test execution is prevented when equipment connection is unavailable.,"1. Click on Tool Characterization Testing.
+2. Do not establish a valid equipment connection.
+3. Select an available SML file.
+4. Try to start the test execution.
+5. Check the execution response.","1. Tool Characterization Testing page should open successfully.
+2. Connection should remain unavailable.
+3. SML file should be selectable.
+4. Test execution should be prevented or handled safely.
+5. Appropriate connection or execution status should be displayed.",
+TC ID - 096,Check whether the Test Suite Explorer displays the available test categories.,"1. Click on Tool Characterization Testing.
+2. Locate the Test Suite Explorer.
+3. Review the available test categories.
+4. Select and expand one of the categories.
+5. Check the test cases displayed under the category.","1. Tool Characterization Testing page should open successfully.
+2. Test Suite Explorer should be displayed.
+3. Available test categories should be visible.
+4. Selected category should expand successfully.
+5. Related test cases should be displayed correctly.",
+TC ID - 097,Check whether a test suite category can be expanded and collapsed correctly.,"1. Click on Tool Characterization Testing.
+2. Select an available test suite category.
+3. Expand the selected category.
+4. Verify the displayed test cases.
+5. Collapse the category again.","1. Tool Characterization Testing page should open successfully.
+2. Test suite category should be displayed.
+3. Selected category should expand successfully.
+4. Related test cases should be visible.
+5. Category should collapse and hide its test cases.",
+TC ID - 098,Check whether selecting a test case updates the Current Test Detail section.,"1. Click on Tool Characterization Testing.
+2. Locate the Test Suite Explorer.
+3. Select an available test case.
+4. Check the Current Test Detail section.
+5. Select another test case and compare the details.","1. Tool Characterization Testing page should open successfully.
+2. Test Suite Explorer should be displayed.
+3. Selected test case should be highlighted.
+4. Current Test Detail should show the selected test information.
+5. Details should update when another test is selected.",
+TC ID - 099,Check whether selecting a test case updates the Execution Flow section.,"1. Click on Tool Characterization Testing.
+2. Select a test case from Test Suite Explorer.
+3. Locate the Execution Flow section.
+4. Review the steps displayed for the selected test.
+5. Select another test case and check the flow.","1. Tool Characterization Testing page should open successfully.
+2. Test case should be selected successfully.
+3. Execution Flow section should be displayed.
+4. Flow should match the selected test case.
+5. Execution Flow should update for the newly selected test.",
+TC ID - 100,Check whether the Test Results section displays the result for the selected test.,"1. Click on Tool Characterization Testing with test results available.
+2. Select a test case from Test Suite Explorer.
+3. Locate the Test Results section.
+4. Review the displayed result information.
+5. Compare the result with the selected test case.","1. Tool Characterization Testing page should open successfully.
+2. Selected test case should be displayed correctly.
+3. Test Results section should be available.
+4. Result information should be displayed.
+5. Displayed result should match the selected test case.",
+TC ID - 101,Check whether changing the MES Family updates the available mapping information.,"1. Click on MES Mapping and open Smart Mapping.
+2. Check the currently selected MES Family.
+3. Select another available MES Family.
+4. Wait for the mapping information to refresh.
+5. Check the updated mapping records.","1. Smart Mapping page should open successfully.
+2. Current MES Family should be displayed.
+3. Another MES Family should be selectable.
+4. Mapping information should refresh successfully.
+5. Records should match the newly selected MES Family.",
+TC ID - 102,Check whether changing the Template updates the mapping records.,"1. Click on MES Mapping and open Smart Mapping.
+2. Check the currently selected Template.
+3. Select another available Template.
+4. Wait for the mapping table to refresh.
+5. Check the displayed mapping records.","1. Smart Mapping page should open successfully.
+2. Current Template should be displayed.
+3. Another Template should be selectable.
+4. Mapping table should refresh successfully.
+5. Records should match the selected Template.",
+TC ID - 103,Check whether mapping records remain correctly associated after Auto Map.,"1. Click on MES Mapping and open Smart Mapping.
+2. Select the required MES Family and Template.
+3. Review the existing mapping values.
+4. Click on the Auto Map option.
+5. Check the mapping records after the process completes.","1. Smart Mapping page should open successfully.
+2. MES Family and Template should be selected successfully.
+3. Existing mapping values should be displayed.
+4. Auto Map should complete successfully.
+5. Mapping records should remain correctly associated with their values.",
+TC ID - 104,Check whether selecting different file types displays the correct content in Smart Code Generator.,"1. Click on Smart Automation Code.
+2. Expand the Configuration folder and select a JSON file.
+3. Check the displayed JSON file content.
+4. Select a .cs file from the RunTimeGenerated folder.
+5. Check the displayed C# file content.","1. Smart Code Generator page should open successfully.
+2. JSON file should open successfully.
+3. Correct JSON content should be displayed.
+4. C# file should open successfully.
+5. Correct C# file content should be displayed.",
+TC ID - 105,Check whether Project Explorer remains usable after switching to another application section.,"1. Click on Smart Automation Code.
+2. Expand the project folders in Project Explorer.
+3. Click on another application section.
+4. Return to Smart Automation Code.
+5. Check the Project Explorer and project structure.","1. Smart Code Generator page should open successfully.
+2. Project folders should expand correctly.
+3. Switching to another section should work successfully.
+4. Smart Automation Code should open correctly.
+5. Project Explorer should load without errors or incorrect data.",
+TC ID - 106,Check whether Configuration files display the correct JSON file extension.,"1. Click on Smart Automation Code.
+2. Locate the BraceLink project in Project Explorer.
+3. Expand the Configuration folder.
+4. Review the displayed configuration file names.
+5. Check the file extensions of the listed files.","1. Smart Code Generator page should open successfully.
+2. BraceLink project should be displayed correctly.
+3. Configuration folder should expand successfully.
+4. Configuration files should be displayed.
+5. Configuration files should show the correct JSON extension.",
+TC ID - 107,Check whether generated source files display the correct .cs file extension.,"1. Click on Smart Automation Code.
+2. Locate the BraceLink project in Project Explorer.
+3. Expand the RunTimeGenerated folder.
+4. Review the generated file names displayed.
+5. Check the file extensions of the generated files.","1. Smart Code Generator page should open successfully.
+2. BraceLink project should be displayed correctly.
+3. RunTimeGenerated folder should expand successfully.
+4. Generated source files should be displayed.
+5. Generated files should show the correct .cs extension.",
+TC ID - 108,Verify the Smart Code Generator page opens and displays the required sections.,"1. Open the BraceLink application from the system.
+ 2. Navigate to the Smart Automation Code section.
+ 3. Open the Smart Code Generator page.
+ 4. Check the Project Explorer and code display area.
+ 5. Verify the page is loaded without UI errors.","1. The BraceLink application should open properly.
+ 2. The Smart Automation Code section should be available.
+ 3. The Smart Code Generator page should open successfully.
+ 4. The Project Explorer and code display area should be visible.
+ 5. No unexpected UI error should be displayed.",
+TC ID - 109,Verify the Configuration folder can be expanded and its contents are displayed.,"1. Open the Smart Code Generator page.
+ 2. Locate the Configuration folder in Project Explorer.
+ 3. Expand the Configuration folder.
+ 4. Check the files displayed under the folder.
+ 5. Collapse and expand the folder again.","1. The Smart Code Generator page should open successfully.
+ 2. The Configuration folder should be visible.
+ 3. The folder should expand successfully.
+ 4. Configuration files should be displayed.
+ 5. The folder should expand and collapse without errors.",
+TC ID - 110,Verify the available JSON configuration files are displayed correctly.,"1. Open the Smart Code Generator page.
+ 2. Expand the Configuration folder.
+ 3. Review the files listed under the folder.
+ 4. Verify the displayed file names.
+ 5. Check that the file list is readable and complete.","1. The Configuration folder should be available.
+ 2. The folder should expand successfully.
+ 3. JSON configuration files should be displayed.
+ 4. Expected file names should be shown correctly.
+ 5. No unexpected or duplicate file entries should be displayed.",
+TC ID - 111,Verify the RunTimeGenerated folder can be expanded and its generated files are displayed.,"1. Open the Smart Code Generator page.
+ 2. Locate the RunTimeGenerated folder.
+ 3. Expand the folder.
+ 4. Review the files displayed under it.
+ 5. Collapse and expand the folder again.","1. The page should open successfully.
+ 2. The RunTimeGenerated folder should be visible.
+ 3. The folder should expand successfully.
+ 4. Generated C# files should be displayed.
+ 5. The folder should expand and collapse without errors.",
+TC ID - 112,Verify the code display updates when different files are selected.,"1. Open the Smart Code Generator page.
+ 2. Select ConnectionConfig.json.
+ 3. Select EventMappings.json.
+ 4. Select AlarmEngine.cs.
+ 5. Check the code display after each selection.","1. The page should open successfully.
+ 2. ConnectionConfig.json content should be displayed.
+ 3. EventMappings.json content should replace the previous content.
+ 4. AlarmEngine.cs content should replace the JSON content.
+ 5. The code area should always show the currently selected file.",
+TC ID - 113,Verify the code area correctly switches between configuration and generated files.,"1. Open the Smart Code Generator page.
+ 2. Select a configuration JSON file.
+ 3. Select a generated C# file.
+ 4. Switch back to the configuration file.
+ 5. Check the displayed content after each switch.","1. The page should open successfully.
+ 2. The selected JSON content should be displayed.
+ 3. The selected C# content should be displayed.
+ 4. The JSON content should be restored when selected again.
+ 5. No stale or mixed file content should be displayed.",
+TC ID - 114,Verify the system handles invalid JSON configuration correctly.,"1. Open the Smart Code Generator page.
+ 2. Open a configuration JSON file.
+ 3. Introduce invalid JSON syntax in the test configuration.
+ 4. Perform the available code-generation operation.
+ 5. Check the system response and error log.","1. The configuration file should be accessible.
+ 2. The test configuration should contain invalid JSON.
+ 3. The system should detect the invalid syntax.
+ 4. Code generation should be rejected or stopped.
+ 5. A suitable error should be displayed or logged without application crash.",
+TC ID - 115,Verify the system handles a missing required configuration file.,"1. Open the Smart Code Generator page.
+ 2. Identify a required configuration file.
+ 3. Make the required file unavailable in the test environment.
+ 4. Perform the available code-generation operation.
+ 5. Check the system response.","1. The page should open successfully.
+ 2. The required configuration file should be identified.
+ 3. The system should detect that the file is unavailable.
+ 4. Code generation should not proceed with incomplete input.
+ 5. An appropriate error should be displayed or logged without application crash.",
+TC ID - 116,Verify the system handles an empty configuration file correctly.,"1. Open the Smart Code Generator page.
+ 2. Select or prepare an empty configuration file.
+ 3. Load the empty file in the Configuration folder.
+ 4. Perform the available code-generation operation.
+ 5. Check the generated output and system response.","1. The page should open successfully.
+ 2. The empty configuration file should be accessible.
+ 3. The system should identify that the file contains no usable data.
+ 4. Generation should be handled according to validation rules.
+ 5. The application should remain stable and should not generate invalid output.",
+TC ID - 117,Verify the system handles configuration data with missing required fields.,"1. Open the Smart Code Generator page.
+ 2. Prepare a configuration file with required fields missing.
+ 3. Load the incomplete configuration file.
+ 4. Perform the available code-generation operation.
+ 5. Check the system response and generated output.","1. The page should open successfully.
+ 2. The incomplete configuration should be accessible.
+ 3. The system should detect missing required fields.
+ 4. Generation should be rejected or handled according to validation rules.
+ 5. An appropriate error should be displayed or logged and the application should remain stable.",
+TC ID - 118,Verify the system can process a large valid configuration file within supported limits.,"1. Open the Smart Code Generator page.
+ 2. Prepare a large valid configuration file.
+ 3. Load the configuration file.
+ 4. Perform the available code-generation operation.
+ 5. Check processing completion and generated files.","1. The page should open successfully.
+ 2. The large configuration file should be accessible.
+ 3. The system should load the complete configuration.
+ 4. Code generation should complete within supported limits.
+ 5. Generated files should contain the expected configuration-related content without truncation.",
+TC ID - 119,Verify configuration values containing supported special characters are processed correctly.,"1. Open the Smart Code Generator page.
+ 2. Prepare a valid configuration containing supported special characters.
+ 3. Load the configuration file.
+ 4. Perform the available code-generation operation.
+ 5. Review the generated output.","1. The page should open successfully.
+ 2. The special-character configuration should be accepted if supported.
+ 3. The complete configuration should be loaded.
+ 4. Code generation should complete without data corruption.
+ 5. Supported special characters should be preserved correctly in the generated output.",
+TC ID - 120,Verify C# code is generated successfully using valid configuration files.,"1. Open the Smart Code Generator page.
+ 2. Verify the required configuration files contain valid data.
+ 3. Perform the available code-generation operation.
+ 4. Wait for generation to complete.
+ 5. Check the RunTimeGenerated folder.","1. The Smart Code Generator page should open successfully.
+ 2. Required configuration files should be valid and available.
+ 3. Code generation should start successfully.
+ 4. Generation should complete without errors.
+ 5. Expected C# files should be created or updated in RunTimeGenerated.",
+TC ID - 121,Verify all expected generated C# files are created after successful generation.,"1. Perform code generation using valid configuration files.
+ 2. Open the RunTimeGenerated folder.
+ 3. Review the generated file list.
+ 4. Compare the list with the expected output.
+ 5. Open the generated files for verification.","1. Code generation should complete successfully.
+ 2. RunTimeGenerated should be accessible.
+ 3. Expected generated C# files should be listed.
+ 4. No required generated file should be missing.
+ 5. Generated files should open and display their source code correctly.",
+TC ID - 122,Verify generated C# files contain valid syntax and expected code structures.,"1. Generate C# code using valid configuration files.
+ 2. Open the RunTimeGenerated folder.
+ 3. Select each required generated C# file.
+ 4. Review classes, methods, and mappings in the code.
+ 5. Validate the generated code using the supported validation or build process.","1. Code generation should complete successfully.
+ 2. Generated C# files should be available.
+ 3. Each file should display its source code.
+ 4. Expected classes, methods, and mappings should be present.
+ 5. The generated code should pass the supported syntax or build validation.",
+TC ID - 123,Verify repeated code generation does not create unwanted duplicate files.,"1. Generate code using valid configuration files.
+ 2. Record the generated file list.
+ 3. Run the same code-generation operation again.
+ 4. Compare the file list before and after regeneration.
+ 5. Check the generated file contents.","1. The first generation should complete successfully.
+ 2. Generated files should be recorded.
+ 3. The second generation should complete without errors.
+ 4. No unwanted duplicate files should be created.
+ 5. Generated content should remain consistent with the configuration.",
+TC ID - 124,Verify generated code is updated when configuration data is changed and regenerated.,"1. Generate code using an initial valid configuration.
+ 2. Change a supported configuration value.
+ 3. Run the code-generation operation again.
+ 4. Open the affected generated C# file.
+ 5. Compare the generated content with the updated configuration.","1. Initial code generation should complete successfully.
+ 2. The configuration change should be saved or loaded successfully.
+ 3. Regeneration should complete without errors.
+ 4. The affected generated file should be updated.
+ 5. The generated code should reflect the changed configuration value.",
+TC ID - 125,Verify code-generation failures are handled without crashing the application.,"1. Open the Smart Code Generator page.
+ 2. Provide an invalid or unsupported generation condition.
+ 3. Perform the available code-generation operation.
+ 4. Observe the application response and logs.
+ 5. Verify the Smart Code Generator remains accessible.","1. The Smart Code Generator page should open successfully.
+ 2. The invalid condition should be detected.
+ 3. Generation should fail safely.
+ 4. An appropriate error should be displayed or logged.
+ 5. The application should remain stable and responsive.",
+TC ID - 126,Verify the application remains responsive while processing and generating code.,"1. Open the Smart Code Generator page.
+ 2. Load a valid configuration set suitable for generation.
+ 3. Start the available code-generation operation.
+ 4. Observe the application during processing.
+ 5. Check the application after generation completes.","1. The Smart Code Generator page should open successfully.
+ 2. The valid configuration should load successfully.
+ 3. Code generation should start normally.
+ 4. The application should remain responsive without unexpected crash.
+ 5. The page should remain usable after generation completes.",
+TC ID - 127,Verify generated files consistently match the configured input data after generation.,"1. Open the Smart Code Generator page.
+ 2. Load valid configuration files.
+ 3. Perform the code-generation operation.
+ 4. Review the generated C# files.
+ 5. Compare generated content with the corresponding configuration data.","1. The configuration files should load successfully.
+ 2. The input data should be valid and complete.
+ 3. Code generation should complete successfully.
+ 4. Generated C# files should be available and readable.
+ 5. Generated output should consistently correspond to the configured input data.",
+TC ID - 128,Verify the Edit button is available when a configuration file is selected.,"1. Open the BraceLink application from the system.
+ 2. Navigate to the Smart Automation Code section.
+ 3. Select PayloadDefinitions.json from the Configuration folder.
+ 4. Check the file content displayed in the code area.
+ 5. Verify the Edit button is available.","1. The BraceLink application should open properly.
+ 2. The Smart Automation Code section should be available.
+ 3. PayloadDefinitions.json should be selected successfully.
+ 4. The file content should be displayed correctly.
+ 5. The Edit button should be visible and available for the selected file.",
+TC ID - 129,Verify the selected configuration file can be edited using the Edit button.,"1. Open the Smart Code Generator page.
+ 2. Select PayloadDefinitions.json from the Configuration folder.
+ 3. Click the Edit button.
+ 4. Modify an existing configuration value.
+ 5. Check whether the modified content can be entered in the code area.","1. The Smart Code Generator page should open successfully.
+ 2. PayloadDefinitions.json should be displayed.
+ 3. The Edit button should enable editing mode.
+ 4. The configuration value should be editable.
+ 5. The modified content should be visible in the code area.",
+TC ID - 130,Verify the Edit button behavior when a generated C# file is selected.,"1. Open the Smart Code Generator page.
+ 2. Expand the RunTimeGenerated folder.
+ 3. Select a generated C# file such as AlarmEngine.cs.
+ 4. Check the available file actions.
+ 5. Verify whether the Edit button is displayed according to the file edit rules.","1. The Smart Code Generator page should open successfully.
+ 2. RunTimeGenerated should be expanded.
+ 3. AlarmEngine.cs should be selected successfully.
+ 4. Available file actions should be displayed correctly.
+ 5. The Edit button should follow the configured edit permission for generated files.",
+TC ID - 131,Verify the Clear button is available for editable file content.,"1. Open the Smart Code Generator page.
+ 2. Select PayloadDefinitions.json.
+ 3. Click the Edit button.
+ 4. Check the available actions in the code area.
+ 5. Verify the Clear button is displayed.","1. The Smart Code Generator page should open successfully.
+ 2. PayloadDefinitions.json content should be displayed.
+ 3. Edit mode should be enabled.
+ 4. Editing actions should be available.
+ 5. The Clear button should be visible and available in edit mode.",
+TC ID - 132,Verify the Clear button removes the current editable content.,"1. Open the Smart Code Generator page.
+ 2. Select PayloadDefinitions.json and click Edit.
+ 3. Confirm that the file content is available in the editor.
+ 4. Click the Clear button.
+ 5. Check the code editor content.","1. The Smart Code Generator page should open successfully.
+ 2. The selected file should enter edit mode.
+ 3. The existing content should be displayed in the editor.
+ 4. The Clear button should remove the editable content.
+ 5. The code editor should become empty without closing the page.",
+TC ID - 133,Verify that Clear only removes content from the editor and does not delete the selected file.,"1. Open the Smart Code Generator page.
+ 2. Select PayloadDefinitions.json and click Edit.
+ 3. Click the Clear button.
+ 4. Check the Project Explorer.
+ 5. Select PayloadDefinitions.json again.
+ 6. Check the file availability and content state.","1. The file should be available in Project Explorer.
+ 2. Edit mode should be enabled.
+ 3. The editor content should be cleared.
+ 4. PayloadDefinitions.json should remain listed in Project Explorer.
+ 5. The file should not be deleted from the project.",
+TC ID - 134,Verify the Save button is available after entering edit mode.,"1. Open the Smart Code Generator page.
+ 2. Select PayloadDefinitions.json.
+ 3. Click the Edit button.
+ 4. Make a valid change to the configuration content.
+ 5. Check the available action buttons.","1. The Smart Code Generator page should open successfully.
+ 2. PayloadDefinitions.json should be selected.
+ 3. Edit mode should be enabled.
+ 4. The configuration content should be editable.
+ 5. The Save button should be visible and available after a change.",
+TC ID - 135,Verify valid changes made to a configuration file are saved successfully.,"1. Open the Smart Code Generator page.
+ 2. Select PayloadDefinitions.json and click Edit.
+ 3. Modify a valid configuration value.
+ 4. Click the Save button.
+ 5. Reload or reopen the file and verify the saved value.","1. The selected configuration file should open successfully.
+ 2. Edit mode should be enabled.
+ 3. The configuration value should be modified successfully.
+ 4. The Save operation should complete successfully.
+ 5. The modified value should be retained after reopening the file.",
+TC ID - 136,Verify Save behavior when no changes are made to the selected file.,"1. Open the Smart Code Generator page.
+ 2. Select PayloadDefinitions.json.
+ 3. Click the Edit button.
+ 4. Do not modify the file content.
+ 5. Check and use the Save button.","1. The file should open successfully.
+ 2. Edit mode should be enabled.
+ 3. The existing content should remain unchanged.
+ 4. The system should handle Save without changes safely.
+ 5. The original file content should remain intact without duplicate or corrupted data.",
+TC ID - 137,Verify the system prevents saving invalid configuration content.,"1. Open the Smart Code Generator page.
+ 2. Select PayloadDefinitions.json and click Edit.
+ 3. Enter invalid JSON syntax in the editor.
+ 4. Click the Save button.
+ 5. Check the save response and file content.","1. The selected file should enter edit mode.
+ 2. The editor should accept the test input.
+ 3. The system should validate the invalid JSON content.
+ 4. The invalid content should not be saved if JSON validation is required.
+ 5. An appropriate validation or error message should be displayed without application crash.",
+TC ID - 138,"Verify the user can clear content, enter new valid content, and save it.","1. Open the Smart Code Generator page.
+ 2. Select a configuration file and click Edit.
+ 3. Click Clear and enter valid replacement content.
+ 4. Click Save.
+ 5. Reopen the file and verify the saved content.","1. The selected configuration file should open in edit mode.
+ 2. The existing content should be editable.
+ 3. The editor should be cleared and accept the replacement content.
+ 4. The valid replacement content should be saved successfully.
+ 5. The saved content should be displayed correctly after reopening the file.",
+TC ID - 139,Verify the system handles unsaved changes when the user switches to another file.,"1. Open the Smart Code Generator page.
+ 2. Select PayloadDefinitions.json and click Edit.
+ 3. Modify the file content without saving.
+ 4. Select another configuration file.
+ 5. Check the system response for the unsaved changes.","1. PayloadDefinitions.json should open in edit mode.
+ 2. The file content should be editable.
+ 3. The modified content should remain unsaved.
+ 4. The system should detect the unsaved changes when switching files.
+ 5. A warning or confirmation should be displayed according to the application design.",
+TC ID - 140,Verify the application handles a save failure without losing the application session.,"1. Open the Smart Code Generator page.
+ 2. Select a configuration file and click Edit.
+ 3. Make a valid change to the file.
+ 4. Perform Save under a simulated or controlled save-failure condition.
+ 5. Check the application response and editor state.","1. The configuration file should open in edit mode.
+ 2. The content should be editable.
+ 3. The change should be available for saving.
+ 4. The save failure should be handled with an appropriate error message.
+ 5. The application should remain stable and the unsaved content should be handled according to the recovery design.",
+TC ID - 141,"Verify Edit, Clear, and Save buttons display the correct state based on the current editing mode.","1. Open the Smart Code Generator page.
+ 2. Select a configuration file without entering edit mode.
+ 3. Check the Edit, Clear, and Save buttons.
+ 4. Click Edit and check the buttons again.
+ 5. Make a change and verify the button states.","1. The selected file should be displayed in view mode.
+ 2. Edit should be available according to the file permissions.
+ 3. Clear and Save should remain disabled or unavailable when editing is not active.
+ 4. After clicking Edit, editing actions should become available according to the design.
+ 5. After making a change, Save should become available and the button states should be correct.",
+TC ID - 142,"Verify that the Brace application and BraceLink application can be opened, connected successfully, and the test execution can be started.","1. Open the Brace application from the system.
+ 2. Open the BraceLink application and navigate to the Smart Testing section.
+ 3. Verify the IP, Port, and Device details, then click the Connect button.
+ 4. Select the required test configuration or test category and click the Start button.
+ 5. Check the test execution status and communication logs.","1. The Brace application should open successfully 
+ 2. The BraceLink application should open and the Smart Testing page should be displayed.
+ 3. BraceLink should establish communication successfully and the connection status should indicate an active connection.
+ 4. The selected test execution should start successfully after clicking Start.
+ 5. The test status and corresponding communication logs should be updated with the execution result",
+TC ID - 143,Verify the Smart Testing page displays all required sections and controls.,"1. Open the Brace application from the system.
+ 2. Open the BraceLink application.
+ 3. Navigate to the Smart Testing section.
+ 4. Check the Test Run and Test Cases sections.
+ 5. Verify the page is displayed without errors.","1. The Brace application should open successfully.
+ 2. The BraceLink application should open successfully.
+ 3. The Smart Testing section should be available.
+ 4. Test Run and Test Cases sections should be displayed.
+ 5. No unexpected error should be displayed.",
+TC ID - 144,Verify the IP address field accepts and displays a valid IP address.,"1. Open the BraceLink application.
+ 2. Navigate to Smart Testing.
+ 3. Check the IP address field.
+ 4. Enter a valid IP address.
+ 5. Check the value displayed in the field.","1. BraceLink should open successfully.
+ 2. Smart Testing should be displayed.
+ 3. The IP address field should be available.
+ 4. The valid IP address should be accepted.
+ 5. The entered IP address should be displayed correctly.",
+TC ID - 145,Verify the Port field accepts and displays a valid port number.,"1. Open Smart Testing.
+ 2. Check the Port field.
+ 3. Enter a valid port number.
+ 4. Check the entered value.
+ 5. Verify the field accepts the port value.","1. Smart Testing should open successfully.
+ 2. The Port field should be visible.
+ 3. The valid port number should be accepted.
+ 4. The entered value should be displayed correctly.
+ 5. The Port field should accept the valid value.",
+TC ID - 146,Verify the Device field accepts and displays a valid device ID.,"1. Open Smart Testing.
+ 2. Check the Device field.
+ 3. Enter a valid device ID.
+ 4. Check the entered value.
+ 5. Verify the Device field displays the value correctly.","1. Smart Testing should open successfully.
+ 2. The Device field should be visible.
+ 3. The valid device ID should be accepted.
+ 4. The entered device ID should be displayed.
+ 5. The Device field should display the correct value.",
+TC ID - 147,"Verify the application establishes an MES connection using valid IP, Port, and Device details.","1. Open the Brace application.
+ 2. Open the BraceLink application and go to Smart Testing.
+ 3. Enter valid IP, Port, and Device details.
+ 4. Click Connect.
+ 5. Check the connection status.","1. The Brace application should open successfully.
+ 2. Smart Testing should be displayed.
+ 3. Valid connection details should be entered.
+ 4. The connection should be established successfully.
+ 5. The connection status should indicate the active connection.",
+TC ID - 148,Verify the system handles an invalid IP address correctly.,"1. Open Smart Testing.
+ 2. Enter an invalid IP address.
+ 3. Enter valid Port and Device details.
+ 4. Click Connect.
+ 5. Check the connection status and message.","1. Smart Testing should open successfully.
+ 2. The invalid IP address should be entered or validated.
+ 3. Valid Port and Device details should be available.
+ 4. The connection should not be established.
+ 5. An appropriate error or connection failure indication should be displayed.",
+TC ID - 149,Verify the system handles an invalid or unavailable Port correctly.,"1. Open Smart Testing.
+ 2. Enter a valid IP address.
+ 3. Enter an invalid or unavailable Port.
+ 4. Enter a valid Device ID.
+ 5. Click Connect and check the result.","1. Smart Testing should open successfully.
+ 2. The valid IP address should be accepted.
+ 3. The invalid or unavailable Port should be detected.
+ 4. The Device ID should be accepted.
+ 5. The connection should fail safely and an appropriate error should be shown.",
+TC ID - 150,Verify the active MES connection can be disconnected successfully.,"1. Open Smart Testing.
+ 2. Enter valid connection details.
+ 3. Click Connect.
+ 4. Wait until the connection is established.
+ 5. Click Disconnect and check the status.","1. Smart Testing should open successfully.
+ 2. Valid connection details should be accepted.
+ 3. The connection should be established.
+ 4. The active connection should be shown.
+ 5. The connection should be closed and the status should change accordingly.",
+TC ID - 151,Verify the connection status indicator changes correctly based on the connection state.,"1. Open Smart Testing.
+ 2. Check the status before connecting.
+ 3. Enter valid connection details and click Connect.
+ 4. Check the status after connection.
+ 5. Click Disconnect and check the status again.","1. The initial status should be displayed correctly.
+ 2. The disconnected state should be indicated correctly.
+ 3. The system should establish the connection.
+ 4. The connected status should be indicated correctly.
+ 5. The status should change back after disconnection.",
+TC ID - 152,Verify the test category dropdown displays the available test categories.,"1. Open Smart Testing.
+ 2. Locate the test category dropdown.
+ 3. Click the dropdown.
+ 4. Review the available categories.
+ 5. Verify the category names are displayed correctly.","1. Smart Testing should open successfully.
+ 2. The test category dropdown should be visible.
+ 3. The dropdown should open successfully.
+ 4. Available categories should be listed.
+ 5. The category names should be readable and correct.",
+TC ID - 153,Verify selecting a test category loads the corresponding test cases.,"1. Open the test category dropdown.
+ 2. Select a valid test category.
+ 3. Wait for the test list to update.
+ 4. Review the displayed test cases.
+ 5. Verify the selected category is reflected in the list.","1. The dropdown should open successfully.
+ 2. The selected category should be displayed.
+ 3. The test list should update successfully.
+ 4. Relevant test cases should be displayed.
+ 5. The displayed tests should belong to the selected category.",
+TC ID - 154,"Verify the test case list displays Test Name, Category, Status, and Last Run correctly.","1. Open Smart Testing.
+ 2. Select the required test category.
+ 3. Check the test case table.
+ 4. Review Test Name, Category, Status, and Last Run columns.
+ 5. Verify the displayed test case information.","1. Smart Testing should open successfully.
+ 2. The selected category should load.
+ 3. The test case table should be visible.
+ 4. The required columns should be displayed.
+ 5. Test case information should be displayed correctly.",
+TC ID - 155,Verify each unexecuted test case displays the correct initial status.,"1. Open Smart Testing.
+ 2. Select a test category.
+ 3. Review the Status column.
+ 4. Check the status of an unexecuted test.
+ 5. Verify the displayed status.","1. Smart Testing should open successfully.
+ 2. The test category should load.
+ 3. The Status column should be visible.
+ 4. An unexecuted test should show its initial status.
+ 5. The initial status should be displayed correctly, such as Pending.",
+TC ID - 156,Verify the Start button initiates the selected test execution.,"1. Open the Brace application.
+ 2. Open BraceLink and navigate to Smart Testing.
+ 3. Establish the required connection.
+ 4. Select the required test category or test.
+ 5. Click Start.","1. The Brace application should open successfully.
+ 2. BraceLink Smart Testing should be displayed.
+ 3. The required connection should be active.
+ 4. The required test should be available for execution.
+ 5. The selected test execution should start successfully.",
+TC ID - 157,Verify the Equipment Presence Check test executes successfully and updates its result.,"1. Open the Brace application.
+ 2. Open BraceLink Smart Testing and connect to the equipment.
+ 3. Select Equipment Presence Check.
+ 4. Click Start.
+ 5. Check the test status and logs.","1. The Brace application should open successfully.
+ 2. BraceLink should connect successfully.
+ 3. Equipment Presence Check should be available.
+ 4. The test should start successfully.
+ 5. The test result and execution log should be updated correctly.",
+TC ID - 158,Verify the Equipment Status Request test sends the request and records the expected response.,"1. Open the Brace application.
+ 2. Open BraceLink Smart Testing and connect to the equipment.
+ 3. Select Equipment Status Request.
+ 4. Click Start.
+ 5. Check the response, status, and logs.","1. The applications should open successfully.
+ 2. The equipment connection should be active.
+ 3. The Equipment Status Request test should be available.
+ 4. The request should be sent successfully.
+ 5. The expected response and test result should be recorded.",
+TC ID - 159,Verify the Status Variable Request test executes and records the test result.,"1. Open the Brace application.
+ 2. Open BraceLink Smart Testing and connect to the equipment.
+ 3. Select Status Variable Request.
+ 4. Click Start.
+ 5. Check the test status and communication logs.","1. The applications should open successfully.
+ 2. The equipment connection should be active.
+ 3. The Status Variable Request test should be available.
+ 4. The request should execute successfully.
+ 5. The test status and communication details should be recorded.",
+TC ID - 160,Verify the Communication Establishment test establishes communication successfully.,"1. Open the Brace application.
+ 2. Open BraceLink Smart Testing.
+ 3. Enter valid connection details.
+ 4. Select Communication Establishment and click Start.
+ 5. Check the connection result and logs.","1. The Brace application should open successfully.
+ 2. BraceLink Smart Testing should open successfully.
+ 3. Valid connection details should be accepted.
+ 4. The communication test should start successfully.
+ 5. The communication result should be displayed and logged correctly.",
+TC ID - 161,Verify the test status is updated correctly after test execution.,"1. Open Smart Testing.
+ 2. Select an available test case.
+ 3. Check its initial status.
+ 4. Click Start and wait for execution to complete.
+ 5. Check the Status column again.","1. Smart Testing should open successfully.
+ 2. The test case should be available.
+ 3. The initial status should be displayed.
+ 4. The test should execute successfully or complete with a result.
+ 5. The Status column should update to the appropriate result such as Pass or Fail.",
+TC ID - 162,Verify the Last Run column is updated with the latest test execution time.,"1. Open Smart Testing.
+ 2. Select an available test case.
+ 3. Note the current Last Run value.
+ 4. Execute the test using Start.
+ 5. Check the Last Run value after execution.","1. Smart Testing should open successfully.
+ 2. The test case should be available.
+ 3. The existing Last Run value should be displayed.
+ 4. The test should complete with a result.
+ 5. The Last Run value should be updated with the latest execution time.",
+TC ID - 163,Verify MES communication messages are recorded in the MES Logs tab.,"1. Open Smart Testing.
+ 2. Establish the MES connection.
+ 3. Execute an MES-related test.
+ 4. Open the MES Logs tab.
+ 5. Review the communication entries.","1. Smart Testing should open successfully.
+ 2. The MES connection should be active.
+ 3. The MES test should execute.
+ 4. The MES Logs tab should be available.
+ 5. MES communication messages should be recorded correctly.",
+TC ID - 164,Verify R2R communication messages are recorded in the R2R Logs tab when applicable.,"1. Open Smart Testing.
+ 2. Establish the required connection.
+ 3. Execute an R2R-related test if available.
+ 4. Open the R2R Logs tab.
+ 5. Review the displayed entries.","1. Smart Testing should open successfully.
+ 2. The required connection should be active.
+ 3. The R2R test should execute when applicable.
+ 4. The R2R Logs tab should be available.
+ 5. R2R communication messages should be recorded when applicable.",
+TC ID - 165,Verify FDC communication messages are recorded in the FDC Logs tab when applicable.,"1. Open Smart Testing.
+ 2. Establish the required connection.
+ 3. Execute an FDC-related test if available.
+ 4. Open the FDC Logs tab.
+ 5. Review the displayed entries.","1. Smart Testing should open successfully.
+ 2. The required connection should be active.
+ 3. The FDC test should execute when applicable.
+ 4. The FDC Logs tab should be available.
+ 5. FDC communication messages should be recorded when applicable.",
+TC ID - 166,Verify a failed test displays the correct failure status and corresponding log information.,"1. Open Smart Testing.
+ 2. Connect to the equipment.
+ 3. Run a test using a controlled failure condition.
+ 4. Wait for the test to complete.
+ 5. Check the test status and logs.","1. Smart Testing should open successfully.
+ 2. The equipment connection should be active.
+ 3. The controlled failure condition should be detected.
+ 4. The test should complete with a failure result.
+ 5. The status should show failure and related log information should be recorded.",
+TC ID - 167,Verify the system prevents test execution when MES communication is not established.,"1. Open Smart Testing.
+ 2. Do not establish the MES connection.
+ 3. Select an available test case.
+ 4. Click Start.
+ 5. Check the application response.","1. Smart Testing should open successfully.
+ 2. The MES connection should remain inactive.
+ 3. The test case should be available.
+ 4. The system should prevent or safely handle test execution.
+ 5. An appropriate connection error or message should be displayed.",
+TC ID - 168,Verify the system handles test execution when no valid test case is selected.,"1. Open Smart Testing.
+ 2. Establish the required connection.
+ 3. Do not select a valid test case.
+ 4. Click Start.
+ 5. Check the application response.","1. Smart Testing should open successfully.
+ 2. The connection should be active.
+ 3. No valid test should be selected.
+ 4. The system should not start an undefined test.
+ 5. An appropriate validation message should be displayed.",
+TC ID - 169,Verify test execution handles unexpected communication loss without crashing.,"1. Open Smart Testing and establish the connection.
+ 2. Select an available test case.
+ 3. Click Start.
+ 4. Disconnect or interrupt the equipment connection during execution.
+ 5. Check the test status and application response.","1. The connection should be established before execution.
+ 2. The test should be available.
+ 3. The test should start successfully.
+ 4. The connection loss should be detected.
+ 5. The test should fail or stop safely and the application should remain stable.",
+TC ID - 170,Verify the system handles an invalid Device ID correctly.,"1. Open Smart Testing.
+ 2. Enter a valid IP and Port.
+ 3. Enter an invalid Device ID.
+ 4. Click Connect.
+ 5. Check the connection status and message.","1. Smart Testing should open successfully.
+ 2. The valid IP and Port should be accepted.
+ 3. The invalid Device ID should be detected or rejected.
+ 4. The connection should not be established with invalid device details.
+ 5. An appropriate error or connection failure message should be displayed.",
+TC ID - 171,Verify multiple test cases can be executed sequentially with correct status and log information.,"1. Open Smart Testing and establish the connection.
+ 2. Select and run the first test case.
+ 3. Wait for the first test to complete.
+ 4. Select and run another test case.
+ 5. Check the status and logs of both tests.","1. The connection should be established successfully.
+ 2. The first test should execute and complete.
+ 3. The first test result should be recorded.
+ 4. The second test should execute successfully.
+ 5. Each test should have the correct status and corresponding log information without overwriting the other result.",
+TC ID - 172,"Verify selecting TestImplantation project displays the correct Project Summary details (Project Name, Customer, Project Code).","1. Navigate to the Overview page
+2. Select 'TestImplantation' from the Current Project dropdown
+3. Review the Project Summary card","1. Overview page is displayed
+2. TestImplantation project is selected and page refreshes
+3. Project Summary displays Project Name: TestImplantation, Customer: Vecco, Project Code: IMP-HE2000-FAB002","1. Overview page displayed as expected
+2. TestImplantation project selected and page refreshed
+3. Project Summary displayed Project Name: TestImplantation, Customer: Vecco, Project Code: IMP-HE2000-FAB002 correctly"
+TC ID - 173,Verify the SV Count displayed matches the selected project data.,"1. Select 'TestImplantation' from the Current Project dropdown
+2. Observe the 'SV Counts' widget under Project Overview","1. Project Overview section refreshes for the selected project
+2. SV Counts widget displays the correct count of 6 SVs","1. Project Overview section refreshed for the selected project
+2. SV Counts widget displayed the correct count of 6 SVs"
+TC ID - 174,Verify the DV Count displayed matches the selected project data.,"1. Select 'TestImplantation' from the Current Project dropdown
+2. Observe the 'DV Counts' widget under Project Overview","1. Project Overview section refreshes for the selected project
+2. DV Counts widget displays the correct count of 3 DVs","1. Project Overview section refreshed for the selected project
+2. DV Counts widget displayed the correct count of 3 DVs"
+TC ID - 175,Verify the Remote Commands (RC) Count displayed matches the selected project data.,"1. Select 'TestImplantation' from the Current Project dropdown
+2. Observe the 'Remote Commands Count' widget under Project Overview","1. Project Overview section refreshes for the selected project
+2. Remote Commands Count widget displays the correct count of 7 RCs","1. Project Overview section refreshed for the selected project
+2. Remote Commands Count widget displayed the correct count of 7 RCs"
+TC ID - 176,Verify the Scripts Count displayed matches the selected project data.,"1. Select 'TestImplantation' from the Current Project dropdown
+2. Observe the 'Scripts Counts' widget under Project Overview","1. Project Overview section refreshes for the selected project
+2. Scripts Counts widget displays the correct count of 4 Script(s)","1. Project Overview section refreshed for the selected project
+2. Scripts Counts widget displayed the correct count of 4 Script(s)"
+TC ID - 177,Verify changing the selected project updates all Overview statistics correctly.,"1. Select 'TestImplantation' from the Current Project dropdown and note SV, DV, RC and Scripts Counts
+2. Change the selection to 'CVD Furnace System' from the dropdown
+3. Observe SV, DV, RC and Scripts Counts widgets","1. Statistics for TestImplantation are displayed and recorded
+2. Page refreshes to load the newly selected project
+3. All widgets update to display statistics specific to CVD Furnace System, distinct from TestImplantation values","1. Statistics for TestImplantation displayed and recorded correctly
+2. Page refreshed and loaded the newly selected project
+3. All widgets updated to display statistics specific to CVD Furnace System as expected"
+TC ID - 178,Verify Total Projects count is displayed correctly.,"1. Navigate to the Overview page
+2. Observe the 'Total Projects in System' card under Overall Project section","1. Overview page is displayed with the Overall Project section
+2. Card displays 'Active Projects' count of 14, matching the total number of projects configured in the system","1. Overview page displayed with Overall Project section
+2. Card displayed Active Projects count of 14, matching total projects configured"
+TC ID - 179,Verify Summary section displays the correct Tools Integrated count.,"1. Navigate to the Overview page
+2. Observe the 'Tools Integrated' value under the Summary section","1. Overview page is displayed with the Summary section
+2. Tools Integrated value displays correctly as 1","1. Overview page displayed with Summary section
+2. Tools Integrated value displayed correctly as 1"
+TC ID - 180,Verify Summary section displays the correct Tests Executed count.,"1. Navigate to the Overview page
+2. Observe the 'Tests Executed' value under the Summary section","1. Overview page is displayed with the Summary section
+2. Tests Executed value displays correctly as 7","1. Overview page displayed with Summary section
+2. Tests Executed value displayed correctly as 7"
+TC ID - 181,Verify Project Overview refreshes immediately after selecting another project.,"1. Navigate to the Overview page with TestImplantation selected
+2. Select 'CVD Furnace System' from the Current Project dropdown
+3. Observe the time taken for Project Overview section to refresh","1. Overview page displays TestImplantation data initially
+2. Dropdown selection changes to CVD Furnace System
+3. Project Overview section refreshes immediately without manual page reload","1. Overview page displayed TestImplantation data initially
+2. Dropdown selection changed to CVD Furnace System
+3. Project Overview section refreshed immediately without manual page reload"
+TC ID - 182,Verify Overview page does not display data from previously selected project after project change.,"1. Select 'TestImplantation' and note the Project Summary and count values displayed
+2. Switch the Current Project dropdown to 'CVD Furnace System'
+3. Verify no residual TestImplantation data (Project Name, Code, Counts) remains on screen","1. TestImplantation data is displayed and recorded
+2. Selection changes to CVD Furnace System
+3. Only CVD Furnace System data is displayed; no TestImplantation values remain visible","1. TestImplantation data displayed and recorded correctly
+2. Selection changed to CVD Furnace System
+3. Only CVD Furnace System data displayed; no residual TestImplantation values found"
+TC ID - 183,Verify Overview page handles project selection without any UI errors or crashes.,"1. Navigate to the Overview page
+2. Rapidly switch between multiple projects in the Current Project dropdown several times
+3. Observe application behaviour, console, and UI responsiveness","1. Overview page loads successfully
+2. Each project selection is processed without lag
+3. No UI errors, broken layout, or application crash occurs during repeated switching","1. Overview page loaded successfully
+2. Each project selection processed without lag
+3. No UI errors, broken layout, or crash occurred during repeated switching"
+TC ID - 184,Verify the Workspace page loads successfully.,"1. Login to BraceLink Integration Platform
+2. Click on 'WorkSpace' from the left navigation panel
+3. Observe the page load","1. Login is successful
+2. WorkSpace page opens with 'Manage documents, extraction and equipment model for the current project.' subtitle
+3. Page loads with Project Info, Upload Document, Extraction and SML Definitions tabs visible","1. Login successful
+2. WorkSpace page opened with correct subtitle
+3. Page loaded with all four tabs visible as expected"
+TC ID - 185,Verify Project Code is displayed correctly.,"1. Navigate to WorkSpace > Project Info tab
+2. Observe the 'Project Code' field value","1. Project Info tab displays Project Information section
+2. Project Code field displays 'IMP-HE2000-FAB002' correctly","1. Project Info tab displayed Project Information section
+2. Project Code field displayed 'IMP-HE2000-FAB002' correctly"
+TC ID - 186,Verify Vendor Name is displayed correctly.,"1. Navigate to WorkSpace > Project Info tab
+2. Observe the 'Vendor Name' field value","1. Project Info tab displays Project Information section
+2. Vendor Name field displays 'Vecco' correctly","1. Project Info tab displayed Project Information section
+2. Vendor Name field displayed 'Vecco' correctly"
+TC ID - 187,Verify Tool information is displayed correctly.,"1. Navigate to WorkSpace > Project Info tab
+2. Observe the 'Tool' field value","1. Project Info tab displays Project Information section
+2. Tool field displays 'ETCH' correctly","1. Project Info tab displayed Project Information section
+2. Tool field displayed 'ETCH' correctly"
+TC ID - 188,Verify Created Date and Time are displayed correctly.,"1. Navigate to WorkSpace > Project Info tab
+2. Observe the 'Created At' field value","1. Project Info tab displays Project Information section
+2. Created At field displays the correct date and time '13-Jul-2026 08:27 AM' in DD-Mon-YYYY hh:mm AM/PM format","1. Project Info tab displayed Project Information section
+2. Created At field displayed '13-Jul-2026 08:27 AM' in the correct format"
+TC ID - 189,Verify clicking Edit Project opens the project details for editing.,"1. Navigate to WorkSpace > Project Info tab
+2. Click on the 'Edit Project' button","1. Project Info tab displays Project Information with Edit Project button visible
+2. Project Information fields become editable, pre-populated with existing project data","1. Project Info tab displayed Project Information with Edit Project button visible
+2. Project Information fields became editable, pre-populated with existing project data"
+TC ID - 190,Verify project details can be edited and saved successfully for project name,"1. Click 'Edit Project' on an existing project
+2. Update the Description field with a new value for project name 
+3. Click the Update button","1. Project fields become editable
+2. New description value is entered in the field
+3. Changes are saved","1. Project fields became editable
+2. New project name entered in the field
+3. Changes not updated in the field"
+TC ID - 191,Verify project details can be edited and saved successfully for vendor name,"1. Click 'Edit Project' on an existing project
+2. Update the Description field with a new value for vendor name a
+3. Click the Update button","1. Project fields become editable
+2. New description value is entered in the field
+3. Changes are saved","1. Project fields became editable
+2. New vendor name entered in the field
+3. Changes updated in the field"
+TC ID - 192,Verify project details can be edited and saved successfully tool,"1. Click 'Edit Project' on an existing project
+2. Update the field with a new value for TOOL
+3. Click the Update button","1. Project fields become editable
+2. New description value is entered in the field
+3. Changes are saved successfully and a success confirmation is shown","1. Project fields became editable
+2. New tool value entered in the field
+3. Changes not updated in the tool field"
+TC ID - 193,Verify dupilcation are handled correctly in Project Name fields in edit tab,"1. Navigate to WorkSpace > Project Info tab,Click 'Edit Project' on an existing project
+2. Enterexisting in the Project Name
+3. Click the 'update' button","1. Project feild become editable 
+2. Existing name are entered in the input fields
+3. System should not accepts existing name and display a messge the name already exist","1. Project feilf become editable 
+2.Existing name entered in the input fields
+3. System is accepts existing name and does not display a messge that name already exist"
+TC ID - 194,Verify dupilcation are handled correctly in Project code fields in edit tab,"1. Navigate to WorkSpace > Project Info tab,Click 'Edit Project' on an existing project
+2. Enterexisting in the Project Name
+3. Click the 'update' button","1. Project feild become editable 
+2. Existing code are entered in the input fields
+3. System should not accepts existing code and display a messge the name already exist","1. Project feilf become editable 
+2.Existing code e entered in the input fields
+3. System is accepts existing code and does not display a messge that name already exist"
+TC ID - 195,Verify the success message is displayed after updating project details in the Edit Project tab,"1. Navigate to WorkSpace > Project Info tab.
+2. Click Edit Project on an existing project.
+3. Modify one or more project details (e.g., Project Name or Description).
+4. Click the Update button.","1. Project fields become editable.
+2. The modified project details are accepted.
+3. The project is updated successfully.
+4. A success message ""Project updated successfully"" is displayed.
+5. The updated project details are reflected in the Project Information section.","1. Project fields became editable.
+2. The modified project details were accepted.
+3. The project was updated successfully.
+4. The success message ""Project updated successfully"" was displayed.
+5. The updated project details were reflected in the Project Information section."
+TC ID - 196,Verify updated project information is reflected in Project Information after saving.,"1. Edit and save the Description field for the current project
+2. Return to the Project Info tab / allow the page to refresh
+3. Review the Project Information section","1. Description is updated and saved successfully
+2. Project Info tab reloads with latest data
+3. Project Information section displays the newly updated Description value","1. Description updated not saved 
+2. Project Info tab is not reloaded with latest data
+3. Project Information section does not displayed the newly updated Description value"
+TC ID - 197,Verify clicking Add Project creates a new project when all mandatory fields are entered correctly.,"1. Navigate to WorkSpace > Project Info tab
+2. Enter valid values in Project Name, Vendor Name, Project Code fields and select a Tool
+3. Click the 'Add' button","1. Add New Project form is displayed with empty input fields
+2. All mandatory fields are populated with valid data
+3. Project is created successfully and a success message is displayed","1. Add New Project form displayed with empty input fields
+2. All mandatory fields populated with valid data
+3. Project created successfully with success message displayed"
+TC ID - 198,Verify newly added project appears in the Current Project dropdown.,"1. Successfully add a new project 'FurnaceTest02' via the Add New Project form
+2. Click on the Current Project dropdown at the top right","1. New project 'FurnaceTest02' is created successfully
+2. Dropdown list includes 'FurnaceTest02' along with existing projects","1. New project 'FurnaceTest02' created successfully
+2. Dropdown list included 'FurnaceTest02' along with existing projects"
+TC ID - 199,Verify selecting the newly created project displays its information correctly.,"1. Select 'FurnaceTest02' from the Current Project dropdown
+2. Review the Project Information section on the Project Info tab","1. Selected project changes to FurnaceTest02 and page refreshes
+2. Project Information section displays FurnaceTest02's Project Name, Code, Vendor Name and Tool as entered during creation","1. Selected project changed to FurnaceTest02 and page refreshed
+2. Project Information section displayed FurnaceTest02 details correctly as entered during creation"
+TC ID - 200,Verify validation message is displayed when Project Name is left blank and Add Project is clicked.,"1. Navigate to WorkSpace > Project Info tab
+2. Leave the Project Name field empty and fill other fields
+3. Click the 'Add' button","1. Add New Project form is displayed
+2. Project Name field remains blank
+3. A Validation popup is displayed with the message 'Please enter Project Name.'","1. Add New Project form displayed
+2. Project Name field remained blank
+3. Validation popup displayed with the message 'Please enter Project Name.' as expected"
+TC ID - 201,Verify project is not created when mandatory Project Name is empty.,"1. Leave Project Name blank and fill remaining fields with valid data
+2. Click 'Add' and acknowledge the validation popup
+3. Check the Current Project dropdown for a new entry","1. Form is submitted with Project Name blank
+2. Validation error is shown and acknowledged
+3. No new project is added to the Current Project dropdown","1. Form submitted with Project Name blank
+2. Validation error shown and acknowledged
+3. No new project was added to the Current Project dropdown, confirming project was not created"
+TC ID - 202,Verify validation message is displayed when Tool is not selected.,"1. Navigate to WorkSpace > Project Info tab
+2. Enter a valid Project Name and leave the Tool dropdown unselected
+3. Click the 'Add' button","1. Add New Project form is displayed
+2. Project Name is filled; Tool field remains unselected
+3. A Validation popup is displayed prompting the user to select a Tool","1. Add New Project form displayed
+2. Project Name filled; Tool field remained unselected
+3. Validation popup displayed prompting the user to select a Tool"
+TC ID - 203,Verify project is not created when mandatory fields are missing.,"1. Leave both Project Name and Tool fields blank
+2. Click the 'Add' button
+3. Verify the Current Project dropdown and project list for the incomplete entry","1. Add New Project form is submitted with mandatory fields missing
+2. Validation popup is displayed and project creation is blocked
+3. No incomplete project record is created in the system","1. Add New Project form submitted with mandatory fields missing
+2. Validation popup displayed and project creation was blocked
+3. No incomplete project record was created in the system"
+TC ID - 204,Verify user can close the validation popup successfully.,"1. Trigger the validation popup by clicking 'Add' with Project Name blank
+2. Click the 'OK' button or the close (X) icon on the Validation popup","1. Validation popup is displayed with the error message
+2. Validation popup closes and user is returned to the Add New Project form","1. Validation popup displayed with the error message
+2. Validation popup closed successfully and user was returned to the Add New Project form"
+TC ID - 205,Verify entered data remains available after closing the validation message.,"1. Enter valid data in Vendor Name and Project Code fields, leave Project Name blank
+2. Click 'Add' to trigger the Validation popup
+3. Close the Validation popup and review the form fields","1. Form fields are populated as entered
+2. Validation popup is displayed
+3. Previously entered Vendor Name and Project Code values remain intact in the form after closing the popup","1. Form fields populated as entered
+2. Validation popup displayed
+3. Previously entered Vendor Name and Project Code values remained intact after closing the popup"
+TC ID - 206,Verify application does not crash when invalid project details are submitted.,"1. Repeatedly submit the Add New Project form with missing mandatory fields
+2. Close each Validation popup that appears
+3. Observe overall application stability and responsiveness","1. Each invalid submission triggers the Add button click
+2. Validation popups are closed one after another without issue
+3. Application remains stable with no crash, freeze, or unexpected behaviour","1. Each invalid submission triggered the Add button click as expected
+2. Validation popups closed one after another without issue
+3. Application remained stable with no crash, freeze, or unexpected behaviour"
+TC ID - 207,Verify Add Project button remains functional after validation error.,"1. Submit the Add New Project form with Project Name blank to trigger a validation error
+2. Close the Validation popup
+3. Enter a valid Project Name and click 'Add' again","1. Validation popup appears for the blank Project Name
+2. Popup closes and form remains on screen
+3. Project is created successfully, confirming the Add button remains functional after the earlier error","1. Validation popup appeared for the blank Project Name
+2. Popup closed and form remained on screen
+3. Project created successfully, confirming the Add button remained functional after the earlier error"
+TC ID - 208,Verify duplicate project code is not accepted (if uniqueness is required).,"1. Navigate to WorkSpace > Project Info tab
+2. Enter a existing Project Name but reuse an new Project Code 
+3. Click the 'Add' button","1. Add New Project form is displayed
+2. Form is filled with a duplicate Project name
+3. System displays a validation/error message indicating the Project Name already exists, and the project is not created","1. Add New Project form displayed
+2. Form filled with a duplicate Project Name 
+3. System displayed error message indicating duplicate Project Name, and project was not created"
+TC ID - 209,Verify duplicate project code is not accepted (if uniqueness is required).,"1. Navigate to WorkSpace > Project Info tab
+2. Enter a new Project Name but reuse an existing Project Code 'IMP-HE2000-FAB002'
+3. Click the 'Add' button","1. Add New Project form is displayed
+2. Form is filled with a duplicate Project Code
+3. System displays a validation/error message indicating the Project Code already exists, and the project is not created","1. Add New Project form displayed
+2. Form filled with a duplicate Project Code
+3. System displayed a validation/error message indicating duplicate Project Code, and project was not created"
+TC ID - 210,Verify special characters are handled correctly in Project Name and Project Code fields.,"1. Navigate to WorkSpace > Project Info tab
+2. Enter special characters in the Project Name and Project Code fields
+3. Click the 'Add' button","1. Add New Project form is displayed
+2. Special characters are entered in the input fields
+3. System either accepts valid special characters gracefully or displays an appropriate validation message, without breaking the UI","1. Add New Project form displayed
+2. Special characters entered in the input fields
+3. System handled special characters gracefully with appropriate validation, and UI remained stable"
+TC ID - 211,Verify maximum character length validation for Project Name.,"1. Navigate to WorkSpace > Project Info tab
+2. Enter a Project Name value exceeding the allowed maximum character length
+3. Click the 'Add' button","1. Add New Project form is displayed
+2. Field either restricts further input at the maximum limit or accepts the entry
+3. System either truncates/restricts the input at the defined maximum length or displays a validation message; excess data is not saved","1. Add New Project form displayed
+2. Field restricted further input at the maximum limit as designed
+3. System restricted input at the defined maximum length and excess data was not saved"
+TC ID - 212,Verify maximum character length validation for Project Description.,"1. Navigate to WorkSpace > Project Info tab
+2. Enter a Project Description exceeding the allowed maximum character length
+3. Click the 'Add' button","1. Add New Project form is displayed
+2. Description field either restricts further input at the maximum limit or accepts the entry
+3. System either restricts input at the defined maximum length or displays a validation message; excess data is not saved","1. Add New Project form displayed
+2. Description field restricted further input at the maximum limit as designed
+3. System restricted input at the defined maximum length and excess data was not saved"
+TC ID - 213,Verify the Upload Document page loads successfully.,"1. Navigate to WorkSpace
+2. Click on the 'Upload Document' tab
+3. Observe the page load","1. WorkSpace page is displayed with Project Info, Upload Document, Extraction and SML Definitions tabs
+2. Upload Document tab is selected and highlighted
+3. Page loads with Document Type dropdown, Browse button, file path field, Upload button, and document list grid","1. WorkSpace page displayed with all tabs as expected
+2. Upload Document tab selected and highlighted correctly
+3. Page loaded with all elements visible as expected"
+TC ID - 214,"Verify the Document Type dropdown (e.g., GEM Manual, SML Scripts) is displayed and selectable.","1. Navigate to WorkSpace > Upload Document tab
+2. Click on the Document Type dropdown (currently showing 'GEM Manual')
+3. Select a different option such as 'SML Scripts'","1. Document Type dropdown is visible and defaults to 'GEM Manual'
+2. Dropdown expands showing available document type options
+3. Selected value updates to 'SML Scripts' in the dropdown field","1. Document Type dropdown visible and defaulted to 'GEM Manual'
+2. Dropdown expanded showing available document type options
+3. Selected value updated to 'SML Scripts' correctly"
+TC ID - 215,Verify clicking the Browse button opens the file selection dialog.,"1. Navigate to WorkSpace > Upload Document tab
+2. Click on the 'Browse' button","1. Upload Document tab is displayed with the Browse button visible
+2. A 'Select Document' file dialog opens showing local folders and files (e.g., Downloads)","1. Upload Document tab displayed with Browse button visible
+2. 'Select Document' file dialog opened showing local folders and files correctly"
+TC ID - 216,Verify the user can select a PDF document successfully.,"1. Click the 'Browse' button to open the Select Document dialog
+2. Navigate to the Downloads folder and select 'imp_he2000_user_manual.pdf'
+3. Click the 'Open' button","1. Select Document dialog opens with file filter 'Documents (*.pdf;*.docx;*.txt)'
+2. PDF file is highlighted/selected in the dialog
+3. Dialog closes and the selected PDF file path is populated in the file path field","1. Select Document dialog opened with correct file filter
+2. PDF file was highlighted/selected in the dialog
+3. Dialog closed and selected PDF file path was populated in the field correctly"
+TC ID - 217,Verify the user can select an Excel (.xlsx) document successfully.,"1. Click the 'Browse' button to open the Select Document dialog
+2. Change the file type filter if required and select 'imp_he2000_variable_tables (1).xlsx'
+3. Click the 'Open' button","1. Select Document dialog opens with the file filter options
+2. Excel file is highlighted/selected in the dialog
+3. Dialog closes and the selected .xlsx file path is populated in the file path field","1. Select Document dialog opened with the file filter options
+2. Excel file was highlighted/selected in the dialog
+3. Dialog closed and selected .xlsx file path was populated in the field correctly"
+TC ID - 218,Verify the selected file path is displayed after choosing a document.,"1. Click 'Browse' and select a valid PDF document
+2. Click 'Open' to confirm the selection
+3. Observe the file path text field next to the Browse button","1. Select Document dialog is opened
+2. Selection is confirmed and dialog closes
+3. File path field displays the full path, e.g., 'C:\Users\sharo\Downloads\imp_he2000_user_manual.pdf'","1. Select Document dialog opened as expected
+2. Selection confirmed and dialog closed
+3. File path field displayed the full path correctly, e.g., 'C:\Users\sharo\Downloads\imp_he2000_user_manual.pdf'"
+TC ID - 219,Verify clicking the Upload button uploads the selected document successfully.,"1. Select 'GEM Manual' as the Document Type and browse/select a valid PDF file
+2. Click the 'Upload' button
+3. Observe the upload process and resulting document list","1. Document Type and file path are populated correctly
+2. Upload request is submitted for processing
+3. Document is uploaded and added to the document list grid with correct details","1. Document Type and file path populated correctly
+2. Upload request submitted for processing
+3. Document uploaded and added to the document list grid with correct details"
+TC ID - 220,Verify a success message is displayed after the document is uploaded successfully.,"1. Select a valid document and click 'Upload'
+2. Wait for the upload process to complete
+3. Observe the popup message displayed","1. Upload request is submitted
+2. Upload processing completes without error
+3. A 'Success' popup is displayed with the message 'Document uploaded successfully.' and an OK button","1. Upload request submitted successfully
+2. Upload processing completed without error
+3. 'Success' popup displayed with the message 'Document uploaded successfully.' and OK button as expected"
+TC ID - 221,"Verify the uploaded document is displayed in the document list with the correct File Name, Document ID, Document Type, Pages and Status.","1. Upload 'imp_he2000_user_manual.pdf' as a GEM Manual document
+2. Close the success popup
+3. Review the document list grid row for the uploaded file","1. File is uploaded successfully
+2. Success popup closes and grid refreshes
+3. Document list displays File Name 'imp_he2000_user_manual.pdf', Document ID 'imp_he2000_user_manual', Document Type 'GEM Manual', Pages '23', and Status 'uploaded'","1. File uploaded successfully
+2. Success popup closed and grid refreshed
+3. Document list displayed all fields correctly (File Name, Document ID, Document Type 'GEM Manual', Pages '23', Status 'uploaded')"
+TC ID - 222,Verify uploading the same document again displays a duplicate file validation message and prevents duplicate upload.,"1. Ensure 'imp_he2000_user_manual.pdf' already exists in the document list
+2. Browse and select the same file 'imp_he2000_user_manual.pdf' again
+3. Click the 'Upload' button","1. Document already exists in the list from a previous upload
+2. Same file is selected and file path is populated
+3. System displays a duplicate file validation message and blocks the duplicate upload; document list is not duplicated","1. Document already existed in the list from a previous upload
+2. Same file was selected and file path was populated
+3. System accepted the duplicate file without any warning and no validation message was shown"
+TC ID - 223,Verify the system rejects a 0 KB document during upload,"1. Navigate to WorkSpace > Upload Document tab.
+2. Select the Document Type (e.g., User Manuals).3. Click the Browse button and select a 0 KB (empty) document.4. Click the Upload button.","1. The system validates the selected file before uploading.2. The 0 KB document is rejected.3. An appropriate validation message (e.g., ""Invalid file. Empty (0 KB) documents are not allowed."") is displayed.4. The document is not uploaded and no entry is created in the document list.",1. The system accepted the selected 0 KB document.2. The upload completed successfully without any validation error.3. The 0 KB document was added to the document list.4. No validation message was displayed.
+TC ID - 224,Verify the uploaded document status remains Uploaded until the Analyze button is clicked.,"1. Upload a new document and note its Status column value immediately after upload
+2. Without clicking Analyze, refresh or revisit the Upload Document tab
+3. Recheck the Status column value for the same document","1. Document is uploaded and appears in the list
+2. Page is refreshed/revisited without triggering analysis
+3. Status remains 'uploaded' until the user explicitly clicks the 'Analyze' button for that document","1. Document uploaded and appeared in the list
+2. Page refreshed/revisited without triggering analysis
+3. Status changed to 'completed' immediately after upload, without the user clicking Analyze"
+TC ID - 225,Verify Status Variables are extracted and displayed correctly after analysis.,"1. Analyze a GEM Manual document successfully
+2. Click on the 'Status Variables' tab below the document list
+3. Review the extracted records","1. Document analysis completes with Status 'completed'
+2. Status Variables tab opens and loads extracted data
+3. Status Variables grid displays extracted SVID records with relevant columns populated correctly","1. Document analysis completed with Status 'completed'
+2. Status Variables tab opened and loaded extracted data
+3. Status Variables grid displayed extracted SVID records with relevant columns populated correctly"
+TC ID - 226,Verify Data Variables are extracted and displayed correctly after analysis.,"1. Analyze a GEM Manual document successfully
+2. Click on the 'Data Variables' tab below the document list
+3. Review the extracted records","1. Document analysis completes with Status 'completed'
+2. Data Variables tab opens and loads extracted data
+3. Data Variables grid displays extracted DVID records with relevant columns populated correctly","1. Document analysis completed with Status 'completed'
+2. Data Variables tab opened and loaded extracted data
+3. Data Variables grid displayed extracted DVID records with relevant columns populated correctly"
+TC ID - 227,Verify Events are extracted and displayed correctly after analysis.,"1. Analyze a GEM Manual document successfully
+2. Click on the 'Events' tab below the document list
+3. Review the extracted records","1. Document analysis completes with Status 'completed'
+2. Events tab opens and loads extracted data
+3. Events grid displays extracted CEID records with relevant columns populated correctly","1. Document analysis completed with Status 'completed'
+2. Events tab opened and loaded extracted data
+3. Events grid displayed extracted CEID records with relevant columns populated correctly"
+TC ID - 228,Verify Alarms are extracted and displayed correctly after analysis.,"1. Analyze a GEM Manual document successfully
+2. Click on the 'Alarms' tab below the document list
+3. Review the extracted records","1. Document analysis completes with Status 'completed'
+2. Alarms tab opens and loads extracted data
+3. Alarms grid displays Alarm ID, Alarm Name and Severity columns populated with extracted records","1. Document analysis completed with Status 'completed'
+2. Alarms tab opened and loaded extracted data
+3. Alarms grid displayed Alarm ID, Alarm Name and Severity columns populated with extracted records correctly"
+TC ID - 229,Verify Remote Commands are extracted and displayed correctly after analysis.,"1. Analyze a GEM Manual document successfully
+2. Click on the 'Remote Commands' tab below the document list
+3. Review the extracted records such as RCMD and Description","1. Document analysis completes with Status 'completed'
+2. Remote Commands tab opens and loads extracted data
+3. Remote Commands grid displays RCMD values (e.g., START_IMPLANT, ABORT_IMPLANT, PAUSE_IMPLANT) with matching Description text","1. Document analysis completed with Status 'completed'
+2. Remote Commands tab opened and loaded extracted data
+3. Remote Commands grid displayed RCMD values with matching Description text correctly, e.g., START_IMPLANT, ABORT_IMPLANT, PAUSE_IMPLANT"
+TC ID - 230,Verify States are extracted and displayed correctly after analysis.,"1. Analyze a GEM Manual document successfully
+2. Click on the 'States' tab below the document list
+3. Review the extracted records","1. Document analysis completes with Status 'completed'
+2. States tab opens and loads extracted data
+3. States grid displays extracted state model records with relevant columns populated correctly","1. Document analysis completed with Status 'completed'
+2. States tab opened and loaded extracted data
+3. States grid displayed extracted state model records with relevant columns populated correctly"
+TC ID - 231,Verify Reports are extracted and displayed correctly after analysis.,"1. Analyze a GEM Manual document successfully
+2. Click on the 'Reports' tab below the document list
+3. Review the extracted records","1. Document analysis completes with Status 'completed'
+2. Reports tab opens and loads extracted data
+3. Reports grid displays extracted RPTID records with relevant columns populated correctly","1. Document analysis completed with Status 'completed'
+2. Reports tab opened and loaded extracted data
+3. Reports grid displayed extracted RPTID records with relevant columns populated correctly"
+TC ID - 232,Verify the checkboxes in Status Variables work correctly.,"1. Navigate to the 'Status Variables' tab after analysis
+2. Click the header checkbox to select/deselect all rows
+3. Click an individual row checkbox to toggle its selection","1. Status Variables grid displays records each with a row checkbox and a header checkbox
+2. Header checkbox selects or deselects all rows accordingly
+3. Individual row checkbox toggles that row's selection independently without affecting other rows","1. Status Variables grid displayed records with row and header checkboxes as expected
+2. Header checkbox selected/deselected all rows correctly
+3. Individual row checkbox toggled selection independently as expected"
+TC ID - 233,Verify the checkboxes in Data Variables work correctly.,"1. Navigate to the 'Data Variables' tab after analysis
+2. Click the header checkbox to select/deselect all rows
+3. Click an individual row checkbox to toggle its selection","1. Data Variables grid displays records each with a row checkbox and a header checkbox
+2. Header checkbox selects or deselects all rows accordingly
+3. Individual row checkbox toggles that row's selection independently without affecting other rows","1. Data Variables grid displayed records with row and header checkboxes as expected
+2. Header checkbox selected/deselected all rows correctly
+3. Individual row checkbox toggled selection independently as expected"
+TC ID - 234,Verify the checkboxes in Events work correctly.,"1. Navigate to the 'Events' tab after analysis
+2. Click the header checkbox to select/deselect all rows
+3. Click an individual row checkbox to toggle its selection","1. Events grid displays records each with a row checkbox and a header checkbox
+2. Header checkbox selects or deselects all rows accordingly
+3. Individual row checkbox toggles that row's selection independently without affecting other rows","1. Events grid displayed records with row and header checkboxes as expected
+2. Header checkbox selected/deselected all rows correctly
+3. Individual row checkbox toggled selection independently as expected"
+TC ID - 235,Verify the checkboxes in Alarms work correctly.,"1. Navigate to the 'Alarms' tab after analysis
+2. Click the header checkbox to select/deselect all rows
+3. Click an individual row checkbox to toggle its selection","1. Alarms grid displays records each with a row checkbox and a header checkbox
+2. Header checkbox selects or deselects all rows accordingly
+3. Individual row checkbox toggles that row's selection independently without affecting other rows","1. Alarms grid displayed records with row and header checkboxes as expected
+2. Header checkbox selected/deselected all rows correctly
+3. Individual row checkbox toggled selection independently as expected"
+TC ID - 236,Verify the checkboxes in Remote Commands work correctly.,"1. Navigate to the 'Remote Commands' tab after analysis
+2. Click the header checkbox to select/deselect all RCMD rows
+3. Click an individual row checkbox (e.g., 'START_IMPLANT') to toggle its selection","1. Remote Commands grid displays RCMD records each with a row checkbox and a header checkbox, all checked by default
+2. Header checkbox selects or deselects all RCMD rows accordingly
+3. Individual row checkbox toggles that row's selection independently without affecting other rows","1. Remote Commands grid displayed RCMD records with row and header checkboxes checked by default as expected
+2. Header checkbox selected/deselected all RCMD rows correctly
+3. Individual row checkbox toggled selection independently as expected"
+TC ID - 237,Verify the checkboxes in States work correctly.,"1. Navigate to the 'States' tab after analysis
+2. Click the header checkbox to select/deselect all rows
+3. Click an individual row checkbox to toggle its selection","1. States grid displays records each with a row checkbox and a header checkbox
+2. Header checkbox selects or deselects all rows accordingly
+3. Individual row checkbox toggles that row's selection independently without affecting other rows","1. States grid displayed records with row and header checkboxes as expected
+2. Header checkbox selected/deselected all rows correctly
+3. Individual row checkbox toggled selection independently as expected"
+TC ID - 238,Verify the checkboxes in Reports work correctly.,"1. Navigate to the 'Reports' tab after analysis
+2. Click the header checkbox to select/deselect all rows
+3. Click an individual row checkbox to toggle its selection","1. Reports grid displays records each with a row checkbox and a header checkbox
+2. Header checkbox selects or deselects all rows accordingly
+3. Individual row checkbox toggles that row's selection independently without affecting other rows","1. Reports grid displayed records with row and header checkboxes as expected
+2. Header checkbox selected/deselected all rows correctly
+3. Individual row checkbox toggled selection independently as expected"
+TC ID - 239,Verify clicking the Delete button displays the delete confirmation popup.,"1. Navigate to WorkSpace > Upload Document tab with at least one uploaded document
+2. Click the 'Delete' button on the row for 'imp_he2000_user_manual.pdf'","1. Document list displays the uploaded document with Analyze and Delete action buttons
+2. A 'Delete Document' confirmation popup is displayed with the message ""Are you sure you want to delete 'imp_he2000_user_manual.pdf'?"" along with Yes and No buttons","1. Document list displayed the uploaded document with Analyze and Delete action buttons
+2. 'Delete Document' confirmation popup displayed with the correct message and Yes/No buttons as expected"
+TC ID - 240,Verify clicking No closes the confirmation popup without deleting the document.,"1. Click the 'Delete' button for a document to trigger the confirmation popup
+2. Click the 'No' button on the Delete Document popup
+3. Verify the document still appears in the document list","1. Delete Document confirmation popup is displayed
+2. Popup closes without performing any delete action
+3. Document remains listed in the document list, unchanged","1. Delete Document confirmation popup displayed
+2. Popup closed without performing any delete action
+3. Document remained listed in the document list, unchanged as expected"
+TC ID - 241,Verify clicking Yes deletes the selected document successfully.,"1. Click the 'Delete' button for a document to trigger the confirmation popup
+2. Click the 'Yes' button on the Delete Document popup
+3. Verify the document list after the popup closes","1. Delete Document confirmation popup is displayed
+2. Delete request is processed for the selected document
+3. Document is removed from the document list successfully","1. Delete Document confirmation popup displayed
+2. Delete request processed for the selected document
+3. Document removed from the document list successfully as expected"
+TC ID - 242,Verify clicking Delete Selected removes the selected extracted records successfully.,"1. Navigate to any extraction tab (e.g., Alarms) after analysis
+2. Select one or more record checkboxes to be removed
+3. Click the 'Delete Selected' button","1. Extraction tab displays records with selectable checkboxes
+2. Desired records are checked for deletion
+3. Selected records are removed from the grid successfully and the list refreshes","1. Extraction tab displayed records with selectable checkboxes
+2. Desired records were checked for deletion
+3. Delete Selected button did not respond; selected records remained in the grid and list did not refresh"
+TC ID - 243,Verify the Extraction page loads successfully.,"1. Login to Brace Link Integration Platform
+2. Select project 'TestImplantation' from Current Project dropdown
+3. Click on 'WorkSpace' in left navigation menu
+4. Click on 'Extraction' tab","1. User is logged in successfully
+2. Project 'TestImplantation' is selected as Current Project
+3. WorkSpace page opens
+4. Extraction page loads with Total Documents, Total Records Extracted and data tabs visible","1. User logged in successfully
+2. Project 'TestImplantation' selected as Current Project
+3. WorkSpace page opened
+4. Extraction page loaded with all fields and tabs visible"
+TC ID - 244,Verify the Total Documents count is displayed correctly.,"1. Navigate to WorkSpace > Extraction page
+2. Observe the 'Total Documents' counter","1. 'Total Documents' field is visible on the page
+2. 'Total Documents' displays the correct count of uploaded documents (3)","1. 'Total Documents' field visible on the page
+2. 'Total Documents' displayed as 3, matching uploaded documents"
+TC ID - 245,Verify the Total Records Extracted count is displayed correctly.,"1. Navigate to WorkSpace > Extraction page
+2. Observe the 'Total Records Extracted' counter","1. 'Total Records Extracted' field is visible on the page
+2. 'Total Records Extracted' displays the correct total count (252)","1. 'Total Records Extracted' field visible on the page
+2. 'Total Records Extracted' displayed as 252, matching extracted records"
+TC ID - 246,Verify clicking the Get Data button retrieves the latest extracted records successfully.,"1. Navigate to WorkSpace > Extraction page
+2. Enter IP Address '127.0.0.1' in IP Address field
+3. Enter Port '5001' in Port field
+4. Click on 'Get Data' button","1. IP Address field accepts the entered value
+2. Port field accepts the entered value
+3. System connects to the specified IP/Port
+4. Latest extracted records are retrieved and displayed in respective tabs","1. IP Address field accepted the entered value
+2. Port field accepted the entered value
+3. System connected to the specified IP/Port
+4. Latest extracted records retrieved and displayed successfully"
+TC ID - 247,Verify clicking Download Report downloads the extraction report successfully in Excel (.xlsx) format.,"1. Navigate to WorkSpace > Extraction page
+2. Click on 'Download Report' button
+3. In the 'Save As' dialog, verify the 'Save as type' field
+4. Click 'Save' button","1. 'Save As' dialog opens
+2. 'Save as type' shows 'Excel Workbook (*.xlsx)'
+3. File name defaults to 'ExtractionReport.xlsx'
+4. Report is downloaded successfully to the selected location","1. 'Save As' dialog opened
+2. 'Save as type' showed 'Excel Workbook (*.xlsx)'
+3. File name defaulted to 'ExtractionReport.xlsx'
+4. Report downloaded successfully"
+TC ID - 248,Verify the downloaded Excel report contains the correct extraction data.,"1. Download the extraction report using 'Download Report' button
+2. Open the downloaded 'ExtractionReport.xlsx' file
+3. Compare the data in the file with the data shown on the Extraction page tabs","1. File opens successfully in Excel
+2. Data is organized in proper columns matching the on-screen tabs
+3. Data in the report matches the data displayed on Extraction page (Status Variables, Data Variables, Events, Alarms, Remote Commands, States, Reports)","1. File opened successfully in Excel
+2. Data was organized in proper columns matching the on-screen tabs
+3. Data in the report matched the data displayed on Extraction page"
+TC ID - 249,Verify the Status Variables tab displays extracted records correctly.,"1. Navigate to WorkSpace > Extraction page
+2. Click on 'Status Variables' tab
+3. Observe the list of records displayed","1. 'Status Variables' tab opens
+2. Records are listed with all expected columns
+3. Extracted status variable records are displayed correctly","1. 'Status Variables' tab opened
+2. Records listed with all expected columns
+3. Extracted status variable records displayed correctly"
+TC ID - 250,Verify the Alarms tab displays extracted records correctly.,"1. Navigate to WorkSpace > Extraction page
+2. Click on 'Alarms' tab
+3. Observe the Alarm ID, Alarm Name and Severity columns for records 4001, 4002, 4005, 4006","1. 'Alarms' tab opens
+2. Records are listed with Alarm ID, Alarm Name and Severity columns
+3. Alarm records (4001-Source_ArcFault, 4002-Source_GasLeak, 4005-EndStn_DoseOverrun, 4006-EndStn_WaferOverheat) display with Severity 'critical'","1. 'Alarms' tab opened
+2. Records listed with Alarm ID, Alarm Name and Severity columns
+3. Alarm records displayed correctly with correct Alarm ID, Alarm Name and Severity"
+TC ID - 251,Verify the Reports tab displays extracted records correctly.,"1. Navigate to WorkSpace > Extraction page
+2. Click on 'Reports' tab
+3. Observe the list of records displayed","1. 'Reports' tab opens
+2. Records are listed with all expected columns
+3. Extracted report records are displayed correctly","1. 'Reports' tab opened
+2. Records listed with all expected columns
+3. Extracted report records displayed correctly"
+TC ID - 252,Verify the checkbox selection works correctly in the Remote Commands tab.,"1. Navigate to WorkSpace > Extraction > Remote Commands tab
+2. Click the header checkbox to select all records
+3. Click an individual row checkbox to deselect a record
+4. Observe the checkbox states","1. Header checkbox selects/deselects all records
+2. Individual checkbox toggles selection of that row correctly
+3. Individual deselection updates the header checkbox state appropriately
+4. Selected records are highlighted correctly","1. Header checkbox selected/deselected all records as expected
+2. Individual checkbox toggled selection correctly
+3. Header checkbox state updated appropriately
+4. Selected records highlighted correctly"
+TC ID - 253,Verify the checkbox selection works correctly in the States tab.,"1. Navigate to WorkSpace > Extraction > States tab
+2. Click the header checkbox to select all records
+3. Click an individual row checkbox to deselect a record
+4. Observe the checkbox states","1. Header checkbox selects/deselects all records
+2. Individual checkbox toggles selection of that row correctly
+3. Individual deselection updates the header checkbox state appropriately
+4. Selected records are highlighted correctly","1. Header checkbox selected/deselected all records as expected
+2. Individual checkbox toggled selection correctly
+3. Header checkbox state updated appropriately
+4. Selected records highlighted correctly"
+TC ID - 254,Verify the checkbox selection works correctly in the Reports tab.,"1. Navigate to WorkSpace > Extraction > Reports tab
+2. Click the header checkbox to select all records
+3. Click an individual row checkbox to deselect a record
+4. Observe the checkbox states","1. Header checkbox selects/deselects all records
+2. Individual checkbox toggles selection of that row correctly
+3. Individual deselection updates the header checkbox state appropriately
+4. Selected records are highlighted correctly","1. Header checkbox selected/deselected all records as expected
+2. Individual checkbox toggled selection correctly
+3. Header checkbox state updated appropriately
+4. Selected records highlighted correctly"
+TC ID - 255,Verify the checkbox selection works correctly in the Status Variables tab.,"1. Navigate to WorkSpace > Extraction > Status Variables tab
+2. Click the header checkbox to select all records
+3. Click an individual row checkbox to deselect a record
+4. Observe the checkbox states","1. Header checkbox should select/deselect all records
+2. Individual checkbox should toggle selection of that row correctly
+3. Individual deselection should update the header checkbox state appropriately
+4. Selected records should be highlighted correctly","1. Checkbox selection does not work properly
+2. Individual row checkbox selection is not reflected correctly
+3. Header checkbox state does not update as expected
+4. Selected records are not highlighted correctly"
+TC ID - 256,Verify the checkbox selection works correctly in the Data Variables tab.,"1. Navigate to WorkSpace > Extraction > Data Variables tab
+2. Click the header checkbox to select all records
+3. Click an individual row checkbox to deselect a record
+4. Observe the checkbox states","1. Header checkbox should select/deselect all records
+2. Individual checkbox should toggle selection of that row correctly
+3. Individual deselection should update the header checkbox state appropriately
+4. Selected records should be highlighted correctly","1. Checkbox selection does not work properly
+2. Individual row checkbox selection is not reflected correctly
+3. Header checkbox state does not update as expected
+4. Selected records are not highlighted correctly"
+TC ID - 257,Verify the checkbox selection works correctly in the Events tab.,"1. Navigate to WorkSpace > Extraction > Events tab
+2. Click the header checkbox to select all records
+3. Click an individual row checkbox to deselect a record
+4. Observe the checkbox states","1. Header checkbox should select/deselect all records
+2. Individual checkbox should toggle selection of that row correctly
+3. Individual deselection should update the header checkbox state appropriately
+4. Selected records should be highlighted correctly","1. Checkbox selection does not work properly
+2. Individual row checkbox selection is not reflected correctly
+3. Header checkbox state does not update as expected
+4. Selected records are not highlighted correctly"
+TC ID - 258,Verify the checkbox selection works correctly in the Alarms tab.,"1. Navigate to WorkSpace > Extraction > Alarms tab
+2. Click the header checkbox to select all alarm records
+3. Click an individual row checkbox to deselect an alarm record
+4. Observe the checkbox states","1. Header checkbox should select/deselect all alarm records
+2. Individual checkbox should toggle selection of that alarm row correctly
+3. Individual deselection should update the header checkbox state appropriately
+4. Selected alarm records should be highlighted correctly","1. Checkbox selection does not work properly
+2. Individual row checkbox selection is not reflected correctly
+3. Header checkbox state does not update as expected
+4. Selected records are not highlighted correctly"
+TC ID - 259,Verify the SML Definitions page loads successfully.,"1. Login to Brace Link Integration Platform
+2. Select project 'TestImplantation' from Current Project dropdown
+3. Click on 'WorkSpace' in left navigation menu
+4. Click on 'SML Definitions' tab","1. User is logged in successfully
+2. Project 'TestImplantation' is selected as Current Project
+3. WorkSpace page opens
+4. SML Definitions page loads with Upload, Download buttons and SML editor/viewer visible","1. User logged in successfully
+2. Project 'TestImplantation' selected as Current Project
+3. WorkSpace page opened
+4. SML Definitions page loaded with all fields visible"
+TC ID - 260,Verify clicking the Upload button opens the file selection dialog.,"1. Navigate to WorkSpace > SML Definitions page
+2. Click on 'Upload' button","1. 'Select SML Script to Upload' file dialog opens
+2. File type filter shows 'SML Files (*.sml)'","1. 'Select SML Script to Upload' file dialog opened
+2. File type filter showed 'SML Files (*.sml)'"
+TC ID - 261,Verify the user can browse and select a valid .sml file.,"1. Click on 'Upload' button to open file dialog
+2. Browse to the folder containing the .sml file
+3. Select the file 'TestImplantation_GeneralGEMTesting.sml'
+4. Click 'Open' button","1. File dialog allows browsing to the target folder
+2. Only .sml files are listed/selectable as per filter
+3. Selected file name populates the 'File name' field
+4. File dialog closes on clicking 'Open'","1. File dialog allowed browsing to target folder
+2. Only .sml files listed as per filter
+3. Selected file name populated the 'File name' field
+4. File dialog closed successfully on clicking 'Open'"
+TC ID - 262,Verify the uploaded SML file is displayed correctly in the editor/viewer.,"1. Upload a valid .sml file
+2. Wait for upload completion
+3. Observe the SML content displayed in the right-side editor/viewer panel","1. Upload completes successfully
+2. Editor/viewer panel displays the uploaded SML script
+3. Content is formatted/readable (e.g. S1F13, S1F15, S1F17, S1F21 message blocks visible)","1. Upload completed successfully
+2. Editor/viewer panel displayed the uploaded SML script
+3. Content was formatted and readable with correct message blocks visible"
+TC ID - 263,Verify the downloaded file is saved with the .sml extension.,"1. Click on 'Download' button on SML Definitions page
+2. Save the file to the Downloads folder
+3. Navigate to the Downloads folder and check the saved file","1. File download completes without error
+2. File is saved with '.sml' extension
+3. File name matches 'TestImplantation_GeneralGEMTesting.sml'","1. File download completed without error
+2. File saved with '.sml' extension
+3. File name matched 'TestImplantation_GeneralGEMTesting.sml'"
+TC ID - 264,Verify the Connect button changes to Disconnect after a successful connection.,"1. Enter valid IP Address, Port and Device ID
+2. Click on 'Connect' button
+3. Observe the button label after connection is established","1. Connection is established successfully
+2. Button label changes from 'Connect' to 'Disconnect'
+3. Button color/style updates to indicate connected state","1. Connection established successfully
+2. Button label changed from 'Connect' to 'Disconnect'
+3. Button style updated to indicate connected state"
+TC ID - 265,Verify the selected SML file is loaded successfully and the Test Suite Explorer displays all available test cases.,"1. Select 'GeneralGEMTesting' from the SML Files dropdown
+2. Click on 'Start' button
+3. Observe the 'Test Suite Explorer' panel on the Test Suite tab
+4. Expand the 'Communication' node and review the listed test cases","1. SML file loads successfully without error
+2. Execution starts
+3. 'Test Suite Explorer' displays the 'Communication' group with a count (e.g. 9)
+4. All test cases (e.g. Equipment Presence Check, Equipment Status Request, Status Variable Request, Communication Establishment, Offline Mode Request, Online Mode Request, Data Variable Request) are listed with their current status","1. SML file loaded successfully without error
+2. Execution started
+3. 'Test Suite Explorer' displayed the 'Communication' group with correct count
+4. All test cases listed with their current status correctly"
+TC ID - 266,"Verify the execution progress, test summary, success rate, elapsed time, and estimated time are updated correctly during execution.","1. Start execution of the selected SML file
+2. Observe the 'Overall Progress' percentage as tests run
+3. Observe the 'Tests Summary' (Passed/Failed/Not Run) counts
+4. Observe the 'Success Rate' circular indicator
+5. Observe the 'Elapsed Time' and 'Estimated Time Left' counters","1. Execution starts and progress bar begins moving
+2. 'Overall Progress' percentage increases as more tests complete (e.g. 22% -> 44% -> 56% -> 74% -> 100%)
+3. 'Tests Summary' Passed/Failed/Not Run counts update in real time
+4. 'Success Rate' percentage updates to reflect Passed vs Total executed tests
+5. 'Elapsed Time' increases continuously and 'Estimated Time Left' decreases as execution proceeds","1. Execution started and progress bar began moving
+2. 'Overall Progress' percentage increased as more tests completed
+3. 'Tests Summary' Passed/Failed/Not Run counts updated in real time
+4. 'Success Rate' percentage updated to reflect Passed vs Total executed tests
+5. 'Elapsed Time' increased continuously and 'Estimated Time Left' decreased as execution proceeded"
+TC ID - 267,Verify the Current Test Details and Execution Flow display the correct SECS/GEM transaction information for the executing test case.,"1. Start execution of an SML file
+2. Observe the 'Current Test Detail' panel while a test case is executing
+3. Observe the 'Execution Flow' panel (Send, Wait Response, Validate steps)","1. 'Current Test Detail' panel shows the correct Test Case name (e.g. 'S1F15 W - Offline Mode Request') and Direction (e.g. 'Host -> Equipment')
+2. 'Execution Flow' panel shows the correct sequence of steps: Send <message>, Wait Response, Validate <expected reply>
+3. Each step in the Execution Flow is marked complete (checkmark) as it finishes","1. 'Current Test Detail' panel showed the correct Test Case name and Direction
+2. 'Execution Flow' panel showed the correct sequence of steps: Send, Wait Response, Validate
+3. Each step in the Execution Flow marked complete as it finished"
+TC ID - 268,Verify the SECS Log displays transmitted and received SECS/GEM messages clearly and in a readable format during execution.,"1. Start execution of an SML file
+2. Click on the 'SECS Log' tab
+3. Observe the 'SECS/GEM Transaction Console' entries
+4. Scroll through the log to review TX and RX message blocks","1. 'SECS Log' tab opens and displays the 'SECS/GEM Transaction Console'
+2. TX messages display the message name (e.g. S2F15 W), status tag (e.g. WAIT REPLY) and full SECS-II body clearly formatted
+3. RX messages display the response status/result (e.g. Status, Result) with a timestamp
+4. Log entries are readable, correctly formatted and scrollable without truncation or overlap","1. Log entries are not always readable; some transmitted/received message blocks appear misaligned or unclear
+2. Status/result values are shown but formatting is inconsistent between entries
+3. Timestamps display correctly
+4. Scrolling works but content readability is affected"
+TC ID - 269,Verify the Report tab generates the execution report after test completion.,"1. Complete execution of the selected SML file (Overall Progress reaches 100%)
+2. Click on the 'Report' tab
+3. Observe the 'Execution Reports' section and its table (SML File, Generated Time, Device, Total, Pass, Fail, Status)","1. 'Report' tab opens successfully
+2. 'Execution Reports' section displays a generated report row corresponding to the completed execution
+3. Report row shows correct SML File name, Generated Time, Device, Total, Pass, Fail counts and Status","1. 'Report' tab opened successfully
+2. 'Execution Reports' section did not display a generated report row after execution completed
+3. Report table remained empty with no data populated"
+TC ID - 270,Verify clicking the Upload Summaries button uploads or generates the execution summary successfully.,"1. Navigate to the 'Report' tab after execution completes
+2. Click on the 'Upload Summaries' button
+3. Observe any confirmation message or updated report table","1. Clicking 'Upload Summaries' triggers the upload/generation process
+2. A success confirmation is shown to the user
+3. The execution summary is generated/uploaded and reflected in the report table","1. Clicking 'Upload Summaries' did not trigger a visible upload/generation process
+2. No success confirmation was shown to the user
+3. Report table remained empty with no summary reflected"
+TC ID - 271,"Verify the Report Overview page displays dynamically updated execution statistics, execution history, logs, and test results after execution completes.","1. Complete execution of the selected SML file
+2. Click on the 'Report Overview' tab
+3. Observe the 'Tool Reports' section (Total, Passed, Failed, Running)
+4. Observe the 'Execution History' and 'Scripts' panels
+5. Click on 'Test Results', 'SECS Logs' and 'Raw JSON' sub-tabs","1. 'Report Overview' tab opens and displays 'Tool Reports' for the correct Tool ID (e.g. Tool: 1001)
+2. 'Total', 'Passed', 'Failed' and 'Running' cards display correct counts matching the completed execution
+3. 'Execution History' panel lists past execution runs
+4. 'Scripts' panel lists the relevant scripts
+5. 'Test Results', 'SECS Logs' and 'Raw JSON' sub-tabs display corresponding data correctly","1. 'Report Overview' tab opened and displayed 'Tool Reports' for the correct Tool ID
+2. 'Total', 'Passed', 'Failed' and 'Running' cards remained empty/blank instead of showing counts
+3. 'Execution History' panel remained empty with no past runs listed
+4. 'Scripts' panel remained empty
+5. 'Test Results', 'SECS Logs' and 'Raw JSON' sub-tabs did not display any data"
+TC ID - 272,Verify the Knowledge Base returns accurate responses for user queries based on the uploaded documents.,"1. Navigate to 'Knowledge Base' page
+2. Type the query 'Is there svids?' in the chat input and send
+3. Type the query 'what tool is this' and send
+4. Type the query 'who is the vendor' and send
+5. Type the query 'metion the name of the vendor' and send","1. Knowledge Base page loads with the HiCore Knowledge Assistant chat window
+2. Assistant responds with SVID details citing the source document (e.g. SVID_1, SVID_2, 1051-Arc Current, with source imp_he2000_user_manual.pdf and page numbers)
+3. Assistant responds with the correct tool name (IMP-HE2000) with source citation
+4. Assistant responds with the correct vendor name (PrecisionBeam Technologies) with source citation
+5. Assistant responds again with the correct vendor name when rephrased, with source citation","1. Knowledge Base page loaded with the HiCore Knowledge Assistant chat window
+2. Assistant responded with SVID details citing the correct source document and page numbers
+3. Assistant responded with the correct tool name (IMP-HE2000) with source citation
+4. Assistant responded with the correct vendor name (PrecisionBeam Technologies) with source citation
+5. Assistant responded again with the correct vendor name when rephrased, with source citation"
+TC ID - 273,Verify the Delete button in the Knowledge Base removes the selected chat/conversation successfully.,"1. Navigate to 'Knowledge Base' page with an existing conversation
+2. Click on the 'Delete' (trash) icon next to the chat input
+3. Confirm deletion if a confirmation prompt appears
+4. Observe the chat window after deletion","1. Delete icon is clickable and responsive
+2. Confirmation prompt (if any) is displayed correctly
+3. Selected chat/conversation is removed successfully
+4. Chat window is cleared/reset after deletion","1. Delete icon was clickable and responsive
+2. Confirmation prompt displayed correctly
+3. Selected chat/conversation removed successfully
+4. Chat window cleared/reset after deletion"
+TC ID - 274,Verify MES Family dropdown is displayed and selectable.,"1. Navigate to the Smart Mapping page
+2. Click on the 'MES Family' dropdown
+3. Select an available option such as 'FactoryWorks', 'FAB300', 'PROMIS' or 'Camstar'","1. Smart Mapping page displays the MES Family dropdown
+2. Dropdown expands showing all available MES Family options
+3. User can select any available MES Family (FactoryWorks, FAB300, PROMIS, Camstar, etc.) and the selection is reflected in the field","1. Smart Mapping page displayed the MES Family dropdown as expected
+2. Dropdown expanded showing all available MES Family options
+3. User was able to select any available MES Family and the selection was reflected in the field correctly"
+TC ID - 275,Verify Template dropdown displays the correct template.,"1. Select a MES Family from the dropdown
+2. Observe the 'Template' dropdown/field
+3. Click on the Template dropdown to view available options","1. MES Family is selected successfully
+2. STANDARD_EVENT_MODEL.json is displayed as the corresponding template
+3. STANDARD_EVENT_MODEL.json is selectable from the Template dropdown","1. MES Family selected successfully
+2. STANDARD_EVENT_MODEL.json displayed as the corresponding template
+3. STANDARD_EVENT_MODEL.json was selectable from the Template dropdown as expected"
+TC ID - 276,"Verify Event, Alarm, Variable, and Payload tables before Auto Map.","1. Select a MES Family and load the STANDARD_EVENT_MODEL.json template
+2. Navigate through the Event, Alarm, Variable and Payload tabs one by one
+3. Observe the mapping table content on each tab before clicking Auto Map","1. MES Family and template load successfully
+2. Each of the four tabs (Event, Alarm, Variable, Payload) opens without error
+3. All mapping tables are empty before Auto Map is triggered","1. MES Family and template loaded successfully
+2. Each of the four tabs opened without error
+3. All mapping tables were empty before Auto Map, as expected"
+TC ID - 277,Verify Payload tab after Auto Map.,"1. Click 'Auto Map' to populate the Event mappings
+2. Navigate to the 'Payload' tab
+3. Select a payload from the list and review its fields","1. Auto Map completes successfully for Events
+2. Payload tab opens and displays the list of payloads
+3. Payload list and fields are displayed correctly, with selecting a payload showing its corresponding fields","1. Auto Map completed successfully for Events
+2. Payload tab opened and displayed the list of payloads
+3. Payload list and fields were displayed correctly as expected"
+TC ID - 278,Verify Auto Map status message.,"1. Click the 'Auto Map' button
+2. Wait for the mapping process to complete
+3. Observe the status message displayed on the page","1. Auto Map request is triggered
+2. Mapping process completes successfully
+3. Status changes to 'Events Auto Mapping Completed' or an appropriate completion message","1. Auto Map request triggered successfully
+2. Mapping process completed successfully
+3. Status changed to 'Events Auto Mapping Completed' as expected"
+TC ID - 279,Verify Event tab Enable checkbox functionality.,"1. Navigate to the Event tab after Auto Map has populated the mapping data
+2. Click the 'Enable' checkbox for a specific event record to uncheck it
+3. Click the checkbox again to re-check it","1. Event tab displays mapped records each with an Enable checkbox, checked by default
+2. Checkbox toggles to unchecked state for that event record
+3. User should be able to check/uncheck the Enable checkbox successfully","1. Event tab displayed mapped records each with an Enable checkbox, checked by default
+2. Clicking the Enable checkbox did not update its state
+3. Enable checkbox was not working; user could not check/uncheck the checkbox"
+TC ID - 280,Verify Alarm tab Enable checkbox functionality.,"1. Navigate to the Alarm tab with available records
+2. Click the 'Enable' checkbox for a specific alarm record to uncheck it
+3. Click the checkbox again to re-check it","1. Alarm tab displays records each with an Enable checkbox
+2. Checkbox toggles to unchecked state for that alarm record
+3. User should be able to check/uncheck the Enable checkbox successfully","1. Alarm tab displayed records each with an Enable checkbox
+2. Clicking the Enable checkbox did not update its state
+3. Enable checkbox was not working; user could not check/uncheck the checkbox"
+TC ID - 281,Verify Variable tab Enable checkbox functionality.,"1. Navigate to the Variable tab with available records
+2. Click the 'Enable' checkbox for a specific variable record to uncheck it
+3. Click the checkbox again to re-check it","1. Variable tab displays records each with an Enable checkbox
+2. Checkbox toggles to unchecked state for that variable record
+3. User should be able to check/uncheck the Enable checkbox successfully","1. Variable tab displayed records each with an Enable checkbox
+2. Clicking the Enable checkbox did not update its state
+3. Enable checkbox was not working; user could not check/uncheck the checkbox"
+TC ID - 282,Verify Payload selection.,"1. Navigate to the 'Payload' tab on the Smart Mapping page
+2. Select the first payload from the list and review the displayed fields
+3. Select a different payload from the list and review the displayed fields","1. Payload tab opens and displays the full list of payloads
+2. Selecting the first payload displays its correct mapped fields
+3. Selecting each subsequent payload displays the correct mapped fields corresponding to that payload","1. Payload tab opened and displayed the full list of payloads
+2. Selecting the first payload displayed its correct mapped fields
+3. Selecting each subsequent payload displayed the correct mapped fields corresponding to that payload"
+TC ID - 283,Select ConnectionConfig.json.,"1. Navigate to the Smart Code Generator screen
+2. Expand the 'Configuration' folder in Project Explorer
+3. Click on 'ConnectionConfig.json'","1. Project Explorer displays the Configuration folder with all configuration files
+2. Configuration folder is expanded showing ConnectionConfig.json
+3. ConnectionConfig.json content should be displayed and highlighted in Project Explorer","1. Project Explorer displayed the Configuration folder with all configuration files
+2. Configuration folder expanded showing ConnectionConfig.json
+3. Content changes correctly, but the blue selection highlight does not move"
+TC ID - 284,Select EventMappings.json.,"1. Navigate to the Smart Code Generator screen
+2. Expand the 'Configuration' folder in Project Explorer
+3. Click on 'EventMappings.json'","1. Project Explorer displays the Configuration folder with all configuration files
+2. Configuration folder is expanded showing EventMappings.json
+3. EventMappings.json content should be displayed and highlighted","1. Project Explorer displayed the Configuration folder with all configuration files
+2. Configuration folder expanded showing EventMappings.json
+3. Content displays correctly, but the selection highlight remains incorrect"
+TC ID - 285,Select MesConfig.json.,"1. Navigate to the Smart Code Generator screen
+2. Expand the 'Configuration' folder in Project Explorer
+3. Click on 'MesConfig.json'","1. Project Explorer displays the Configuration folder with all configuration files
+2. Configuration folder is expanded showing MesConfig.json
+3. MesConfig.json content should be displayed and highlighted","1. Project Explorer displayed the Configuration folder with all configuration files
+2. Configuration folder expanded showing MesConfig.json
+3. Content displays correctly, but selection highlight behavior is inconsistent"
+TC ID - 286,Select PayloadDefinitions.json.,"1. Navigate to the Smart Code Generator screen
+2. Expand the 'Configuration' folder in Project Explorer
+3. Click on 'PayloadDefinitions.json'","1. Project Explorer displays the Configuration folder with all configuration files
+2. Configuration folder is expanded showing PayloadDefinitions.json
+3. PayloadDefinitions.json content should be displayed and highlighted","1. Project Explorer displayed the Configuration folder with all configuration files
+2. Configuration folder expanded showing PayloadDefinitions.json
+3. Content displays correctly, but the highlight does not update"
+TC ID - 287,Select VariableMappings.json.,"1. Navigate to the Smart Code Generator screen
+2. Expand the 'Configuration' folder in Project Explorer
+3. Click on 'VariableMappings.json'","1. Project Explorer displays the Configuration folder with all configuration files
+2. Configuration folder is expanded showing VariableMappings.json
+3. VariableMappings.json content should be displayed and highlighted","1. Project Explorer displayed the Configuration folder with all configuration files
+2. Configuration folder expanded showing VariableMappings.json
+3. Content displays correctly, but the selection highlight remains on another file"
+TC ID - 288,"Select any file under RunTimeGenerated (AlarmEngine.cs, EventEngine.cs, VariableEngine.cs, etc.).","1. Navigate to the Smart Code Generator screen
+2. Expand the 'RunTimeGenerated' folder in Project Explorer
+3. Click on any file, e.g., 'AlarmEngine.cs', 'EventEngine.cs' or 'VariableEngine.cs'","1. Project Explorer displays the RunTimeGenerated folder with all generated .cs files
+2. RunTimeGenerated folder is expanded showing all runtime-generated code files
+3. The selected file content should be displayed and the selected file should be highlighted in blue","1. Project Explorer displayed the RunTimeGenerated folder with all generated .cs files
+2. RunTimeGenerated folder expanded showing all runtime-generated code files
+3. File content is displayed correctly, but the blue selection highlight does not update to the selected file"
+TC ID - 289,Verify MES Test Run screen loads successfully.,1. Navigate to Smart Testing → MES Test Run,"1. MES Test Run screen loads successfully with IP, Port, Device, Connect button, Test Suite dropdown, Start button, Test Cases table, and Communication Logs","1. MES Test Run screen loaded successfully with all elements (IP, Port, Device, Connect button, Test Suite dropdown, Start button, Test Cases table, Communication Logs) visible as expected"
+TC ID - 290,Verify successful connection to Brace.,"1. Enter valid IP, Port, and Device
+2. Click 'Connect'","1. IP, Port and Device fields accept the valid values entered
+2. System establishes the connection successfully and the Connect button changes to Disconnect","1. IP, Port and Device fields accepted the valid values entered
+2. Connection was established successfully and the Connect button changed to Disconnect as expected"
+TC ID - 291,Verify Connect button changes to Disconnect.,"1. Connect successfully to Brace using valid IP, Port and Device","1. The Connect button changes to Disconnect, indicating an active connection","1. The Connect button changed to Disconnect correctly, indicating an active connection as expected"
+TC ID - 292,Verify Test Suite selection.,"1. Click the 'Test Suite' dropdown
+2. Select a test suite (e.g., ToolCharacterisationTesting)","1. Test Suite dropdown expands showing all available test suites
+2. Selected test suite is displayed correctly in the dropdown","1. Test Suite dropdown expanded showing all available test suites
+2. Selected test suite 'ToolCharacterisationTesting' was displayed correctly in the dropdown as expected"
+TC ID - 293,Verify Test Logs are generated.,"1. Execute a test suite
+2. Open the 'Test Logs' tab under Communication Logs","1. Test suite executes and generates communication activity
+2. Test Logs display the communication messages exchanged during execution","1. Test suite executed and generated communication activity
+2. Test Logs displayed the communication messages exchanged during execution as expected"
+TC ID - 294,Verify all test case rows display data.,"1. Execute a test suite
+2. Observe all rows in the Test Cases table","1. Test suite executes and populates the Test Cases table
+2. Every test case row should display valid test information; no row should be empty","1. Test suite executed and populated the Test Cases table
+2. Not every row displayed valid test information; at least one row was found empty"
+TC ID - 295,Verify Row 11 contains test case data.,"1. Execute the selected test suite
+2. Navigate to Row 11 in the Test Cases table","1. Test suite executes and populates the Test Cases table
+2. Row 11 should display the corresponding test case details","1. Test suite executed and populated the Test Cases table
+2. Row 11 is displayed empty without any data"
+TC ID - 296,Verify MES Logs are populated.,"1. Execute a test suite
+2. Open the 'MES Logs' tab","1. Test suite executes and generates MES-related communication activity
+2. MES Logs should display communication log entries related to MES operations","1. Test suite executed and generated MES-related communication activity
+2. MES Logs remain empty"
+TC ID - 297,Verify Equipment Configuration screen loads successfully.,1. Navigate to 'Settings',"1. Equipment Configuration screen loads successfully with Equipment Information, Communication Modules, Restore, and Save Configuration buttons","1. Equipment Configuration screen loaded successfully with all elements (Equipment Information, Communication Modules, Restore, Save Configuration) visible as expected"
+TC ID - 298,Verify Equipment Information fields are displayed.,1. Open the 'Settings' screen,"1. Equipment ID, IP Address, Port, and Device ID fields are displayed with their configured values","1. Equipment ID, IP Address, Port, and Device ID fields were displayed with their configured values as expected"
+TC ID - 299,Verify Communication Modules are displayed.,1. Scroll to the 'Communication Modules' section,"1. MES, R2R, and FDC modules are displayed with Equipment ID, IP Address, Port, Device ID, and Enable checkbox for each","1. MES, R2R, and FDC modules were displayed with Equipment ID, IP Address, Port, Device ID, and Enable checkbox for each, as expected"
+TC ID - 300,Verify Enable checkbox functionality.,"1. Enable or disable the MES, R2R, and FDC checkboxes",1. The selected module is enabled or disabled successfully,1. The selected module was enabled or disabled successfully as expected
+TC ID - 301,Verify Save Configuration button.,"1. Modify any configuration value
+2. Click 'Save Configuration'","1. Configuration field is updated with the new value
+2. Configuration is saved successfully, and a confirmation message is displayed","1. Configuration field was updated with the new value
+2. Configuration was saved successfully, and a confirmation message was displayed as expected"
+TC ID - 302,Verify saved configuration is retained.,"1. Save the modified configuration
+2. Refresh or reopen the Settings page","1. Configuration is saved successfully
+2. Previously saved configuration values are retained","1. Configuration was saved successfully
+2. Previously saved configuration values were retained as expected"
+TC ID - 303,Verify Restore button.,"1. Modify any configuration value
+2. Click 'Restore'","1. Configuration field is updated with the new value
+2. A confirmation dialog is displayed asking whether to restore the default configuration","1. Configuration field was updated with the new value
+2. A confirmation dialog was displayed asking whether to restore the default configuration, as expected"
+TC ID - 304,Verify Restore confirmation – Yes.,"1. Click 'Restore'
+2. Select 'Yes' in the confirmation dialog","1. Restore confirmation dialog is displayed
+2. Default configuration is restored successfully, and a success message is displayed","1. Restore confirmation dialog was displayed
+2. Default configuration was restored successfully, and a success message was displayed as expected"
+TC ID - 305,Verify Restore confirmation – No.,"1. Click 'Restore'
+2. Select 'No' in the confirmation dialog","1. Restore confirmation dialog is displayed
+2. Restore operation is cancelled, and the existing configuration remains unchanged","1. Restore confirmation dialog was displayed
+2. Restore operation was cancelled, and the existing configuration remained unchanged as expected"
+TC ID - 306,Verify success message after Save.,1. Save the configuration,1. A 'Configuration saved successfully' message is displayed,1. A 'Configuration saved successfully' message was displayed as expected
+TC ID - 307,Verify Last Updated field.,1. Save the configuration,1. The Last Updated date and time is updated after the configuration is saved,"1. The Last Updated date and time was updated correctly after the configuration was saved, as expected"

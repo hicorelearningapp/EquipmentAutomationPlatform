@@ -1,0 +1,12 @@
+{
+  "ProjectID": 24,
+  "ProjectName": "CLI Test Project",
+  "VendorName": "FabTech",
+  "ProjectCode": "CLI-001",
+  "ProjectDescription": "",
+  "Tool": "None",
+  "CreatedAt": "2026-09-07T07:14:49.632695Z",
+  "LastUpdatedOn": "2026-09-07T07:14:49.632695Z",
+  "Status": "active",
+  "ProjectVersion": "1.0"
+}
