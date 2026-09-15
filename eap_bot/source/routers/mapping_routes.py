@@ -348,36 +348,6 @@ class MappingAPI:
             logger.exception("Error saving mapping")
             raise HTTPException(500, str(exc))
 
-    # async def upload_mes_tag_document(self, project_id: str, file: UploadFile = File(...)):
-    #     if not file.filename or not file.filename.lower().endswith(".pdf"):
-    #         raise HTTPException(400, "Only .pdf files are accepted for MES tags")
-    #     try:
-    #         document_id = self.storage.slugify(file.filename.replace(".pdf", ""))
-    #         mes_path = self.storage.mes_tag_path(project_id, document_id)
-    #         contents = await file.read()
-    #         self.storage.save_pdf(mes_path, contents)
-    #         extracted_tags = ["Tag1", "Tag2", "Tag3"]
-    #         return {
-    #             "ProjectID": project_id,
-    #             "DocumentID": document_id,
-    #             "Status": "success",
-    #             "Message": "MES Tag document uploaded and tags extracted",
-    #             "ExtractedTags": extracted_tags,
-    #         }
-    #     except StorageError as exc:
-    #         raise HTTPException(500, str(exc))
-
-    # def get_mes_mapping(self, project_id: int, body: MESMappingRequest):
-    #     try:
-    #         return container.project_service.get_mes_mapping(project_id, body)
-    #     except ProjectNotFoundError as exc:
-    #         raise HTTPException(404, str(exc)) from exc
-    #     except FileNotFoundError as exc:
-    #         raise HTTPException(404, str(exc)) from exc
-    #     except Exception as exc:
-    #         logger.error("MES mapping failed: %s", exc)
-    #         raise HTTPException(500, f"Error generating mapping suggestions: {exc}") from exc
-
     def auto_map(self, project_id: int, body: dict) -> dict:
         from source.schemas.mapping import AutoMapSectionRequest
 
@@ -722,4 +692,3 @@ class MappingAPI:
                     response_data[section].append(item)
 
         return response_data
-

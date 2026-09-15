@@ -148,6 +148,35 @@ class DocumentService:
 
         return self._build_extraction_response(project_id, document_id, spec)
 
+    def get_or_generate_questions(self, project_id: int) -> list:
+        questions = self.storage.get_questions(project_id)
+        if not questions:
+            spec_json = self.storage.read_spec_json(project_id, "project_batch")
+            spec_obj = EquipmentSpec.model_validate_json(spec_json)
+            questions = self.generate_predefined_questions(project_id, spec_obj)
+        return questions
+
+    def delete_document_workflow(self, project_id: int, document_id: str) -> dict:
+        self.storage.delete_document(project_id, document_id)
+        from source.utils.embedder import VectorStoreManager
+        # Remove the document's chunks from every category store that exists
+        all_store_paths = self.storage.all_vectorstore_paths(project_id)
+        for slug, store_path in all_store_paths.items():
+            try:
+                vs = VectorStoreManager(store_path)
+                removed = vs.remove_document(document_id)
+                if removed:
+                    logger.info(
+                        "Removed %d chunks for document %s from %s store",
+                        removed, document_id, slug,
+                    )
+            except Exception as exc:
+                logger.warning(
+                    "Could not clean up vector store '%s' for document %s: %s",
+                    slug, document_id, exc,
+                )
+        return {"Status": "success", "Message": f"Document {document_id} deleted"}
+
     def generate_predefined_questions(self, project_id: int, spec: EquipmentSpec) -> list[dict]:
         try:
             from source.services.equipment_extractor import PREDEFINED_QUESTIONS

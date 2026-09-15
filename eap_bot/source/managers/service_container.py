@@ -37,12 +37,15 @@ class ServiceContainer:
             storage=self.storage,
             llm_strategy=self.llm_strategy,
         )
-        self.smart_automation_service: SmartAutomationService = SmartAutomationService()
+        self.smart_automation_service: SmartAutomationService = SmartAutomationService(
+            storage=self.storage
+        )
 
         # Import here to avoid circular imports at module load time
         from source.services.project_service import ProjectService
         from source.services.document_service import DocumentService
         from source.services.sml_generation_service import SMLGenerationService
+        from source.services.mes_family_service import MesFamilyService
 
         self.project_service: ProjectService = ProjectService(
             storage=self.storage, container=self
@@ -53,6 +56,7 @@ class ServiceContainer:
         self.sml_generation_service: SMLGenerationService = SMLGenerationService(
             storage=self.storage
         )
+        self.mes_family_service: MesFamilyService = MesFamilyService()
 
         logger.info("ServiceContainer: all services ready.")
 
