@@ -24,3 +24,4 @@ test_codegen.py
 deploy.ps1
 scratch/
 zip/
+test/
