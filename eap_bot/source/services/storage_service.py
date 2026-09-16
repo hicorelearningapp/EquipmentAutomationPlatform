@@ -1085,14 +1085,14 @@ class StorageService:
         )
 
     def _resolve_root(self, storage_root: str | Path) -> Path:
+        # A relative location means "inside the data folder", not "wherever the program was
+        # started from" - BraceLink starts the backend from its own folder.
+        from source.app_paths import data_dir, resolve_storage_root
+
         root = Path(storage_root).expanduser()
         if not root.is_absolute():
-            logger.warning(
-                "EAP_STORAGE_ROOT is relative (%s). Use an absolute path on Azure.",
-                storage_root,
-            )
-            root = Path.cwd() / root
-        return root.resolve()
+            logger.info("Storage location %s is relative; using %s", storage_root, data_dir())
+        return resolve_storage_root(storage_root)
 
     def _ensure_root(self) -> None:
         try:

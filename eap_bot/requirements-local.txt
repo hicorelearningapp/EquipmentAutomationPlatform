@@ -1,0 +1,41 @@
+# Libraries for running this backend locally, through eap_cli.py or the FastAPI server.
+#
+# Differences from requirements.txt:
+#   - sentence-transformers and langchain-huggingface replaced by onnxruntime + tokenizers.
+#     The embedding model (all-MiniLM-L6-v2) runs on ONNX Runtime instead of PyTorch:
+#     identical vectors, ~15 MB of libraries instead of ~700 MB, and it packages into an exe
+#     (PyTorch crashed inside one). See source/utils/onnx_embeddings.py.
+#   - streamlit removed: nothing imports it.
+#   - langchain-ollama added: source/utils/llm_factory.py imports it at startup.
+#   - httpx and pytest added, for the FastAPI test client and the test suite.
+#
+#   uv venv --python 3.12 .venv
+#   uv pip install --python .venv/Scripts/python.exe -r requirements-local.txt
+
+fastapi
+uvicorn[standard]
+pydantic>=2.5
+pydantic-settings
+packaging<25
+pypdf
+faiss-cpu
+langchain
+langchain-community
+langchain-groq
+langchain-ollama
+langchain-google-genai
+langchain-mistralai
+onnxruntime
+tokenizers
+python-dotenv
+aiofiles
+python-multipart
+requests
+tiktoken
+pdfplumber
+openpyxl
+pymupdf
+reportlab
+
+httpx
+pytest

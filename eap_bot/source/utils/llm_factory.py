@@ -118,6 +118,43 @@ class MultiFallbackLLMStrategy(LLMStrategy):
         return RobustFallbackWrapper(models)
 
 
+class _LazyModel:
+    """Builds the real AI client the first time it is actually used.
+
+    The services create their models while the backend starts, and creating one needs an API
+    key. Without a key the whole backend refused to start - including everything that never
+    uses AI. Now the key is only needed when an AI call is really made, so BraceLink can
+    start the backend before the user has entered one.
+    """
+
+    def __init__(self, build):
+        self._build = build
+        self._model = None
+
+    def _resolve(self):
+        if self._model is None:
+            self._model = self._build()
+        return self._model
+
+    def invoke(self, *args, **kwargs):
+        return self._resolve().invoke(*args, **kwargs)
+
+    def __getattr__(self, name):
+        return getattr(self._resolve(), name)
+
+
+class LazyStrategy(LLMStrategy):
+    """Wraps a strategy so its models are only built when used."""
+
+    def __init__(self, inner: LLMStrategy):
+        self._inner = inner
+
+    def get_model(self, temperature: float = 0.0, require_json: bool = False):
+        return _LazyModel(
+            lambda: self._inner.get_model(temperature=temperature, require_json=require_json)
+        )
+
+
 def _make_strategy(provider: str) -> LLMStrategy:
     """Instantiate an LLMStrategy for a given provider name."""
     p = provider.lower()
@@ -148,6 +185,6 @@ class LLMFactory:
                     fallbacks.append((_make_strategy(provider.strip()), model_name.strip()))
                     
             if fallbacks:
-                return MultiFallbackLLMStrategy(primary, fallbacks)
+                return LazyStrategy(MultiFallbackLLMStrategy(primary, fallbacks))
 
-        return primary
+        return LazyStrategy(primary)

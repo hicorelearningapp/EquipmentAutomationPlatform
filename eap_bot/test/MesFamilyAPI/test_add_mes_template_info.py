@@ -3,7 +3,7 @@ import os
 import pytest
 from pathlib import Path
 from fastapi.testclient import TestClient
-from source.routers.mes_family_routes import MES_MAP_DIR
+from source.services.mes_family_service import MES_MAP_DIR  # moved here by the router refactor (a260802)
 
 def test_add_mes_template_info_happy_path(client: TestClient, record_property):
     """Test adding a new template JSON file successfully to a family."""

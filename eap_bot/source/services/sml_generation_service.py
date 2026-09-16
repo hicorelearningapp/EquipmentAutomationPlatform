@@ -291,7 +291,10 @@ class SMLGenerationService:
                 FileSize=len(script_content.encode("utf-8")),
                 Pages=1,
                 Status="completed",
-                UploadDate=datetime.datetime.now()
+                # Every other timestamp carries a timezone (StorageService.now). A plain
+                # datetime.now() here has none, and the next upload crashed while sorting
+                # the documents by date, comparing one with a timezone against one without.
+                UploadDate=StorageService.now(),
             )
             metadata.Documents.append(doc_entry)
         else:

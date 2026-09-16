@@ -6,6 +6,7 @@ from typing import List, Optional, Any
 from fastapi import APIRouter, File, HTTPException, UploadFile
 import numpy as np
 
+from source.app_paths import mes_templates_dir
 from source.managers.service_container import container
 from source.schemas.mapping import (
     MESMappingRequest,
@@ -278,7 +279,7 @@ class MappingAPI:
 
             # Load raw template
             template_name = body.template if body.template.lower().endswith(".json") else f"{body.template}.json"
-            template_path = Path("MESMapTemplates") / body.family / template_name
+            template_path = mes_templates_dir() / body.family / template_name
             
             if not template_path.exists():
                 raise HTTPException(404, f"Raw template not found: {template_path}")
@@ -531,7 +532,7 @@ class MappingAPI:
             payload_names = []
             if family and template:
                 template_name_for_payloads = template if template.lower().endswith(".json") else f"{template}.json"
-                template_path = Path("MESMapTemplates") / family / template_name_for_payloads
+                template_path = mes_templates_dir() / family / template_name_for_payloads
                 if template_path.exists():
                     try:
                         with open(template_path, "r", encoding="utf-8") as f:

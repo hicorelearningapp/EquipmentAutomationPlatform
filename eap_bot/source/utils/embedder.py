@@ -5,10 +5,9 @@ from typing import Dict, List
 
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document as LC_Document
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from source.config import settings
+from source.utils.onnx_embeddings import OnnxEmbeddings
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +15,7 @@ logger = logging.getLogger(__name__)
 class VectorStoreManager:
 
     _WS_RE = re.compile(r"[ \t\xa0]+")
-    _EMBEDDINGS: HuggingFaceEmbeddings | None = None
+    _EMBEDDINGS: OnnxEmbeddings | None = None
 
     def __init__(self, vector_dir: Path | str) -> None:
         self.vector_dir = Path(vector_dir)
@@ -24,13 +23,9 @@ class VectorStoreManager:
         self._embeddings = self._get_embeddings()
 
     @classmethod
-    def get_embeddings(cls) -> HuggingFaceEmbeddings:
+    def get_embeddings(cls) -> OnnxEmbeddings:
         if cls._EMBEDDINGS is None:
-            cls._EMBEDDINGS = HuggingFaceEmbeddings(
-                model_name="sentence-transformers/all-MiniLM-L6-v2",
-                model_kwargs={"device": "cpu"},
-                encode_kwargs={"normalize_embeddings": True},
-            )
+            cls._EMBEDDINGS = OnnxEmbeddings()
         return cls._EMBEDDINGS
 
     _get_embeddings = get_embeddings  # legacy alias
@@ -62,6 +57,10 @@ class VectorStoreManager:
     def add_document(self, text: str, metadata: Dict) -> bool:
         """Chunk, embed, and persist a document. Updates the in-memory cache."""
         clean = self.normalize_pdf_text(text)
+
+        # Imported here, not at module level: importing the package loads sentence-transformers
+        # and PyTorch when they are installed, which the exe does not ship.
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
 
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=settings.CHUNK_SIZE,
@@ -99,6 +98,10 @@ class VectorStoreManager:
 
     def add_pages(self, pages: list[tuple[int, str]], base_metadata: Dict) -> bool:
         """Chunk, embed, and persist a document while preserving page numbers. Updates the cache."""
+        # Imported here, not at module level: importing the package loads sentence-transformers
+        # and PyTorch when they are installed, which the exe does not ship.
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=settings.CHUNK_SIZE,
             chunk_overlap=settings.CHUNK_OVERLAP,

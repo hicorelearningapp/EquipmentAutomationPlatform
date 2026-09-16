@@ -10,7 +10,9 @@ from source.services.test_script_service import TestScriptService
 
 logger = logging.getLogger(__name__)
 
-SCRIPTS_DIR = Path(__file__).parent.parent.parent / "GEMTestScriptTemplates"
+from source.app_paths import gem_templates_dir
+
+SCRIPTS_DIR = gem_templates_dir()
 
 SML_TEMPLATE_FILENAME = "ToolCharacterizationTestScriptjson (1).txt"
 

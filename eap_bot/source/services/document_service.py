@@ -140,7 +140,9 @@ class DocumentService:
 
         except Exception as e:
             import traceback
-            with open("error.txt", "w") as f:
+            from source.app_paths import logs_dir
+
+            with open(logs_dir() / "error.txt", "w") as f:
                 f.write(traceback.format_exc())
             logger.error("Analysis failed for %s/%s: %s", project_id, document_id, str(e))
             self.storage.mark_failed(project_id, document_id)

@@ -299,6 +299,7 @@ class ProjectService:
         return metadata, aggregated
 
     def _build_aggregated_spec(self, project_id: int, metadata: Any) -> AggregatedSpec:
+
         aggregated = EquipmentSpec(
             DocumentType=metadata.Documents[0].DocumentType if metadata.Documents else "GEM Manual",
             ToolID=metadata.ProjectName,
@@ -668,12 +669,9 @@ class ProjectService:
         if not template_filename.lower().endswith(".json"):
             template_filename = f"{template_filename}.json"
 
-        template_path = (
-            Path(__file__).resolve().parent.parent.parent
-            / "MESMapTemplates"
-            / body.family
-            / template_filename
-        )
+        from source.app_paths import mes_templates_dir
+
+        template_path = mes_templates_dir() / body.family / template_filename
         if not template_path.exists():
             raise FileNotFoundError(f"MES template not found at {template_path}")
 

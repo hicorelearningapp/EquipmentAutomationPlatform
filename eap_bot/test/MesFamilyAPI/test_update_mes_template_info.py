@@ -3,7 +3,7 @@ import json
 import pytest
 from pathlib import Path
 from fastapi.testclient import TestClient
-from source.routers.mes_family_routes import MES_MAP_DIR
+from source.services.mes_family_service import MES_MAP_DIR  # moved here by the router refactor (a260802)
 
 def test_update_mes_template_info_happy_path(client: TestClient, record_property):
     """Test updating an existing template successfully and verifying version auto-increment."""

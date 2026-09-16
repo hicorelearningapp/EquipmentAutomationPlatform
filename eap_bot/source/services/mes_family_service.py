@@ -4,9 +4,11 @@ import shutil
 from pathlib import Path
 from fastapi import HTTPException
 
+from source.app_paths import mes_templates_dir
+
 logger = logging.getLogger(__name__)
 
-MES_MAP_DIR: Path = Path(__file__).resolve().parent.parent.parent / "MESMapTemplates"
+MES_MAP_DIR: Path = mes_templates_dir()
 FAMILIES_FILE: Path = MES_MAP_DIR / "families.json"
 
 class MesFamilyService:

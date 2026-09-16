@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, File, UploadFile, Form
 
 from pathlib import Path
 
+from source.app_paths import gem_templates_dir
 from source.managers.service_container import container
 from source.schemas.secsgem import EquipmentSpec
 from source.schemas.codegen import ScriptUpdateRequest
@@ -61,7 +62,7 @@ class ToolCharacterizationAPI:
                 else:
                     fallback_filename = sml_filename
 
-                file_path = Path(__file__).resolve().parent.parent.parent / "GEMTestScriptTemplates" / fallback_filename
+                file_path = gem_templates_dir() / fallback_filename
 
             if not file_path.exists():
                 raise HTTPException(404, f"Test script file '{filename}' not found.")

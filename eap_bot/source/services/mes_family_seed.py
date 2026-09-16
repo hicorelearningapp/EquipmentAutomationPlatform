@@ -11,8 +11,9 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# ── Canonical root (same resolution as project_service.py MESMapTemplates ref) ─
-MES_MAP_DIR: Path = Path(__file__).resolve().parent.parent.parent / "MESMapTemplates"
+from source.app_paths import mes_templates_dir, prepare_data_dir
+
+MES_MAP_DIR: Path = mes_templates_dir()
 FAMILIES_FILE: Path = MES_MAP_DIR / "families.json"
 
 # ── Default families registry ─────────────────────
@@ -77,6 +78,9 @@ def _seed_template(family_name: str) -> dict:
 def seed_mes_families() -> None:
     """Idempotently seed default families and template structures."""
     try:
+        # 0. On an installed copy, bring the delivered templates into the data folder
+        prepare_data_dir()
+
         # 1. Ensure MES_MAP_DIR exists
         MES_MAP_DIR.mkdir(parents=True, exist_ok=True)
 

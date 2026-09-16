@@ -24,3 +24,13 @@ test_codegen.py
 deploy.ps1
 scratch/
 zip/
+# Local command-line additions: downloaded model files and logs written while running
+eap_bot/models/
+eap_bot/logs/
+
+# Built packages (the runtime folder and its zip)
+dist/
+
+# The demo specification build_cli.py ships in sample\ (generated with ReportLab, not a
+# customer document). Everything else matching *.pdf above stays ignored.
+!packaging/shipped_files/*.pdf

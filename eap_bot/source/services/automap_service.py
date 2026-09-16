@@ -44,7 +44,9 @@ RERANK_MIN_SCORE = 0.30      # cosine floor for triggering an LLM rerank
 LOW_CONFIDENCE = 0.50        # below this, even after rerank, treat as needs_review
 TOP_K = 5
 
-MES_MAP_DIR: Path = Path(__file__).resolve().parent.parent.parent / "MESMapTemplates"
+from source.app_paths import mes_templates_dir
+
+MES_MAP_DIR: Path = mes_templates_dir()
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────

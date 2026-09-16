@@ -398,7 +398,9 @@ class EquipmentExtractor:
                 self._sanitize(data)
                 return EquipmentSpec.model_validate(data)
             except Exception as retry_err:
-                with open("extractor_error.txt", "w") as f:
+                from source.app_paths import logs_dir
+
+                with open(logs_dir() / "extractor_error.txt", "w") as f:
                     f.write(traceback.format_exc())
                 if total_chunks == 1:
                     raise
